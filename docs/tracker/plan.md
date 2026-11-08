@@ -149,11 +149,11 @@ The longest chain runs through the **harness spike (P0-04, Q2)**, the adapter in
 | Task | Size | Requirements | Approach A views | Depends on |
 |---|---|---|---|---|
 | **P4-01** Workflow engine from the Git workflow standard (with overrides) ✅ | M | FR-91 | A-v11 | P3-02, P0-05 |
-| **P4-02** Deterministic git ops: branch, commit, push, PR/MR, CI status 🔶 | M | FR-92, FR-93 | A-v09 | P4-01, P2-02 |
+| **P4-02** Deterministic git ops: branch, commit, push, PR/MR, CI status ✅ | M | FR-92, FR-93 | A-v09 | P4-01, P2-02 |
 | **P4-03** Agent-assisted ops: merge conflicts, release notes ✅ | M | FR-92, FR-93 | — | P4-02, P3-15 |
 | **P4-04** Push guarantee and reconciliation loop ✅ | S | FR-94 | A-v01 | P4-02 |
 | **P4-05** Managed-project releases: CalVer tag and forge release ✅ | M | FR-92, FR-44 | A-v02 | P4-02 |
-| **P4-06** Pages publishing (GitHub / GitLab) and stored URL 🔶 | M | FR-44 | A-v01, A-v02 | P4-05 |
+| **P4-06** Pages publishing (GitHub / GitLab) and stored URL | M | FR-44 | A-v01, A-v02 | P4-05 |
 | **P4-07** Artifact revisions committed by Courier ✅ | S | FR-46, FR-45a | A-v03b | P4-02 |
 
 ### P5 · Human-in-the-loop (MVP) (MVP)

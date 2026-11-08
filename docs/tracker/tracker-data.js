@@ -1076,7 +1076,7 @@ window.TRACKER = {
     "P4-01",
     "P2-02"
    ],
-   "status": "in-progress",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -1150,7 +1150,7 @@ window.TRACKER = {
    "deps": [
     "P4-05"
    ],
-   "status": "in-progress",
+   "status": "blocked",
    "done": "",
    "q": []
   },
