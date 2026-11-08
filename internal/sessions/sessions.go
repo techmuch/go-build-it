@@ -502,6 +502,7 @@ func (m *Manager) consume(ctx context.Context, s Session, t queue.Task, act *act
 	case limited != nil:
 		// FR-65: pause and resume automatically when the limit resets.
 		s.Status, s.ResumeAt, s.ExitReason = "rate_limited", limited.ResetsAt.UTC().Format(time.RFC3339), "subscription limit ("+limited.Kind+")"
+		_ = m.write(ctx, s) // record the session first so readers never see a paused task with a running session
 		_, _ = m.queue.SetStatus(ctx, t.ID, queue.Paused, "rate limited until "+limited.ResetsAt.Local().Format("15:04"))
 		m.hist.Must(ctx, history.Event{ProjectID: s.ProjectID, Type: "session.rate_limited", Subject: s.ID, Summary: fmt.Sprintf("%s paused: %s limit", t.ID, s.Harness),
 			Why: "resumes at " + limited.ResetsAt.Local().Format("15:04"), Data: history.Data(map[string]any{"task": t.ID, "resumeAt": s.ResumeAt})})
