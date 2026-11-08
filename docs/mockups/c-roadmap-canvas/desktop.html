@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Approach C Desktop</title>
+<link rel="stylesheet" href="../frame.css">
+<style>
+/* ===== Approach C: Roadmap Canvas — app styles ===== */
+.app { --bg:#0e1217; --p:#151b22; --p2:#1b232c; --line:#26313c; --t:#e4e9ee; --m:#8593a1; --vio:#8b7cf6; --vio-s:#2a2550;
+  --lime:#9ad64a; --lime-s:#1f2f17; --amb:#f0b23d; --amb-s:#3a2c10; --cor:#f2685c; --cor-s:#3d1d1b; --sky:#5cb8f2; --sky-s:#13283a;
+  background:var(--bg); color:var(--t); min-height:560px; display:grid; grid-template-columns:56px 1fr;
+  font:13px/1.45 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.app * { box-sizing:border-box; }
+.rail { background:#0a0d11; border-right:1px solid var(--line); display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 0; }
+.rail .lg { width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,var(--vio),var(--sky)); margin-bottom:10px; }
+.rail span { width:36px; height:36px; border-radius:8px; display:grid; place-items:center; color:var(--m); font-size:15px; position:relative; }
+.rail span.on { background:var(--p2); color:var(--t); box-shadow:inset 2px 0 0 var(--vio); }
+.rail span i { position:absolute; top:3px; right:3px; width:8px; height:8px; border-radius:50%; background:var(--cor); }
+.rail .bot { margin-top:auto; }
+.main { display:flex; flex-direction:column; min-width:0; }
+.top { height:50px; display:flex; align-items:center; gap:14px; padding:0 18px; border-bottom:1px solid var(--line); }
+.top h1 { font-size:15px; margin:0; font-weight:600; }
+.top .k { margin-left:auto; border:1px solid var(--line); border-radius:6px; padding:4px 10px; color:var(--m); font-size:12px; }
+.top .id { font:11.5px ui-monospace, Menlo, monospace; color:var(--lime); border:1px solid #2f4a22; border-radius:999px; padding:2px 10px; }
+.cv { padding:16px 18px; flex:1; display:flex; flex-direction:column; gap:14px; position:relative; }
+.pn { background:var(--p); border:1px solid var(--line); border-radius:10px; padding:12px; min-width:0; }
+.pn h4 { margin:0 0 8px; font:600 10.5px ui-monospace, Menlo, monospace; text-transform:uppercase; letter-spacing:.1em; color:var(--m); display:flex; justify-content:space-between; }
+.b { display:inline-block; font:500 10.5px ui-monospace, Menlo, monospace; padding:1px 7px; border-radius:4px; background:var(--p2); color:var(--m); border:1px solid var(--line); white-space:nowrap; }
+.b.vio{background:var(--vio-s);color:#bdb3ff;border-color:#3d3670}.b.lime{background:var(--lime-s);color:var(--lime);border-color:#2f4a22}.b.amb{background:var(--amb-s);color:var(--amb);border-color:#5a4318}.b.cor{background:var(--cor-s);color:var(--cor);border-color:#5d2a27}.b.sky{background:var(--sky-s);color:var(--sky);border-color:#1f4260}
+.m{color:var(--m)} .sm{font-size:12px} .xs{font-size:11px} .mono{font-family:ui-monospace, Menlo, monospace; font-size:11.5px}
+a.l{color:var(--sky);text-decoration:none}
+.btn { display:inline-block; font:600 12px Inter, system-ui, sans-serif; padding:6px 12px; border-radius:6px; border:1px solid var(--line); background:var(--p2); color:var(--t); }
+.btn.p { background:var(--vio); border-color:var(--vio); color:#fff; } .btn.g { background:var(--lime); border-color:var(--lime); color:#10180a; } .btn.r { color:var(--cor); border-color:#5d2a27; }
+.av { width:24px; height:24px; border-radius:6px; display:inline-grid; place-items:center; font:700 10px Inter, system-ui, sans-serif; color:#0e1217; flex:none; }
+.av.pm{background:#bdb3ff}.av.ar{background:#5cb8f2}.av.dv{background:#9ad64a}.av.dv2{background:#c9e36b}.av.qa{background:#f0b23d}.av.rv{background:#f2685c}.av.gt{background:#a8b3bd}.av.hu{background:#e4e9ee}
+.col { background:#11161c; border:1px solid var(--line); border-radius:10px; padding:8px; display:flex; flex-direction:column; gap:8px; min-width:0; }
+.col > .hd { font:600 10.5px ui-monospace, Menlo, monospace; text-transform:uppercase; letter-spacing:.1em; color:var(--m); display:flex; justify-content:space-between; padding:2px 4px; }
+.tile { background:var(--p2); border:1px solid var(--line); border-radius:8px; padding:9px 10px; display:flex; flex-direction:column; gap:5px; }
+.tile.hot { border-color:#5d2a27; box-shadow:inset 3px 0 0 var(--cor); }
+.tile .n { font-weight:600; font-size:13.5px; display:flex; justify-content:space-between; align-items:center; }
+.meter { height:5px; border-radius:3px; background:#25303a; overflow:hidden; } .meter i { display:block; height:100%; background:var(--vio); } .meter.w i { background:var(--amb); } .meter.g i { background:var(--lime); }
+.gate { width:12px; height:12px; transform:rotate(45deg); display:inline-block; border:2px solid var(--amb); background:var(--bg); }
+.gate.done { background:var(--lime); border-color:var(--lime); }
+.shot { border:1px dashed #34414e; border-radius:8px; background:repeating-linear-gradient(45deg,#121820,#121820 8px,#151c25 8px,#151c25 16px); display:grid; place-items:center; color:var(--m); font-size:11.5px; }
+.diff { font:11.5px/1.6 ui-monospace, Menlo, monospace; background:#0b0f13; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+.diff div { padding:0 10px; white-space:pre; } .diff .a { background:#14250f; color:#c8eaa8; } .diff .h { background:var(--p2); color:var(--m); } .diff .c { background:var(--amb-s); color:#f6d79a; font-family:Inter, system-ui; white-space:normal; padding:5px 10px; }
+textarea.ta { width:100%; min-height:60px; border:1px solid var(--line); border-radius:8px; padding:8px; background:#0b0f13; color:var(--t); font:12.5px Inter, system-ui, sans-serif; resize:none; }
+svg text { font-family:ui-monospace, Menlo, monospace; }
+table.mx { border-collapse:collapse; width:100%; font-size:12px; }
+table.mx th, table.mx td { border:1px solid var(--line); padding:7px 8px; text-align:center; }
+table.mx th { font:600 10.5px ui-monospace, Menlo, monospace; color:var(--m); text-transform:uppercase; letter-spacing:.06em; background:#11161c; }
+table.mx td:first-child, table.mx th:first-child { text-align:left; }
+.mic { display:inline-grid; place-items:center; width:28px; height:28px; border-radius:6px; border:1px solid var(--line); background:var(--p2); font-size:12px; }
+.xp { position:absolute; right:8px; top:8px; background:rgba(10,13,17,.85); color:#fff; font:600 11px Inter, system-ui, sans-serif; padding:3px 8px; border-radius:5px; border:1px solid var(--line); }
+.chat { display:flex; flex-direction:column; gap:8px; font-size:12px; } .chat > div { display:flex; gap:8px; align-items:flex-start; }
+.compose { display:flex; gap:6px; align-items:center; border:1px solid var(--line); border-radius:8px; background:#0b0f13; padding:6px 6px 6px 10px; font-size:12px; color:var(--m); }
+.ins { background:#14250f; color:#c8eaa8; display:block; padding:0 6px; border-left:2px solid var(--lime); }
+.del { background:var(--cor-s); color:#f3a49c; display:block; padding:0 6px; border-left:2px solid var(--cor); text-decoration:line-through; }
+.seg { display:inline-flex; border:1px solid var(--line); border-radius:6px; overflow:hidden; font-size:11.5px; } .seg span { padding:3px 9px; color:var(--m); } .seg span.on { background:var(--vio-s); color:#bdb3ff; }
+</style>
+</head>
+<body class="mock">
+<div class="rv-bar">
+  <span class="rv-title">Approach C: Roadmap Canvas <small>Desktop · 14 views · rev 2</small></span>
+  <a href="../index.html">← Overview &amp; review guide</a>
+  <a href="mobile.html">Approach C mobile →</a>
+  <span class="rv-spacer"></span>
+  <a href="../a-mission-control/desktop.html">A: Mission Control</a>
+  <a href="../b-team-room/desktop.html">B: Team Room</a>
+</div>
+<div class="rv-intro">
+  <p><b>Idea:</b> show the work as a <b>picture</b>. Projects move across a lifecycle board. A project's home is its roadmap timeline with gates. Sessions are relay lanes over time. Decisions are a branching tree. Standards and the team are matrices. Navigation is a slim icon rail plus a ⌘K command palette, which suits keyboard users and the CLI-parity goal.</p>
+  <p><b>Best for:</b> long-running projects where the hard part is seeing progress, dependencies and how decisions led to the current state. <b>Risk:</b> the visual views take the most effort to build, and the dark, dense styling won't suit everyone.</p>
+</div>
+<div class="rv-intro"><p style="background:#fff8e6;border:1px solid #ecd9a8;border-radius:8px;padding:8px 12px"><b>Rev 2 (feedback from the Approach A review, applied here too):</b> trace-map documents, standards and personas get <i>Edit</i> with an agent chat and a rich editor (03, 10, 11) · attachments and mockups open full size (04, 07, 08) · 🎙 dictation · relay lanes show compaction as the default, with batons (handoffs) <i>experimental</i>, plus a terminal view (05) · review rebuilt as mockup vs built plus a trace of tests, standards, feedback and requirements (09) · swimlane dots open event detail (12) · git workflow moved to standards, plus an experimental section (13).</p></div>
+<nav class="rv-toc">
+  <a href="#v01">01 Portfolio board</a><a href="#v02">02 Roadmap timeline</a><a href="#v03">03 Trace map &amp; values</a><a href="#v04">04 Decision board (questions)</a>
+  <a href="#v05">05 Relay lanes (sessions)</a><a href="#v06">06 Flow board (queue)</a><a href="#v07">07 Decision tree (options)</a><a href="#v08">08 Storyboard rehearsal</a>
+  <a href="#v09">09 Review</a><a href="#v10">10 Team matrix</a><a href="#v11">11 Standards matrix</a><a href="#v12">12 Activity &amp; insights</a>
+  <a href="#v13">13 System map (settings)</a><a href="#v14">14 Command palette &amp; docs</a>
+</nav>
+
+<!-- 01 -->
+<section class="view" id="v01">
+  <header><span class="num">01</span><h2>Portfolio board (catalog)</h2><span class="req">FR-40</span><span class="req">FR-41</span><span class="req">FR-41a</span><span class="req">FR-42</span><span class="req">FR-43</span><span class="req">FR-44</span><span class="req">FR-94</span></header>
+  <p class="look"><b>Look for:</b> the catalog as a board with one column per lifecycle stage (FR-43), so <i>where each project stands</i> is shown by position. A strip at the top counts what needs you. Tiles are compact; hover or expand for links. Does grouping by stage beat sorting by "needs attention"?</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/portfolio</span></div>
+  <div class="app">
+    <div class="rail"><div class="lg"></div><span class="on">▦</span><span>◷<i></i></span><span>⇶</span><span>⑂</span><span>☷</span><span>◈</span><span>≋</span><span class="bot">⚙</span><span>?</span></div>
+    <div class="main">
+      <div class="top"><h1>Portfolio</h1><span class="b cor">2 blocking</span><span class="b amb">1 gate</span><span class="b amb">1 review</span><span class="b vio">1 option set</span><span class="b cor">1 CI failing</span><span class="k">⌘K  Go to anything…</span><span class="id">tailnet · david@github</span></div>
+      <div class="cv">
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px">
+          <div class="col"><div class="hd">Discovery<span>0</span></div><div class="xs m" style="padding:4px">—</div></div>
+          <div class="col"><div class="hd">Requirements<span>1</span></div>
+            <div class="tile"><div class="n">pantry-pal <span class="b lime">ok</span></div><div class="xs m">Meal plans from your pantry.</div><div class="meter g"><i style="width:30%"></i></div><div class="xs m">M0 · 1 session</div><div class="xs m">No release · site not published</div><div class="xs"><a class="l">GitHub ↗</a></div></div></div>
+          <div class="col"><div class="hd">Design<span>1</span></div>
+            <div class="tile hot"><div class="n">trailmap <span class="b cor">● 1</span></div><div class="xs m">Offline hiking maps.</div><div class="meter"><i style="width:45%"></i></div><div class="xs"><span class="b cor">blocking Q</span> <span class="b vio">OS-3</span></div><div class="xs m">No release · site not published</div><div class="xs"><a class="l">GitHub ↗</a> <a class="l">Docs</a></div></div></div>
+          <div class="col"><div class="hd">Implementation<span>1</span></div>
+            <div class="tile hot"><div class="n">go-build-it <span class="b cor">● 1</span></div><div class="xs m">AI + human dev teams.</div><div class="meter"><i style="width:62%"></i></div><div class="xs">M2 · ◆ Handoff demo</div><div class="xs"><span class="b cor">blocking Q</span> <span class="b amb">review</span></div><div class="xs"><b>2026.11.02.1</b> <span class="m">+14</span></div><div class="xs"><a class="l">Notes ↗</a> <a class="l">Site ↗</a> <a class="l">GitHub ↗</a></div></div></div>
+          <div class="col"><div class="hd">Review<span>1</span></div>
+            <div class="tile hot"><div class="n">ledgerly <span class="b amb">◆</span></div><div class="xs m">Finance ledger + CSV import.</div><div class="meter w"><i style="width:85%"></i></div><div class="xs"><span class="b amb">gate: rehearsal</span></div><div class="xs"><b>2026.10.18.2</b> <span class="m">+31</span></div><div class="xs"><a class="l">Notes ↗</a> <a class="l">Site ↗</a> <a class="l">GitLab ↗</a></div></div></div>
+          <div class="col"><div class="hd">Released<span>0</span></div><div class="xs m" style="padding:4px">—</div></div>
+          <div class="col"><div class="hd">Maintenance<span>1</span></div>
+            <div class="tile hot"><div class="n">inkwell <span class="b cor">CI ✕</span></div><div class="xs m">Static blog engine.</div><div class="xs"><span class="b cor">⚠ 2 unpushed</span></div><div class="xs"><b>2026.09.30.1</b> <span class="m">+4</span></div><div class="xs"><a class="l">Notes ↗</a> <a class="l">Site ↗</a> <a class="l">GitHub ↗</a></div></div></div>
+        </div>
+        <div class="pn" style="display:flex;gap:16px;align-items:center"><h4 style="margin:0">Parked</h4><span class="sm">fleetwatch · <span class="m">Paused Oct 30 · M4 Reporting · 2026.08.12.3</span> · <a class="l">Site ↗</a></span><span class="m xs" style="margin-left:auto">Archived: 0</span></div>
+        <div class="pn"><h4>Expanded tile · go-build-it <span>click any tile</span></h4>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px" class="sm"><div><span class="m xs">PURPOSE</span><br>Orchestrates AI + human teams for long-running projects.</div><div><span class="m xs">STATE</span><br>Implementation · M2 62% · CI ● passing · 2 sessions</div><div><span class="m xs">NEEDS YOU</span><br>1 blocking question · 1 review</div><div><span class="m xs">SHIPPED</span><br>2026.11.02.1 (Nov 2) · 14 commits since</div><div><span class="m xs">LINKS</span><br><a class="l">Release notes</a> · <a class="l">techmuch.github.io/go-build-it</a> · <a class="l">GitHub</a> · <a class="l">Docs</a> · 3 PRs · 11 issues</div></div></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 02 -->
+<section class="view" id="v02">
+  <header><span class="num">02</span><h2>Project home: roadmap timeline</h2><span class="req">FR-41</span><span class="req">FR-44</span><span class="req">FR-45</span><span class="req">FR-81</span><span class="req">FR-115</span><span class="req">NFR-11</span></header>
+  <p class="look"><b>Look for:</b> the roadmap as a <b>timeline</b> with milestones as bars, review gates as ◆, and a "now" line. Under it are lanes per role showing what each persona is doing. Questions appear as pins on the lanes where they block work. Can you see in one glance what is late and why?</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/p/go-build-it</span></div>
+  <div class="app">
+    <div class="rail"><div class="lg"></div><span class="on">▦</span><span>◷<i></i></span><span>⇶</span><span>⑂</span><span>☷</span><span>◈</span><span>≋</span><span class="bot">⚙</span><span>?</span></div>
+    <div class="main">
+      <div class="top"><h1><span class="m">Portfolio /</span> go-build-it</h1><span class="b vio">Implementation</span><span class="m sm">Timeline · Trace map · Flow · Relay · Activity</span><span class="k">⌘K</span><span class="id">local · david</span></div>
+      <div class="cv" style="flex-direction:row">
+        <div style="flex:1;display:flex;flex-direction:column;gap:14px;min-width:0">
+          <div class="pn" style="padding:0;overflow:hidden">
+            <svg viewBox="0 0 880 330" width="100%" style="display:block">
+              <rect width="880" height="330" fill="#151b22"/>
+              <g fill="#8593a1" font-size="10"><text x="150" y="20">OCT 13</text><text x="290" y="20">OCT 27</text><text x="430" y="20">NOV 10</text><text x="570" y="20">NOV 24</text><text x="710" y="20">DEC 8</text></g>
+              <g stroke="#26313c"><line x1="150" y1="28" x2="150" y2="330"/><line x1="290" y1="28" x2="290" y2="330"/><line x1="430" y1="28" x2="430" y2="330"/><line x1="570" y1="28" x2="570" y2="330"/><line x1="710" y1="28" x2="710" y2="330"/></g>
+              <g font-size="11" fill="#e4e9ee">
+                <text x="12" y="52">M0 Requirements</text><rect x="120" y="40" width="70" height="16" rx="4" fill="#9ad64a"/><rect x="186" y="42" width="12" height="12" transform="rotate(45 192 48)" fill="#9ad64a"/>
+                <text x="12" y="80">M1 Core server</text><rect x="196" y="68" width="150" height="16" rx="4" fill="#9ad64a"/><rect x="342" y="70" width="12" height="12" transform="rotate(45 348 76)" fill="#9ad64a"/>
+                <text x="12" y="108">M2 Harnesses</text><rect x="352" y="96" width="180" height="16" rx="4" fill="#2a2550"/><rect x="352" y="96" width="112" height="16" rx="4" fill="#8b7cf6"/><rect x="528" y="98" width="12" height="12" transform="rotate(45 534 104)" fill="#0e1217" stroke="#f0b23d" stroke-width="2"/><text x="548" y="108" fill="#f0b23d" font-size="10">Handoff demo</text>
+                <text x="12" y="136">M3 Questions</text><rect x="540" y="124" width="150" height="16" rx="4" fill="#1b232c" stroke="#26313c"/><rect x="686" y="126" width="12" height="12" transform="rotate(45 692 132)" fill="#0e1217" stroke="#f0b23d" stroke-width="2"/>
+                <text x="12" y="164">M4 Mobile+docs</text><rect x="696" y="152" width="170" height="16" rx="4" fill="#1b232c" stroke="#26313c"/>
+              </g>
+              <line x1="400" y1="28" x2="400" y2="330" stroke="#f2685c" stroke-dasharray="4 3"/><text x="404" y="38" fill="#f2685c" font-size="10">now · Nov 7</text>
+              <g font-size="10" fill="#8593a1"><text x="12" y="200">DEVELOPER</text><text x="12" y="236">ARCHITECT</text><text x="12" y="272">REVIEWER</text><text x="12" y="308">GIT/RELEASE</text></g>
+              <rect x="352" y="188" width="60" height="18" rx="4" fill="#1f2f17" stroke="#9ad64a"/><text x="358" y="201" font-size="10" fill="#9ad64a">T-142 ⟳2</text>
+              <rect x="416" y="188" width="54" height="18" rx="4" fill="#3d1d1b" stroke="#f2685c"/><text x="421" y="201" font-size="10" fill="#f2685c">T-151 ⏸</text>
+              <circle cx="470" cy="186" r="7" fill="#f2685c"/><text x="466" y="190" font-size="9" fill="#0e1217">?</text>
+              <rect x="476" y="188" width="56" height="18" rx="4" fill="#1b232c" stroke="#26313c"/><text x="481" y="201" font-size="10" fill="#8593a1">T-153</text>
+              <rect x="380" y="224" width="70" height="18" rx="4" fill="#13283a" stroke="#5cb8f2"/><text x="385" y="237" font-size="10" fill="#5cb8f2">T-149</text>
+              <rect x="454" y="224" width="60" height="18" rx="4" fill="#1b232c" stroke="#26313c"/><text x="459" y="237" font-size="10" fill="#8593a1">T-152</text>
+              <rect x="370" y="260" width="40" height="18" rx="4" fill="#3a2c10" stroke="#f0b23d"/><text x="374" y="273" font-size="10" fill="#f0b23d">T-138</text>
+              <rect x="410" y="296" width="44" height="18" rx="4" fill="#1b232c" stroke="#26313c"/><text x="414" y="309" font-size="10" fill="#8593a1">PR #41</text>
+              <rect x="526" y="296" width="70" height="18" rx="4" fill="#1b232c" stroke="#26313c"/><text x="530" y="309" font-size="10" fill="#8593a1">tag + Pages</text>
+            </svg>
+          </div>
+          <div class="pn sm" style="display:flex;gap:18px;align-items:center"><span class="b cor">? Q-34 pin</span><span>T-151 is blocked by your answer. M2 slips ~1 day per day unanswered.</span><a class="l" style="margin-left:auto">Answer →</a></div>
+        </div>
+        <div style="width:290px;display:flex;flex-direction:column;gap:12px">
+          <div class="pn"><h4>Project</h4><div class="sm">Orchestrates AI + human teams for long-running projects.</div><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px"><span class="b">CLI parity</span><span class="b">Handoffs &gt; compaction</span><span class="b">Local first</span></div></div>
+          <div class="pn"><h4>Shipped</h4><div class="sm"><b>2026.11.02.1</b> · Nov 2<br><span class="m">14 commits since · CI ● passing</span><br><a class="l">Release notes ↗</a> · <a class="l">Website ↗</a> · <a class="l">GitHub ↗</a></div></div>
+          <div class="pn"><h4>Live</h4><div class="sm">Forge · T-142 <span style="color:var(--amb)">76%</span><div class="meter w" style="margin:4px 0 8px"><i style="width:76%"></i></div>Atlas · T-149 31%<div class="meter" style="margin-top:4px"><i style="width:31%"></i></div></div></div>
+          <div class="pn"><h4>Repo</h4><div class="sm mono">techmuch/go-build-it<br><span class="m">3 PRs · 11 issues · 0 unpushed</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 03 -->
+<section class="view" id="v03">
+  <header><span class="num">03</span><h2>Trace map: requirements ↔ values ↔ decisions ↔ artifacts</h2><span class="req">FR-45</span><span class="req">FR-46</span><span class="req">FR-123</span><span class="req">FR-105</span></header>
+  <p class="look"><b>Look for:</b> project knowledge drawn as a <b>graph</b>: the problem definition at the center, values around it, and requirements, decisions and mockups linked to the values that justify them. Clicking a node opens the document (right). <b>Rev 2:</b> a node's document can be changed by asking an agent (the proposal shows inline) or edited directly in the rich editor (✎ Edit); saving creates a new revision. Is the traceability worth the visual complexity?</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/p/trailmap/trace</span></div>
+  <div class="app">
+    <div class="rail"><div class="lg"></div><span class="on">▦</span><span>◷<i></i></span><span>⇶</span><span>⑂</span><span>☷</span><span>◈</span><span>≋</span><span class="bot">⚙</span><span>?</span></div>
+    <div class="main">
+      <div class="top"><h1><span class="m">trailmap /</span> Trace map</h1><span class="m sm">Show: values · requirements · decisions · mockups · questions</span><span class="k">⌘K</span><span class="id">local · david</span></div>
+      <div class="cv" style="flex-direction:row">
+        <div class="pn" style="flex:1;padding:0;overflow:hidden">
+          <svg viewBox="0 0 760 520" width="100%" style="display:block">
+            <rect width="760" height="520" fill="#151b22"/>
+            <g stroke="#34414e" stroke-width="1.5">
+              <line x1="380" y1="260" x2="200" y2="140"/><line x1="380" y1="260" x2="560" y2="140"/><line x1="380" y1="260" x2="380" y2="420"/>
+              <line x1="200" y1="140" x2="90" y2="60"/><line x1="200" y1="140" x2="80" y2="220"/><line x1="560" y1="140" x2="680" y2="60"/><line x1="560" y1="140" x2="690" y2="230"/>
+              <line x1="380" y1="420" x2="240" y2="470"/><line x1="380" y1="420" x2="530" y2="470"/>
+              <line x1="560" y1="140" x2="530" y2="470" stroke-dasharray="4 4"/>
+            </g>
+            <line x1="200" y1="140" x2="300" y2="340" stroke="#f2685c" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <circle cx="380" cy="260" r="56" fill="#1f2f17" stroke="#9ad64a" stroke-width="2"/><text x="380" y="254" text-anchor="middle" fill="#9ad64a" font-size="11">PROBLEM v4</text><text x="380" y="270" text-anchor="middle" fill="#e4e9ee" font-size="10">trusted offline map,</text><text x="380" y="283" text-anchor="middle" fill="#e4e9ee" font-size="10">one-handed, low battery</text>
+            <g font-size="10.5"><rect x="140" y="122" width="120" height="36" rx="18" fill="#2a2550" stroke="#8b7cf6"/><text x="200" y="144" text-anchor="middle" fill="#bdb3ff">◈ Offline first</text>
+            <rect x="490" y="122" width="140" height="36" rx="18" fill="#2a2550" stroke="#8b7cf6"/><text x="560" y="144" text-anchor="middle" fill="#bdb3ff">◈ One-handed on trail</text>
+            <rect x="310" y="402" width="140" height="36" rx="18" fill="#2a2550" stroke="#8b7cf6"/><text x="380" y="424" text-anchor="middle" fill="#bdb3ff">◈ Battery over beauty</text>
+            <rect x="40" y="44" width="100" height="30" rx="5" fill="#1b232c" stroke="#5cb8f2"/><text x="90" y="63" text-anchor="middle" fill="#5cb8f2">FR-07 offline</text>
+            <rect x="20" y="206" width="120" height="30" rx="5" fill="#3a2c10" stroke="#f0b23d"/><text x="80" y="225" text-anchor="middle" fill="#f0b23d">FR-08 download ✎</text>
+            <rect x="630" y="44" width="100" height="30" rx="5" fill="#1b232c" stroke="#5cb8f2"/><text x="680" y="63" text-anchor="middle" fill="#5cb8f2">FR-10 thumb</text>
+            <rect x="630" y="216" width="120" height="30" rx="5" fill="#1b232c" stroke="#a8b3bd"/><text x="690" y="235" text-anchor="middle" fill="#a8b3bd">OS-2 bottom sheet</text>
+            <rect x="180" y="456" width="120" height="30" rx="5" fill="#1b232c" stroke="#5cb8f2"/><text x="240" y="475" text-anchor="middle" fill="#5cb8f2">FR-09 &lt;5%/h</text>
+            <rect x="470" y="456" width="120" height="30" rx="5" fill="#1b232c" stroke="#a8b3bd"/><text x="530" y="475" text-anchor="middle" fill="#a8b3bd">mockup C thumbs</text>
+            <circle cx="300" cy="340" r="14" fill="#f2685c"/><text x="300" y="344" text-anchor="middle" fill="#0e1217" font-size="11">?</text><text x="320" y="344" fill="#f2685c">Q-31 blocking</text>
+            <rect x="560" y="300" width="150" height="32" rx="16" fill="none" stroke="#8b7cf6" stroke-dasharray="4 3"/><text x="635" y="320" text-anchor="middle" fill="#bdb3ff">+ Glanceable in sunlight?</text></g>
+          </svg>
+        </div>
+        <div style="width:330px;display:flex;flex-direction:column;gap:12px">
+          <div class="pn"><h4>Selected · FR-08 <span><span class="b amb">2 comments</span> <span class="btn p" style="padding:2px 8px">✎ Edit</span></span></h4><div class="mono m">docs/requirements.md · rev 7 → draft rev 8</div><div class="sm" style="margin-top:6px"><span class="del">The user SHALL be able to download maps per trail <i>or</i> per region.</span><span class="ins">The user SHALL be able to download maps per trail; regions MAY come later. FR-08a: show size before download.</span></div><div style="display:flex;gap:6px;margin-top:6px"><span class="btn g" style="padding:3px 8px">Accept</span><span class="btn" style="padding:3px 8px">Reject</span><span class="xs m" style="align-self:center">proposed by Atlas from Q-31</span></div><div class="compose" style="margin-top:8px">Ask Atlas to change this node…<span class="mic" style="margin-left:auto">🎙</span></div>
+            <div class="sm" style="margin-top:10px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px"><span class="av ar">At</span><span>Trail packs 10–40 MB vs. region 300 MB+. Raised Q-31.</span></div><div style="display:flex;gap:8px"><span class="av pm">Pi</span><span>T-077 held.</span></div></div></div>
+          <div class="pn"><h4>Linked</h4><div class="sm" style="line-height:1.9">◈ Offline first <span class="m">(justifies)</span><br>? Q-31 <span class="m">(blocks)</span><br>⇶ T-077 tile storage <span class="m">(implements)</span></div></div>
+          <div class="pn"><h4>Proposed value</h4><div class="sm">"Glanceable in sunlight", from rehearsal step 4</div><div style="margin-top:8px;display:flex;gap:6px"><span class="btn g">Adopt</span><span class="btn">Edit</span><span class="btn">Dismiss</span></div></div>
+          <div class="pn"><h4>Documents</h4><div class="sm mono" style="line-height:1.8">requirements.md · roadmap.md<br>values.md · problem-definition.md<br>mockups/ (3) · adr/ (4)</div><div style="margin-top:8px"><span class="btn">+ Ask team to draft</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 04 -->
+<section class="view" id="v04">
+  <header><span class="num">04</span><h2>Decision board (questions)</h2><span class="req">FR-100</span><span class="req">FR-101</span><span class="req">FR-102</span><span class="req">FR-103</span><span class="req">FR-104</span><span class="req">FR-105</span></header>
+  <p class="look"><b>Look for:</b> every question across projects as cards in <b>columns by urgency</b>: blocking, running on an assumption, and recently answered. Each card shows its cost ("blocking 2 tasks, 12m"). The selected card opens a drawer with context, attachments and structured answers.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/decisions?open=Q-34</span></div>
+  <div class="app">
+    <div class="rail"><div class="lg"></div><span>▦</span><span class="on">◷<i></i></span><span>⇶</span><span>⑂</span><span>☷</span><span>◈</span><span>≋</span><span class="bot">⚙</span><span>?</span></div>
+    <div class="main">
+      <div class="top"><h1>Decisions</h1><span class="m sm">questions · gates · reviews · option sets</span><span class="k">⌘K</span><span class="id">local · david</span></div>
+      <div class="cv" style="flex-direction:row">
+        <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-content:start">
+          <div class="col"><div class="hd" style="color:var(--cor)">Blocking work<span>2</span></div>
+            <div class="tile hot" style="outline:2px solid var(--vio)"><div class="xs m">go-build-it · Forge · 12m</div><b>OpenCode context usage?</b><div class="xs"><span class="b cor">blocks T-151</span> <span class="b">rec: A</span></div></div>
+            <div class="tile hot"><div class="xs m">trailmap · Atlas · 2h</div><b>Per trail or per region?</b><div class="xs"><span class="b cor">blocks T-077, T-078</span> <span class="b">3 options</span></div></div></div>
+          <div class="col"><div class="hd" style="color:var(--amb)">Running on assumption<span>3</span></div>
+            <div class="tile"><div class="xs m">ledgerly · Probe · 5h</div><b>UK CSV dates DD/MM?</b><div class="xs m">assumed: DD/MM</div><div class="xs"><span class="btn g" style="padding:2px 8px">✓ Confirm</span> <span class="btn" style="padding:2px 8px">Correct…</span></div></div>
+            <div class="tile"><div class="xs m">go-build-it · Atlas · 1d</div><b>Handoff file name?</b><div class="xs m">assumed: HANDOFF.md</div></div>
+            <div class="tile"><div class="xs m">pantry-pal · Pilot · 1d</div><b>Barcode scanning in v1?</b><div class="xs m">assumed: out of scope</div></div>
+            <div class="hd" style="color:var(--amb);margin-top:6px">Gates · reviews · options<span>3</span></div>
+            <div class="tile"><b>◆ ledgerly G-5 rehearsal</b></div><div class="tile"><b>T-138 review</b></div><div class="tile"><b>⑂ trailmap OS-3</b></div></div>
+          <div class="col"><div class="hd" style="color:var(--lime)">Answered · 7d<span>9</span></div>
+            <div class="tile" style="opacity:.7"><div class="xs m">trailmap · OS-2</div><b>Bottom sheets</b><div class="xs m">→ value "Offline first"</div></div>
+            <div class="tile" style="opacity:.7"><div class="xs m">trailmap · Q-27</div><b>Battery vs. visuals</b><div class="xs m">→ value "Battery over beauty"</div></div>
+            <div class="tile" style="opacity:.7"><div class="xs m">go-build-it · Q-29</div><b>SQLite driver</b><div class="xs m">→ modernc (no cgo)</div></div></div>
+        </div>
+        <div class="pn" style="width:400px;display:flex;flex-direction:column;gap:10px">
+          <h4>Q-34 · blocking <span>✕</span></h4>
+          <div style="display:flex;gap:8px;align-items:center"><span class="av dv">Fg</span><span class="sm">Forge · Developer · S-881 · T-151 · FR-61, FR-71, Q2</span></div>
+          <b style="font-size:16px">How should OpenCode context usage be measured?</b>
+          <div class="sm m">Handoffs need usage %. <span class="mono">opencode run</span> emits per-message tokens but no window size or total.</div>
+          <div class="tile" style="border-color:var(--vio)"><b>◉ A · Estimate from tokens</b> <span class="b vio">recommended</span><div class="xs m">±5% error · no extra processes</div></div>
+          <div class="tile"><b>○ B · Server mode API</b><div class="xs m">exact · +1 process per session</div></div>
+          <div class="tile"><b>○ Other…</b></div>
+          <div class="xs">📎 <a class="l">opencode-run-sample.json</a> · <a class="l">adapter.go +84</a> · <a class="l">usage mockup</a> · <a class="l">transcript S-881</a> <span class="m">→ viewer</span></div>
+          <div style="position:relative"><textarea class="ta">Go with A, but log estimates vs. real values so we can check the error.</textarea><span class="mic" style="position:absolute;right:8px;bottom:10px">🎙</span></div>
+          <label class="xs"><input type="checkbox" checked> propose as project value</label>
+          <div style="display:flex;gap:6px"><span class="btn">Follow-up</span><span class="btn p" style="margin-left:auto">Answer · unblock T-151</span></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 05 -->
+<section class="view" id="v05">
+  <header><span class="num">05</span><h2>Relay lanes: sessions, context, compaction &amp; handoffs (exp.)</h2><span class="req">FR-60</span><span class="req">FR-65</span><span class="req">FR-70</span><span class="req">FR-71</span><span class="req">FR-72</span><span class="req">FR-73</span><span class="req">FR-74</span><span class="req">NFR-11</span></header>
+  <p class="look"><b>Look for:</b> a lane per task over time. Each session is a segment whose height shows its context filling up, and a <b>baton (◆)</b> marks each handoff. Rate-limit pauses show as hatched gaps. Clicking a baton opens the briefing. <b>Rev 2:</b> by default lanes show <b>compaction</b> marks (⟲) where the harness compacted. Batons appear only where experimental smart handoffs are on (go-build-it here). A segment opens a structured or terminal view.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/relay</span></div>
+  <div class="app">
+    <div class="rail"><div class="lg"></div><span>▦</span><span>◷<i></i></span><span class="on">⇶</span><span>⑂</span><span>☷</span><span>◈</span><span>≋</span><span class="bot">⚙</span><span>?</span></div>
+    <div class="main">
+      <div class="top"><h1>Relay</h1><span class="b vio">4 live</span><span class="b amb">1 handoff · exp.</span><span class="b">1 rate-limited</span><span class="m sm">default: auto-compact · last 24h</span><span class="k">⌘K</span><span class="id">local · david</span></div>
+      <div class="cv">
+        <div class="pn" style="padding:0;overflow:hidden">
+          <svg viewBox="0 0 1130 300" width="100%" style="display:block">
+            <rect width="1130" height="300" fill="#151b22"/>
+            <g fill="#8593a1" font-size="10"><text x="250" y="18">06:00</text><text x="450" y="18">09:00</text><text x="650" y="18">12:00</text><text x="850" y="18">15:00</text></g>
+            <line x1="980" y1="24" x2="980" y2="300" stroke="#f2685c" stroke-dasharray="4 3"/><text x="984" y="34" fill="#f2685c" font-size="10">now 13:44</text>
+            <g font-size="11" fill="#e4e9ee"><text x="12" y="70">Forge · T-142</text><text x="12" y="132">Atlas · T-149</text><text x="12" y="194">Spark · T-310</text><text x="12" y="256">Pilot · T-012</text></g>
+            <g font-size="9.5" fill="#8593a1"><text x="12" y="84">go-build-it · OpenCode</text><text x="12" y="146">go-build-it · Claude Code</text><text x="12" y="208">inkwell · Antigravity</text><text x="12" y="270">pantry-pal · Claude Code</text></g>
+            <line x1="180" y1="56" x2="1120" y2="56" stroke="#26313c" stroke-dasharray="2 4"/><text x="1090" y="52" fill="#8593a1" font-size="9">75%</text>
+            <path d="M200 90 L200 88 L420 58 L420 90 Z" fill="#2a2550" stroke="#8b7cf6"/><text x="300" y="84" font-size="9.5" fill="#bdb3ff">S1</text>
+            <rect x="414" y="50" width="12" height="12" transform="rotate(45 420 56)" fill="#9ad64a"/>
+            <path d="M424 90 L424 89 L700 58 L700 90 Z" fill="#2a2550" stroke="#8b7cf6"/><text x="550" y="84" font-size="9.5" fill="#bdb3ff">S2</text>
+            <rect x="694" y="50" width="12" height="12" transform="rotate(45 700 56)" fill="#9ad64a"/>
+            <path d="M704 90 L704 88 L980 56 L980 90 Z" fill="#3a2c10" stroke="#f0b23d"/><text x="840" y="84" font-size="9.5" fill="#f0b23d">S3 · 76% · writing handoff</text>
+            <rect x="974" y="50" width="12" height="12" transform="rotate(45 980 56)" fill="#0e1217" stroke="#f0b23d" stroke-width="2"/>
+            <path d="M760 152 L760 150 L860 112 L860 152 Z" fill="#13283a" stroke="#5cb8f2"/><text x="866" y="110" font-size="11" fill="#5cb8f2">⟲ compacted</text><path d="M862 152 L862 145 L980 132 L980 152 Z" fill="#13283a" stroke="#5cb8f2"/><text x="900" y="148" font-size="9.5" fill="#5cb8f2">31%</text>
+            <path d="M600 214 L600 212 L980 198 L980 214 Z" fill="#1f2f17" stroke="#9ad64a"/><text x="760" y="210" font-size="9.5" fill="#9ad64a">≈18% est.</text>
+            <path d="M520 276 L520 274 L640 266 L640 276 Z" fill="#2a2550" stroke="#8b7cf6"/>
+            <defs><pattern id="h" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#34414e" stroke-width="2"/></pattern></defs>
+            <rect x="640" y="258" width="340" height="18" fill="url(#h)"/><text x="700" y="252" font-size="9.5" fill="#8593a1">paused · Anthropic limit · resumes 14:20</text>
+          </svg>
+        </div>
+        <div style="display:flex;gap:14px">
+          <div class="pn" style="flex:1"><h4>Baton S3 → S4 · briefing draft <span><span class="b vio">experimental</span> <span class="b amb">Lens checking</span> <span class="seg"><span class="on">Briefing</span><span>Structured</span><span>Terminal</span></span></span></h4>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" class="sm">
+              <div><span class="m xs">OBJECTIVE / DONE</span><br>All stream-json lines → typed events; 9 fixtures pass.</div>
+              <div><span class="m xs">COMPLETED</span><br>text, tool_use, tool_result, usage · 31 tests ✓</div>
+              <div><span class="m xs">DECISIONS</span><br>Buffer partial lines (64 KB splits); log unknown events.</div>
+              <div><span class="m xs">DEAD ENDS</span><br>json.Decoder streaming breaks on interleaved stderr.</div>
+              <div><span class="m xs">NEXT</span><br>error mapping → rate_limit.jsonl → wire usage.</div>
+              <div><span class="m xs">POINTERS</span><br><span class="mono">parse.go · testdata/stream-json/ · FR-61 · ADR-007</span></div>
+            </div></div>
+          <div class="pn" style="width:330px"><h4>Next session context</h4>
+            <div class="sm" style="line-height:1.9">task T-142 <span class="m">0.4k</span><br>handoff S3 <span class="m">1.2k</span><br>FR-61, FR-71 <span class="m">0.6k</span><br>Go + testing standards <span class="m">2.1k</span><br>persona Forge <span class="m">0.5k</span><br><b>total ≈ 4.8k / 200k</b></div>
+            <div style="display:flex;gap:6px;margin-top:8px"><span class="btn">Edit</span><span class="btn p" style="margin-left:auto">Pass baton → S4</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 06 -->
+<section class="view" id="v06">
+  <header><span class="num">06</span><h2>Flow board (task queue with dependencies)</h2><span class="req">FR-75</span><span class="req">FR-80</span><span class="req">FR-81</span><span class="req">FR-82</span></header>
+  <p class="look"><b>Look for:</b> tasks as cards that move through states, with dependency arrows between them. WIP limits appear in the column headers (concurrency). Tasks that keep needing handoffs glow amber with a "split?" action.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/p/go-build-it/flow</span></div>
+  <div class="app">
+    <div class="rail"><div class="lg"></div><span class="on">▦</span><span>◷<i></i></span><span>⇶</span><span>⑂</span><span>☷</span><span>◈</span><span>≋</span><span class="bot">⚙</span><span>?</span></div>
+    <div class="main">
+      <div class="top"><h1><span class="m">go-build-it /</span> Flow</h1><span class="m sm">project ▾ all · role ▾ · show dependencies ✓</span><span class="k">⌘K</span><span class="id">local · david</span></div>
+      <div class="cv">
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;position:relative">
+          <div class="col"><div class="hd">Ready<span>23</span></div>
+            <div class="tile" style="border-color:#5a4318;box-shadow:0 0 0 1px #5a4318, 0 0 18px rgba(240,178,61,.15)"><div class="n">T-118 <span class="b amb">⟳3</span></div><div class="xs">SQLite migrations + backfill</div><div class="xs"><span class="b">P2</span> <span class="b">dev · Spark</span></div><div class="xs"><span class="btn" style="padding:2px 8px">Split?</span></div></div>
+            <div class="tile"><div class="n">T-155</div><div class="xs">Queue retries</div><div class="xs"><span class="b">P2</span> <span class="b">dev</span></div></div>
+            <div class="tile"><div class="n">T-160</div><div class="xs">Docs search</div><div class="xs"><span class="b">P3</span> <span class="b">unassigned</span></div></div></div>
+          <div class="col"><div class="hd">Running<span>2 / 2 WIP</span></div>
+            <div class="tile" style="border-color:#3d3670"><div class="n">T-142 <span class="b vio">76%</span></div><div class="xs">stream-json parser</div><div class="xs"><span class="b cor">P1</span> <span class="b">Forge</span> <span class="b">⟳2</span></div></div>
+            <div class="tile" style="border-color:#1f4260"><div class="n">T-149 <span class="b sky">31%</span></div><div class="xs">usage interface</div><div class="xs"><span class="b cor">P1</span> <span class="b">Atlas</span></div></div></div>
+          <div class="col"><div class="hd" style="color:var(--cor)">Blocked<span>6</span></div>
+            <div class="tile hot"><div class="n">T-151 <span class="b cor">? Q-34</span></div><div class="xs">OpenCode usage</div><div class="xs m">needs T-149 + answer</div></div>
+            <div class="tile"><div class="n">T-152</div><div class="xs">handoff reviewer check</div><div class="xs m">needs T-149</div></div>
+            <div class="tile"><div class="n">T-153</div><div class="xs">Antigravity probe</div><div class="xs m">needs T-151</div></div></div>
+          <div class="col"><div class="hd" style="color:var(--amb)">In review<span>2</span></div>
+            <div class="tile" style="border-color:#5a4318"><div class="n">T-138 <span class="b amb">you</span></div><div class="xs">Tailscale classifier · PR #41</div></div>
+            <div class="tile"><div class="n">T-147</div><div class="xs">Lens reviewing</div></div></div>
+          <div class="col"><div class="hd" style="color:var(--lime)">Done · 7d<span>11</span></div>
+            <div class="tile" style="opacity:.6"><div class="n">T-139</div><div class="xs">adapter interface</div></div>
+            <div class="tile" style="opacity:.6"><div class="n">T-136</div><div class="xs">SQLite bootstrap</div></div></div>
+          <svg style="position:absolute;inset:0;pointer-events:none" width="100%" height="100%"><g stroke="#8b7cf6" stroke-width="1.5" fill="none" stroke-dasharray="4 3" opacity=".8"><path d="M440 150 C 470 150, 470 60, 500 60"/><path d="M440 150 C 470 150, 470 140, 500 140"/><path d="M700 60 C 680 140, 680 200, 700 220"/></g></svg>
+        </div>
+        <div class="pn sm" style="display:flex;gap:20px"><span>Global WIP <b>4 / 5</b></span><span>go-build-it <b>2 / 2</b></span><span>inkwell <b>1 / 1</b></span><span>pantry-pal <b>1 / 2</b></span><span class="m">Queue survives restarts; interrupted sessions resume from their latest baton.</span></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 07 -->
+<section class="view" id="v07">
+  <header><span class="num">07</span><h2>Decision tree (option sets)</h2><span class="req">FR-120</span><span class="req">FR-121</span><span class="req">FR-122</span><span class="req">FR-123</span><span class="req">FR-124</span></header>
+  <p class="look"><b>Look for:</b> option sets placed in a <b>tree of past decisions</b>, so you can see how earlier choices shaped today's options. The current set branches into A, B and C. You drag aspects into a <b>composition tray</b> to build the combination. <b>Rev 2:</b> the cards are thumbnails only; ⤢ opens each mockup full size in the viewer.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/p/trailmap/decisions/OS-3</span></div>
+  <div class="app">
+    <div class="rail"><div class="lg"></div><span>▦</span><span>◷<i></i></span><span>⇶</span><span class="on">⑂</span><span>☷</span><span>◈</span><span>≋</span><span class="bot">⚙</span><span>?</span></div>
+    <div class="main">
+      <div class="top"><h1><span class="m">trailmap /</span> Decision tree</h1><span class="b vio">OS-3 open</span><span class="m sm">values lens: Offline first · One-handed · Battery</span><span class="k">⌘K</span><span class="id">local · david</span></div>
+      <div class="cv" style="flex-direction:row">
+        <div style="width:250px" class="pn"><h4>Path so far</h4>
+          <svg viewBox="0 0 220 300" width="100%"><g stroke="#34414e" stroke-width="2" fill="none"><path d="M30 30 V 110"/><path d="M30 110 V 190"/><path d="M30 190 V 270"/><path d="M30 30 H 90" stroke-dasharray="3 3"/><path d="M30 110 H 90" stroke-dasharray="3 3"/></g>
+            <circle cx="30" cy="30" r="8" fill="#9ad64a"/><text x="46" y="26" fill="#e4e9ee" font-size="10.5">OS-1 Platform</text><text x="46" y="40" fill="#8593a1" font-size="9.5">→ native-feel PWA</text><text x="96" y="58" fill="#5d6b78" font-size="9">✕ native apps</text>
+            <circle cx="30" cy="110" r="8" fill="#9ad64a"/><text x="46" y="106" fill="#e4e9ee" font-size="10.5">OS-2 Navigation</text><text x="46" y="120" fill="#8593a1" font-size="9.5">→ bottom sheets</text><text x="96" y="138" fill="#5d6b78" font-size="9">✕ tabs, ✕ drawer</text>
+            <circle cx="30" cy="190" r="8" fill="#9ad64a"/><text x="46" y="186" fill="#e4e9ee" font-size="10.5">Q-27 Battery</text><text x="46" y="200" fill="#8593a1" font-size="9.5">→ value added</text>
+            <circle cx="30" cy="270" r="9" fill="#0e1217" stroke="#8b7cf6" stroke-width="3"/><text x="46" y="266" fill="#bdb3ff" font-size="10.5">OS-3 Map layout</text><text x="46" y="280" fill="#8593a1" font-size="9.5">choosing now</text></svg></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:12px">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+            <div class="pn" style="padding:0;overflow:hidden"><div style="height:150px;background:linear-gradient(135deg,#1f3a2a,#2b4a36);position:relative"><span class="xp" style="z-index:2">⤢ Full size</span><div style="position:absolute;left:0;right:0;bottom:0;height:44px;background:#1b232c;border-radius:10px 10px 0 0"></div></div><div style="padding:10px"><b>A · Map first</b><div class="xs m">fits: offline ✓ one-hand ✓ battery ~</div><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px"><span class="b vio">⠿ full-bleed map</span><span class="b vio">⠿ bottom sheet</span><span class="b">⠿ floating zoom</span></div></div></div>
+            <div class="pn" style="padding:0;overflow:hidden"><div style="height:150px;display:grid;grid-template-rows:1fr 1fr;position:relative"><span class="xp" style="z-index:2">⤢ Full size</span><div style="background:linear-gradient(135deg,#1f3a2a,#2b4a36)"></div><div style="background:#1b232c"></div></div><div style="padding:10px"><b>B · Compare</b><div class="xs m">fits: offline ✓ one-hand ✕ battery ~</div><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px"><span class="b">⠿ split layout</span><span class="b vio">⠿ elevation sparkline</span></div></div></div>
+            <div class="pn" style="padding:0;overflow:hidden"><div style="height:150px;background:#11161c;padding:12px;display:grid;gap:8px;position:relative"><span class="xp" style="z-index:2">⤢ Full size</span><div style="background:#1b232c;border-radius:6px"></div><div style="background:#1b232c;border-radius:6px"></div></div><div style="padding:10px"><b>C · Plan</b><div class="xs m">fits: offline ✓ one-hand ✓ battery ✓</div><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px"><span class="b vio">⠿ static thumbnails</span><span class="b">⠿ card feed</span></div></div></div>
+          </div>
+          <div class="pn" style="border:1px dashed #3d3670;background:#14122a"><h4>Composition tray <span>drag aspects here</span></h4>
+            <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="b vio">A · full-bleed map</span><span class="b vio">A · bottom sheet</span><span class="b vio">B · elevation sparkline</span><span class="b vio">C · static thumbnails</span></div>
+            <div style="position:relative;margin-top:10px"><textarea class="ta">Map-first, with the sparkline in the sheet. Static thumbnails keep battery low in the list.</textarea><span class="mic" style="position:absolute;right:8px;bottom:10px">🎙</span></div>
+            <div style="display:flex;gap:6px;margin-top:8px"><span class="btn">Generate 3 more</span><span class="btn p" style="margin-left:auto">Commit choice → OS-3</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 08 -->
+<section class="view" id="v08">
+  <header><span class="num">08</span><h2>Storyboard rehearsal (review gate)</h2><span class="req">FR-115</span><span class="req">FR-116</span><span class="req">FR-117</span><span class="req">FR-118</span><span class="req">FR-132</span></header>
+  <p class="look"><b>Look for:</b> every step of the rehearsal shown as a <b>filmstrip</b>, so you see the whole journey. The current frame is enlarged with feedback pins dropped onto the screen, and an agent console handles live change requests. <b>Rev 2:</b> the frame opens full size, and pins and notes come from several reviewers, human and AI. The gate status is shown on the filmstrip as colors.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/p/ledgerly/gates/G-5</span></div>
+  <div class="app">
+    <div class="rail"><div class="lg"></div><span class="on">▦</span><span>◷<i></i></span><span>⇶</span><span>⑂</span><span>☷</span><span>◈</span><span>≋</span><span class="bot">⚙</span><span>?</span></div>
+    <div class="main">
+      <div class="top"><h1><span class="m">ledgerly /</span> ◆ G-5 Dress rehearsal · CSV import</h1><span class="b sky">UAT · live app</span><span class="b amb">3 / 7</span><span class="k">⌘K</span><span class="id">local · david</span></div>
+      <div class="cv">
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px">
+          <div class="pn" style="padding:6px;border-color:#2f4a22"><div class="shot" style="height:60px">1</div><div class="xs" style="margin-top:4px">✓ Open import</div></div>
+          <div class="pn" style="padding:6px;border-color:#5a4318"><div class="shot" style="height:60px">2</div><div class="xs" style="margin-top:4px">● Upload CSV · 1 note</div></div>
+          <div class="pn" style="padding:6px;border-color:var(--vio);box-shadow:0 0 0 1px var(--vio)"><div class="shot" style="height:60px">3</div><div class="xs" style="margin-top:4px"><b>▶ Map columns</b></div></div>
+          <div class="pn" style="padding:6px"><div class="shot" style="height:60px">4</div><div class="xs m" style="margin-top:4px">Duplicates</div></div>
+          <div class="pn" style="padding:6px"><div class="shot" style="height:60px">5</div><div class="xs m" style="margin-top:4px">Categorize</div></div>
+          <div class="pn" style="padding:6px"><div class="shot" style="height:60px">6</div><div class="xs m" style="margin-top:4px">Reconcile</div></div>
+          <div class="pn" style="padding:6px"><div class="shot" style="height:60px">7</div><div class="xs m" style="margin-top:4px">Undo import</div></div>
+        </div>
+        <div style="display:flex;gap:14px">
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+            <div class="sm"><b>Scenario:</b> confirm guessed CSV columns for <span class="mono">barclays-oct.csv</span> before importing 214 rows. <span class="m">FR-21, FR-22 · Owner</span></div>
+            <div class="shot" style="height:270px;position:relative"><span class="xp" style="z-index:2">⤢ Open full size</span>Live ledgerly · column mapping
+              <span style="position:absolute;left:58%;top:38%;width:22px;height:22px;border-radius:50% 50% 50% 0;background:var(--cor);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700">1</span></div>
+          </div>
+          <div class="pn" style="width:380px;display:flex;flex-direction:column;gap:8px"><h4>Pin 1 · feedback &amp; agent console</h4>
+            <div class="sm"><span class="av hu">dv</span> Can't tell debit vs credit sign. Preview 3 rows?</div>
+            <div class="sm"><span class="av qa">Pr</span> Logged CR-12.</div>
+            <div class="sm"><span class="av dv">Fg</span> ~20 min. Implement now and reload frame 3?</div>
+            <div style="display:flex;gap:6px"><span class="btn">Queue CR-12</span><span class="btn p">Implement now</span></div>
+            <div class="sm"><span class="av hu" style="background:#d7a6ea">mr</span> <b>maria</b> (human): "Payee" vs "Description" is confusing.</div>
+            <div style="position:relative"><textarea class="ta" placeholder="Drop a pin on the frame, type, or dictate…"></textarea><span class="mic" style="position:absolute;right:8px;bottom:10px">🎙</span></div>
+            <div style="display:flex;gap:6px"><span class="btn">← 2</span><span class="btn g" style="margin-left:auto">✓ Step OK → 4</span></div>
+            <div class="xs m" style="border-top:1px solid var(--line);padding-top:8px">Gate: <span class="btn r" style="padding:2px 8px">Request changes</span> <span class="btn" style="padding:2px 8px;opacity:.4">Approve ◆</span> unlocks when all frames are reviewed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 09 -->
+<section class="view" id="v09">
+  <header><span class="num">09</span><h2>Review: mockup vs built, with a full trace</h2><span class="req">FR-54</span><span class="req">FR-92</span><span class="req">FR-110</span><span class="req">FR-111</span><span class="req">FR-112</span></header>
+  <p class="look"><b>Look for:</b> <b>Rev 2: rebuilt, no code diff.</b> On the left, the approved mockup and the build overlaid with a slider, with differences pinned. On the right, a <b>trace matrix</b>: every requirement, standard and piece of rehearsal feedback in scope, with its status and the test that proves it. The test summary and verdict bar sit below, and the Courier pipeline is unchanged.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/p/ledgerly/review/T-204</span></div>
+  <div class="app">
+    <div class="rail"><div class="lg"></div><span>▦</span><span class="on">◷<i></i></span><span>⇶</span><span>⑂</span><span>☷</span><span>◈</span><span>≋</span><span class="bot">⚙</span><span>?</span></div>
+    <div class="main">
+      <div class="top"><h1><span class="m">ledgerly /</span> T-204 · column mapping</h1><span class="b lime">unit 142/142</span><span class="b lime">e2e 18/18</span><span class="b amb">2 gaps</span><a class="l sm">PR #57 ↗</a><span class="k">⌘K</span><span class="id">local · david</span></div>
+      <div class="cv">
+        <div style="display:flex;gap:14px">
+          <div class="pn" style="flex:1"><h4>Mockup ⇄ built <span class="seg"><span>Side by side</span><span class="on">Slider</span><span>Diff highlight</span></span></h4>
+            <div class="shot" style="height:250px;position:relative;overflow:hidden">
+              <div style="position:absolute;inset:0 50% 0 0;display:grid;place-items:center;border-right:2px solid var(--vio)">mockup rev 3</div>
+              <div style="position:absolute;inset:0 0 0 50%;display:grid;place-items:center;background:#0f151b">e2e screenshot · run #88</div>
+              <span style="position:absolute;left:calc(50% - 10px);top:112px;width:20px;height:20px;border-radius:50%;background:var(--vio)"></span>
+              <span class="b lime" style="position:absolute;left:62%;top:40px">① preview rows · CR-12</span>
+              <span class="b cor" style="position:absolute;left:58%;top:190px;background:var(--cor-s);color:var(--cor)">② bank logo missing</span>
+              <span class="xp">⤢</span>
+            </div></div>
+          <div class="pn" style="width:430px"><h4>Trace</h4>
+            <table class="mx" style="font-size:11.5px">
+              <tr><th>Item</th><th>Status</th><th>Evidence</th></tr>
+              <tr><td><span class="b vio">FR-21</span> guess mapping</td><td style="color:var(--lime)">met</td><td class="xs">e2e #3</td></tr>
+              <tr><td><span class="b vio">FR-22</span> fix mapping</td><td style="color:var(--lime)">met</td><td class="xs">e2e #4, #5</td></tr>
+              <tr><td><span class="b vio">FR-23</span> remember per bank</td><td style="background:var(--amb-s);color:var(--amb)">partly</td><td class="xs">e2e #14 ✕ reuse</td></tr>
+              <tr><td><span class="b">STD</span> React+TS · a11y · coverage</td><td style="color:var(--lime)">✓ 88%</td><td class="xs">Lens</td></tr>
+              <tr><td><span class="b">STD</span> currency via Intl</td><td style="background:var(--amb-s);color:var(--amb)">1 "£"</td><td class="xs">mapping.tsx:41</td></tr>
+              <tr><td><span class="b lime">CR-12</span> david · preview rows</td><td style="color:var(--lime)">done</td><td class="xs">pin ①</td></tr>
+              <tr><td><span class="b lime">CR-13</span> maria · label</td><td style="color:var(--lime)">done</td><td class="xs">e2e #7</td></tr>
+              <tr><td><span class="b lime">Probe</span> tab order</td><td style="color:var(--lime)">done</td><td class="xs">e2e #9</td></tr>
+            </table></div>
+        </div>
+        <div class="pn sm" style="display:flex;gap:18px;align-items:center"><b>Tests</b><span>unit <b style="color:var(--lime)">142 ✓</b> · 0 ✕ · coverage 88%</span><span>e2e <b style="color:var(--lime)">18 ✓</b> · Playwright · desktop + phone screenshots</span><span class="m">run 6m ago on t-204</span></div>
+        <div class="pn" style="display:flex;gap:12px;align-items:center"><b class="sm">Verdict</b><span class="btn g">Approve</span><span class="btn" style="border-color:var(--amb);color:var(--amb)">● Request changes</span><span class="btn r">Reject</span><input class="ta" style="min-height:0;height:32px;flex:1" value="Fix FR-23 reuse + the £; logo as a separate task"><span class="mic">🎙</span><span class="btn p">Submit</span></div>
+        <div class="pn sm"><h4>After approve · Courier pipeline (no LLM)</h4><div style="display:flex;gap:8px;align-items:center"><span class="b">squash-merge #57</span>→<span class="b">push main</span>→<span class="b">CI</span>→<span class="b">close T-204</span>→<span class="b m">next release: tag + Pages</span></div></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 10 -->
+<section class="view" id="v10">
+  <header><span class="num">10</span><h2>Team matrix (personas × projects)</h2><span class="req">FR-10</span><span class="req">FR-11</span><span class="req">FR-12</span><span class="req">FR-25</span><span class="req">FR-26</span></header>
+  <p class="look"><b>Look for:</b> a <b>capacity matrix</b> with team members as rows and projects as columns. Cells show assignment and live load. The persona editor is a side sheet. <b>Rev 2:</b> it is a rich Markdown editor with a persona coach (agent chat) underneath. Useful for spotting who is overloaded and which harness each persona uses.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/team</span></div>
+  <div class="app">
+    <div class="rail"><div class="lg"></div><span>▦</span><span>◷<i></i></span><span>⇶</span><span>⑂</span><span class="on">☷</span><span>◈</span><span>≋</span><span class="bot">⚙</span><span>?</span></div>
+    <div class="main">
+      <div class="top"><h1>Team</h1><span class="m sm">team ▾ Core · Web-small</span><span class="k">⌘K</span><span class="id">local · david</span></div>
+      <div class="cv" style="flex-direction:row">
+        <div class="pn" style="flex:1">
+          <table class="mx">
+            <tr><th>Member</th><th>Role</th><th>Harness</th><th>go-build-it</th><th>trailmap</th><th>ledgerly</th><th>inkwell</th><th>pantry-pal</th></tr>
+            <tr><td><span class="av pm">Pi</span> Pilot</td><td>PM</td><td class="xs">Claude Code</td><td>●</td><td>●</td><td>●</td><td>○</td><td style="background:#2a2550">▶ T-012 · ☕</td></tr>
+            <tr><td><span class="av ar">At</span> Atlas</td><td>Architect</td><td class="xs">Claude Code</td><td style="background:#13283a">▶ T-149 · 31%</td><td>●</td><td>○</td><td>○</td><td>●</td></tr>
+            <tr style="outline:1px solid var(--vio)"><td><span class="av dv">Fg</span> Forge</td><td>Developer</td><td class="xs">OpenCode</td><td style="background:#3a2c10">▶ T-142 · 76%</td><td>○</td><td>●</td><td>○</td><td>○</td></tr>
+            <tr><td><span class="av dv2">Sp</span> Spark</td><td>Developer</td><td class="xs">Antigravity</td><td>●</td><td>○</td><td>○</td><td style="background:#1f2f17">▶ T-310 · 18%</td><td>○</td></tr>
+            <tr><td><span class="av qa">Pr</span> Probe</td><td>QA</td><td class="xs">Antigravity</td><td>●</td><td>●</td><td>◆ G-5</td><td>●</td><td>○</td></tr>
+            <tr><td><span class="av rv">Ln</span> Lens</td><td>Reviewer</td><td class="xs">Claude Code</td><td>●</td><td>●</td><td>●</td><td>●</td><td>●</td></tr>
+            <tr><td><span class="av gt">Co</span> Courier</td><td>Git/Release</td><td class="xs">built-in</td><td>●</td><td>●</td><td>●</td><td>⚠ push</td><td>●</td></tr>
+            <tr><td><span class="av hu">dv</span> david</td><td>Owner</td><td class="xs">human</td><td>2 waiting</td><td>2 waiting</td><td>1 gate</td><td>—</td><td>—</td></tr>
+          </table>
+          <div class="xs m" style="margin-top:8px">● assigned · ○ not assigned · ▶ running · shaded = live context load</div>
+          <div style="display:flex;gap:6px;margin-top:10px"><span class="btn">+ Persona</span><span class="btn">+ Human</span><span class="btn">+ Role</span></div>
+        </div>
+        <div class="pn" style="width:340px;display:flex;flex-direction:column;gap:8px"><h4>Persona · Forge</h4>
+          <div class="sm" style="line-height:2">role <b>Developer</b> · harness <b>OpenCode</b> <span class="b lime">headless ✓</span><br>model <b class="mono">claude-sonnet-5-5</b> · context <b>auto-compact</b></div>
+          <div class="mono" style="background:#0b0f13;border:1px solid var(--line);border-radius:8px;padding:8px;line-height:1.7;white-space:pre-wrap;font-size:11px"><span style="color:#bdb3ff"># Forge · Developer</span>
+- One task at a time; tests first.
+- Ask a blocking question if unclear.
+<span class="ins">- Stdlib first; ask before adding a dep.</span></div>
+          <div class="xs m">personas/forge.md · Markdown editor · <span class="seg"><span>WYSIWYG</span><span class="on">MD</span></span></div>
+          <div class="chat"><div><span class="av ar">At</span><span>Forge asked 4 dependency questions this week. I proposed the highlighted rule.</span></div></div>
+          <div class="compose">Coach Forge's persona…<span class="mic" style="margin-left:auto">🎙</span></div>
+          
+          <div style="display:flex;gap:4px;flex-wrap:wrap"><span class="b">TDD</span><span class="b">no git</span><span class="b">≤400 LOC</span><span class="b m">+ global</span></div>
+          <div style="display:flex;gap:6px;margin-top:auto"><span class="btn r">Remove</span><span class="btn p" style="margin-left:auto">Save</span></div></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 11 -->
+<section class="view" id="v11">
+  <header><span class="num">11</span><h2>Standards matrix (global standards × projects)</h2><span class="req">FR-50</span><span class="req">FR-51</span><span class="req">FR-52</span><span class="req">FR-53</span><span class="req">FR-54</span></header>
+  <p class="look"><b>Look for:</b> standards as rows and projects as columns. Each cell shows compliant, overridden (with reason) or failing. Selecting a row opens its Markdown and the generated agent files. <b>Rev 2:</b> ✎ Edit and an agent chat change the standard; <i>Git workflow</i> is now a standard row.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/standards</span></div>
+  <div class="app">
+    <div class="rail"><div class="lg"></div><span>▦</span><span>◷<i></i></span><span>⇶</span><span>⑂</span><span>☷</span><span class="on">◈</span><span>≋</span><span class="bot">⚙</span><span>?</span></div>
+    <div class="main">
+      <div class="top"><h1>Standards</h1><span class="b lime">5 / 6 compliant</span><span class="k">⌘K</span><span class="id">local · david</span></div>
+      <div class="cv" style="flex-direction:row">
+        <div class="pn" style="flex:1">
+          <table class="mx">
+            <tr><th>Standard</th><th>go-build-it</th><th>trailmap</th><th>ledgerly</th><th>inkwell</th><th>pantry-pal</th><th>fleetwatch</th></tr>
+            <tr><td>Backend · Go stdlib + SQLite</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+            <tr style="outline:1px solid var(--vio)"><td><b>Frontend · React + TS + Vite</b></td><td>✓</td><td>✓</td><td>✓</td><td style="background:#3a2c10;color:var(--amb)">override</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Unit tests ≥ 80%</td><td>✓ 91%</td><td>— <span class="xs m">n/a yet</span></td><td>✓ 84%</td><td style="background:#3d1d1b;color:var(--cor)">✕ CI</td><td>—</td><td>✓</td></tr>
+            <tr><td>E2E · Playwright per view</td><td>✓</td><td>—</td><td>✓</td><td>✓</td><td>—</td><td>✓</td></tr>
+            <tr><td>Docs embedded</td><td>✓</td><td>—</td><td>✓</td><td>✓</td><td>—</td><td>✓</td></tr>
+            <tr><td>CalVer YYYY.MM.DD.N</td><td>✓</td><td>—</td><td>✓</td><td>✓</td><td>—</td><td>✓</td></tr>
+            <tr><td>Git workflow <span class="b vio">new</span></td><td>✓</td><td>✓</td><td>✓ GL</td><td>✓</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Website on Pages</td><td>✓</td><td style="color:var(--amb)">not yet</td><td>✓ GL</td><td>✓</td><td style="color:var(--amb)">not yet</td><td>✓</td></tr>
+          </table>
+        </div>
+        <div style="width:360px;display:flex;flex-direction:column;gap:12px">
+          <div class="pn"><h4>Frontend · Markdown <span class="btn p" style="padding:2px 8px">✎ Edit</span></h4><div class="mono" style="white-space:pre-wrap;line-height:1.7;color:#c9d3dc">- React 19 + TypeScript strict, Vite
+- Embedded via embed.FS
+- Separate desktop + mobile routes
+- CSS variables + modules
+- Playwright test per view<span class="ins">- e2e captures desktop + phone screenshots</span></div>
+            <div class="chat" style="margin-top:8px"><div><span class="av rv">Ln</span><span>Reviews now compare mockup vs build, so I proposed the highlighted line.</span></div></div><div class="compose" style="margin-top:6px">Ask Lens to change this standard…<span class="mic" style="margin-left:auto">🎙</span></div></div>
+          <div class="pn"><h4>Override · inkwell</h4><div class="sm">"No React; vanilla templates." Static output must work without JS. <span class="m">Approved Sep 12</span></div></div>
+          <div class="pn"><h4>Generated for agents</h4><div class="sm mono" style="line-height:1.8">AGENTS.md · CLAUDE.md<br>.opencode/instructions.md</div><div class="xs m">regenerated in 6 repos on save</div></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 12 -->
+<section class="view" id="v12">
+  <header><span class="num">12</span><h2>Activity &amp; insights</h2><span class="req">NFR-10</span><span class="req">NFR-11</span><span class="req">NFR-12</span><span class="req">NFR-13</span></header>
+  <p class="look"><b>Look for:</b> history as <b>swimlanes per persona</b> over time, with each event a dot you can inspect for the what and why. Trend charts sit beneath, and agent improvement proposals link to the evidence that produced them. <b>Rev 2:</b> each dot opens a detail view for its event type, and human actions are dots in the human lane like any other.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/activity</span></div>
+  <div class="app">
+    <div class="rail"><div class="lg"></div><span>▦</span><span>◷<i></i></span><span>⇶</span><span>⑂</span><span>☷</span><span>◈</span><span class="on">≋</span><span class="bot">⚙</span><span>?</span></div>
+    <div class="main">
+      <div class="top"><h1>Activity</h1><span class="m sm mono">filter: project:* type:* since:today</span><span class="k">⌘K</span><span class="id">local · david</span></div>
+      <div class="cv">
+        <div class="pn" style="padding:0;overflow:hidden">
+          <svg viewBox="0 0 1130 200" width="100%" style="display:block"><rect width="1130" height="200" fill="#151b22"/>
+            <g font-size="10.5" fill="#8593a1"><text x="12" y="34">Forge</text><text x="12" y="64">Atlas</text><text x="12" y="94">Courier</text><text x="12" y="124">Pilot</text><text x="12" y="154">david</text><text x="12" y="184">system</text></g>
+            <g stroke="#26313c"><line x1="80" y1="30" x2="1120" y2="30"/><line x1="80" y1="60" x2="1120" y2="60"/><line x1="80" y1="90" x2="1120" y2="90"/><line x1="80" y1="120" x2="1120" y2="120"/><line x1="80" y1="150" x2="1120" y2="150"/><line x1="80" y1="180" x2="1120" y2="180"/></g>
+            <g><circle cx="300" cy="30" r="5" fill="#9ad64a"/><circle cx="560" cy="30" r="6" fill="#f0b23d"/><circle cx="905" cy="30" r="5" fill="#f2685c"/><circle cx="1040" cy="30" r="7" fill="#f0b23d" stroke="#fff" stroke-width="2"/>
+              <circle cx="420" cy="60" r="5" fill="#5cb8f2"/><circle cx="990" cy="60" r="5" fill="#5cb8f2"/>
+              <circle cx="1000" cy="90" r="5" fill="#a8b3bd"/><circle cx="640" cy="90" r="5" fill="#a8b3bd"/>
+              <circle cx="760" cy="120" r="5" fill="#8593a1"/><circle cx="350" cy="120" r="5" fill="#bdb3ff"/>
+              <circle cx="830" cy="150" r="5" fill="#e4e9ee"/><circle cx="520" cy="150" r="5" fill="#e4e9ee"/>
+              <circle cx="200" cy="180" r="5" fill="#9ad64a"/></g>
+            <rect x="900" y="38" width="210" height="44" rx="6" fill="#1b232c" stroke="#34414e"/><text x="910" y="56" font-size="10.5" fill="#e4e9ee">13:44 handoff S3 → S4 (T-142)</text><text x="910" y="72" font-size="9.5" fill="#8593a1">why: context 75.4% ≥ threshold · open ›</text>
+          </svg>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr) 1.6fr;gap:12px">
+          <div class="pn"><h4>Handoffs/task</h4><svg viewBox="0 0 120 40" width="100%"><polyline points="0,8 20,10 40,14 60,18 80,22 100,26 120,28" fill="none" stroke="#9ad64a" stroke-width="2"/></svg><b>1.4</b> <span class="xs m">↓ 2.1</span></div>
+          <div class="pn"><h4>Rework</h4><svg viewBox="0 0 120 40" width="100%"><polyline points="0,20 20,18 40,24 60,16 80,22 100,20 120,22" fill="none" stroke="#f0b23d" stroke-width="2"/></svg><b>18%</b></div>
+          <div class="pn"><h4>Answer time</h4><svg viewBox="0 0 120 40" width="100%"><polyline points="0,10 20,14 40,12 60,20 80,18 100,24 120,26" fill="none" stroke="#5cb8f2" stroke-width="2"/></svg><b>2.6h</b></div>
+          <div class="pn"><h4>Time/task</h4><svg viewBox="0 0 120 40" width="100%"><polyline points="0,24 20,22 40,20 60,22 80,18 100,16 120,18" fill="none" stroke="#bdb3ff" stroke-width="2"/></svg><b>54m</b></div>
+          <div class="pn"><h4>Improvement proposals</h4><div class="sm" style="line-height:1.8"><span class="b rv" style="background:var(--cor-s);color:var(--cor)">Lens</span> IP-7 trim developer handoffs (&gt;2k → +18% rework) <a class="l">evidence</a> · <a class="l">review</a><br><span class="b sky">Atlas</span> IP-8 OpenCode threshold → 80% (est. 4% high) <a class="l">evidence</a> · <a class="l">review</a></div></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 13 -->
+<section class="view" id="v13">
+  <header><span class="num">13</span><h2>System map (settings)</h2><span class="req">FR-05</span><span class="req">FR-06</span><span class="req">FR-15</span><span class="req">FR-19</span><span class="req">FR-20</span><span class="req">FR-63</span><span class="req">FR-90</span><span class="req">FR-91</span></header>
+  <p class="look"><b>Look for:</b> settings drawn as a <b>topology diagram</b>: the access paths into the machine on the left (localhost, Tailscale Serve, external), go-build-it in the middle, and the harnesses and forges on the right. Clicking a node opens its settings. Does the diagram make the access model (FR-15–19) clearer?</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/system</span></div>
+  <div class="app">
+    <div class="rail"><div class="lg"></div><span>▦</span><span>◷<i></i></span><span>⇶</span><span>⑂</span><span>☷</span><span>◈</span><span>≋</span><span class="bot on">⚙</span><span>?</span></div>
+    <div class="main">
+      <div class="top"><h1>System</h1><span class="mono m">~/.go-build-it/</span><span class="k">⌘K</span><span class="id">local · david</span></div>
+      <div class="cv" style="flex-direction:row">
+        <div class="pn" style="flex:1;padding:0;overflow:hidden">
+          <svg viewBox="0 0 800 440" width="100%" style="display:block"><rect width="800" height="440" fill="#151b22"/>
+            <rect x="250" y="40" width="300" height="360" rx="14" fill="none" stroke="#34414e" stroke-dasharray="5 4"/><text x="262" y="60" fill="#8593a1" font-size="10">devbox (macOS)</text>
+            <g font-size="11"><rect x="20" y="80" width="170" height="54" rx="8" fill="#1f2f17" stroke="#9ad64a"/><text x="34" y="102" fill="#9ad64a">● localhost:7420</text><text x="34" y="120" fill="#8593a1" font-size="9.5">no challenge · user david</text>
+            <rect x="20" y="180" width="170" height="54" rx="8" fill="#1f2f17" stroke="#9ad64a"/><text x="34" y="202" fill="#9ad64a">● Tailscale Serve</text><text x="34" y="220" fill="#8593a1" font-size="9.5">devbox.tail3f2a.ts.net · identity</text>
+            <rect x="20" y="280" width="170" height="54" rx="8" fill="#1b232c" stroke="#5d2a27" stroke-dasharray="4 3"/><text x="34" y="302" fill="#f2685c">○ External iface</text><text x="34" y="320" fill="#8593a1" font-size="9.5">off · challenge = Q1</text></g>
+            <g stroke-width="2" fill="none"><path d="M190 107 C 230 107, 240 200, 300 200" stroke="#9ad64a"/><path d="M190 207 C 230 207, 240 210, 300 210" stroke="#9ad64a"/><path d="M190 307 C 230 307, 240 220, 300 220" stroke="#5d2a27" stroke-dasharray="4 3"/></g>
+            <rect x="300" y="160" width="200" height="100" rx="12" fill="#2a2550" stroke="#8b7cf6" stroke-width="2"/><text x="400" y="196" text-anchor="middle" fill="#e4e9ee" font-size="13">go-build-it</text><text x="400" y="214" text-anchor="middle" fill="#bdb3ff" font-size="10">2026.11.07.1 · auto-update ✓</text><text x="400" y="230" text-anchor="middle" fill="#8593a1" font-size="9.5">SQLite · config.toml</text><text x="400" y="246" text-anchor="middle" fill="#8593a1" font-size="9.5">handoff @ 75%</text>
+            <g font-size="11"><rect x="610" y="50" width="170" height="44" rx="8" fill="#1f2f17" stroke="#9ad64a"/><text x="622" y="70" fill="#9ad64a">Claude Code</text><text x="622" y="85" fill="#8593a1" font-size="9.5">headless ✓ usage ✓</text>
+            <rect x="610" y="110" width="170" height="44" rx="8" fill="#1f2f17" stroke="#9ad64a"/><text x="622" y="130" fill="#9ad64a">OpenCode</text><text x="622" y="145" fill="#8593a1" font-size="9.5">headless ✓ usage ≈</text>
+            <rect x="610" y="170" width="170" height="44" rx="8" fill="#3a2c10" stroke="#f0b23d"/><text x="622" y="190" fill="#f0b23d">Antigravity</text><text x="622" y="205" fill="#8593a1" font-size="9.5">headless ? (Q2)</text>
+            <rect x="610" y="250" width="170" height="44" rx="8" fill="#13283a" stroke="#5cb8f2"/><text x="622" y="270" fill="#5cb8f2">GitHub · gh ✓</text><text x="622" y="285" fill="#8593a1" font-size="9.5">techmuch · Pages</text>
+            <rect x="610" y="310" width="170" height="44" rx="8" fill="#13283a" stroke="#5cb8f2"/><text x="622" y="330" fill="#5cb8f2">GitLab · glab ✓</text><text x="622" y="345" fill="#8593a1" font-size="9.5">gitlab.com</text></g>
+            <g stroke="#34414e" stroke-width="1.5" fill="none"><path d="M500 190 C 560 190, 560 72, 610 72"/><path d="M500 200 C 560 200, 560 132, 610 132"/><path d="M500 210 C 560 210, 560 192, 610 192" stroke="#f0b23d" stroke-dasharray="4 3"/><path d="M500 230 C 560 230, 560 272, 610 272"/><path d="M500 240 C 560 240, 560 332, 610 332"/></g>
+          </svg>
+        </div>
+        <div class="pn" style="width:320px;display:flex;flex-direction:column;gap:10px"><h4>Selected · Tailscale Serve</h4>
+          <div class="sm" style="line-height:1.9">status <span class="b lime">logged in</span><br>url <span class="mono">https://devbox.tail3f2a.ts.net</span><br>proxies to <span class="mono">127.0.0.1:7420</span><br>identity <span class="mono">Tailscale-User-Login</span><br>trust: same as local (FR-17)</div>
+          <div style="display:flex;gap:6px"><span class="btn">Re-run setup</span><span class="btn r">Disable</span></div>
+          <h4 style="margin-top:8px">Updates</h4><div class="sm">channel stable · install when idle · signed ✓<br><a class="l">roll back to 2026.11.05.2</a></div>
+          <h4 style="margin-top:8px">Git workflow</h4><div class="sm">Defined in <a class="l">Standards → Git workflow</a>. Here: gh ✓ · glab ✓</div>
+          <h4 style="margin-top:8px">Experimental</h4><div class="sm" style="line-height:1.8"><span class="b vio">on · 1 project</span> smart handoffs (FR-72)<br><span class="b">off</span> attachable sessions (FR-67)<br><span class="m">default: harness auto-compaction</span></div></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 14 -->
+<section class="view" id="v14">
+  <header><span class="num">14</span><h2>Command palette &amp; docs</h2><span class="req">FR-30</span><span class="req">FR-130</span><span class="req">FR-131</span><span class="req">FR-132</span><span class="req">FR-133</span></header>
+  <p class="look"><b>Look for:</b> one <b>⌘K palette</b> that searches projects, actions, docs <i>and</i> shows the matching CLI command for each action, which makes the UI/CLI parity goal visible. A doc result opens a reading pane with auto-captured screenshots.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/docs/smart-handoffs</span></div>
+  <div class="app" style="position:relative">
+    <div class="rail"><div class="lg"></div><span>▦</span><span>◷<i></i></span><span>⇶</span><span>⑂</span><span>☷</span><span>◈</span><span>≋</span><span class="bot">⚙</span><span class="on">?</span></div>
+    <div class="main">
+      <div class="top"><h1>Docs</h1><span class="m sm">Getting started · Concepts · UAT walkthrough · CLI</span><span class="k">⌘K</span><span class="id">local · david</span></div>
+      <div class="cv" style="flex-direction:row;opacity:.4">
+        <div class="pn" style="width:220px;height:400px"></div><div class="pn" style="flex:1;height:400px"></div>
+      </div>
+    </div>
+    <div style="position:absolute;left:50%;top:80px;transform:translateX(-50%);width:680px;background:var(--p);border:1px solid #34414e;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.6);overflow:hidden">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--line);font-size:15px">⌘K &nbsp;handoff<span style="color:var(--vio)">▌</span></div>
+      <div style="padding:8px">
+        <div class="xs m" style="padding:6px 8px;font-family:ui-monospace">ACTIONS</div>
+        <div style="display:flex;justify-content:space-between;padding:8px;border-radius:6px;background:var(--vio-s)"><span>Approve handoff S-881 (Forge · T-142)</span><span class="mono m">gbi sessions handoff S-881 --approve</span></div>
+        <div style="display:flex;justify-content:space-between;padding:8px"><span>Edit handoff template developer-v3</span><span class="mono m">gbi templates edit developer-v3</span></div>
+        <div class="xs m" style="padding:6px 8px;font-family:ui-monospace">DOCS</div>
+        <div style="display:flex;justify-content:space-between;padding:8px"><span>📖 Smart handoffs · Concepts</span><span class="xs m">FR-70–75 · 3 screenshots</span></div>
+        <div style="display:flex;justify-content:space-between;padding:8px"><span>📖 UAT · Owner step 9 · Approve a handoff</span><span class="xs m">auto-captured #212</span></div>
+        <div class="xs m" style="padding:6px 8px;font-family:ui-monospace">HISTORY</div>
+        <div style="display:flex;justify-content:space-between;padding:8px"><span>≋ 14 handoffs today</span><span class="mono m">gbi history --type handoff --since today</span></div>
+      </div>
+      <div class="xs m" style="padding:8px 16px;border-top:1px solid var(--line)">↵ open · ⌥↵ copy CLI · every action here has a CLI equivalent (FR-30)</div>
+    </div>
+  </div></div></div>
+</section>
+
+<p class="rv-foot">Approach C · Roadmap Canvas · static mockup. Data is illustrative. <a href="../index.html">Back to overview</a></p>
+</body>
+</html>

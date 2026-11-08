@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Approach B Desktop</title>
+<link rel="stylesheet" href="../frame.css">
+<style>
+/* ===== Approach B: Team Room — app styles ===== */
+.app { --bg:#faf6ef; --card:#fffdf9; --line:#e8dfd1; --t:#2b2622; --m:#7a6f64; --acc:#c2562f; --acc-s:#f8e6dc;
+  --sage:#5f7f63; --sage-s:#e6eee4; --gold:#b58a1b; --gold-s:#f6ecd0; --plum:#7b4f8e; --sky:#3f6f99; --sky-s:#e3ecf4;
+  background:var(--bg); color:var(--t); min-height:780px; display:flex; flex-direction:column;
+  font:14px/1.55 "Iowan Old Style", "Palatino Linotype", Georgia, serif; }
+.app * { box-sizing:border-box; }
+.app .ui { font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.nav { height:58px; display:flex; align-items:center; gap:26px; padding:0 28px; border-bottom:1px solid var(--line); background:var(--card);
+  font-family:-apple-system, system-ui, sans-serif; font-size:13.5px; }
+.nav .logo { font:italic 700 19px Georgia, serif; color:var(--acc); margin-right:10px; }
+.nav a { color:var(--m); text-decoration:none; padding:18px 0; border-bottom:2px solid transparent; }
+.nav a.on { color:var(--t); border-color:var(--acc); font-weight:600; }
+.nav .pill { background:var(--acc); color:#fff; border-radius:999px; font-size:11px; padding:1px 7px; margin-left:4px; }
+.nav .right { margin-left:auto; display:flex; gap:14px; align-items:center; color:var(--m); font-size:12.5px; }
+.wrap { padding:24px 28px; display:flex; gap:24px; flex:1; }
+h2.ttl { font-size:26px; margin:0 0 4px; font-weight:600; letter-spacing:-.01em; }
+.lede { color:var(--m); margin:0 0 16px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; }
+.card h4 { margin:0 0 8px; font:600 11.5px -apple-system, system-ui, sans-serif; text-transform:uppercase; letter-spacing:.07em; color:var(--m); }
+.tag { display:inline-block; font:500 11.5px -apple-system, system-ui, sans-serif; padding:2px 9px; border-radius:999px; background:#efe8dc; color:#5b5148; }
+.tag.acc{background:var(--acc-s);color:var(--acc)} .tag.sage{background:var(--sage-s);color:var(--sage)} .tag.gold{background:var(--gold-s);color:var(--gold)} .tag.sky{background:var(--sky-s);color:var(--sky)}
+.btn { display:inline-block; font:600 13px -apple-system, system-ui, sans-serif; padding:7px 14px; border-radius:999px; border:1px solid var(--line); background:#fff; color:var(--t); }
+.btn.p { background:var(--acc); border-color:var(--acc); color:#fff; } .btn.s { background:var(--sage); border-color:var(--sage); color:#fff; }
+.m { color:var(--m); } .sm { font-size:12.5px; } .mono { font:12px ui-monospace, Menlo, monospace; }
+.av { width:34px; height:34px; border-radius:50%; display:inline-grid; place-items:center; font:700 12px -apple-system, system-ui, sans-serif; color:#fff; flex:none; }
+.av.s { width:24px; height:24px; font-size:10px; } .av.l { width:56px; height:56px; font-size:18px; }
+.av.pm{background:#7b4f8e}.av.ar{background:#3f6f99}.av.dv{background:#5f7f63}.av.dv2{background:#8a9a4b}.av.qa{background:#b58a1b}.av.rv{background:#c2562f}.av.gt{background:#6b6158}.av.hu{background:#2b2622}
+.msg { display:flex; gap:12px; } .msg .who { font:600 13px -apple-system, system-ui, sans-serif; } .msg .who span { font-weight:400; color:var(--m); font-size:12px; }
+.bubble { background:var(--card); border:1px solid var(--line); border-radius:4px 14px 14px 14px; padding:10px 14px; margin-top:4px; }
+.bubble.me { background:#2b2622; color:#f6efe4; border-color:#2b2622; border-radius:14px 4px 14px 14px; }
+.bubble.ask { border:2px solid var(--acc); }
+.room { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:8px; }
+.room .nm { font-size:18px; font-weight:600; }
+.faces { display:flex; } .faces .av { margin-left:-6px; border:2px solid var(--card); } .faces .av:first-child { margin-left:0; }
+.fuel { height:8px; border-radius:999px; background:#efe8dc; overflow:hidden; } .fuel i { display:block; height:100%; background:var(--sage); border-radius:999px; } .fuel.w i { background:var(--gold); }
+textarea.ta { width:100%; min-height:64px; border:1px solid var(--line); border-radius:12px; padding:10px; font:14px Georgia, serif; background:#fff; resize:none; }
+.compose { display:flex; gap:10px; align-items:center; border:1px solid var(--line); border-radius:999px; background:#fff; padding:8px 8px 8px 16px; font:13px -apple-system, system-ui, sans-serif; color:var(--m); }
+.compose .btn { margin-left:auto; }
+.shot { border:1px dashed #cdbfa9; border-radius:12px; background:repeating-linear-gradient(45deg,#f5efe4,#f5efe4 8px,#efe7da 8px,#efe7da 16px); display:grid; place-items:center; color:var(--m); font:12px -apple-system, system-ui, sans-serif; }
+.letter { background:#fffef9; border:1px solid var(--line); border-radius:6px; padding:22px 26px; box-shadow:0 2px 0 #efe7da, 0 4px 0 #f7f1e7; }
+.diff { font:12px/1.55 ui-monospace, Menlo, monospace; background:#fff; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+.diff div { padding:0 12px; white-space:pre; } .diff .a { background:#eaf2e7; } .diff .h { background:#f3ede3; color:var(--m); }
+.step { display:flex; flex-direction:column; align-items:center; gap:4px; font:12px -apple-system, system-ui, sans-serif; color:var(--m); flex:1; }
+.step b { width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:#efe8dc; color:var(--m); }
+.step.done b { background:var(--sage); color:#fff; } .step.on b { background:var(--acc); color:#fff; } .step.on { color:var(--t); font-weight:600; }
+.chk { font:13px -apple-system, system-ui, sans-serif; display:block; margin:3px 0; }
+.mic { display:inline-grid; place-items:center; width:30px; height:30px; border-radius:50%; border:1px solid var(--line); background:#fff; font-size:13px; }
+.xp { position:absolute; right:10px; top:10px; background:rgba(43,38,34,.82); color:#fff; font:600 11.5px -apple-system, system-ui, sans-serif; padding:4px 9px; border-radius:999px; }
+.ins { background:#eaf2e7; border-left:3px solid var(--sage); padding:4px 8px; border-radius:4px; display:block; }
+.del { background:#f8e6dc; border-left:3px solid var(--acc); padding:4px 8px; border-radius:4px; display:block; text-decoration:line-through; color:#8a4a32; }
+.ok { color:var(--sage); font-weight:700; } .warn { color:var(--gold); font-weight:700; }
+</style>
+</head>
+<body class="mock">
+<div class="rv-bar">
+  <span class="rv-title">Approach B: Team Room <small>Desktop · 14 views · rev 2</small></span>
+  <a href="../index.html">← Overview &amp; review guide</a>
+  <a href="mobile.html">Approach B mobile →</a>
+  <span class="rv-spacer"></span>
+  <a href="../a-mission-control/desktop.html">A: Mission Control</a>
+  <a href="../c-roadmap-canvas/desktop.html">C: Roadmap Canvas</a>
+</div>
+<div class="rv-intro">
+  <p><b>Idea:</b> working with go-build-it should feel like working with a team (line 18 of the original brief). Each project is a <b>room</b> where personas post updates, ask questions and present work as messages. The home page pairs a <b>"Waiting on you"</b> desk with the project rooms. The tone is warm and editorial, with typography that's pleasant to read for long periods.</p>
+  <p><b>Best for:</b> fast back-and-forth with the team, and understanding <i>why</i> things happened. <b>Risk:</b> chat can bury status. Every room therefore keeps a fixed status panel on the right, and the catalog stays on the home page (FR-40).</p>
+</div>
+<div class="rv-intro"><p style="background:#fff8e6;border:1px solid #ecd9a8;border-radius:8px;padding:8px 12px"><b>Rev 2 (feedback from the Approach A review, applied here too):</b> notebook, handbook and persona profiles can be edited by chatting with an agent or directly in a rich editor (03, 10, 11) · attachments and mockups open full size (04, 07, 08) · 🎙 dictation · compaction is the default and handoff letters are <i>experimental</i>; sessions can be watched in a terminal (05) · show &amp; tell rebuilt as an assessment: mockup vs built, tests, standards, feedback, requirements (09) · journal entries open detail pages (12) · git workflow moved into the handbook (13).</p></div>
+<nav class="rv-toc">
+  <a href="#v01">01 Catalog</a><a href="#v02">02 Project room</a><a href="#v03">03 Notebook &amp; values</a><a href="#v04">04 Questions (desk)</a>
+  <a href="#v05">05 Who's working &amp; handoffs</a><a href="#v06">06 Team plan (queue)</a><a href="#v07">07 Option set</a><a href="#v08">08 Dress rehearsal</a>
+  <a href="#v09">09 Show &amp; tell (review)</a><a href="#v10">10 Team</a><a href="#v11">11 Handbook (standards)</a><a href="#v12">12 Journal &amp; retro</a>
+  <a href="#v13">13 Settings</a><a href="#v14">14 Docs</a>
+</nav>
+
+<!-- 01 -->
+<section class="view" id="v01">
+  <header><span class="num">01</span><h2>Home: desk + project rooms (catalog)</h2><span class="req">FR-40</span><span class="req">FR-41</span><span class="req">FR-41a</span><span class="req">FR-42</span><span class="req">FR-43</span><span class="req">FR-44</span><span class="req">FR-104</span></header>
+  <p class="look"><b>Look for:</b> two halves. The left column is your desk: everything waiting on you, written as plain sentences. The right side is the catalog: each project is a room card showing its purpose, who's in it, its status line, release and links. Does writing status as sentences help you, or slow you down?</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/</span></div>
+  <div class="app">
+    <div class="nav"><span class="logo">go·build·it</span><a class="on">Home</a><a>Rooms</a><a>Desk <span class="pill">7</span></a><a>Team</a><a>Handbook</a><a>Journal</a><div class="right"><span>Search ⌘K</span><span>⚙</span><span class="tag sage">Tailnet · david@github</span></div></div>
+    <div class="wrap">
+      <div style="width:360px;display:flex;flex-direction:column;gap:12px">
+        <h2 class="ttl">Good afternoon, david.</h2><p class="lede">Your team is waiting on 7 things. Two are holding up work.</p>
+        <div class="card" style="border:2px solid var(--acc)"><div class="msg"><span class="av dv">Fg</span><div><div class="who">Forge <span>in go-build-it · 12m</span></div><div>"I'm stuck until you tell me how to measure OpenCode's context usage."</div><div style="margin-top:8px"><span class="btn p">Answer</span></div></div></div></div>
+        <div class="card" style="border:2px solid var(--acc)"><div class="msg"><span class="av ar">At</span><div><div class="who">Atlas <span>in trailmap · 2h</span></div><div>"Per-trail or per-region downloads? I've attached three storage options."</div><div style="margin-top:8px"><span class="btn p">Answer</span></div></div></div></div>
+        <div class="card"><div class="msg"><span class="av qa">Pr</span><div><div class="who">Probe <span>in ledgerly</span></div><div>"The import flow is ready for a dress rehearsal whenever you are."</div><div style="margin-top:8px"><span class="btn">Start rehearsal</span></div></div></div></div>
+        <div class="card sm ui m">+ 4 more: a review, an option set, 2 non-blocking questions</div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:12px">
+        <div class="ui sm" style="display:flex;gap:8px;align-items:center"><b style="font-size:15px">Rooms</b><span class="tag acc">Needs you</span><span class="tag">Active</span><span class="tag">Paused</span><span class="m" style="margin-left:auto">Find a room… · Sort: needs you ▾</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="room"><div style="display:flex;justify-content:space-between"><span class="nm">go-build-it</span><span class="tag sage">Implementation</span></div><div class="m">Orchestrates AI + human teams for long-running projects.</div>
+            <div style="font-style:italic">"Forge is handing off the parser work; Atlas is designing usage reporting."</div>
+            <div class="ui sm" style="display:flex;justify-content:space-between;align-items:center"><div class="faces"><span class="av s pm">Pi</span><span class="av s ar">At</span><span class="av s dv">Fg</span><span class="av s rv">Ln</span></div><span><span class="tag acc">1 blocking</span> <span class="tag gold">1 review</span></span></div>
+            <div class="ui sm" style="border-top:1px solid var(--line);padding-top:8px">Stable <b>2026.11.02.1</b> · 14 commits since · CI ● passing<br><a style="color:var(--sky)">Release notes ↗ · Website ↗ · GitHub ↗ · Docs</a></div></div>
+          <div class="room"><div style="display:flex;justify-content:space-between"><span class="nm">trailmap</span><span class="tag sky">Design</span></div><div class="m">Offline hiking maps for one-handed use on the trail.</div>
+            <div style="font-style:italic">"Waiting on you to choose a map layout and a download strategy."</div>
+            <div class="ui sm" style="display:flex;justify-content:space-between;align-items:center"><div class="faces"><span class="av s pm">Pi</span><span class="av s ar">At</span></div><span><span class="tag acc">1 blocking</span> <span class="tag gold">options</span></span></div>
+            <div class="ui sm" style="border-top:1px solid var(--line);padding-top:8px"><span class="m">No stable release yet · Website not published</span><br><a style="color:var(--sky)">GitHub ↗ · Docs</a></div></div>
+          <div class="room"><div style="display:flex;justify-content:space-between"><span class="nm">ledgerly</span><span class="tag gold">Review</span></div><div class="m">Personal finance ledger with bank CSV import.</div>
+            <div style="font-style:italic">"Import flow is built; dress rehearsal gate is next."</div>
+            <div class="ui sm" style="display:flex;justify-content:space-between;align-items:center"><div class="faces"><span class="av s qa">Pr</span><span class="av s dv">Fg</span></div><span class="tag gold">Gate ready</span></div>
+            <div class="ui sm" style="border-top:1px solid var(--line);padding-top:8px">Stable <b>2026.10.18.2</b> · 31 commits since · CI ● passing<br><a style="color:var(--sky)">Release notes ↗ · Website ↗ · GitLab ↗ · Docs</a></div></div>
+          <div class="room"><div style="display:flex;justify-content:space-between"><span class="nm">inkwell</span><span class="tag">Maintenance</span></div><div class="m">Static blog engine with live preview.</div>
+            <div style="font-style:italic">"Spark is fixing the failing RSS test. Courier will push the 2 stranded commits after."</div>
+            <div class="ui sm" style="display:flex;justify-content:space-between;align-items:center"><div class="faces"><span class="av s dv2">Sp</span><span class="av s gt">Co</span></div><span><span class="tag acc">CI failing</span> <span class="tag acc">⚠ unpushed</span></span></div>
+            <div class="ui sm" style="border-top:1px solid var(--line);padding-top:8px">Stable <b>2026.09.30.1</b> · 4 commits since<br><a style="color:var(--sky)">Release notes ↗ · Website ↗ · GitHub ↗ · Docs</a></div></div>
+        </div>
+        <div class="ui sm m">pantry-pal (Requirements, on track) · fleetwatch (Paused Oct 30) · <a style="color:var(--sky)">show all 6</a></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 02 -->
+<section class="view" id="v02">
+  <header><span class="num">02</span><h2>Project room</h2><span class="req">FR-36</span><span class="req">FR-41</span><span class="req">FR-44</span><span class="req">FR-100</span><span class="req">FR-115</span><span class="req">NFR-11</span></header>
+  <p class="look"><b>Look for:</b> the team's conversation in the middle. Personas post progress, questions and finished work, and you reply as you would to colleagues. The right panel is fixed and always shows status, roadmap and gates, and the release. Is the conversation useful, or noise?</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/rooms/go-build-it</span></div>
+  <div class="app">
+    <div class="nav"><span class="logo">go·build·it</span><a>Home</a><a class="on">Rooms</a><a>Desk <span class="pill">7</span></a><a>Team</a><a>Handbook</a><a>Journal</a><div class="right"><span>Search ⌘K</span><span class="tag sage">Local · david</span></div></div>
+    <div class="wrap" style="padding:0">
+      <div style="width:200px;border-right:1px solid var(--line);padding:18px 14px;font:13px -apple-system, system-ui, sans-serif;display:flex;flex-direction:column;gap:6px">
+        <b class="m" style="font-size:11px;letter-spacing:.07em">ROOMS</b><b># go-build-it <span class="tag acc">1</span></b><span># trailmap <span class="tag acc">1</span></span><span># ledgerly</span><span># inkwell</span><span># pantry-pal</span><span class="m"># fleetwatch (paused)</span>
+        <b class="m" style="font-size:11px;letter-spacing:.07em;margin-top:12px">IN THIS ROOM</b><span>Thread</span><span>Notebook</span><span>Team plan</span><span>Releases</span><span>Journal</span></div>
+      <div style="flex:1;padding:18px 22px;display:flex;flex-direction:column;gap:16px">
+        <div class="ui sm m" style="text-align:center">Today</div>
+        <div class="msg"><span class="av pm">Pi</span><div style="flex:1"><div class="who">Pilot <span>Project Manager · 13:05</span></div><div class="bubble">Morning update: M2 is 13/21. Forge is on the Claude Code parser, Atlas is designing usage reporting. One blocker came up, and Forge is asking about it below.</div></div></div>
+        <div class="msg"><span class="av dv">Fg</span><div style="flex:1"><div class="who">Forge <span>Developer · 13:28 · blocking</span></div><div class="bubble ask"><b>How should OpenCode context usage be measured?</b><br>I recommend estimating from token counts (±5%). The alternative is server mode, which is exact but heavier.<div style="margin-top:8px"><span class="btn p">A · Estimate</span> <span class="btn">B · Server mode</span> <span class="btn">Discuss…</span></div></div></div></div>
+        <div class="msg"><span class="av dv">Fg</span><div style="flex:1"><div class="who">Forge <span>13:44</span></div><div class="bubble">I'm near my context limit, so I've written a handoff for the next Forge session. Lens is checking it. <a style="color:var(--sky)">Read the handoff →</a></div></div></div>
+        <div class="msg"><span class="av rv">Ln</span><div style="flex:1"><div class="who">Lens <span>Reviewer · 13:50</span></div><div class="bubble">T-138 (Tailscale request classifier) is ready for you. 18 tests pass; one IPv6 gap noted. <a style="color:var(--sky)">Open show &amp; tell →</a></div></div></div>
+        <div class="msg" style="flex-direction:row-reverse"><span class="av hu">dv</span><div style="text-align:right"><div class="who">you <span>13:52</span></div><div class="bubble me">Thanks. I'll look at T-138 after lunch.</div></div></div>
+        <div class="compose" style="margin-top:auto">Message the team, or @mention a persona…<span class="btn p">Send</span></div>
+      </div>
+      <div style="width:300px;border-left:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:14px">
+        <div><div class="room nm" style="padding:0;border:0;background:none">go-build-it</div><div class="m sm">Orchestrates AI + human teams for long-running projects.</div></div>
+        <div class="ui sm"><span class="tag">CLI parity</span> <span class="tag">Handoffs over compaction</span> <span class="tag">Local first</span></div>
+        <div class="card"><h4>Roadmap</h4><div class="ui sm" style="line-height:1.9">✓ M0 Requirements ◆<br>✓ M1 Core server ◆<br><b>● M2 Harness adapters</b> · 62%<br><span class="m">◆ next: Handoff demo</span><br><span class="m">○ M3 · ○ M4</span></div></div>
+        <div class="card"><h4>Release</h4><div class="ui sm"><b>2026.11.02.1</b> · Nov 2<br>14 commits since · CI ● passing<br><a style="color:var(--sky)">Notes ↗ · Website ↗ · GitHub ↗</a></div></div>
+        <div class="card"><h4>Working now</h4><div class="ui sm">Forge · <span style="color:var(--gold)">76% · handing off</span><div class="fuel w" style="margin:4px 0 8px"><i style="width:76%"></i></div>Atlas · 31%<div class="fuel" style="margin-top:4px"><i style="width:31%"></i></div></div></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 03 -->
+<section class="view" id="v03">
+  <header><span class="num">03</span><h2>Project notebook: requirements, problem &amp; values</h2><span class="req">FR-45</span><span class="req">FR-46</span><span class="req">FR-123</span><span class="req">FR-105</span></header>
+  <p class="look"><b>Look for:</b> documents laid out like a manuscript, with the team's comments as conversation threads in the margin. The values sit above the document as pinned "principles", each with its story: where it came from and when. <b>Rev 2:</b> ask a persona in the margin to change the document; the edit shows up inline to accept, or you edit directly.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/rooms/trailmap/notebook/requirements</span></div>
+  <div class="app">
+    <div class="nav"><span class="logo">go·build·it</span><a>Home</a><a class="on">Rooms</a><a>Desk <span class="pill">7</span></a><a>Team</a><a>Handbook</a><a>Journal</a><div class="right"><span class="tag sage">Local · david</span></div></div>
+    <div class="wrap" style="flex-direction:column">
+      <div class="ui sm m">trailmap / Notebook · <b>Requirements</b> · Roadmap · Problem · Mockups · Decisions</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div class="card" style="background:var(--sage-s);border-color:#cfdccc"><h4>Problem (v4)</h4><div class="sm">Hikers lose signal and need a map they can trust offline, used one-handed, without draining the phone they rely on for safety.</div></div>
+        <div class="card"><h4>Principle 1</h4><b>Offline first.</b><div class="sm m">Chosen in OS-2 · Oct 29</div></div>
+        <div class="card"><h4>Principle 2</h4><b>One-handed on trail.</b><div class="sm m">Your feedback on mockup B</div></div>
+        <div class="card" style="border-style:dashed"><h4>Proposed principle</h4><b>Glanceable in sunlight.</b><div class="ui sm" style="margin-top:6px"><span class="btn s">Adopt</span> <span class="btn">Not quite</span></div></div>
+      </div>
+      <div style="display:flex;gap:24px">
+        <div class="card" style="flex:1;padding:28px 36px"><div style="display:flex;align-items:center"><span class="mono m">docs/requirements.md · rev 7 · in git</span><span class="ui sm" style="margin-left:auto"><span class="tag">WYSIWYG</span> <span class="tag">Markdown</span> <span class="btn p" style="margin-left:6px">✎ Edit</span></span></div>
+          <h2 class="ttl" style="margin-top:8px">trailmap Requirements</h2>
+          <p><b>FR-07</b> The map SHALL remain fully usable with no network connection for any downloaded region.</p>
+          <span class="del"><b>FR-08</b> The user SHALL be able to download maps per trail <i>or</i> per region.</span><span class="ins" style="margin-top:4px"><b>FR-08</b> The user SHALL be able to download maps <b>per trail</b>; regions MAY come later. <b>FR-08a</b> Show the size and free space before downloading.</span><span class="ui sm m" style="display:block;margin:4px 0 10px">Atlas's suggested edit · <span class="btn s" style="padding:3px 10px">Accept</span> <span class="btn" style="padding:3px 10px">Reject</span> · saving creates rev 8 (Courier commits it)</span>
+          <p><b>FR-09</b> Battery usage while recording SHOULD stay under 5% per hour.</p>
+          <p><b>FR-10</b> All primary actions SHALL be reachable with one thumb.</p></div>
+        <div style="width:320px;display:flex;flex-direction:column;gap:12px;padding-top:120px">
+          <div class="msg"><span class="av s ar">At</span><div><div class="who">Atlas</div><div class="bubble sm">On FR-08: trail packs are 10–40 MB, regions 300 MB+. I've asked you which to prioritize.</div></div></div>
+          <div class="msg"><span class="av s hu">dv</span><div><div class="who">you</div><div class="bubble me sm">Per trail only for now. Rewrite FR-08, and warn people about the size.</div></div></div>
+          <div class="msg"><span class="av s ar">At</span><div><div class="who">Atlas</div><div class="bubble sm">Done. It's highlighted in the document for you to accept.</div></div></div>
+          <div class="compose sm">Ask Atlas to change something…<span class="mic" style="margin-left:auto">🎙</span></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 04 -->
+<section class="view" id="v04">
+  <header><span class="num">04</span><h2>Desk: answering questions in focus mode</h2><span class="req">FR-100</span><span class="req">FR-101</span><span class="req">FR-102</span><span class="req">FR-103</span><span class="req">FR-104</span><span class="req">FR-105</span></header>
+  <p class="look"><b>Look for:</b> a different model from a list. The desk shows <b>one item at a time</b>, full width, with its context and attachments, and steps you through the queue ("1 of 7 · next →"). The strip at the top shows what's coming. Does one-at-a-time help you finish, or hide too much?</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/desk</span></div>
+  <div class="app">
+    <div class="nav"><span class="logo">go·build·it</span><a>Home</a><a>Rooms</a><a class="on">Desk <span class="pill">7</span></a><a>Team</a><a>Handbook</a><a>Journal</a><div class="right"><span class="tag sage">Local · david</span></div></div>
+    <div class="wrap" style="flex-direction:column;align-items:center">
+      <div class="ui sm" style="display:flex;gap:8px;width:860px;align-items:center"><b>1 of 7</b><span class="tag acc">● Forge · blocking</span><span class="tag acc">○ Atlas · blocking</span><span class="tag gold">○ Gate</span><span class="tag gold">○ Review</span><span class="tag sky">○ Options</span><span class="tag">○ ○ assumed</span><span class="m" style="margin-left:auto">Skip · Next →</span></div>
+      <div class="card" style="width:860px;padding:28px 32px;display:flex;flex-direction:column;gap:16px">
+        <div class="msg"><span class="av l dv">Fg</span><div><div class="ui sm m">Forge · Developer · go-build-it · T-151 · asked 12 minutes ago · <b style="color:var(--acc)">work paused</b></div><h2 class="ttl" style="margin-top:4px">How should I measure OpenCode's context usage?</h2></div></div>
+        <div>The context monitor needs to know how full my context is. <span class="mono">opencode run --format json</span> gives me token counts per message, but not the model's window size or a running total.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="card" style="border:2px solid var(--sage)"><span class="tag sage">I'd go with this</span><h3 style="margin:6px 0 4px">A · Estimate from token counts</h3><div class="sm">Sum tokens per session; look up window size per model. Simple; about ±5% error.</div><div style="margin-top:10px"><span class="btn s">Choose A</span></div></div>
+          <div class="card"><span class="tag">Alternative</span><h3 style="margin:6px 0 4px">B · OpenCode server mode</h3><div class="sm">Exact numbers from the API. Adds a long-running server process per session.</div><div style="margin-top:10px"><span class="btn">Choose B</span></div></div>
+        </div>
+        <div class="ui sm m">📎 <a style="color:var(--sky)">opencode-run-sample.json</a> · <a style="color:var(--sky)">adapter.go diff (+84)</a> · <a style="color:var(--sky)">usage mockup</a> <span class="m">(open full size in the viewer)</span> · FR-61, FR-71 · open question Q2 · <a style="color:var(--sky)">see the conversation in the room</a></div>
+        <div style="position:relative"><textarea class="ta" placeholder="Anything else Forge should know? Type or 🎙">Choose A, and log the estimate next to real values when you have them.</textarea><span class="mic" style="position:absolute;right:10px;bottom:12px">🎙</span></div>
+        <div class="ui sm" style="display:flex;align-items:center;gap:10px"><label><input type="checkbox" checked> This reflects a principle; suggest it for the notebook</label><span style="margin-left:auto" class="btn">Talk it through</span><span class="btn p">Send &amp; next →</span></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 05 -->
+<section class="view" id="v05">
+  <header><span class="num">05</span><h2>Who's working &amp; the handoff letter (experimental)</h2><span class="req">FR-60</span><span class="req">FR-65</span><span class="req">FR-70</span><span class="req">FR-71</span><span class="req">FR-72</span><span class="req">FR-73</span><span class="req">FR-74</span><span class="req">NFR-11</span></header>
+  <p class="look"><b>Look for:</b> sessions shown as people at desks, each with an "energy" bar for context usage. The handoff is written as a <b>letter to the next person</b>, showing the relay (session 1 → 2 → 3) for this task. Does the letter format make handoff quality easier to judge? <b>Rev 2:</b> the MVP relies on the tools' own compaction; letters are an experimental setting. Each desk now offers a terminal view ("look over their shoulder") and, for attachable sessions, "take the keyboard".</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/team/working</span></div>
+  <div class="app">
+    <div class="nav"><span class="logo">go·build·it</span><a>Home</a><a>Rooms</a><a>Desk <span class="pill">7</span></a><a class="on">Team</a><a>Handbook</a><a>Journal</a><div class="right"><span class="tag sage">Local · david</span></div></div>
+    <div class="wrap">
+      <div style="width:400px;display:flex;flex-direction:column;gap:12px">
+        <h2 class="ttl">Who's working</h2><p class="lede">4 of 5 desks busy · tools compact on their own · handoff letters: experimental, on in go-build-it</p>
+        <div class="card" style="border:2px solid var(--gold)"><div class="msg"><span class="av dv">Fg</span><div style="flex:1"><div class="who">Forge <span>OpenCode · go-build-it</span></div><div class="sm">T-142 stream-json parser · 48 min</div><div class="fuel w" style="margin:6px 0"><i style="width:76%"></i></div><div class="ui sm" style="color:var(--gold)">76%: wrapping up and writing a handoff letter</div></div></div></div>
+        <div class="card"><div class="msg"><span class="av ar">At</span><div style="flex:1"><div class="who">Atlas <span>Claude Code · go-build-it</span></div><div class="sm">T-149 usage interface · 14 min</div><div class="fuel" style="margin-top:6px"><i style="width:31%"></i></div><div class="ui sm m">compacted once · <a style="color:var(--sky)">look over their shoulder (terminal)</a> · <a style="color:var(--sky)">take the keyboard</a></div></div></div></div>
+        <div class="card"><div class="msg"><span class="av dv2">Sp</span><div style="flex:1"><div class="who">Spark <span>Antigravity · inkwell</span></div><div class="sm">T-310 RSS date bug · 22 min</div><div class="fuel" style="margin-top:6px"><i style="width:18%"></i></div><div class="ui sm m">≈ estimated</div></div></div></div>
+        <div class="card" style="opacity:.75"><div class="msg"><span class="av pm">Pi</span><div><div class="who">Pilot <span>Claude Code · pantry-pal</span></div><div class="sm">☕ Resting: Anthropic usage limit, back at 14:20</div></div></div></div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:12px">
+        <div class="ui sm" style="display:flex;gap:8px;align-items:center"><b>T-142 relay</b><span class="tag">Session 1 · Nov 6</span>→<span class="tag">Session 2 · 09:10</span>→<span class="tag gold">Session 3 · now</span>→<span class="tag" style="border:1px dashed #cdbfa9;background:none">Session 4</span></div>
+        <div class="letter">
+          <div class="ui sm m"><span class="tag sky">Experimental</span> From Forge (session 3) to Forge (session 4) · 1,180 words of context, not 152k · checked by Lens ✓</div>
+          <p style="margin-top:12px">Hi. You're picking up <b>T-142, the Claude Code stream-json parser</b>. It's done when every line type becomes a typed event and all 9 fixtures pass.</p>
+          <p><b>Where things stand:</b> text, tool_use, tool_result and usage events work; 31 tests are green.</p>
+          <p><b>What I decided:</b> buffer partial lines, because stdout splits at 64 KB. Log unknown event types instead of failing on them.</p>
+          <p><b>Don't bother with:</b> <span class="mono">json.Decoder</span> streaming. It broke on interleaved stderr, and I lost an hour to it.</p>
+          <p><b>Your next steps:</b> (1) map error events, (2) add the <span class="mono">rate_limit.jsonl</span> fixture, (3) wire usage into the context monitor.</p>
+          <p class="sm m">Look at: internal/harness/claude/parse.go · testdata/stream-json/ · FR-61 · ADR-007</p>
+        </div>
+        <div style="display:flex;gap:10px"><span class="btn">Suggest an edit</span><span class="btn">Compare with session 2's letter</span><span class="btn p" style="margin-left:auto">Looks right: start session 4</span></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 06 -->
+<section class="view" id="v06">
+  <header><span class="num">06</span><h2>Team plan (task queue)</h2><span class="req">FR-75</span><span class="req">FR-80</span><span class="req">FR-81</span><span class="req">FR-82</span></header>
+  <p class="look"><b>Look for:</b> the queue grouped <b>by who will do the work</b> (a lane per persona), not as one flat list. Blocked items say in words what they're waiting for. Pilot's suggestions, such as splitting a task, appear inline.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/rooms/go-build-it/plan</span></div>
+  <div class="app">
+    <div class="nav"><span class="logo">go·build·it</span><a>Home</a><a class="on">Rooms</a><a>Desk <span class="pill">7</span></a><a>Team</a><a>Handbook</a><a>Journal</a><div class="right"><span class="tag sage">Local · david</span></div></div>
+    <div class="wrap" style="flex-direction:column">
+      <div style="display:flex;align-items:baseline;gap:14px"><h2 class="ttl">Team plan · go-build-it</h2><span class="ui sm m">23 ready · 6 waiting · up to 2 people at once here, 5 across all rooms</span></div>
+      <div class="card" style="background:var(--gold-s);border-color:#ead9a6"><div class="msg"><span class="av s pm">Pi</span><div class="sm"><b>Pilot suggests:</b> T-118 "SQLite migrations + backfill" has needed 3 handoffs. Split it into "schema migrations" and "backfill job"? <span class="btn s" style="margin-left:6px">Split it</span> <span class="btn">Leave it</span></div></div></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+        <div class="card"><div class="msg" style="align-items:center;margin-bottom:10px"><span class="av s dv">Fg</span><b class="ui">Forge</b></div><div class="ui sm" style="display:flex;flex-direction:column;gap:8px"><div><b>Now</b> · T-142 parser <span class="tag sage">P1</span></div><div>Next · T-151 OpenCode usage<br><span style="color:var(--acc)">⏸ waiting on your answer</span></div><div>Then · T-153 Antigravity probe</div></div></div>
+        <div class="card"><div class="msg" style="align-items:center;margin-bottom:10px"><span class="av s ar">At</span><b class="ui">Atlas</b></div><div class="ui sm" style="display:flex;flex-direction:column;gap:8px"><div><b>Now</b> · T-149 usage interface</div><div>Next · T-152 handoff reviewer check<br><span class="m">after T-149</span></div></div></div>
+        <div class="card"><div class="msg" style="align-items:center;margin-bottom:10px"><span class="av s dv2">Sp</span><b class="ui">Spark</b></div><div class="ui sm" style="display:flex;flex-direction:column;gap:8px"><div>Next · T-118 SQLite migrations <span class="tag gold">3 handoffs</span></div><div>Then · T-155 queue retries</div></div></div>
+        <div class="card"><div class="msg" style="align-items:center;margin-bottom:10px"><span class="av s gt">Co</span><b class="ui">Courier</b></div><div class="ui sm" style="display:flex;flex-direction:column;gap:8px"><div>Waiting · merge PR #41<br><span class="m">after your review</span></div><div>Waiting · tag 2026.11.08.1 + publish site<br><span class="m">after Handoff demo gate ◆</span></div></div></div>
+      </div>
+      <div class="ui sm m">Unassigned (4): T-160 docs search · T-161 mobile inbox · T-162 update rollback · T-163 MCP server · <a style="color:var(--sky)">assign…</a></div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 07 -->
+<section class="view" id="v07">
+  <header><span class="num">07</span><h2>Option set, presented by the team</h2><span class="req">FR-120</span><span class="req">FR-121</span><span class="req">FR-122</span><span class="req">FR-124</span></header>
+  <p class="look"><b>Look for:</b> Atlas "presents" three options with a short pitch for each. You react to individual <b>aspects</b> (♥ keep / ✕ drop), and the team writes back a summary of the combination you've built. Does reacting to parts feel more natural than ticking boxes? <b>Rev 2:</b> the cards are only previews; ⤢ opens each mockup full size in the viewer, where Atlas can walk you through it.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/rooms/trailmap/options/OS-3</span></div>
+  <div class="app">
+    <div class="nav"><span class="logo">go·build·it</span><a>Home</a><a class="on">Rooms</a><a>Desk <span class="pill">7</span></a><a>Team</a><a>Handbook</a><a>Journal</a><div class="right"><span class="tag sage">Local · david</span></div></div>
+    <div class="wrap" style="flex-direction:column">
+      <div class="msg"><span class="av ar">At</span><div style="flex:1"><div class="who">Atlas <span>Architect · trailmap</span></div><div class="bubble">Three ways to lay out the map screen. I kept <i>offline first</i>, <i>one-handed</i> and <i>battery over beauty</i> in mind, and leaned on your choice of bottom sheets in OS-2.</div></div></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+        <div class="card" style="padding:0;overflow:hidden"><div style="position:relative;height:190px;background:linear-gradient(135deg,#d3e0cf,#b9cdb3);position:relative"><span class="xp" style="z-index:2">⤢ Full size</span><div style="position:absolute;left:0;right:0;bottom:0;height:56px;background:#fffdf9;border-radius:14px 14px 0 0"></div></div><div style="padding:14px"><h3 style="margin:0">A · Map first</h3><div class="sm m">Full-bleed map, info in a bottom sheet.</div><div class="ui sm" style="margin-top:8px;line-height:2">♥ Full-bleed map<br>♥ Bottom sheet<br>✕ Floating zoom buttons</div></div></div>
+        <div class="card" style="padding:0;overflow:hidden"><div style="position:relative;height:190px;display:grid;grid-template-rows:1fr 1fr"><span class="xp" style="z-index:2">⤢ Full size</span><div style="background:linear-gradient(135deg,#d3e0cf,#b9cdb3)"></div><div style="background:#fffdf9"></div></div><div style="padding:14px"><h3 style="margin:0">B · Compare</h3><div class="sm m">Half map, half nearby trails.</div><div class="ui sm" style="margin-top:8px;line-height:2">✕ Split screen<br>♥ Elevation sparkline<br><span class="m">○ Distance sort</span></div></div></div>
+        <div class="card" style="padding:0;overflow:hidden"><div style="position:relative;height:190px;background:#efe7da;padding:16px;display:grid;gap:10px"><span class="xp" style="z-index:2">⤢ Full size</span><div style="background:#fffdf9;border-radius:10px"></div><div style="background:#fffdf9;border-radius:10px"></div></div><div style="padding:14px"><h3 style="margin:0">C · Plan</h3><div class="sm m">Trail cards with mini-maps.</div><div class="ui sm" style="margin-top:8px;line-height:2">♥ Static thumbnails (battery)<br><span class="m">○ Card feed</span></div></div></div>
+      </div>
+      <div class="msg"><span class="av ar">At</span><div style="flex:1"><div class="who">Atlas <span>live summary</span></div><div class="bubble" style="background:var(--sage-s);border-color:#cfdccc">So far: <b>A's map + bottom sheet</b>, with <b>B's elevation sparkline</b> in the sheet and <b>C's static thumbnails</b> in the list. Floating zoom and split screen are out. Shall I mock up this combination and add "battery over beauty" to the reasoning?</div></div></div>
+      <div class="compose">Tell Atlas why, or ask for another option…<span class="mic" style="margin-left:auto">🎙</span><span class="btn p" style="margin-left:6px">Confirm combination</span></div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 08 -->
+<section class="view" id="v08">
+  <header><span class="num">08</span><h2>Dress rehearsal as a guided meeting</h2><span class="req">FR-115</span><span class="req">FR-116</span><span class="req">FR-117</span><span class="req">FR-118</span><span class="req">FR-132</span></header>
+  <p class="look"><b>Look for:</b> a rehearsal run like a meeting. A stepper runs across the top, the scenario is the large center stage, and the meeting transcript (your notes and agent replies) runs underneath. Agents can make changes during the meeting and reload the step. <b>Rev 2:</b> several people (and personas) can attend, and each note is attributed. The stage opens full size.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/rooms/ledgerly/rehearsal/G-5</span></div>
+  <div class="app">
+    <div class="nav"><span class="logo">go·build·it</span><a>Home</a><a class="on">Rooms</a><a>Desk <span class="pill">7</span></a><a>Team</a><a>Handbook</a><a>Journal</a><div class="right"><span class="tag sage">Local · david</span></div></div>
+    <div class="wrap" style="flex-direction:column">
+      <div style="display:flex;align-items:baseline;gap:12px"><h2 class="ttl">Dress rehearsal: CSV import</h2><span class="ui sm m">ledgerly · Gate G-5 · hosted by Probe · UAT on the working app</span></div>
+      <div style="display:flex;gap:4px"><div class="step done"><b>✓</b>Open import</div><div class="step done"><b>✓</b>Upload CSV</div><div class="step on"><b>3</b>Map columns</div><div class="step"><b>4</b>Duplicates</div><div class="step"><b>5</b>Categorize</div><div class="step"><b>6</b>Reconcile</div><div class="step"><b>7</b>Undo</div></div>
+      <div style="display:flex;gap:20px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:10px"><div class="card sm"><b>Scenario:</b> you've uploaded <span class="mono">barclays-oct.csv</span>. ledgerly guesses which column is which. Check the guess before importing 214 rows. <span class="m">(FR-21, FR-22 · Owner)</span></div><div class="shot" style="height:250px;position:relative"><span class="xp">⤢ Open full size</span>Live ledgerly · column mapping step (scaled to fit)</div></div>
+        <div style="width:420px;display:flex;flex-direction:column;gap:10px">
+          <div class="ui sm m">MEETING NOTES · STEP 3</div>
+          <div class="msg"><span class="av s hu">dv</span><div class="bubble me sm">Amount is right, but I can't tell debits from credits. Show 3 preview rows?</div></div>
+          <div class="msg"><span class="av s hu" style="background:#8a5a9e">mr</span><div class="bubble sm"><b>maria</b> (joined from her tailnet): "Payee" vs "Description" confuses me.</div></div>
+          <div class="msg"><span class="av s qa">Pr</span><div class="bubble sm">Noted both: CR-12 and CR-13.</div></div>
+          <div class="msg"><span class="av s dv">Fg</span><div class="bubble sm">I can do it now (~20 min) and we'll re-run this step. Or I can queue it for after.</div></div>
+          <div style="display:flex;gap:8px"><span class="btn s">Do it now</span><span class="btn">After the rehearsal</span></div>
+          <div class="compose sm">Add a note on this step…<span class="mic" style="margin-left:auto">🎙</span></div>
+          <div style="display:flex;gap:8px;margin-top:4px"><span class="btn">← Step 2</span><span class="btn p" style="margin-left:auto">Good → Step 4</span></div>
+          <div class="ui sm m" style="border-top:1px solid var(--line);padding-top:8px">The gate decision (approve or request changes) opens after step 7.</div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 09 -->
+<section class="view" id="v09">
+  <header><span class="num">09</span><h2>Show &amp; tell (work review)</h2><span class="req">FR-54</span><span class="req">FR-92</span><span class="req">FR-110</span><span class="req">FR-111</span><span class="req">FR-112</span><span class="req">FR-107</span></header>
+  <p class="look"><b>Look for:</b> <b>Rev 2: rebuilt.</b> The persona presents the work against what was agreed: the approved mockup next to what was built, then the tests (unit and e2e), then Lens's notes on the standards, the rehearsal feedback and the requirements. The code is only a link to the PR. Your verdict is phrased the way you'd say it to a colleague.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/rooms/ledgerly/review/T-204</span></div>
+  <div class="app">
+    <div class="nav"><span class="logo">go·build·it</span><a>Home</a><a class="on">Rooms</a><a>Desk <span class="pill">7</span></a><a>Team</a><a>Handbook</a><a>Journal</a><div class="right"><span class="tag sage">Local · david</span></div></div>
+    <div class="wrap">
+      <div style="flex:1;display:flex;flex-direction:column;gap:14px;min-width:0">
+        <div class="ui sm m">ledgerly · T-204 · built by Spark · reviewed by Lens · <a style="color:var(--sky)">PR #57 (code) ↗</a></div>
+        <h2 class="ttl">Column mapping, as we agreed at the tabletop</h2>
+        <div class="msg"><span class="av dv2">Sp</span><div class="bubble" style="flex:1">Here's the screen next to the mockup you approved. I added the 3-row preview you asked for in the rehearsal (CR-12) and renamed "Payee" for maria (CR-13). <b>One thing is missing:</b> the bank logo in the header.</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div><div class="shot" style="height:170px;position:relative"><span class="xp">⤢</span>Approved mockup · rev 3</div><div class="ui sm m" style="margin-top:4px">Approved Oct 30 at the G-5 tabletop</div></div>
+          <div><div class="shot" style="height:170px;position:relative;background:#fff"><span class="xp">⤢</span>What was built · e2e screenshot</div><div class="ui sm m" style="margin-top:4px">Captured by the UAT run today · <a style="color:var(--sky)">overlay</a> · <a style="color:var(--sky)">slider</a></div></div>
+        </div>
+        <div class="msg"><span class="av rv">Ln</span><div class="bubble" style="flex:1">
+          <div class="ui sm" style="display:grid;grid-template-columns:150px 1fr;gap:6px 12px">
+            <b>Tests</b><span><span class="ok">✓</span> 142 unit (88% coverage) · <span class="ok">✓</span> 18 end-to-end in Playwright</span>
+            <b>Handbook</b><span><span class="ok">✓</span> 9 of 10 · <span class="warn">!</span> one hard-coded "£" breaks the currency rule</span>
+            <b>Rehearsal notes</b><span><span class="ok">✓</span> all 3 addressed: david's preview rows, maria's label, Probe's tab order</span>
+            <b>Requirements</b><span><span class="ok">✓</span> FR-21 · <span class="ok">✓</span> FR-22 · <span class="warn">!</span> FR-23: the mapping is saved but not reused on the next import</span>
+          </div>
+          <div class="sm" style="margin-top:8px">My take: nearly there. Fix FR-23 and the £; the logo can be its own task.</div></div></div>
+      </div>
+      <div style="width:330px;display:flex;flex-direction:column;gap:12px">
+        <div class="card"><h4>What do you think?</h4>
+          <div class="ui sm" style="display:flex;flex-direction:column;gap:6px"><span class="btn s">👍 Ship it</span><span class="btn" style="border:2px solid var(--acc)">✎ Nearly. A few changes</span><span class="btn">✕ Not this approach</span></div>
+          <div style="position:relative;margin-top:10px"><textarea class="ta">Agree with Lens: fix FR-23 and the £, and make the logo a separate task.</textarea><span class="mic" style="position:absolute;right:10px;bottom:12px">🎙</span></div>
+          <div class="ui sm m" style="margin:6px 0">Spark gets this as the brief for T-204b.</div><span class="btn p">Send feedback</span></div>
+        <div class="card ui sm m">When approved, Courier squash-merges PR #57 and pushes. No AI session needed.</div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 10 -->
+<section class="view" id="v10">
+  <header><span class="num">10</span><h2>Team: roster &amp; persona profile</h2><span class="req">FR-10</span><span class="req">FR-11</span><span class="req">FR-12</span><span class="req">FR-25</span><span class="req">FR-26</span></header>
+  <p class="look"><b>Look for:</b> personas shown as team members, each with a profile: role, how they work (harness and model), their instructions written as a "working agreement", and their track record. <b>Rev 2:</b> a persona coach helps shape the agreement through conversation; <i>Edit directly</i> opens the rich editor.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/team/forge</span></div>
+  <div class="app">
+    <div class="nav"><span class="logo">go·build·it</span><a>Home</a><a>Rooms</a><a>Desk <span class="pill">7</span></a><a class="on">Team</a><a>Handbook</a><a>Journal</a><div class="right"><span class="tag sage">Local · david</span></div></div>
+    <div class="wrap">
+      <div style="width:420px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 class="ttl">The Core team</h2><span class="ui sm m">4 rooms · <a style="color:var(--sky)">Web-small team</a></span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" class="ui sm">
+          <div class="card" style="display:flex;gap:10px;align-items:center"><span class="av pm">Pi</span><div><b>Pilot</b><br><span class="m">Project Manager</span></div></div>
+          <div class="card" style="display:flex;gap:10px;align-items:center"><span class="av ar">At</span><div><b>Atlas</b><br><span class="m">Architect</span></div></div>
+          <div class="card" style="display:flex;gap:10px;align-items:center;border:2px solid var(--acc)"><span class="av dv">Fg</span><div><b>Forge</b><br><span class="m">Developer</span></div></div>
+          <div class="card" style="display:flex;gap:10px;align-items:center"><span class="av dv2">Sp</span><div><b>Spark</b><br><span class="m">Developer</span></div></div>
+          <div class="card" style="display:flex;gap:10px;align-items:center"><span class="av qa">Pr</span><div><b>Probe</b><br><span class="m">QA</span></div></div>
+          <div class="card" style="display:flex;gap:10px;align-items:center"><span class="av rv">Ln</span><div><b>Lens</b><br><span class="m">Reviewer</span></div></div>
+          <div class="card" style="display:flex;gap:10px;align-items:center"><span class="av gt">Co</span><div><b>Courier</b><br><span class="m">Git / Release</span></div></div>
+          <div class="card" style="display:flex;gap:10px;align-items:center"><span class="av hu">dv</span><div><b>david</b> (you)<br><span class="m">Owner · human</span></div></div>
+        </div>
+        <div class="ui sm" style="display:flex;gap:8px"><span class="btn">+ Invite a persona</span><span class="btn">+ Add a human</span><span class="btn">+ New role</span></div>
+      </div>
+      <div class="card" style="flex:1;padding:24px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;gap:16px;align-items:center"><span class="av l dv">Fg</span><div><h2 class="ttl">Forge</h2><div class="ui sm m">Developer · AI persona · works in OpenCode with claude-sonnet-5-5 · auto-compacts</div></div><span class="btn" style="margin-left:auto">✎ Edit directly</span><span class="btn p">Shape with Atlas</span></div>
+        <div><h4 class="ui m" style="font-size:11.5px;letter-spacing:.07em;margin:0 0 6px">WORKING AGREEMENT</h4><div class="letter" style="padding:14px 18px">I implement one task at a time and write tests first. If a requirement is ambiguous, I stop and ask a blocking question rather than guess. I never push to git; Courier owns that. I keep tasks under 400 lines.</div></div>
+        <div class="msg"><span class="av s ar">At</span><div class="bubble sm" style="flex:1"><b>Persona coach:</b> Forge asked you 4 questions about dependencies this week. Shall I add "standard library first; ask before adding a dependency" to the working agreement? <span class="btn s" style="padding:3px 10px">Add it</span> <span class="btn" style="padding:3px 10px">Interview me instead</span></div></div>
+        <div class="compose sm">Tell Atlas how Forge should work…<span class="mic" style="margin-left:auto">🎙</span></div>
+        <div class="ui sm"><b>Extra standards:</b> <span class="tag">TDD</span> <span class="tag">No git operations</span> <span class="tag">≤ 400 LOC / task</span> <span class="m">+ all global standards</span></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px" class="ui sm"><div class="card"><b style="font-size:18px">42</b><br><span class="m">tasks done</span></div><div class="card"><b style="font-size:18px">1.3</b><br><span class="m">handoffs/task</span></div><div class="card"><b style="font-size:18px">14%</b><br><span class="m">rework</span></div><div class="card"><b style="font-size:18px">9</b><br><span class="m">questions asked</span></div></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 11 -->
+<section class="view" id="v11">
+  <header><span class="num">11</span><h2>Handbook (global standards)</h2><span class="req">FR-50</span><span class="req">FR-51</span><span class="req">FR-52</span><span class="req">FR-53</span><span class="req">FR-54</span></header>
+  <p class="look"><b>Look for:</b> standards presented as a team handbook to read through, with chapters and a "why" for each rule. Project exceptions appear as callouts. <b>Rev 2:</b> a chapter can be changed by chatting with Lens or edited directly. <i>Git workflow</i> is now a chapter here instead of a setting. Built-in docs share this "Library" space (see 14).</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/handbook/frontend</span></div>
+  <div class="app">
+    <div class="nav"><span class="logo">go·build·it</span><a>Home</a><a>Rooms</a><a>Desk <span class="pill">7</span></a><a>Team</a><a class="on">Handbook</a><a>Journal</a><div class="right"><span class="tag sage">Local · david</span></div></div>
+    <div class="wrap">
+      <div style="width:220px" class="ui sm"><b class="m" style="font-size:11px;letter-spacing:.07em">HOW WE BUILD</b><div style="display:flex;flex-direction:column;gap:7px;margin-top:8px"><span>1. Backend</span><b>2. Frontend</b><span>3. Unit tests</span><span>4. End-to-end tests</span><span>5. Documentation</span><span>6. Versioning</span><span>7. Git workflow</span><span>8. Project websites</span><span>9. Accessibility</span></div><div style="margin-top:14px"><span class="btn">+ New chapter</span></div></div>
+      <div class="card" style="flex:1;padding:28px 40px">
+        <div class="ui sm m">Chapter 2 · applies to every room · edited Oct 28 · <span class="btn p" style="padding:3px 12px">✎ Edit</span> <span class="m">(rich editor or chat)</span></div>
+        <h2 class="ttl" style="margin-top:6px">Frontend</h2>
+        <p>Every project uses <b>React 19 with strict TypeScript</b>, built with Vite and embedded into the Go binary. Desktop and mobile get separate route trees. We don't use a CSS framework; CSS variables and modules are enough.</p>
+        <p>Every view has a Playwright end-to-end test.</p>
+        <p class="m"><i>Why:</i> one stack means personas reuse patterns between projects, and handoffs stay short.</p>
+        <div class="card" style="background:var(--gold-s);border-color:#ead9a6;margin-top:10px"><b>Exception · inkwell</b><div class="sm">No React; vanilla templates, because static output must work without JavaScript. Agreed Sep 12.</div></div>
+      </div>
+      <div style="width:260px;display:flex;flex-direction:column;gap:12px">
+        <div class="card ui sm"><h4>Shared with the team via</h4>AGENTS.md · CLAUDE.md · .opencode/instructions.md<br><span class="m">Updated in 6 projects when you save.</span></div>
+        <div class="card ui sm"><h4>Who checks</h4><span class="av s rv">Ln</span> Lens checks every piece of work against this handbook.</div>
+        <div class="card ui sm"><h4>Change it with Lens</h4><div class="msg"><span class="av s rv">Ln</span><div class="bubble sm">Reviews now compare mockups with builds. Should every e2e test capture desktop and phone screenshots? I can draft the paragraph.</div></div><div class="compose sm" style="margin-top:8px">Ask Lens…<span class="mic" style="margin-left:auto">🎙</span></div></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 12 -->
+<section class="view" id="v12">
+  <header><span class="num">12</span><h2>Journal &amp; retro (history, insights, self-improvement)</h2><span class="req">NFR-10</span><span class="req">NFR-11</span><span class="req">NFR-12</span><span class="req">NFR-13</span></header>
+  <p class="look"><b>Look for:</b> history told as a <b>narrative journal</b> ("what happened and why"), backed by the raw event log one click away. <b>Rev 2:</b> every entry links to a detail page for its kind (transcript, letter, compaction, decision, review, git), and your own actions are recorded the same way. A weekly <b>retro</b> collects the metrics, plus the changes agents propose to how the team works.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/journal</span></div>
+  <div class="app">
+    <div class="nav"><span class="logo">go·build·it</span><a>Home</a><a>Rooms</a><a>Desk <span class="pill">7</span></a><a>Team</a><a>Handbook</a><a class="on">Journal</a><div class="right"><span class="tag sage">Local · david</span></div></div>
+    <div class="wrap">
+      <div style="flex:1;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:baseline;gap:12px"><h2 class="ttl">Journal</h2><span class="ui sm m">All rooms ▾ · Narrative | <a style="color:var(--sky)">Raw events</a> · search "handoff"</span></div>
+        <div class="card"><div class="ui sm m">THURSDAY, NOVEMBER 7</div>
+          <p style="margin:8px 0"><b>13:44</b>: Forge reached 75% context on the parser task and wrote a handoff letter (experimental). Lens checked it and found it complete. <a style="color:var(--sky)">letter</a> · <a style="color:var(--sky)">transcript</a></p>
+          <p style="margin:8px 0"><b>13:39</b>: Atlas's tool compacted its context on the usage task (168k → 41k). <a style="color:var(--sky)">details</a></p>
+          <p style="margin:8px 0"><b>13:31</b>: Courier pushed branch <span class="mono">t-149</span> and opened PR #43, because Atlas finished the task and the workflow's next step is "push".</p>
+          <p style="margin:8px 0"><b>13:28</b>: Forge paused T-151 to ask you how to measure OpenCode's context usage.</p>
+          <p style="margin:8px 0"><b>12:50</b>: You chose bottom sheets in trailmap's OS-2 (from your phone, over the tailnet). "Offline first" became a project principle. <a style="color:var(--sky)">what you saw, what you said, what changed</a></p>
+          <p style="margin:8px 0"><b>12:02</b>: Pilot hit the Anthropic usage limit; pantry-pal is resting until 14:20.</p></div>
+      </div>
+      <div style="width:400px;display:flex;flex-direction:column;gap:12px">
+        <div class="card"><h4>This week's retro</h4><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" class="ui sm"><div><b style="font-size:20px">1.4</b><br><span class="m">handoffs/task ↓</span></div><div><b style="font-size:20px">18%</b><br><span class="m">rework</span></div><div><b style="font-size:20px">2.6h</b><br><span class="m">to answer blockers</span></div><div><b style="font-size:20px">54m</b><br><span class="m">per task</span></div></div></div>
+        <div class="msg"><span class="av s rv">Ln</span><div class="bubble sm"><b>Proposal:</b> long developer handoff letters (over 2k words) go with 18% more rework. Can I trim the "where things stand" section to bullet points? <div style="margin-top:6px"><span class="btn s">Try it</span> <span class="btn">See the evidence</span></div></div></div>
+        <div class="msg"><span class="av s ar">At</span><div class="bubble sm"><b>Proposal:</b> raise OpenCode's handoff point to 80%. Our estimates run about 4% high. <div style="margin-top:6px"><span class="btn s">Try it</span> <span class="btn">See the evidence</span></div></div></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 13 -->
+<section class="view" id="v13">
+  <header><span class="num">13</span><h2>Settings</h2><span class="req">FR-05</span><span class="req">FR-06</span><span class="req">FR-15</span><span class="req">FR-19</span><span class="req">FR-20</span><span class="req">FR-63</span><span class="req">FR-90</span><span class="req">FR-91</span></header>
+  <p class="look"><b>Look for:</b> settings written in plain language, one topic per section, with what each choice means. The same data as Approach A, in a calmer style. <b>Rev 2:</b> git workflow moved to the handbook; new experimental section.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/settings</span></div>
+  <div class="app">
+    <div class="nav"><span class="logo">go·build·it</span><a>Home</a><a>Rooms</a><a>Desk <span class="pill">7</span></a><a>Team</a><a>Handbook</a><a>Journal</a><div class="right"><span>⚙ Settings</span><span class="tag sage">Local · david</span></div></div>
+    <div class="wrap" style="flex-direction:column;align-items:center">
+      <div style="width:860px;display:flex;flex-direction:column;gap:14px">
+        <h2 class="ttl">Settings</h2>
+        <div class="card"><h4>Who can reach go-build-it</h4><div class="ui sm" style="line-height:1.9">✓ <b>On this machine</b>: no sign-in; you're "david".<br>✓ <b>On your tailnet</b> at <span class="mono">devbox.tail3f2a.ts.net</span>: Tailscale already knows who you are.<br>✕ <b>On your local network</b>: off. Turning it on needs a sign-in method (not decided yet: Q1).</div></div>
+        <div class="card"><h4>Agent tools your team can use</h4><div class="ui sm" style="line-height:1.9">✓ <b>Claude Code</b>: runs headless and reports how full it is.<br>✓ <b>OpenCode</b>: runs headless; fullness is estimated.<br>? <b>Antigravity</b>: found, but we haven't confirmed it can run headless (Q2). <a style="color:var(--sky)">Test it</a><br><span class="m">Pi-agent: not installed.</span></div><div class="ui sm m" style="margin-top:6px">When a tool fills up, it compacts on its own · if a subscription limit is hit, pause and resume automatically.</div></div>
+        <div class="card"><h4>GitHub &amp; GitLab</h4><div class="ui sm">gh ✓ signed in as techmuch · glab ✓ gitlab.com. <span class="m">How work flows (branches, reviews, merging) is a chapter in the handbook:</span> <a style="color:var(--sky)">Handbook → Git workflow</a></div></div>
+        <div class="card" style="border-color:#c9d8e6"><h4>Trying out <span class="tag sky">experimental</span></h4><div class="ui sm" style="line-height:1.9">● <b>Handoff letters</b>: instead of letting the tool compact, write a letter and start fresh at 75%. <span class="m">On in go-build-it.</span><br>○ <b>Take the keyboard</b>: run tools in a terminal you can join from desktop or phone. <span class="m">Off.</span></div></div>
+        <div class="card"><h4>Updates</h4><div class="ui sm">You're on <b>2026.11.07.1</b>. New versions install automatically when nobody is working, after the checksum and signature are verified. <a style="color:var(--sky)">Go back to 2026.11.05.2</a></div></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- 14 -->
+<section class="view" id="v14">
+  <header><span class="num">14</span><h2>Docs: contextual help drawer + library</h2><span class="req">FR-130</span><span class="req">FR-131</span><span class="req">FR-132</span><span class="req">FR-133</span></header>
+  <p class="look"><b>Look for:</b> docs that come to you. A <b>help drawer</b> slides over whatever room you're in and opens on the matching topic. The full library, including the UAT walkthrough by role, is one click away.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/rooms/go-build-it?help=smart-handoffs</span></div>
+  <div class="app" style="position:relative">
+    <div class="nav"><span class="logo">go·build·it</span><a>Home</a><a class="on">Rooms</a><a>Desk <span class="pill">7</span></a><a>Team</a><a>Handbook</a><a>Journal</a><div class="right"><span class="tag sage">Local · david</span></div></div>
+    <div class="wrap" style="opacity:.35">
+      <div style="flex:1;display:flex;flex-direction:column;gap:16px"><div class="msg"><span class="av dv">Fg</span><div class="bubble">I'm near my context limit, so I've written a handoff… <span style="color:var(--sky)">(?) what's a handoff</span></div></div><div class="msg"><span class="av rv">Ln</span><div class="bubble">T-138 is ready for you…</div></div></div>
+    </div>
+    <div style="position:absolute;top:58px;right:0;bottom:0;width:480px;background:var(--card);border-left:1px solid var(--line);box-shadow:-10px 0 30px rgba(0,0,0,.08);padding:22px 26px;display:flex;flex-direction:column;gap:12px">
+      <div class="ui sm" style="display:flex;gap:10px;align-items:center"><span class="m">Help</span><span style="flex:1;border:1px solid var(--line);border-radius:999px;padding:4px 12px" class="m">Search docs…</span><span>✕</span></div>
+      <h2 class="ttl">Smart handoffs</h2>
+      <div class="ui sm m">FR-70–75 · screenshots refreshed by UAT run #212 today</div>
+      <p style="margin:0">When a teammate's context is nearly full, go-build-it asks them to write a short letter to their successor and starts a fresh session from it. We never rely on auto-compaction.</p>
+      <div class="shot" style="height:170px">📷 Who's working → handoff letter</div>
+      <div class="ui sm"><b>From the terminal:</b> <span class="mono">gbi sessions handoff S-881 --approve</span></div>
+      <div class="ui sm" style="border-top:1px solid var(--line);padding-top:10px"><b>Library:</b> Getting started · Concepts · <b>UAT walkthrough</b> (Owner 14 · Reviewer 8 · PM 6 steps) · CLI reference</div>
+    </div>
+  </div></div></div>
+</section>
+
+<p class="rv-foot">Approach B · Team Room · static mockup. Data is illustrative. <a href="../index.html">Back to overview</a></p>
+</body>
+</html>

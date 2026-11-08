@@ -1,0 +1,10 @@
+/bin/
+/dist/
+web/node_modules/
+web/dist/*
+!web/dist/.keep
+web/test-results/
+web/playwright-report/
+*.db
+.DS_Store
+/release/

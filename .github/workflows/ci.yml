@@ -1,0 +1,77 @@
+name: ci
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: cd web && npm ci && npm run build && touch dist/.keep
+      - run: git config --global user.email ci@example.com && git config --global user.name ci
+      - run: make test
+      - name: cross-compile
+        run: |
+          for p in darwin/arm64 linux/amd64 windows/amd64; do
+            GOOS=${p%/*} GOARCH=${p#*/} CGO_ENABLED=0 go build -o /tmp/gbi-${p%/*}-${p#*/} ./cmd/gbi
+          done
+
+  # P9-05: install go-build-it as a systemd user service and check it answers.
+  linux-service:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - run: go build -o "$RUNNER_TEMP/gbi" ./cmd/gbi
+      - name: enable a user systemd session
+        run: |
+          sudo loginctl enable-linger "$(whoami)"
+          for i in $(seq 1 30); do [ -S "/run/user/$(id -u)/bus" ] && break; sleep 1; done
+          ls -la "/run/user/$(id -u)"
+      - name: install, check, uninstall the service
+        env:
+          GBI_HOME: ${{ runner.temp }}/gbi-home
+        run: |
+          export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+          export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
+          "$RUNNER_TEMP/gbi" service plan
+          "$RUNNER_TEMP/gbi" service install
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:7420/api/system && break; sleep 1; done
+          curl -sf http://127.0.0.1:7420/api/system | grep -q '"version"'
+          systemctl --user status gbi.service --no-pager
+          "$RUNNER_TEMP/gbi" service uninstall
+          ! systemctl --user is-active gbi.service
+
+  # P9-06: run the Go suite on Windows and install the scheduled-task service.
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - run: git config --global user.email ci@example.com
+      - run: git config --global user.name ci
+      - run: go test ./...
+      - run: go build -o "$env:RUNNER_TEMP\gbi.exe" ./cmd/gbi
+      - name: install, check, uninstall the service
+        shell: pwsh
+        run: |
+          $env:GBI_HOME = "$env:RUNNER_TEMP\gbi-home"
+          & "$env:RUNNER_TEMP\gbi.exe" service plan
+          & "$env:RUNNER_TEMP\gbi.exe" service install
+          schtasks /Run /TN go-build-it
+          $ok = $false
+          for ($i = 0; $i -lt 30; $i++) {
+            try { $r = Invoke-RestMethod http://127.0.0.1:7420/api/system; if ($r.version) { $ok = $true; break } } catch { Start-Sleep 1 }
+          }
+          if (-not $ok) { throw "service did not answer" }
+          & "$env:RUNNER_TEMP\gbi.exe" service uninstall

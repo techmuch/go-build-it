@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>go-build-it — Phased delivery plan</title>
+<style>
+:root {
+  --bg: #fbfaf7; --surface: #ffffff; --text: #1f2328; --muted: #656d76;
+  --border: #e3e0d8; --accent: #2f6f5e; --accent-soft: #e6f0ec;
+  --code-bg: #f2efe8; --shall: #9a3412; --should: #1d4ed8; --may: #6b7280;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15171a; --surface: #1c1f23; --text: #e6e6e3; --muted: #9aa1a9;
+    --border: #2d3238; --accent: #6fc2a8; --accent-soft: #1f2e29;
+    --code-bg: #262a30; --shall: #fb923c; --should: #7aa2ff; --may: #9ca3af;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+.layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); max-width: 1180px; margin: 0 auto; gap: 48px; padding: 0 24px; }
+nav { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto; padding: 40px 0; }
+nav h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 12px; border: 0; padding: 0; }
+nav ol { list-style: none; padding: 0; margin: 0; }
+nav a { display: block; padding: 5px 10px; border-radius: 6px; color: var(--muted); text-decoration: none; font-size: 14px; }
+nav a:hover { background: var(--accent-soft); color: var(--accent); }
+main { padding: 40px 0 96px; min-width: 0; }
+h1 { font-size: 2.2rem; line-height: 1.2; margin: 0 0 8px; letter-spacing: -.01em; }
+.meta { color: var(--muted); margin-top: 0; font-size: 14px; }
+h2 { font-size: 1.45rem; margin: 56px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); scroll-margin-top: 16px; }
+h3 { font-size: 1.1rem; margin: 32px 0 10px; color: var(--accent); scroll-margin-top: 16px; }
+p, li { max-width: 78ch; }
+ul, ol { padding-left: 1.4em; }
+li { margin: 6px 0; }
+code { font: 0.88em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+.rid { display: inline-block; font: 600 12px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--accent); background: var(--accent-soft); padding: 1px 7px; border-radius: 999px; margin-right: 2px; scroll-margin-top: 16px; }
+.kw { font-size: 0.78em; font-weight: 700; letter-spacing: .04em; }
+.kw-SHALL, .kw-SHALLNOT { color: var(--shall); }
+.kw-SHOULD { color: var(--should); }
+.kw-MAY { color: var(--may); }
+.table-wrap { overflow-x: auto; margin: 16px 0; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: var(--code-bg); }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; gap: 0; padding: 0 16px; }
+  nav { position: static; max-height: none; padding: 24px 0 0; }
+  nav ol { display: flex; flex-wrap: wrap; gap: 4px; }
+  td:first-child { white-space: normal; }
+  h1 { font-size: 1.7rem; }
+}
+@media print {
+  nav { display: none; }
+  .layout { display: block; }
+  body { background: #fff; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav aria-label="Contents"><h2>Contents</h2><ol>
+<li><a href="#1-how-this-plan-is-built">1. How this plan is built</a></li>
+<li><a href="#2-phases-at-a-glance">2. Phases at a glance</a></li>
+<li><a href="#3-critical-path">3. Critical path</a></li>
+<li><a href="#4-phases-in-detail">4. Phases in detail</a></li>
+<li><a href="#5-open-questions-schedule">5. Open questions schedule</a></li>
+<li><a href="#6-risks">6. Risks</a></li>
+<li><a href="#7-tracking">7. Tracking</a></li>
+</ol></nav>
+<main>
+<h1>go-build-it — Phased delivery plan</h1>
+<p class="meta">Status: Draft · 2026-11-08 · Based on [requirements rev 2](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)</p>
+<h2 id="1-how-this-plan-is-built">1. How this plan is built</h2>
+<ul><li>
+<strong>Approach A is the UI baseline.</strong> Every UI task names the Approach A view it implements (desktop <code>A-v01</code>…<code>A-v14</code> plus detail views <code>02b</code>, <code>03b</code>, <code>04b</code>, <code>05b</code>, <code>12b</code>; mobile <code>A-M1</code>…<code>A-M11</code>).
+</li><li>
+<strong>Every requirement maps to at least one task.</strong> The tracker's <em>Requirement coverage</em> tab checks this.
+</li><li>
+<strong>Each phase ends at a review gate (◆),</strong> the same mechanism the app itself provides (FR-115). A gate passes only when the owner approves it.
+</li><li>
+<strong>The MVP is the desktop app at the end of P5.</strong> Mobile (P6), observability UI (P7), docs/UAT/auto-update (P8) and experimental features (P9) follow.
+</li><li>
+<strong>Simple path first.</strong> Harness compaction is the MVP default; smart handoffs and attachable headed sessions are experimental (P9), as decided in rev 2.
+</li><li>
+<strong>Dogfooding from P4.</strong> Once Courier can branch, PR, merge and release (end of P4), go-build-it manages its own remaining phases, and this tracker's data is imported into it.
+</li><li>
+<strong>Sizes, not dates.</strong> S ≈ up to a day of agent work, M ≈ 2–4 days, L ≈ 1–2 weeks. Progress is weighted S=1, M=3, L=8. Dates are set once the P0 spike shows real throughput.
+</li></ul>
+<h2 id="2-phases-at-a-glance">2. Phases at a glance</h2>
+<div class="table-wrap"><table><thead><tr><th>Phase</th><th>Name</th><th>MVP</th><th>Tasks</th><th>Points</th><th>Gate</th></tr></thead><tbody>
+<tr><td>P0</td><td>Foundations &amp; decisions</td><td>✓</td><td>12</td><td>27</td><td>◆ Decisions review</td></tr>
+<tr><td>P1</td><td>Core platform (walking skeleton)</td><td>✓</td><td>12</td><td>30</td><td>◆ Skeleton demo</td></tr>
+<tr><td>P2</td><td>Projects, catalog &amp; artifacts</td><td>✓</td><td>9</td><td>21</td><td>◆ Catalog review</td></tr>
+<tr><td>P3</td><td>Team, standards &amp; harness engine</td><td>✓</td><td>17</td><td>44</td><td>◆ Adapter demo</td></tr>
+<tr><td>P4</td><td>Courier: git &amp; release</td><td>✓</td><td>7</td><td>17</td><td>◆ Release rehearsal</td></tr>
+<tr><td>P5</td><td>Human-in-the-loop (MVP)</td><td>✓</td><td>15</td><td>55</td><td>◆ MVP dress rehearsal</td></tr>
+<tr><td>P6</td><td>Mobile web UI</td><td></td><td>9</td><td>17</td><td>◆ One-handed UAT</td></tr>
+<tr><td>P7</td><td>Observability &amp; self-improvement</td><td></td><td>5</td><td>13</td><td>◆ First retro</td></tr>
+<tr><td>P8</td><td>Docs, UAT, updates &amp; integrations</td><td></td><td>7</td><td>22</td><td>◆ v1 UAT</td></tr>
+<tr><td>P9</td><td>Experimental &amp; expansion</td><td></td><td>8</td><td>44</td><td>◆ Graduation reviews</td></tr>
+</tbody></table></div>
+<h2 id="3-critical-path">3. Critical path</h2>
+<ul><li>
+<strong>Main chain:</strong> P0 decisions and scaffold → P1 platform → P3 adapter interface → P3 queue and dispatcher → P4 Courier → P5 human loop → <strong>MVP</strong>.
+</li><li>
+<strong>In parallel:</strong> P0-04 harness spike → P3 adapters; P1 → P2 projects and artifacts (feeds P3 context preparation and P5 editors).
+</li><li>
+<strong>After the MVP:</strong> P5 → P6 mobile; P1 history store → P7 observability; P0-12 e2e harness + P5 rehearsals → P8 UAT and docs; P3 sessions view → P9 attachable sessions.
+</li></ul>
+<p>The longest chain runs through the <strong>harness spike (P0-04, Q2)</strong>, the adapter interface, the queue and dispatcher, Courier, and the work review. Start P0-04 first: its findings decide the scope of P3-06 and P3-07.</p>
+<h2 id="4-phases-in-detail">4. Phases in detail</h2>
+<h3 id="p0-foundations-decisions-mvp">P0 · Foundations &amp; decisions (MVP)</h3>
+<p><strong>Goal:</strong> Lock the requirements and UI baseline, answer the questions that block building, and set up the repo, CI, standards and design kit.</p>
+<p><strong>◆ Gate: Decisions review.</strong> Passes when:</p>
+<ul><li>
+Approach A confirmed as UI baseline
+</li><li>
+Q2 spike results recorded; adapters scoped
+</li><li>
+Q1, Q5, Q6 decided (Q4 can wait for P9)
+</li><li>
+Repo builds a CalVer-stamped binary in CI
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P0-01</strong> Requirements draft (rev 2, incl. mockup feedback) ✅</td><td>M</td><td>FR-01</td><td>—</td><td>—</td></tr>
+<tr><td><strong>P0-02</strong> Three UI approaches mocked; Approach A reviewed ✅</td><td>L</td><td>FR-34, FR-35</td><td>A-all</td><td>P0-01</td></tr>
+<tr><td><strong>P0-03</strong> Confirm Approach A as baseline; list aspects borrowed from B/C ✅</td><td>S</td><td>FR-34, FR-35</td><td>A-all</td><td>P0-02</td></tr>
+<tr><td><strong>P0-04</strong> Harness spike: headless + usage reporting for Claude Code, OpenCode, Antigravity ✅ · waits on Q2</td><td>M</td><td>FR-60, FR-61, FR-62, FR-71</td><td>—</td><td>—</td></tr>
+<tr><td><strong>P0-05</strong> Decide default git workflow; write the Git workflow standard ✅ · waits on Q5</td><td>S</td><td>FR-91</td><td>A-v11</td><td>—</td></tr>
+<tr><td><strong>P0-06</strong> Decide auto-update channel and signing ✅ · waits on Q6</td><td>S</td><td>FR-06</td><td>—</td><td>—</td></tr>
+<tr><td><strong>P0-07</strong> Decide external-interface access for MVP (default: refuse; Tailscale only) ✅ · waits on Q1</td><td>S</td><td>FR-18, NFR-21</td><td>—</td><td>—</td></tr>
+<tr><td><strong>P0-08</strong> Decide multi-user scope for v1 ✅ · waits on Q4</td><td>S</td><td>FR-17, FR-117a</td><td>—</td><td>—</td></tr>
+<tr><td><strong>P0-09</strong> Repo scaffold: Go module, React + TS + Vite, embed, lint, CI, CalVer stamping ✅</td><td>M</td><td>FR-01, FR-05</td><td>—</td><td>—</td></tr>
+<tr><td><strong>P0-10</strong> Write go-build-it's own global standards (backend, frontend, tests, docs, versioning) ✅</td><td>S</td><td>FR-50, FR-51</td><td>A-v11</td><td>P0-05</td></tr>
+<tr><td><strong>P0-11</strong> Design tokens and component kit from Approach A (light + dark) ✅</td><td>M</td><td>FR-34</td><td>A-v01, A-v03b, A-v04b</td><td>P0-09</td></tr>
+<tr><td><strong>P0-12</strong> Playwright e2e harness with desktop + phone screenshot capture ✅</td><td>S</td><td>FR-133</td><td>—</td><td>P0-09</td></tr>
+</tbody></table></div>
+<h3 id="p1-core-platform-walking-skeleton-mvp">P1 · Core platform (walking skeleton) (MVP)</h3>
+<p><strong>Goal:</strong> One Go binary with embedded React: config, SQLite, API, CLI parity, access classification, Tailscale Serve, live updates, history store, desktop shell.</p>
+<p><strong>◆ Gate: Skeleton demo.</strong> Passes when:</p>
+<ul><li>
+Install, open on localhost and over Tailscale Serve with the right identity badge
+</li><li>
+Every API call has a CLI command with --json
+</li><li>
+History records every write with who/what/when/why
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P1-01</strong> State dir ~/.go-build-it and config loader (cross-platform paths) ✅</td><td>S</td><td>FR-03, NFR-01</td><td>—</td><td>P0-09</td></tr>
+<tr><td><strong>P1-02</strong> SQLite storage layer and migrations ✅</td><td>M</td><td>FR-04</td><td>—</td><td>P1-01</td></tr>
+<tr><td><strong>P1-03</strong> HTTP API skeleton, OpenAPI spec, generated TS client ✅</td><td>M</td><td>FR-31</td><td>—</td><td>P1-02</td></tr>
+<tr><td><strong>P1-04</strong> CLI gbi as an API client with --json; parity test ✅</td><td>M</td><td>FR-30, FR-32</td><td>—</td><td>P1-03</td></tr>
+<tr><td><strong>P1-05</strong> Request origin classifier and identity attribution ✅</td><td>S</td><td>FR-15, FR-16, FR-17</td><td>A-v13</td><td>P1-03</td></tr>
+<tr><td><strong>P1-06</strong> Loopback-only default; external refused unless configured ✅</td><td>S</td><td>FR-19, FR-18, NFR-21</td><td>—</td><td>P1-05, P0-07</td></tr>
+<tr><td><strong>P1-07</strong> Tailscale Serve detection and guided setup ✅</td><td>M</td><td>FR-20</td><td>A-v13</td><td>P1-05</td></tr>
+<tr><td><strong>P1-08</strong> Live updates channel (SSE) and client store ✅</td><td>M</td><td>FR-36</td><td>—</td><td>P1-03</td></tr>
+<tr><td><strong>P1-09</strong> Desktop shell: sidebar, topbar, identity badge, routing, ⌘K stub ✅</td><td>M</td><td>FR-34</td><td>A-v01</td><td>P0-11, P1-03</td></tr>
+<tr><td><strong>P1-10</strong> History event store used by every write (who/what/when/why/origin) ✅</td><td>M</td><td>NFR-10</td><td>—</td><td>P1-02</td></tr>
+<tr><td><strong>P1-11</strong> Background service install (launchd) and gbi service commands ✅</td><td>M</td><td>FR-02</td><td>—</td><td>P1-04</td></tr>
+<tr><td><strong>P1-12</strong> Release build: single binary, CalVer tag, checksums, signature ✅</td><td>M</td><td>FR-01, FR-05</td><td>—</td><td>P0-06, P0-09</td></tr>
+</tbody></table></div>
+<h3 id="p2-projects-catalog-artifacts-mvp">P2 · Projects, catalog &amp; artifacts (MVP)</h3>
+<p><strong>Goal:</strong> Manage real projects: catalog cards, project overview, roadmap and item detail, artifacts with git revisions, values and problem definition.</p>
+<p><strong>◆ Gate: Catalog review.</strong> Passes when:</p>
+<ul><li>
+6 real repos imported and shown correctly
+</li><li>
+Release, website, CI and unpushed-work data on every card
+</li><li>
+Roadmap items open their detail page
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P2-01</strong> Project model, import existing repo, lifecycle states ✅</td><td>M</td><td>FR-43</td><td>A-v01</td><td>P1-02</td></tr>
+<tr><td><strong>P2-02</strong> Forge detection and gh / glab auth check ✅</td><td>S</td><td>FR-90</td><td>A-v13</td><td>P2-01</td></tr>
+<tr><td><strong>P2-03</strong> Catalog view: cards, needs-you first, search, filter, sort ✅</td><td>M</td><td>FR-40, FR-41, FR-42</td><td>A-v01, A-M1</td><td>P1-09, P2-01</td></tr>
+<tr><td><strong>P2-04</strong> Card data: release, commits since, website, CI, PRs/issues, placeholders ✅</td><td>M</td><td>FR-41, FR-41a, FR-44</td><td>A-v01</td><td>P2-02</td></tr>
+<tr><td><strong>P2-05</strong> Unpushed-work detector and card warning ✅</td><td>S</td><td>FR-94</td><td>A-v01</td><td>P2-01</td></tr>
+<tr><td><strong>P2-06</strong> Project overview page ✅</td><td>M</td><td>FR-41, NFR-11</td><td>A-v02, A-M2</td><td>P2-03</td></tr>
+<tr><td><strong>P2-07</strong> Roadmap model (milestones, gates) and roadmap item detail page ✅</td><td>M</td><td>FR-45b, FR-115</td><td>A-v02, A-v02b</td><td>P2-06</td></tr>
+<tr><td><strong>P2-08</strong> Artifacts browser: repo docs, git revisions, rendered Markdown and HTML mockups ✅</td><td>M</td><td>FR-45, FR-46</td><td>A-v03</td><td>P2-01</td></tr>
+<tr><td><strong>P2-09</strong> Problem definition and values with provenance ✅</td><td>S</td><td>FR-123</td><td>A-v03</td><td>P2-08</td></tr>
+</tbody></table></div>
+<h3 id="p3-team-standards-harness-engine-mvp">P3 · Team, standards &amp; harness engine (MVP)</h3>
+<p><strong>Goal:</strong> Personas and standards feed headless harness sessions; the queue dispatches tasks; context is monitored; compaction and rate limits are handled.</p>
+<p><strong>◆ Gate: Adapter demo.</strong> Passes when:</p>
+<ul><li>
+Claude Code and OpenCode each finish a task headlessly (Antigravity if Q2 allows)
+</li><li>
+Context % visible live, marked measured or estimated
+</li><li>
+Compaction logged; rate-limit pause and auto-resume shown
+</li><li>
+Queue survives a restart
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P3-01</strong> Teams, personas, humans and roles; assign to projects ✅</td><td>M</td><td>FR-10, FR-11, FR-12, FR-25, FR-26</td><td>A-v10</td><td>P1-03</td></tr>
+<tr><td><strong>P3-02</strong> Global standards store with project overrides and reasons ✅</td><td>M</td><td>FR-50, FR-51, FR-52</td><td>A-v11</td><td>P1-03, P0-10</td></tr>
+<tr><td><strong>P3-03</strong> Generate AGENTS.md / CLAUDE.md / OpenCode instructions per project and persona ✅</td><td>S</td><td>FR-53</td><td>A-v11</td><td>P3-02, P3-01</td></tr>
+<tr><td><strong>P3-04</strong> Harness adapter interface (start, events, input, usage, cancel, limits) ✅</td><td>M</td><td>FR-61</td><td>—</td><td>P0-04</td></tr>
+<tr><td><strong>P3-05</strong> Claude Code adapter (stream-json) ✅</td><td>M</td><td>FR-60, FR-62</td><td>—</td><td>P3-04</td></tr>
+<tr><td><strong>P3-06</strong> OpenCode adapter (run/serve; usage estimate per Q-34) ✅</td><td>M</td><td>FR-62, FR-71</td><td>—</td><td>P3-04</td></tr>
+<tr><td><strong>P3-07</strong> Antigravity adapter (scope from Q2 spike) ✅ · waits on Q2</td><td>M</td><td>FR-62</td><td>—</td><td>P3-04</td></tr>
+<tr><td><strong>P3-08</strong> Harness detection and settings (UI + CLI) ✅</td><td>S</td><td>FR-63</td><td>A-v13</td><td>P3-04</td></tr>
+<tr><td><strong>P3-09</strong> Git worktree per concurrent session ✅</td><td>S</td><td>FR-64</td><td>—</td><td>P3-04</td></tr>
+<tr><td><strong>P3-10</strong> Session context preparation (task, reqs, standards, values, handoff) ✅</td><td>M</td><td>FR-70</td><td>A-v05</td><td>P3-03, P2-09</td></tr>
+<tr><td><strong>P3-11</strong> Context monitor with measured / estimated flag ✅</td><td>S</td><td>FR-71</td><td>A-v05</td><td>P3-05, P3-06</td></tr>
+<tr><td><strong>P3-12</strong> Compaction detection and history logging (MVP default) ✅</td><td>S</td><td>FR-72</td><td>A-v05, A-v12</td><td>P3-11, P1-10</td></tr>
+<tr><td><strong>P3-13</strong> Rate-limit detection, pause and auto-resume ✅</td><td>M</td><td>FR-65</td><td>A-v05</td><td>P3-05</td></tr>
+<tr><td><strong>P3-14</strong> Task queue: priorities, deps, role routing, concurrency, retries, persistence ✅</td><td>L</td><td>FR-80, FR-81, FR-82</td><td>A-v06</td><td>P1-02</td></tr>
+<tr><td><strong>P3-15</strong> Dispatcher: pick task, start session as persona, resume after restart ✅</td><td>M</td><td>FR-60, FR-81, FR-82</td><td>A-v06</td><td>P3-14, P3-10</td></tr>
+<tr><td><strong>P3-16</strong> Sessions view: table, structured live output, terminal (raw) view ✅</td><td>M</td><td>FR-66, NFR-11</td><td>A-v05, A-v05b</td><td>P3-15, P1-08</td></tr>
+<tr><td><strong>P3-17</strong> PM sizing: flag tasks with repeated compactions; propose split ✅</td><td>S</td><td>FR-75</td><td>A-v06</td><td>P3-12, P3-14</td></tr>
+</tbody></table></div>
+<h3 id="p4-courier-git-release-mvp">P4 · Courier: git &amp; release (MVP)</h3>
+<p><strong>Goal:</strong> The Git / Release Manager runs the workflow from the Git workflow standard: branches, PRs, CI, merges, CalVer releases and Pages, with no LLM unless judgment is needed.</p>
+<p><strong>◆ Gate: Release rehearsal.</strong> Passes when:</p>
+<ul><li>
+Task → branch → PR → merge → tag → Pages, end to end on a sample project
+</li><li>
+Nothing completed is left unpushed
+</li><li>
+From here go-build-it can manage its own remaining phases (dogfooding)
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P4-01</strong> Workflow engine from the Git workflow standard (with overrides) ✅</td><td>M</td><td>FR-91</td><td>A-v11</td><td>P3-02, P0-05</td></tr>
+<tr><td><strong>P4-02</strong> Deterministic git ops: branch, commit, push, PR/MR, CI status ✅</td><td>M</td><td>FR-92, FR-93</td><td>A-v09</td><td>P4-01, P2-02</td></tr>
+<tr><td><strong>P4-03</strong> Agent-assisted ops: merge conflicts, release notes ✅</td><td>M</td><td>FR-92, FR-93</td><td>—</td><td>P4-02, P3-15</td></tr>
+<tr><td><strong>P4-04</strong> Push guarantee and reconciliation loop ✅</td><td>S</td><td>FR-94</td><td>A-v01</td><td>P4-02</td></tr>
+<tr><td><strong>P4-05</strong> Managed-project releases: CalVer tag and forge release ✅</td><td>M</td><td>FR-92, FR-44</td><td>A-v02</td><td>P4-02</td></tr>
+<tr><td><strong>P4-06</strong> Pages publishing (GitHub / GitLab) and stored URL ✅</td><td>M</td><td>FR-44</td><td>A-v01, A-v02</td><td>P4-05</td></tr>
+<tr><td><strong>P4-07</strong> Artifact revisions committed by Courier ✅</td><td>S</td><td>FR-46, FR-45a</td><td>A-v03b</td><td>P4-02</td></tr>
+</tbody></table></div>
+<h3 id="p5-human-in-the-loop-mvp-mvp">P5 · Human-in-the-loop (MVP) (MVP)</h3>
+<p><strong>Goal:</strong> Questions, attachment viewer, dictation, assessment-style work review, review gates and dress rehearsals, option sets, and agent-assisted editing of artifacts, personas and standards.</p>
+<p><strong>◆ Gate: MVP dress rehearsal.</strong> Passes when:</p>
+<ul><li>
+Full desktop UAT walkthrough passes for the Owner role
+</li><li>
+A real feature goes option set → rehearsal → build → assessment review → release
+</li><li>
+MVP release tagged
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P5-01</strong> Questions: blocking / non-blocking, assumptions, answers routed to sessions ✅</td><td>M</td><td>FR-100, FR-101, FR-105</td><td>A-v04</td><td>P3-15</td></tr>
+<tr><td><strong>P5-02</strong> Questions dashboard: triage list, detail, structured answers, propose value ✅</td><td>M</td><td>FR-102, FR-103, FR-104</td><td>A-v04, A-M3, A-M4</td><td>P5-01</td></tr>
+<tr><td><strong>P5-03</strong> Attachment and mockup viewer: live HTML with viewports, images, diffs, logs, pins ✅</td><td>L</td><td>FR-102a, FR-116a</td><td>A-v04b, A-M11</td><td>P0-11</td></tr>
+<tr><td><strong>P5-04</strong> Voice dictation component with editable transcript ✅</td><td>S</td><td>FR-107</td><td>A-v04, A-v09</td><td>P0-11</td></tr>
+<tr><td><strong>P5-05</strong> Lens assessment: standards, requirements, feedback addressed ✅</td><td>M</td><td>FR-54, FR-112</td><td>A-v09</td><td>P3-15, P3-02</td></tr>
+<tr><td><strong>P5-06</strong> Mockup vs built comparison from e2e screenshots (side by side, overlay, slider) ✅</td><td>M</td><td>FR-112</td><td>A-v09</td><td>P0-12, P5-03</td></tr>
+<tr><td><strong>P5-07</strong> Work review page; verdicts feed follow-up task context ✅</td><td>M</td><td>FR-110, FR-111, FR-112</td><td>A-v09, A-M5</td><td>P5-05, P5-06, P4-02</td></tr>
+<tr><td><strong>P5-08</strong> Review gates block downstream work until approved ✅</td><td>S</td><td>FR-115, FR-118</td><td>A-v02b</td><td>P2-07, P3-14</td></tr>
+<tr><td><strong>P5-09</strong> Dress rehearsal runner: steps, findings by several reviewers, live agent changes, gate decision ✅</td><td>L</td><td>FR-116, FR-117, FR-117a, FR-118</td><td>A-v08, A-M6</td><td>P5-08, P5-03</td></tr>
+<tr><td><strong>P5-10</strong> Option sets: generate against values, large preview, compare, combination tray ✅</td><td>L</td><td>FR-120, FR-121, FR-122, FR-124</td><td>A-v07, A-M7</td><td>P5-03, P2-09</td></tr>
+<tr><td><strong>P5-11</strong> Values and problem definition refined from answers, choices, feedback ✅</td><td>S</td><td>FR-123, FR-105</td><td>A-v03</td><td>P5-02, P5-10</td></tr>
+<tr><td><strong>P5-12</strong> Artifact editor: WYSIWYG + Markdown, agent chat with inline proposals, save → revision ✅</td><td>L</td><td>FR-45a</td><td>A-v03b</td><td>P4-07, P3-15</td></tr>
+<tr><td><strong>P5-13</strong> Persona coach and rich persona editor ✅</td><td>M</td><td>FR-13</td><td>A-v10</td><td>P5-12, P3-01</td></tr>
+<tr><td><strong>P5-14</strong> Standards editing through the artifact editor with agent chat ✅</td><td>S</td><td>FR-51</td><td>A-v11</td><td>P5-12, P3-02</td></tr>
+<tr><td><strong>P5-15</strong> Needs-you aggregation: badges and overview card across questions, reviews, gates, options ✅</td><td>S</td><td>FR-104</td><td>A-v02, A-v01</td><td>P5-02, P5-07, P5-08, P5-10</td></tr>
+</tbody></table></div>
+<h3 id="p6-mobile-web-ui">P6 · Mobile web UI</h3>
+<p><strong>Goal:</strong> The separate phone UI from Approach A mobile: projects, inbox, answer, review, rehearsal, options, sessions with terminal, viewer, more.</p>
+<p><strong>◆ Gate: One-handed UAT.</strong> Passes when:</p>
+<ul><li>
+Answer a blocking question, approve a review and give rehearsal feedback one-handed in under a minute each
+</li><li>
+Phone e2e screenshots in docs
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P6-01</strong> Mobile shell: routing and 4 bottom tabs ✅</td><td>M</td><td>FR-35</td><td>A-M1</td><td>P1-09</td></tr>
+<tr><td><strong>P6-02</strong> Projects and project status screens ✅</td><td>S</td><td>FR-35, FR-40, FR-41</td><td>A-M1, A-M2</td><td>P6-01, P2-06</td></tr>
+<tr><td><strong>P6-03</strong> Inbox and answer screen with dictation ✅</td><td>M</td><td>FR-104, FR-107</td><td>A-M3, A-M4</td><td>P6-01, P5-02, P5-04</td></tr>
+<tr><td><strong>P6-04</strong> Review screen (assessment + verdict) ✅</td><td>S</td><td>FR-110, FR-112</td><td>A-M5</td><td>P6-01, P5-07</td></tr>
+<tr><td><strong>P6-05</strong> Rehearsal step and option set screens ✅</td><td>M</td><td>FR-117, FR-122</td><td>A-M6, A-M7</td><td>P5-09, P5-10</td></tr>
+<tr><td><strong>P6-06</strong> Sessions and terminal view with key bar ✅</td><td>M</td><td>FR-66</td><td>A-M8, A-M10</td><td>P3-16</td></tr>
+<tr><td><strong>P6-07</strong> Full-screen viewer on phone ✅</td><td>S</td><td>FR-102a, FR-116a</td><td>A-M11</td><td>P5-03</td></tr>
+<tr><td><strong>P6-08</strong> More: read-only areas and chat-based edits ✅</td><td>S</td><td>FR-35</td><td>A-M9</td><td>P6-01</td></tr>
+<tr><td><strong>P6-09</strong> PWA install; spike web push (out-of-app notifications stay out of scope) ✅</td><td>S</td><td>FR-106</td><td>—</td><td>P6-01</td></tr>
+</tbody></table></div>
+<h3 id="p7-observability-self-improvement">P7 · Observability &amp; self-improvement</h3>
+<p><strong>Goal:</strong> History UI and event detail pages, metrics agents can analyze, and improvement proposals that go through normal review.</p>
+<p><strong>◆ Gate: First retro.</strong> Passes when:</p>
+<ul><li>
+Rebuild any task's story from history alone
+</li><li>
+An agent proposes an improvement from real metrics and it is reviewed
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P7-01</strong> History UI: search, filters, metric tiles ✅</td><td>M</td><td>NFR-10, NFR-11</td><td>A-v12</td><td>P1-10</td></tr>
+<tr><td><strong>P7-02</strong> Event detail views per type, human actions included ✅</td><td>M</td><td>NFR-14</td><td>A-v12b</td><td>P7-01</td></tr>
+<tr><td><strong>P7-03</strong> Metrics pipeline: rework, answer time, time per task, compactions, limits ✅</td><td>M</td><td>NFR-12</td><td>A-v12</td><td>P1-10</td></tr>
+<tr><td><strong>P7-04</strong> Agent improvement proposals through normal review ✅</td><td>M</td><td>NFR-13</td><td>A-v12</td><td>P7-03, P5-07</td></tr>
+<tr><td><strong>P7-05</strong> Agent-readable history export / analysis API ✅</td><td>S</td><td>NFR-12</td><td>—</td><td>P7-03</td></tr>
+</tbody></table></div>
+<h3 id="p8-docs-uat-updates-integrations">P8 · Docs, UAT, updates &amp; integrations</h3>
+<p><strong>Goal:</strong> Embedded searchable docs with auto-captured screenshots, the per-role UAT walkthrough, finished settings, auto-update with rollback, MCP server.</p>
+<p><strong>◆ Gate: v1 UAT.</strong> Passes when:</p>
+<ul><li>
+UAT scripts for every role pass and regenerate docs screenshots
+</li><li>
+Auto-update and rollback demonstrated
+</li><li>
+External agent drives the app through MCP
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P8-01</strong> Embedded docs: Markdown, search, contextual ? Docs links ✅</td><td>M</td><td>FR-130</td><td>A-v14</td><td>P1-09</td></tr>
+<tr><td><strong>P8-02</strong> UAT walkthrough per role as Playwright scripts ✅</td><td>L</td><td>FR-132, FR-133</td><td>A-v14</td><td>P0-12, P5-09</td></tr>
+<tr><td><strong>P8-03</strong> Screenshot regeneration into docs ✅</td><td>S</td><td>FR-131, FR-133</td><td>A-v14</td><td>P8-02, P8-01</td></tr>
+<tr><td><strong>P8-04</strong> Settings page complete: harnesses, access, forges, experimental, updates ✅</td><td>M</td><td>FR-63, FR-19, FR-20</td><td>A-v13</td><td>P3-08, P1-07</td></tr>
+<tr><td><strong>P8-05</strong> Auto-update: verify, install when idle, roll back ✅</td><td>M</td><td>FR-06</td><td>A-v13</td><td>P1-12</td></tr>
+<tr><td><strong>P8-06</strong> MCP server over the API ✅</td><td>M</td><td>FR-33</td><td>—</td><td>P1-04</td></tr>
+<tr><td><strong>P8-07</strong> Security posture check: exposure tests; no sandbox by design ✅</td><td>S</td><td>NFR-20, NFR-21</td><td>—</td><td>P1-06</td></tr>
+</tbody></table></div>
+<h3 id="p9-experimental-expansion">P9 · Experimental &amp; expansion</h3>
+<p><strong>Goal:</strong> Features behind flags or after v1: smart handoffs, attachable headed sessions, Pi-agent, Linux and Windows, external access challenge, multi-user.</p>
+<p><strong>◆ Gate: Graduation reviews.</strong> Passes when:</p>
+<ul><li>
+Each experimental feature has evidence (NFR-12 metrics) before it becomes default
+</li><li>
+Linux and Windows pass the UAT suite
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P9-01</strong> Smart handoffs behind experimental flag: threshold, briefing, Lens check, next session ✅ · waits on Q3</td><td>L</td><td>FR-72, FR-73, FR-74</td><td>A-v05</td><td>P3-12, P5-05</td></tr>
+<tr><td><strong>P9-02</strong> Handoff vs compaction evaluation and graduation criteria ✅ · waits on Q3</td><td>M</td><td>FR-72, NFR-12</td><td>A-v12</td><td>P9-01, P7-03</td></tr>
+<tr><td><strong>P9-03</strong> Attachable headed sessions: PTY/multiplexer, attach, detach, control handback ✅ · waits on Q7</td><td>L</td><td>FR-67</td><td>A-v05b, A-M10</td><td>P3-16</td></tr>
+<tr><td><strong>P9-04</strong> Pi-agent adapter ✅</td><td>M</td><td>FR-62</td><td>—</td><td>P3-04</td></tr>
+<tr><td><strong>P9-05</strong> Linux support (systemd) ✅</td><td>M</td><td>NFR-01, FR-02</td><td>—</td><td>P1-11</td></tr>
+<tr><td><strong>P9-06</strong> Windows support (service, paths) ✅</td><td>L</td><td>NFR-01, FR-02</td><td>—</td><td>P1-11</td></tr>
+<tr><td><strong>P9-07</strong> External interface challenge (if Q1 allows external access) ✅ · waits on Q1</td><td>M</td><td>FR-18</td><td>—</td><td>P1-06</td></tr>
+<tr><td><strong>P9-08</strong> Multi-user roles and review assignment ✅ · waits on Q4</td><td>L</td><td>FR-17, FR-117a</td><td>—</td><td>P5-09</td></tr>
+</tbody></table></div>
+<h2 id="5-open-questions-schedule">5. Open questions schedule</h2>
+<div class="table-wrap"><table><thead><tr><th>Question</th><th>Answer before</th><th>Why</th></tr></thead><tbody>
+<tr><td>Q2 harness headless + usage</td><td>P0 (spike P0-04)</td><td>Sets adapter scope for OpenCode and Antigravity</td></tr>
+<tr><td>Q5 default git workflow</td><td>P0 (P0-05)</td><td>Courier's workflow engine reads the Git workflow standard</td></tr>
+<tr><td>Q6 update channel</td><td>P0 (P0-06)</td><td>Release build and signing in P1-12</td></tr>
+<tr><td>Q1 external access</td><td>P0 (P0-07)</td><td>MVP default: refuse; full challenge only if needed (P9-07)</td></tr>
+<tr><td>Q4 multi-user</td><td>before P5-09</td><td>Rehearsals already show a second reviewer (FR-117a)</td></tr>
+<tr><td>Q3 handoff threshold and graduation</td><td>P9</td><td>Smart handoffs are experimental</td></tr>
+<tr><td>Q7 attachable sessions</td><td>P9</td><td>Headed sessions are experimental</td></tr>
+</tbody></table></div>
+<h2 id="6-risks">6. Risks</h2>
+<div class="table-wrap"><table><thead><tr><th>Risk</th><th>Effect</th><th>Mitigation</th></tr></thead><tbody>
+<tr><td>Antigravity has no usable headless mode (Q2)</td><td>One of three initial adapters slips</td><td>Spike first; ship Claude Code + OpenCode for MVP; keep the adapter interface harness-neutral</td></tr>
+<tr><td>Context usage can only be estimated for some harnesses</td><td>Wrong compaction/handoff timing</td><td>Measured vs estimated flag (P3-11); compare estimates with real values (Q-34 answer)</td></tr>
+<tr><td>Rich editor + agent inline proposals are complex (P5-12)</td><td>MVP slips</td><td>Use proven libraries (e.g. TipTap or CodeMirror); proposals as plain diffs first</td></tr>
+<tr><td>Attachment viewer rendering untrusted HTML mockups</td><td>Script access to the app</td><td>Sandboxed iframe with no same-origin access</td></tr>
+<tr><td>Subscription rate limits slow the team</td><td>Throughput drops</td><td>Pause/resume (P3-13), concurrency limits, schedule heavy work off-peak</td></tr>
+<tr><td>Scope creep from experimental features</td><td>MVP never lands</td><td>Experimental work stays in P9 behind flags until a graduation review</td></tr>
+</tbody></table></div>
+<h2 id="7-tracking">7. Tracking</h2>
+<p>Status lives in [<code>tracker-data.js</code>](tracker-data.js) and is shown by [<code>index.html</code>](index.html). Set a task's <code>status</code> to <code>todo</code>, <code>in-progress</code>, <code>blocked</code> or <code>done</code> and commit. The task tables in this document are generated from the same data, so regenerate them when tasks are added or renamed.</p>
+</main>
+</div>
+</body>
+</html>

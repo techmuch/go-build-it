@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Approach A Mobile</title>
+<link rel="stylesheet" href="../frame.css">
+<style>
+.phone { --acc:#0f9d8a; --acc-s:#e3f4f1; --bg:#f4f6f7; --line:#e1e5e8; --t:#1c2329; --m:#66727c; --red:#d1453b; --red-s:#fdecea;
+  --amb:#c47f00; --amb-s:#fff4dc; --grn:#1f9d55; --grn-s:#e5f6ec; --blue:#2f6fd1; --blue-s:#e7effc;
+  background:var(--bg); color:var(--t); font:13.5px/1.45 -apple-system, system-ui, sans-serif; }
+.phone .status { background:#17212b; color:#fff; }
+.hdr { background:#17212b; color:#fff; padding:6px 16px 12px; flex:none; }
+.hdr h1 { margin:0; font-size:20px; } .hdr .sub { font-size:12px; color:#a9b7c3; }
+.body { flex:1; overflow:hidden; padding:12px; display:flex; flex-direction:column; gap:10px; }
+.tabbar { flex:none; height:64px; background:#fff; border-top:1px solid var(--line); display:grid; grid-template-columns:repeat(4,1fr); font-size:11px; color:var(--m); text-align:center; padding-top:8px; }
+.tabbar span b { display:block; font-size:18px; font-weight:400; } .tabbar .on { color:var(--acc); font-weight:600; }
+.tabbar .dot { background:var(--red); color:#fff; border-radius:999px; font-size:10px; padding:0 5px; margin-left:2px; }
+.c { background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+.c.attn { border-left:3px solid var(--red); }
+.c h4 { margin:0 0 6px; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--m); }
+.chip { display:inline-block; font-size:11px; padding:1px 8px; border-radius:999px; background:#eef1f3; color:#4a5560; }
+.chip.red{background:var(--red-s);color:var(--red)}.chip.amb{background:var(--amb-s);color:var(--amb)}.chip.grn{background:var(--grn-s);color:var(--grn)}.chip.acc{background:var(--acc-s);color:var(--acc)}.chip.blue{background:var(--blue-s);color:var(--blue)}
+.muted{color:var(--m)} .small{font-size:12px} .mono{font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
+.btn { display:block; text-align:center; padding:11px; border-radius:8px; border:1px solid var(--line); background:#fff; font-weight:600; }
+.btn.p { background:var(--acc); color:#fff; border-color:var(--acc); } .btn.d { color:var(--red); }
+.rowb { display:flex; gap:8px; } .rowb > * { flex:1; }
+.bar { height:6px; background:#e7ebee; border-radius:4px; overflow:hidden; } .bar i { display:block; height:100%; background:var(--acc); } .bar.warn i { background:var(--amb); }
+.av { width:28px; height:28px; border-radius:50%; display:inline-grid; place-items:center; font-size:11px; font-weight:700; color:#fff; flex:none; }
+.av.pm{background:#7c5cd6}.av.ar{background:#2f6fd1}.av.dv{background:#0f9d8a}.av.qa{background:#c47f00}.av.rv{background:#d1453b}.av.gt{background:#4a5560}.av.hu{background:#1c2329}
+.li { display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid var(--line); background:#fff; }
+.opt { border:1px solid var(--line); border-radius:8px; padding:10px; background:#fff; }
+.opt.sel { border:2px solid var(--acc); }
+textarea.ta { width:100%; min-height:64px; border:1px solid var(--line); border-radius:8px; padding:8px; font:13px system-ui; resize:none; }
+.diff { font:11.5px/1.55 ui-monospace,Menlo,monospace; border:1px solid var(--line); border-radius:6px; overflow:hidden; background:#fff; }
+.diff div { padding:0 8px; white-space:pre; overflow:hidden; } .diff .a{background:#e8f6ee} .diff .h{background:#eef1f3;color:var(--m)}
+.mic { width:34px; height:34px; border-radius:50%; display:inline-grid; place-items:center; border:1px solid var(--line); background:#fff; font-size:15px; position:absolute; right:8px; bottom:10px; }
+.mic.rec { background:var(--red); color:#fff; border-color:var(--red); }
+.term { background:#0e1419; color:#c9d6df; font:11px/1.55 ui-monospace,Menlo,monospace; padding:8px 10px; white-space:pre; overflow:hidden; }
+.term .g{color:#5fd39a}.term .y{color:#e2b54a}.term .b{color:#7fb2ff}.term .d{color:#6f8190}
+.keys { display:flex; gap:5px; padding:6px 8px; background:#1b252e; flex:none; } .keys span { flex:1; text-align:center; background:#2b3a47; color:#dfe7ee; border-radius:5px; padding:7px 0; font:600 11px ui-monospace,Menlo,monospace; }
+.seg { display:flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; font-size:12px; background:#fff; } .seg span { flex:1; text-align:center; padding:6px 0; color:var(--m); } .seg span.on { background:var(--acc-s); color:var(--acc); font-weight:600; }
+.xp { position:absolute; right:8px; top:8px; background:rgba(23,33,43,.85); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; }
+.pin { position:absolute; width:20px; height:20px; border-radius:50% 50% 50% 0; background:var(--amb); color:#fff; font:700 10px/20px sans-serif; text-align:center; transform:rotate(-45deg); } .pin span{display:inline-block;transform:rotate(45deg)}
+</style>
+</head>
+<body class="mock">
+<div class="rv-bar">
+  <span class="rv-title">Approach A: Mission Control <small>Mobile · 11 screens · rev 2</small></span>
+  <a href="../index.html">← Overview &amp; review guide</a>
+  <a href="desktop.html">Approach A desktop</a>
+  <span class="rv-spacer"></span>
+  <a href="../b-team-room/mobile.html">B mobile</a>
+  <a href="../c-roadmap-canvas/mobile.html">C mobile</a>
+</div>
+<div class="rv-intro">
+  <p><b>Mobile idea:</b> a compact version of the console. A bottom tab bar gives Projects · Inbox · Sessions · More. "Inbox" combines questions, reviews and gates (FR-35). Screens use dense lists and colored status chips, the same visual language as desktop.</p>
+  <p style="background:#fff8e6;border:1px solid #ecd9a8;border-radius:8px;padding:8px 12px"><b>Rev 2:</b> 🎙 dictation on every answer box · attachments and mockups open full screen (M11) · review rebuilt as an assessment (M5) · several reviewers per rehearsal (M6) · sessions show compaction by default, with handoffs experimental (M8) · new terminal view with a key bar and attach (M10).</p>
+  <p><b>Look for:</b> can you answer a blocking question, approve a handoff, and give feedback on a rehearsal step one-handed, in under a minute each?</p>
+</div>
+
+<section class="view" id="m">
+  <header><h2>Mobile screens</h2><span class="req">FR-35</span><span class="req">FR-36</span></header>
+  <div class="phones">
+
+  <!-- M1 -->
+  <div class="phone-wrap"><h3>M1 · Projects (home)</h3><p class="look">Covers FR-40–44. Projects that need you come first. Each card shows purpose, state, release and links.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div class="sub">● Tailnet · david@github</div><h1>Projects</h1></div>
+    <div class="body">
+      <div class="small"><span class="chip red">Needs you · 4</span> <span class="chip">All · 6</span> <span class="chip">Paused · 1</span></div>
+      <div class="c attn"><div style="display:flex;justify-content:space-between"><b>trailmap</b><span class="chip blue">Design</span></div><div class="small muted">Offline hiking maps, one-handed.</div><div class="small" style="margin-top:4px"><span class="chip red">1 blocking</span> <span class="chip amb">Options</span></div><div class="small muted" style="margin-top:4px">No stable release · Site not published</div></div>
+      <div class="c attn"><div style="display:flex;justify-content:space-between"><b>go-build-it</b><span class="chip acc">Implementation</span></div><div class="small muted">AI + human teams for long projects.</div><div class="small" style="margin-top:4px"><span class="chip red">1 blocking</span> <span class="chip amb">1 review</span></div><div class="small" style="margin-top:4px"><b>2026.11.02.1</b> · 14 commits since · <span style="color:var(--blue)">Notes ↗ Site ↗</span></div></div>
+      <div class="c attn"><div style="display:flex;justify-content:space-between"><b>ledgerly</b><span class="chip amb">Review</span></div><div class="small muted">Finance ledger with CSV import.</div><div class="small" style="margin-top:4px"><span class="chip amb">Gate: Dress rehearsal</span></div><div class="small" style="margin-top:4px"><b>2026.10.18.2</b> · <span style="color:var(--blue)">Notes ↗ Site ↗</span></div></div>
+      <div class="c attn"><div style="display:flex;justify-content:space-between"><b>inkwell</b><span class="chip">Maintenance</span></div><div class="small" style="margin-top:4px"><span class="chip red">CI failing</span> <span class="chip red">⚠ 2 unpushed</span></div></div>
+    </div>
+    <div class="tabbar"><span class="on"><b>▦</b>Projects</span><span><b>✉</b>Inbox<span class="dot">5</span></span><span><b>◉</b>Sessions</span><span><b>⋯</b>More</span></div>
+  </div></div>
+
+  <!-- M2 -->
+  <div class="phone-wrap"><h3>M2 · Project status</h3><p class="look">Covers FR-41, FR-44, FR-115. Values, roadmap with gates, running sessions, and release.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div class="sub">‹ Projects</div><h1>go-build-it</h1><div class="sub">Implementation · M2 Harness adapters</div></div>
+    <div class="body">
+      <div class="c" style="border-color:#f0c4c0"><h4>Needs you</h4><div class="small"><span class="chip red">Blocking</span> OpenCode context usage? ›</div><div class="small" style="margin-top:6px"><span class="chip amb">Review</span> T-138 request classifier ›</div></div>
+      <div class="c"><h4>Roadmap</h4><div class="small">✅ M0 Requirements ◆<br>✅ M1 Core server ◆<br><b>▶ M2 Harness adapters &amp; context</b> 13/21 › <div class="bar" style="margin:4px 0"><i style="width:62%"></i></div>◆ next gate: Adapter demo · <span style="color:var(--blue)">tap a milestone for detail</span><br><span class="muted">○ M3 Questions &amp; gates · ○ M4 Mobile &amp; docs</span></div></div>
+      <div class="c"><h4>Running</h4><div class="small">Forge · T-142 <span style="color:var(--amb)">76% · handoff (exp.)</span><div class="bar warn" style="margin:4px 0 8px"><i style="width:76%"></i></div>Atlas · T-149 · 31% · auto-compact<div class="bar" style="margin-top:4px"><i style="width:31%"></i></div></div></div>
+      <div class="c"><h4>Release &amp; links</h4><div class="small"><b>2026.11.02.1</b> · Nov 2 · CI <span style="color:var(--grn)">● passing</span><br><span style="color:var(--blue)">Release notes ↗ · Website ↗ · GitHub ↗</span></div></div>
+    </div>
+    <div class="tabbar"><span class="on"><b>▦</b>Projects</span><span><b>✉</b>Inbox<span class="dot">5</span></span><span><b>◉</b>Sessions</span><span><b>⋯</b>More</span></div>
+  </div></div>
+
+  <!-- M3 -->
+  <div class="phone-wrap"><h3>M3 · Inbox</h3><p class="look">Covers FR-104. Questions, reviews, gates and option sets in one list, with blocking items first.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><h1>Inbox</h1><div class="sub">2 blocking · 5 total</div></div>
+    <div class="body" style="padding:0;gap:0">
+      <div class="small muted" style="padding:8px 12px">BLOCKING · WORK PAUSED</div>
+      <div class="li"><div><div class="small muted">go-build-it · Forge · 12m</div><b>OpenCode context usage?</b></div><span class="chip red">Q</span></div>
+      <div class="li"><div><div class="small muted">trailmap · Atlas · 2h</div><b>Download per trail or region?</b></div><span class="chip red">Q</span></div>
+      <div class="small muted" style="padding:8px 12px">NEEDS DECISION</div>
+      <div class="li"><div><div class="small muted">ledgerly · Probe</div><b>Gate G-5 · Dress rehearsal</b></div><span class="chip amb">Gate</span></div>
+      <div class="li"><div><div class="small muted">ledgerly · Lens</div><b>Review T-204 column mapping</b></div><span class="chip amb">Review</span></div>
+      <div class="li"><div><div class="small muted">trailmap · Atlas</div><b>OS-3 Map screen layout</b></div><span class="chip blue">Options</span></div>
+      <div class="small muted" style="padding:8px 12px">NON-BLOCKING · ASSUMED</div>
+      <div class="li"><div><div class="small muted">ledgerly · Probe · 5h</div><b>UK CSV dates DD/MM?</b><div class="small muted">Assumed DD/MM</div></div><span class="chip">Q</span></div>
+    </div>
+    <div class="tabbar"><span><b>▦</b>Projects</span><span class="on"><b>✉</b>Inbox<span class="dot">5</span></span><span><b>◉</b>Sessions</span><span><b>⋯</b>More</span></div>
+  </div></div>
+
+  <!-- M4 -->
+  <div class="phone-wrap"><h3>M4 · Answer a question</h3><p class="look">Covers FR-101–103, FR-105, FR-107. Context, the asker's recommendation, attachments (tap to open full screen, M11), one-tap structured answers, and 🎙 dictation.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div class="sub">‹ Inbox · go-build-it · <span style="color:#ff9b93">Blocking</span></div><h1 style="font-size:17px">How should OpenCode context usage be measured?</h1></div>
+    <div class="body">
+      <div class="small" style="display:flex;gap:8px;align-items:center"><span class="av dv">Fg</span><span><b>Forge</b> · Developer · T-151 · FR-71</span></div>
+      <div class="c small"><h4>Why it matters</h4>Context monitoring needs usage. <span class="mono">opencode run</span> reports tokens but not window size.</div>
+      <div class="opt sel small"><b>◉ A. Estimate from token counts</b> <span class="chip acc">Recommended</span><div class="muted">Simple, ±5% error.</div></div>
+      <div class="opt small"><b>○ B. Server mode API</b><div class="muted">Exact; adds a process per session.</div></div>
+      <div class="small" style="color:var(--blue)">📎 opencode-run-sample.json › · adapter.go diff › · usage mockup ›</div>
+      <div style="position:relative"><textarea class="ta" placeholder="Add a note (optional)…">Log estimates vs. real values to check the error.</textarea><span class="mic rec">🎙</span></div><div class="small muted" style="margin-top:-4px">● Listening… tap to stop; edit the transcript before sending</div>
+      <div class="btn p">Answer &amp; resume work</div>
+    </div>
+  </div></div>
+
+  <!-- M5 -->
+  <div class="phone-wrap"><h3>M5 · Review work</h3><p class="look">Covers FR-110–112, FR-54. <b>Rev 2:</b> an assessment, not a diff. Mockup vs built, tests, standards, feedback and requirements, then the verdict at thumb height.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div class="sub">‹ Inbox · ledgerly · PR #57 ↗</div><h1 style="font-size:17px">T-204 CSV column mapping</h1><div class="sub">Lens: ready · 1 gap · recommends changes</div></div>
+    <div class="body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;position:relative"><div style="height:92px;border:1px dashed #b9c2c9;border-radius:6px;background:#eef1f3;display:grid;place-items:center;font-size:11px;color:var(--m)">Mockup rev 3</div><div style="height:92px;border:1px dashed #b9c2c9;border-radius:6px;background:#fff;display:grid;place-items:center;font-size:11px;color:var(--m);position:relative">Built (e2e)<span class="pin" style="left:20px;top:56px;background:var(--red)"><span>2</span></span></div><span class="xp">⤢</span></div>
+      <div class="small">① preview rows added <span class="chip grn">CR-12</span> · ② bank logo missing <span class="chip red">gap</span></div>
+      <div class="c small" style="padding:0">
+        <div class="li" style="padding:8px 10px"><span>🧪 Unit 142/142 · E2E 18/18</span><span class="chip grn">pass</span></div>
+        <div class="li" style="padding:8px 10px"><span>📐 Standards 9/10 · hard-coded "£"</span><span class="chip amb">1</span></div>
+        <div class="li" style="padding:8px 10px"><span>💬 Rehearsal feedback 3/3</span><span class="chip grn">done</span></div>
+        <div class="li" style="padding:8px 10px;border-bottom:0"><span>📋 FR-21 ✓ · FR-22 ✓ · FR-23 partly</span><span class="chip amb">1</span></div>
+      </div>
+      <div style="position:relative"><textarea class="ta">Fix FR-23 reuse and the £. Logo can be a separate task.</textarea><span class="mic">🎙</span></div>
+      <div class="rowb"><span class="btn d">Reject</span><span class="btn">Changes</span><span class="btn p">Approve</span></div>
+    </div>
+  </div></div>
+
+  <!-- M6 -->
+  <div class="phone-wrap"><h3>M6 · Dress rehearsal step</h3><p class="look">Covers FR-116–118, FR-116a, FR-117a. One step per screen, with findings from every reviewer and agent chat below it. Tap the screen to open it full size. Swipe for the next step.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div class="sub">‹ ledgerly · Gate G-5 · Step 3 / 7</div><h1 style="font-size:17px">Map CSV columns</h1><div class="bar" style="margin-top:6px;background:#2b3a47"><i style="width:43%"></i></div></div>
+    <div class="body">
+      <div class="small">You uploaded <span class="mono">barclays-oct.csv</span>. Confirm the guessed columns before importing 214 rows.</div>
+      <div style="height:150px;border:1px dashed #b9c2c9;border-radius:8px;display:grid;place-items:center;color:var(--m);font-size:12px;background:#eef1f3;position:relative"><span class="xp">⤢ Full size</span>Screen preview · tap to open live</div>
+      <div class="small muted">Findings · 4 from david, maria, Probe, Lens</div>
+      <div class="small" style="display:flex;gap:8px"><span class="av hu">dv</span><span>Can't tell debit vs credit. Preview 3 rows?</span></div>
+      <div class="small" style="display:flex;gap:8px"><span class="av hu" style="background:#8a5a9e">mr</span><span><b>maria</b>: "Payee" vs "Description" is confusing.</span></div>
+      <div class="small" style="display:flex;gap:8px"><span class="av dv">Fg</span><span>~20 min for both. Do it now and reload this step?</span></div>
+      <div class="rowb"><span class="btn">Later</span><span class="btn p">Do it now</span></div>
+      <div class="rowb"><span class="btn">◀ Prev</span><span class="btn">🎙 Note</span><span class="btn">Good ▶</span></div>
+    </div>
+  </div></div>
+
+  <!-- M7 -->
+  <div class="phone-wrap"><h3>M7 · Option set</h3><p class="look">Covers FR-120–122. Swipe between options, tick the aspects you want, and say why.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div class="sub">‹ trailmap · OS-3</div><h1 style="font-size:17px">Map screen layout</h1><div class="sub">Option 1 of 3 · ● ○ ○</div></div>
+    <div class="body">
+      <div style="height:220px;border-radius:10px;background:linear-gradient(135deg,#cfe3d4,#b8d4c0);position:relative"><span class="xp">⤢ Full screen</span><div style="position:absolute;left:0;right:0;bottom:0;height:60px;background:#fff;border-radius:12px 12px 0 0;padding:8px;font-size:11px">▬ Bottom sheet</div></div>
+      <b>A · Full-bleed map + bottom sheet</b>
+      <div class="small">+ Max map area · + Thumb-reachable<br>− Sheet hides map when expanded</div>
+      <div class="c small"><h4>Keep these aspects</h4>☑ Full-bleed map<br>☑ Bottom sheet<br>☐ Floating zoom</div>
+      <div class="small muted">Selected so far: 2 from A · 1 from B · 1 from C</div>
+      <div class="btn p">Review tray, say why (🎙) &amp; submit</div>
+    </div>
+  </div></div>
+
+  <!-- M8 -->
+  <div class="phone-wrap"><h3>M8 · Sessions</h3><p class="look">Covers FR-71–74, FR-65, FR-66, NFR-11. <b>Rev 2:</b> sessions auto-compact by default. A handoff appears only where the experimental setting is on. Each session opens a structured or terminal view.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><h1>Sessions</h1><div class="sub">4 running · auto-compact · handoffs exp. on go-build-it</div></div>
+    <div class="body">
+      <div class="c" style="border-color:#f1d9a3;background:#fffaf0"><div class="small" style="display:flex;justify-content:space-between"><b>Forge · go-build-it</b><span class="chip blue">Handoff · exp.</span></div><div class="small muted">T-142 stream-json parser · OpenCode</div><div class="bar warn" style="margin:6px 0"><i style="width:76%"></i></div>
+        <div class="small"><b>Briefing:</b> 4 event types done, 31 tests green. Next: error mapping, rate_limit fixture, wire usage. Avoid json.Decoder.</div>
+        <div class="rowb" style="margin-top:8px"><span class="btn">Read all</span><span class="btn p">Approve</span></div></div>
+      <div class="c small"><div style="display:flex;justify-content:space-between"><b>Atlas · go-build-it</b><span class="chip acc">attachable</span></div>31% · compacted 1×<div class="bar" style="margin:4px 0 8px"><i style="width:31%"></i></div><div class="rowb"><span class="btn" style="padding:7px">Structured</span><span class="btn" style="padding:7px">⌨ Terminal ›</span></div></div>
+      <div class="c small"><b>Spark · inkwell</b> · ≈18% (est.)<div class="bar" style="margin-top:4px"><i style="width:18%"></i></div></div>
+      <div class="c small"><b>Pilot · pantry-pal</b> <span class="chip">Rate-limited · 14:20</span></div>
+    </div>
+    <div class="tabbar"><span><b>▦</b>Projects</span><span><b>✉</b>Inbox<span class="dot">5</span></span><span class="on"><b>◉</b>Sessions</span><span><b>⋯</b>More</span></div>
+  </div></div>
+
+  <!-- M9 -->
+  <div class="phone-wrap"><h3>M9 · More</h3><p class="look">The desktop-first areas (team, standards, history, settings, docs) open read-only on mobile, with light actions such as pausing a project or rolling back an update.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><h1>More</h1><div class="sub">v2026.11.07.1 · up to date</div></div>
+    <div class="body" style="padding:0;gap:0">
+      <div class="li"><span>👥 Team &amp; personas</span><span class="muted">8 ›</span></div>
+      <div class="li"><span>📐 Global standards</span><span class="muted">9 ›</span></div>
+      <div class="li"><span>☰ Task queue</span><span class="muted">23 ready ›</span></div>
+      <div class="li"><span>🕘 History &amp; insights</span><span class="muted">2 proposals ›</span></div>
+      <div class="li"><span>📖 Docs &amp; UAT walkthrough</span><span class="muted">›</span></div>
+      <div class="li"><span>⚙ Settings</span><span class="muted">read-only ›</span></div>
+      <div style="padding:12px" class="small muted">Access: Tailnet (david@github), trusted like local. Personas, standards and artifacts can be changed on mobile by chatting with an agent (🎙 works too). The rich editor is desktop-first.</div>
+    </div>
+    <div class="tabbar"><span><b>▦</b>Projects</span><span><b>✉</b>Inbox<span class="dot">5</span></span><span><b>◉</b>Sessions</span><span class="on"><b>⋯</b>More</span></div>
+  </div></div>
+
+  <!-- M10 -->
+  <div class="phone-wrap"><h3>M10 · Terminal view &amp; attach</h3><p class="look">Covers FR-66, FR-67. <b>New:</b> the raw terminal of a session, with a key bar for keys phones lack. <i>Attach</i> takes control of an attachable (headed) session; the agent pauses until you detach. The idea comes from Herdr's touch-friendly terminal views.</p>
+  <div class="phone"><div class="status" style="background:#0e1419"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr" style="background:#0e1419"><div class="sub">‹ Sessions · Atlas · S-874 · T-149</div><div style="display:flex;gap:8px;align-items:center;margin-top:4px"><div class="seg" style="flex:1;background:#1b252e;border-color:#2b3a47"><span>Structured</span><span class="on">Terminal</span></div><span class="chip acc">watching</span></div></div>
+    <div class="term" style="flex:1"><span class="d">~/src/go-build-it (t-149)</span>
+<span class="b">●</span> Edit internal/harness/adapter.go
+  <span class="g">+ type Usage struct {</span>
+  <span class="g">+   Used, Window int</span>
+  <span class="g">+   Measured bool</span>
+  <span class="g">+ }</span>
+<span class="b">●</span> Bash go test ./internal/harness/...
+  <span class="g">ok</span>   harness          0.41s
+  <span class="g">ok</span>   harness/claude   0.88s
+  <span class="y">FAIL</span> harness/opencode
+       stub: Measured=true
+<span class="b">●</span> OpenCode stub needs
+  Measured=false until Q-34
+  is answered. Fixing…
+<span class="g">▌</span></div>
+    <div class="keys"><span>Esc</span><span>Tab</span><span>Ctrl</span><span>↑</span><span>↓</span><span>⏎</span></div>
+    <div style="padding:8px 10px 12px;background:#0e1419;flex:none"><div class="btn p">⌨ Attach &amp; take control</div><div class="small" style="color:#6f8190;text-align:center;margin-top:6px">Atlas pauses while you're attached · Detach returns control</div></div>
+  </div></div>
+
+  <!-- M11 -->
+  <div class="phone-wrap"><h3>M11 · Attachment &amp; mockup viewer</h3><p class="look">Covers FR-102a, FR-116a. <b>New:</b> attachments and mockups open full screen. Pinch to zoom, switch viewport size, rotate for desktop mockups, and tap to pin a comment.</p>
+  <div class="phone"><div class="status" style="background:#111"><span style="color:#fff">9:41</span><span style="color:#fff">●●● 5G</span></div>
+    <div style="background:#111;color:#fff;padding:6px 14px 10px;display:flex;align-items:center;gap:10px;flex:none"><span>✕</span><b style="font-size:14px">usage-panel-mockup.html</b><span style="margin-left:auto;font-size:12px;color:#aaa">3 / 4</span></div>
+    <div style="flex:1;background:#2a2d31;display:grid;place-items:center;position:relative;padding:12px">
+      <div style="background:#fff;border-radius:6px;width:100%;padding:12px;font-size:11px;position:relative">
+        <b style="font-size:12px">Sessions · context usage</b>
+        <div style="margin-top:8px">Forge · OpenCode ≈152k <span class="chip amb">est.</span></div><div class="bar warn" style="margin:4px 0 8px"><i style="width:76%"></i></div>
+        <div>Atlas · Claude 62k <span class="chip grn">measured</span></div><div class="bar" style="margin:4px 0 8px"><i style="width:31%"></i></div>
+        <div style="height:90px;border:1px dashed #b9c2c9;border-radius:6px;background:#eef1f3;display:grid;place-items:center;color:var(--m)">chart</div>
+        <span class="pin" style="right:30px;top:36px"><span>1</span></span>
+      </div>
+      <div style="position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:11px;color:#aaa">Desktop mockup · rotate for 100% · pinch to zoom</div>
+    </div>
+    <div style="background:#111;padding:10px 12px 14px;flex:none;display:flex;flex-direction:column;gap:8px">
+      <div class="seg" style="background:#1d2024;border-color:#333"><span class="on">Desktop</span><span>Tablet</span><span>Phone</span></div>
+      <div style="display:flex;gap:8px;font-size:12px;color:#ddd;align-items:center"><span class="pin" style="position:static;transform:rotate(-45deg)"><span>1</span></span><span>you: explain "est." on hover</span><span style="margin-left:auto">💬 2 · 🎙</span></div>
+    </div>
+  </div></div>
+
+  </div>
+</section>
+<p class="rv-foot">Approach A · Mission Control · mobile mockups. <a href="../index.html">Back to overview</a></p>
+</body>
+</html>

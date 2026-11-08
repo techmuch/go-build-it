@@ -1,6 +1,6 @@
 # go-build-it — Requirements
 
-Status: Draft · Last updated: 2026-11-07
+Status: Draft · Last updated: 2026-11-07 (rev. 2: mockup review feedback)
 
 ## 1. Overview
 
@@ -24,7 +24,8 @@ go-build-it is a Go application with an embedded React frontend that manages lon
 | **Role** | A responsibility within the team. See §4.3. |
 | **Agent harness** | An external agent CLI (e.g. Claude Code, Antigravity, OpenCode, Pi-agent) that go-build-it drives headlessly to carry out a task. |
 | **Session** | One run of a harness working on a task, with its own context window. |
-| **Handoff** | A curated briefing produced when a session ends, mainly when its context window is nearly full. The next session starts from it instead of from a raw memory dump. |
+| **Handoff** | A curated briefing produced when a session ends, mainly when its context window is nearly full. The next session starts from it instead of from a raw memory dump. Smart handoffs are an **experimental** feature; the MVP relies on the harness's own compaction (§8.2). |
+| **Artifact editor** | The view for changing a project artifact, standard or persona definition: chat with an AI agent to make changes, or edit directly in a rich editor. Saving creates a new revision. |
 | **Global standards** | Rules and conventions that apply to every project, e.g. the standard backend stack, frontend stack and test requirements. |
 | **Values** | A project's guiding principles, discovered as work proceeds. They are used to judge and generate solutions. |
 | **Question** | A request for input sent from a team member (usually an AI persona) to a human. It carries the context and artifacts needed to answer it. |
@@ -56,6 +57,7 @@ go-build-it is a Go application with an embedded React frontend that manages lon
 - **FR-10**: A team member SHALL be either an AI persona or a human user.
 - **FR-11**: The user SHALL be able to create, edit and remove teams, and assign teams to projects.
 - **FR-12**: Each AI persona SHALL be configurable with: role, instructions, assigned harness, model, and any role-specific standards that add to the global standards.
+- **FR-13**: Persona definitions SHALL be edited in the artifact editor (FR-45a). The user can write the definition directly, or chat with an AI agent that helps develop the persona (e.g. interviews the user, suggests instructions, checks for conflicts with global standards).
 
 ### 4.2 Access and identity
 
@@ -123,6 +125,11 @@ Authentication is delegated to Tailscale. go-build-it does not run its own login
   - mockups
   - roadmaps
   - a record of the project's **values**
+- **FR-45a**: Each artifact SHALL have an **Edit** action that opens the artifact editor. In the editor the user SHALL be able to:
+  - chat with an AI agent (e.g. the Project Manager or Architect persona) that proposes changes, shown as a highlighted diff the user accepts or rejects
+  - edit the content directly in a rich editor: WYSIWYG for prose, or a code-editor style Markdown editor (syntax highlighting, preview, outline). A plain text area is not sufficient.
+  - save, which creates a new revision. The revision SHALL be committed to the repository by the Git / Release Manager and shown in the artifact's revision history.
+- **FR-45b**: Roadmap items (milestones and review gates) SHALL open a detail page showing: description and scope, tasks with status, linked requirements, gate criteria, assigned team members, and history.
 - **FR-46**: Project artifacts SHOULD be stored in the project's git repository (e.g. under `docs/`) so they are versioned with the code. Operational state (queues, sessions, history) SHALL live in the application database.
 
 ## 7. Global standards
@@ -133,7 +140,7 @@ Authentication is delegated to Tailscale. go-build-it does not run its own login
   - unit tests required
   - end-to-end tests required
   - documentation requirements
-- **FR-51**: Standards SHALL be authored as Markdown and managed in the UI and the CLI.
+- **FR-51**: Standards SHALL be authored as Markdown and managed in the UI and the CLI. They SHALL be edited in the artifact editor (FR-45a), so an AI agent can help draft or change them.
 - **FR-52**: A project MAY override or extend a global standard. Every override SHALL be recorded with its reason.
 - **FR-53**: Standards SHALL be supplied to every agent session automatically, for example by generating the harness's instruction file (`CLAUDE.md`, `AGENTS.md` or equivalent), or by injecting them into the session context.
 - **FR-54**: The Reviewer role SHALL check completed work against the applicable standards.
@@ -152,14 +159,20 @@ Authentication is delegated to Tailscale. go-build-it does not run its own login
   - report exit status
 - **FR-62**: Initial adapters: **Claude Code** (Anthropic subscription), **Antigravity** (Google / Gemini subscription) and **OpenCode** (open-source harness that works with multiple model providers). Pi-agent and others SHOULD be addable through the same interface.
 - **FR-63**: Harnesses and their settings (binary path, model, flags, permission mode) SHALL be configurable in the UI and the CLI.
+- **FR-66**: The live view of a session SHALL offer two modes:
+  - a **structured view**: the harness's events rendered natively (edits, commands, test results, messages)
+  - a **terminal view**: the harness's raw terminal output
+- **FR-67**: The application MAY support **attachable (headed) sessions**: the harness runs interactively in a persistent terminal session that the user can attach to from the desktop or mobile UI, to watch and take control when needed (similar to terminal agent multiplexers such as Herdr and its web front-ends). When the user detaches, control returns to the application.
 - **FR-64**: Concurrent sessions on the same project SHOULD work in isolated workspaces, such as git worktrees, so they don't interfere with each other.
 - **FR-65**: Cost is limited by the user's AI subscriptions, so no budget controls are needed. The application SHALL detect subscription rate or usage limits reported by a harness. It SHALL then pause the affected work and resume it automatically when the limit resets.
 
 ### 8.2 Context management and smart handoffs
 
+For the MVP, sessions SHALL rely on each harness's built-in auto-compaction when the context window fills. Smart handoffs (FR-72–FR-74) are an **experimental** feature: off by default and enabled in Settings, globally or per project. FR-70 and FR-71 apply in both modes.
+
 - **FR-70**: The application SHALL prepare each session's starting context deliberately: the task, the relevant requirements, standards, values, and the incoming handoff (if any). It SHALL NOT dump all of the project's history.
 - **FR-71**: The application SHALL monitor each session's context-window usage while it runs.
-- **FR-72**: When usage reaches a configurable threshold (e.g. 70–80%), the application SHALL step in and start a smart handoff **before** the harness auto-compacts.
+- **FR-72**: *(Experimental.)* When smart handoffs are enabled and usage reaches a configurable threshold (e.g. 70–80%), the application SHALL step in and start a smart handoff **before** the harness auto-compacts. When they are disabled, the application SHALL record each compaction event in the history.
 - **FR-73**: A handoff SHALL be a curated briefing, written as if handing responsibility to another person. At minimum it SHALL contain:
   - objective and definition of done
   - current state and what has been completed
@@ -184,7 +197,7 @@ Authentication is delegated to Tailscale. go-build-it does not run its own login
 ## 9. Git, GitHub and GitLab workflow
 
 - **FR-90**: The application SHALL work with both GitHub (`gh`) and GitLab (`glab`), and SHALL detect which one each project uses and whether its CLI is authenticated.
-- **FR-91**: The application SHALL enforce a defined development workflow, configurable per project with a global default. For example: branch per task → commits → push → PR/MR → review → merge.
+- **FR-91**: The application SHALL enforce a defined development workflow. The workflow SHALL be defined as a global standard (*Git workflow*, §7) that projects may override per FR-52. For example: branch per task → commits → push → PR/MR → review → merge. Settings only hold forge connections and authentication.
 - **FR-92**: All git and forge operations SHALL be carried out by the **Git / Release Manager** role, including:
   - branching and committing
   - pushing
@@ -207,21 +220,32 @@ Authentication is delegated to Tailscale. go-build-it does not run its own login
   - the related task and requirement IDs
   - the asker's recommendation, if it has one
   - attached artifacts, such as mockups, diffs, screenshots, logs or option sets
+- **FR-102a**: Attachments SHALL open in an in-app viewer suited to their type: HTML mockups rendered live (with desktop and mobile viewport sizes), images with zoom, diffs side by side, and JSON or logs with syntax highlighting.
 - **FR-103**: Questions MAY offer structured answers (choices, yes/no, pick-an-option) as well as free text.
 - **FR-104**: A **Questions dashboard** (on desktop and mobile) SHALL list open questions across all projects. It SHALL put blocking questions first and SHALL let the user answer each question in place, with its context, so they can get through them quickly.
 - **FR-105**: Answers SHALL be sent back to the asking session or task automatically. Answers that reveal a project value SHALL be offered for recording in the project's values (§10.4).
 - **FR-106**: Email and other out-of-app notifications are out of scope for now. In-app live updates (FR-36) are in scope.
+- **FR-107**: Wherever the user writes an answer, feedback or chat message, they SHALL be able to dictate it by voice (speech-to-text) as well as type it. The transcript SHALL be editable before sending.
 
 ### 10.2 Feedback on completed work
 
 - **FR-110**: The application SHALL provide an easy way to give feedback on completed work. The verdicts are: approve, request changes, or reject. Comments SHALL attach to a specific artifact, screen or diff location.
 - **FR-111**: Feedback SHALL go into the context of the follow-up task automatically, and SHALL be recorded in the history.
+- **FR-112**: The review of completed work SHALL be an assessment, not primarily a code diff. It SHALL show:
+  - the approved mockup next to the built result (screenshots captured by the e2e tests)
+  - a summary of the tests run: unit and end-to-end, passed, failed and coverage
+  - an assessment against the global and project standards
+  - an assessment against the feedback given during mockup reviews and dress rehearsals: addressed or not
+  - an assessment against the requirements in scope: met, partly met or not met, with evidence
+  - a link to the pull or merge request, where the code diff remains available
 
 ### 10.3 Review gates and dress rehearsals
 
 - **FR-115**: Roadmaps SHALL support **review gates**: defined points where work pauses for human review and feedback before going on.
 - **FR-116**: A review gate MAY be a **dress rehearsal**. The application walks the human step by step through every feature or scenario in scope. It can do this as a tabletop exercise before implementation (using mockups and scenarios) or as a UAT run after it (using the working application).
+- **FR-116a**: Mockups and screens shown in option sets, rehearsals and reviews SHALL open in a large viewer (full screen, with desktop and mobile viewport sizes), because a desktop-sized mockup does not fit inside a panel of the desktop app.
 - **FR-117**: During a dress rehearsal, the human SHALL be able to give feedback on each step, and SHALL be able to talk with the agents live to request changes or improvements as the rehearsal goes on.
+- **FR-117a**: More than one reviewer, human or AI persona, SHALL be able to record findings on the same rehearsal. Each finding SHALL be attributed to its author.
 - **FR-118**: Rehearsal outcomes (feedback per step, changes requested, approval) SHALL be recorded. A gate SHALL NOT be passed until the human explicitly approves it.
 
 ### 10.4 Exploratory design and values
@@ -247,6 +271,7 @@ Authentication is delegated to Tailscale. go-build-it does not run its own login
   - rework rates
   - question volume
   - time per task
+- **NFR-14**: Every history event SHALL open a detail view suited to its type: session transcript or log, handoff, compaction, question and answer, review, rehearsal finding, option choice, git operation. Actions taken by humans SHALL be recorded and viewable in the same way as agent actions.
 - **NFR-13**: Agents SHALL be able to use that analysis to propose and make improvements to go-build-it itself, such as prompts, persona definitions, handoff templates or code. These changes go through the normal review workflow.
 
 ## 12. Built-in documentation
@@ -267,10 +292,11 @@ Authentication is delegated to Tailscale. go-build-it does not run its own login
 |---|---|
 | Q1 | For access through an external network interface (FR-18), what should the challenge be: a local password or token, an OAuth/OIDC provider, or refusing external access completely and requiring Tailscale Serve? |
 | Q2 | Check that each target harness supports headless operation **and** reports context-window usage. Claude Code reports usage in its streaming JSON output. OpenCode offers a non-interactive mode (`opencode run`) and a server mode; how it reports context usage needs to be confirmed. Antigravity's headless and CLI support needs to be confirmed. |
-| Q3 | What is the default context threshold for a handoff, and should it be configurable per harness or model? |
+| Q3 | When smart handoffs graduate from experimental, what is the default context threshold, and should it be configurable per harness or model? What evidence (rework rate, handoff quality vs. compaction) decides that they are ready? |
 | Q4 | Can multiple humans collaborate on the same projects (e.g. different Tailscale users with different roles), or is it single-user with optional reviewers? |
 | Q5 | What is the exact default git workflow (branch naming, PR/MR requirements, merge strategy)? |
 | Q6 | What is the mechanism and channel for auto-updates (GitHub Releases, Homebrew tap, etc.)? |
+| Q7 | How should attachable (headed) sessions work (FR-67): which terminal multiplexer or PTY approach, and how does the app read context usage and events from an interactive session? |
 
 ## 15. Out of scope (for now)
 

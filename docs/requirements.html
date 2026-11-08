@@ -82,7 +82,7 @@ td:first-child { white-space: nowrap; }
 </ol></nav>
 <main>
 <h1>go-build-it — Requirements</h1>
-<p class="meta">Status: Draft · Last updated: 2026-11-07</p>
+<p class="meta">Status: Draft · Last updated: 2026-11-07 (rev. 2: mockup review feedback)</p>
 <h2 id="1-overview">1. Overview</h2>
 <p>go-build-it is a Go application with an embedded React frontend that manages long-running software project development. It is installed globally on a machine and provides a web UI and a CLI. A team of AI personas and humans works through it to take projects from problem definition to released software. The app coordinates external agent harnesses such as Claude Code, Antigravity and OpenCode, and it drives them headlessly.</p>
 <h3 id="conventions">Conventions</h3>
@@ -104,7 +104,8 @@ Requirement IDs (<code>FR-xx</code>, <code>NFR-xx</code>) are stable. Tests, the
 <tr><td><strong>Role</strong></td><td>A responsibility within the team. See §4.3.</td></tr>
 <tr><td><strong>Agent harness</strong></td><td>An external agent CLI (e.g. Claude Code, Antigravity, OpenCode, Pi-agent) that go-build-it drives headlessly to carry out a task.</td></tr>
 <tr><td><strong>Session</strong></td><td>One run of a harness working on a task, with its own context window.</td></tr>
-<tr><td><strong>Handoff</strong></td><td>A curated briefing produced when a session ends, mainly when its context window is nearly full. The next session starts from it instead of from a raw memory dump.</td></tr>
+<tr><td><strong>Handoff</strong></td><td>A curated briefing produced when a session ends, mainly when its context window is nearly full. The next session starts from it instead of from a raw memory dump. Smart handoffs are an <strong>experimental</strong> feature; the MVP relies on the harness's own compaction (§8.2).</td></tr>
+<tr><td><strong>Artifact editor</strong></td><td>The view for changing a project artifact, standard or persona definition: chat with an AI agent to make changes, or edit directly in a rich editor. Saving creates a new revision.</td></tr>
 <tr><td><strong>Global standards</strong></td><td>Rules and conventions that apply to every project, e.g. the standard backend stack, frontend stack and test requirements.</td></tr>
 <tr><td><strong>Values</strong></td><td>A project's guiding principles, discovered as work proceeds. They are used to judge and generate solutions.</td></tr>
 <tr><td><strong>Question</strong></td><td>A request for input sent from a team member (usually an AI persona) to a human. It carries the context and artifacts needed to answer it.</td></tr>
@@ -152,6 +153,8 @@ The user <span class="kw kw-SHALL">SHALL</span> be able to turn automatic update
 <strong class="rid" id="FR-11">FR-11</strong>: The user <span class="kw kw-SHALL">SHALL</span> be able to create, edit and remove teams, and assign teams to projects.
 </li><li>
 <strong class="rid" id="FR-12">FR-12</strong>: Each AI persona <span class="kw kw-SHALL">SHALL</span> be configurable with: role, instructions, assigned harness, model, and any role-specific standards that add to the global standards.
+</li><li>
+<strong class="rid" id="FR-13">FR-13</strong>: Persona definitions <span class="kw kw-SHALL">SHALL</span> be edited in the artifact editor (FR-45a). The user can write the definition directly, or chat with an AI agent that helps develop the persona (e.g. interviews the user, suggests instructions, checks for conflicts with global standards).
 </li></ul>
 <h3 id="4-2-access-and-identity">4.2 Access and identity</h3>
 <p>Authentication is delegated to Tailscale. go-build-it does not run its own login system for local or tailnet access.</p>
@@ -254,6 +257,17 @@ roadmaps
 a record of the project's <strong>values</strong>
 </li></ul>
 </li><li>
+<strong class="rid" id="FR-45a">FR-45a</strong>: Each artifact <span class="kw kw-SHALL">SHALL</span> have an <strong>Edit</strong> action that opens the artifact editor. In the editor the user <span class="kw kw-SHALL">SHALL</span> be able to:
+<ul><li>
+chat with an AI agent (e.g. the Project Manager or Architect persona) that proposes changes, shown as a highlighted diff the user accepts or rejects
+</li><li>
+edit the content directly in a rich editor: WYSIWYG for prose, or a code-editor style Markdown editor (syntax highlighting, preview, outline). A plain text area is not sufficient.
+</li><li>
+save, which creates a new revision. The revision <span class="kw kw-SHALL">SHALL</span> be committed to the repository by the Git / Release Manager and shown in the artifact's revision history.
+</li></ul>
+</li><li>
+<strong class="rid" id="FR-45b">FR-45b</strong>: Roadmap items (milestones and review gates) <span class="kw kw-SHALL">SHALL</span> open a detail page showing: description and scope, tasks with status, linked requirements, gate criteria, assigned team members, and history.
+</li><li>
 <strong class="rid" id="FR-46">FR-46</strong>: Project artifacts <span class="kw kw-SHOULD">SHOULD</span> be stored in the project's git repository (e.g. under <code>docs/</code>) so they are versioned with the code. Operational state (queues, sessions, history) <span class="kw kw-SHALL">SHALL</span> live in the application database.
 </li></ul>
 <h2 id="7-global-standards">7. Global standards</h2>
@@ -271,7 +285,7 @@ end-to-end tests required
 documentation requirements
 </li></ul>
 </li><li>
-<strong class="rid" id="FR-51">FR-51</strong>: Standards <span class="kw kw-SHALL">SHALL</span> be authored as Markdown and managed in the UI and the CLI.
+<strong class="rid" id="FR-51">FR-51</strong>: Standards <span class="kw kw-SHALL">SHALL</span> be authored as Markdown and managed in the UI and the CLI. They <span class="kw kw-SHALL">SHALL</span> be edited in the artifact editor (FR-45a), so an AI agent can help draft or change them.
 </li><li>
 <strong class="rid" id="FR-52">FR-52</strong>: A project <span class="kw kw-MAY">MAY</span> override or extend a global standard. Every override <span class="kw kw-SHALL">SHALL</span> be recorded with its reason.
 </li><li>
@@ -303,17 +317,27 @@ report exit status
 </li><li>
 <strong class="rid" id="FR-63">FR-63</strong>: Harnesses and their settings (binary path, model, flags, permission mode) <span class="kw kw-SHALL">SHALL</span> be configurable in the UI and the CLI.
 </li><li>
+<strong class="rid" id="FR-66">FR-66</strong>: The live view of a session <span class="kw kw-SHALL">SHALL</span> offer two modes:
+<ul><li>
+a <strong>structured view</strong>: the harness's events rendered natively (edits, commands, test results, messages)
+</li><li>
+a <strong>terminal view</strong>: the harness's raw terminal output
+</li></ul>
+</li><li>
+<strong class="rid" id="FR-67">FR-67</strong>: The application <span class="kw kw-MAY">MAY</span> support <strong>attachable (headed) sessions</strong>: the harness runs interactively in a persistent terminal session that the user can attach to from the desktop or mobile UI, to watch and take control when needed (similar to terminal agent multiplexers such as Herdr and its web front-ends). When the user detaches, control returns to the application.
+</li><li>
 <strong class="rid" id="FR-64">FR-64</strong>: Concurrent sessions on the same project <span class="kw kw-SHOULD">SHOULD</span> work in isolated workspaces, such as git worktrees, so they don't interfere with each other.
 </li><li>
 <strong class="rid" id="FR-65">FR-65</strong>: Cost is limited by the user's AI subscriptions, so no budget controls are needed. The application <span class="kw kw-SHALL">SHALL</span> detect subscription rate or usage limits reported by a harness. It <span class="kw kw-SHALL">SHALL</span> then pause the affected work and resume it automatically when the limit resets.
 </li></ul>
 <h3 id="8-2-context-management-and-smart-handoffs">8.2 Context management and smart handoffs</h3>
+<p>For the MVP, sessions <span class="kw kw-SHALL">SHALL</span> rely on each harness's built-in auto-compaction when the context window fills. Smart handoffs (FR-72–FR-74) are an <strong>experimental</strong> feature: off by default and enabled in Settings, globally or per project. FR-70 and FR-71 apply in both modes.</p>
 <ul><li>
 <strong class="rid" id="FR-70">FR-70</strong>: The application <span class="kw kw-SHALL">SHALL</span> prepare each session's starting context deliberately: the task, the relevant requirements, standards, values, and the incoming handoff (if any). It <span class="kw kw-SHALLNOT">SHALL NOT</span> dump all of the project's history.
 </li><li>
 <strong class="rid" id="FR-71">FR-71</strong>: The application <span class="kw kw-SHALL">SHALL</span> monitor each session's context-window usage while it runs.
 </li><li>
-<strong class="rid" id="FR-72">FR-72</strong>: When usage reaches a configurable threshold (e.g. 70–80%), the application <span class="kw kw-SHALL">SHALL</span> step in and start a smart handoff <strong>before</strong> the harness auto-compacts.
+<strong class="rid" id="FR-72">FR-72</strong>: <em>(Experimental.)</em> When smart handoffs are enabled and usage reaches a configurable threshold (e.g. 70–80%), the application <span class="kw kw-SHALL">SHALL</span> step in and start a smart handoff <strong>before</strong> the harness auto-compacts. When they are disabled, the application <span class="kw kw-SHALL">SHALL</span> record each compaction event in the history.
 </li><li>
 <strong class="rid" id="FR-73">FR-73</strong>: A handoff <span class="kw kw-SHALL">SHALL</span> be a curated briefing, written as if handing responsibility to another person. At minimum it <span class="kw kw-SHALL">SHALL</span> contain:
 <ul><li>
@@ -357,7 +381,7 @@ assignment of tasks to roles or personas
 <ul><li>
 <strong class="rid" id="FR-90">FR-90</strong>: The application <span class="kw kw-SHALL">SHALL</span> work with both GitHub (<code>gh</code>) and GitLab (<code>glab</code>), and <span class="kw kw-SHALL">SHALL</span> detect which one each project uses and whether its CLI is authenticated.
 </li><li>
-<strong class="rid" id="FR-91">FR-91</strong>: The application <span class="kw kw-SHALL">SHALL</span> enforce a defined development workflow, configurable per project with a global default. For example: branch per task → commits → push → PR/MR → review → merge.
+<strong class="rid" id="FR-91">FR-91</strong>: The application <span class="kw kw-SHALL">SHALL</span> enforce a defined development workflow. The workflow <span class="kw kw-SHALL">SHALL</span> be defined as a global standard (<em>Git workflow</em>, §7) that projects may override per FR-52. For example: branch per task → commits → push → PR/MR → review → merge. Settings only hold forge connections and authentication.
 </li><li>
 <strong class="rid" id="FR-92">FR-92</strong>: All git and forge operations <span class="kw kw-SHALL">SHALL</span> be carried out by the <strong>Git / Release Manager</strong> role, including:
 <ul><li>
@@ -398,6 +422,8 @@ the asker's recommendation, if it has one
 attached artifacts, such as mockups, diffs, screenshots, logs or option sets
 </li></ul>
 </li><li>
+<strong class="rid" id="FR-102a">FR-102a</strong>: Attachments <span class="kw kw-SHALL">SHALL</span> open in an in-app viewer suited to their type: HTML mockups rendered live (with desktop and mobile viewport sizes), images with zoom, diffs side by side, and JSON or logs with syntax highlighting.
+</li><li>
 <strong class="rid" id="FR-103">FR-103</strong>: Questions <span class="kw kw-MAY">MAY</span> offer structured answers (choices, yes/no, pick-an-option) as well as free text.
 </li><li>
 <strong class="rid" id="FR-104">FR-104</strong>: A <strong>Questions dashboard</strong> (on desktop and mobile) <span class="kw kw-SHALL">SHALL</span> list open questions across all projects. It <span class="kw kw-SHALL">SHALL</span> put blocking questions first and <span class="kw kw-SHALL">SHALL</span> let the user answer each question in place, with its context, so they can get through them quickly.
@@ -405,12 +431,29 @@ attached artifacts, such as mockups, diffs, screenshots, logs or option sets
 <strong class="rid" id="FR-105">FR-105</strong>: Answers <span class="kw kw-SHALL">SHALL</span> be sent back to the asking session or task automatically. Answers that reveal a project value <span class="kw kw-SHALL">SHALL</span> be offered for recording in the project's values (§10.4).
 </li><li>
 <strong class="rid" id="FR-106">FR-106</strong>: Email and other out-of-app notifications are out of scope for now. In-app live updates (FR-36) are in scope.
+</li><li>
+<strong class="rid" id="FR-107">FR-107</strong>: Wherever the user writes an answer, feedback or chat message, they <span class="kw kw-SHALL">SHALL</span> be able to dictate it by voice (speech-to-text) as well as type it. The transcript <span class="kw kw-SHALL">SHALL</span> be editable before sending.
 </li></ul>
 <h3 id="10-2-feedback-on-completed-work">10.2 Feedback on completed work</h3>
 <ul><li>
 <strong class="rid" id="FR-110">FR-110</strong>: The application <span class="kw kw-SHALL">SHALL</span> provide an easy way to give feedback on completed work. The verdicts are: approve, request changes, or reject. Comments <span class="kw kw-SHALL">SHALL</span> attach to a specific artifact, screen or diff location.
 </li><li>
 <strong class="rid" id="FR-111">FR-111</strong>: Feedback <span class="kw kw-SHALL">SHALL</span> go into the context of the follow-up task automatically, and <span class="kw kw-SHALL">SHALL</span> be recorded in the history.
+</li><li>
+<strong class="rid" id="FR-112">FR-112</strong>: The review of completed work <span class="kw kw-SHALL">SHALL</span> be an assessment, not primarily a code diff. It <span class="kw kw-SHALL">SHALL</span> show:
+<ul><li>
+the approved mockup next to the built result (screenshots captured by the e2e tests)
+</li><li>
+a summary of the tests run: unit and end-to-end, passed, failed and coverage
+</li><li>
+an assessment against the global and project standards
+</li><li>
+an assessment against the feedback given during mockup reviews and dress rehearsals: addressed or not
+</li><li>
+an assessment against the requirements in scope: met, partly met or not met, with evidence
+</li><li>
+a link to the pull or merge request, where the code diff remains available
+</li></ul>
 </li></ul>
 <h3 id="10-3-review-gates-and-dress-rehearsals">10.3 Review gates and dress rehearsals</h3>
 <ul><li>
@@ -418,7 +461,11 @@ attached artifacts, such as mockups, diffs, screenshots, logs or option sets
 </li><li>
 <strong class="rid" id="FR-116">FR-116</strong>: A review gate <span class="kw kw-MAY">MAY</span> be a <strong>dress rehearsal</strong>. The application walks the human step by step through every feature or scenario in scope. It can do this as a tabletop exercise before implementation (using mockups and scenarios) or as a UAT run after it (using the working application).
 </li><li>
+<strong class="rid" id="FR-116a">FR-116a</strong>: Mockups and screens shown in option sets, rehearsals and reviews <span class="kw kw-SHALL">SHALL</span> open in a large viewer (full screen, with desktop and mobile viewport sizes), because a desktop-sized mockup does not fit inside a panel of the desktop app.
+</li><li>
 <strong class="rid" id="FR-117">FR-117</strong>: During a dress rehearsal, the human <span class="kw kw-SHALL">SHALL</span> be able to give feedback on each step, and <span class="kw kw-SHALL">SHALL</span> be able to talk with the agents live to request changes or improvements as the rehearsal goes on.
+</li><li>
+<strong class="rid" id="FR-117a">FR-117a</strong>: More than one reviewer, human or AI persona, <span class="kw kw-SHALL">SHALL</span> be able to record findings on the same rehearsal. Each finding <span class="kw kw-SHALL">SHALL</span> be attributed to its author.
 </li><li>
 <strong class="rid" id="FR-118">FR-118</strong>: Rehearsal outcomes (feedback per step, changes requested, approval) <span class="kw kw-SHALL">SHALL</span> be recorded. A gate <span class="kw kw-SHALLNOT">SHALL NOT</span> be passed until the human explicitly approves it.
 </li></ul>
@@ -464,6 +511,8 @@ question volume
 time per task
 </li></ul>
 </li><li>
+<strong class="rid" id="NFR-14">NFR-14</strong>: Every history event <span class="kw kw-SHALL">SHALL</span> open a detail view suited to its type: session transcript or log, handoff, compaction, question and answer, review, rehearsal finding, option choice, git operation. Actions taken by humans <span class="kw kw-SHALL">SHALL</span> be recorded and viewable in the same way as agent actions.
+</li><li>
 <strong class="rid" id="NFR-13">NFR-13</strong>: Agents <span class="kw kw-SHALL">SHALL</span> be able to use that analysis to propose and make improvements to go-build-it itself, such as prompts, persona definitions, handoff templates or code. These changes go through the normal review workflow.
 </li></ul>
 <h2 id="12-built-in-documentation">12. Built-in documentation</h2>
@@ -486,10 +535,11 @@ time per task
 <div class="table-wrap"><table><thead><tr><th>#</th><th>Question</th></tr></thead><tbody>
 <tr><td>Q1</td><td>For access through an external network interface (FR-18), what should the challenge be: a local password or token, an OAuth/OIDC provider, or refusing external access completely and requiring Tailscale Serve?</td></tr>
 <tr><td>Q2</td><td>Check that each target harness supports headless operation <strong>and</strong> reports context-window usage. Claude Code reports usage in its streaming JSON output. OpenCode offers a non-interactive mode (<code>opencode run</code>) and a server mode; how it reports context usage needs to be confirmed. Antigravity's headless and CLI support needs to be confirmed.</td></tr>
-<tr><td>Q3</td><td>What is the default context threshold for a handoff, and should it be configurable per harness or model?</td></tr>
+<tr><td>Q3</td><td>When smart handoffs graduate from experimental, what is the default context threshold, and should it be configurable per harness or model? What evidence (rework rate, handoff quality vs. compaction) decides that they are ready?</td></tr>
 <tr><td>Q4</td><td>Can multiple humans collaborate on the same projects (e.g. different Tailscale users with different roles), or is it single-user with optional reviewers?</td></tr>
 <tr><td>Q5</td><td>What is the exact default git workflow (branch naming, PR/MR requirements, merge strategy)?</td></tr>
 <tr><td>Q6</td><td>What is the mechanism and channel for auto-updates (GitHub Releases, Homebrew tap, etc.)?</td></tr>
+<tr><td>Q7</td><td>How should attachable (headed) sessions work (FR-67): which terminal multiplexer or PTY approach, and how does the app read context usage and events from an interactive session?</td></tr>
 </tbody></table></div>
 <h2 id="15-out-of-scope-for-now">15. Out of scope (for now)</h2>
 <ul><li>
