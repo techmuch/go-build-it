@@ -20,7 +20,9 @@ window.TRACKER = {
     "Q2 spike results recorded; adapters scoped",
     "Q1, Q5, Q6 decided (Q4 can wait for P9)",
     "Repo builds a CalVer-stamped binary in CI"
-   ]
+   ],
+   "gateApproved": "2026-11-08",
+   "gateApprovedBy": "david (owner)"
   },
   {
    "id": "P1",
@@ -32,7 +34,9 @@ window.TRACKER = {
     "Install, open on localhost and over Tailscale Serve with the right identity badge",
     "Every API call has a CLI command with --json",
     "History records every write with who/what/when/why"
-   ]
+   ],
+   "gateApproved": "2026-11-08",
+   "gateApprovedBy": "david (owner)"
   },
   {
    "id": "P2",
@@ -44,7 +48,9 @@ window.TRACKER = {
     "6 real repos imported and shown correctly",
     "Release, website, CI and unpushed-work data on every card",
     "Roadmap items open their detail page"
-   ]
+   ],
+   "gateApproved": "2026-11-08",
+   "gateApprovedBy": "david (owner)"
   },
   {
    "id": "P3",
@@ -57,7 +63,9 @@ window.TRACKER = {
     "Context % visible live, marked measured or estimated",
     "Compaction logged; rate-limit pause and auto-resume shown",
     "Queue survives a restart"
-   ]
+   ],
+   "gateApproved": "2026-11-08",
+   "gateApprovedBy": "david (owner)"
   },
   {
    "id": "P4",
@@ -69,7 +77,9 @@ window.TRACKER = {
     "Task → branch → PR → merge → tag → Pages, end to end on a sample project",
     "Nothing completed is left unpushed",
     "From here go-build-it can manage its own remaining phases (dogfooding)"
-   ]
+   ],
+   "gateApproved": "2026-11-08",
+   "gateApprovedBy": "david (owner)"
   },
   {
    "id": "P5",
@@ -81,7 +91,9 @@ window.TRACKER = {
     "Full desktop UAT walkthrough passes for the Owner role",
     "A real feature goes option set → rehearsal → build → assessment review → release",
     "MVP release tagged"
-   ]
+   ],
+   "gateApproved": "2026-11-08",
+   "gateApprovedBy": "david (owner)"
   },
   {
    "id": "P6",
@@ -92,7 +104,9 @@ window.TRACKER = {
    "gateCriteria": [
     "Answer a blocking question, approve a review and give rehearsal feedback one-handed in under a minute each",
     "Phone e2e screenshots in docs"
-   ]
+   ],
+   "gateApproved": "2026-11-08",
+   "gateApprovedBy": "david (owner)"
   },
   {
    "id": "P7",
@@ -103,7 +117,9 @@ window.TRACKER = {
    "gateCriteria": [
     "Rebuild any task's story from history alone",
     "An agent proposes an improvement from real metrics and it is reviewed"
-   ]
+   ],
+   "gateApproved": "2026-11-08",
+   "gateApprovedBy": "david (owner)"
   },
   {
    "id": "P8",
@@ -115,7 +131,9 @@ window.TRACKER = {
     "UAT scripts for every role pass and regenerate docs screenshots",
     "Auto-update and rollback demonstrated",
     "External agent drives the app through MCP"
-   ]
+   ],
+   "gateApproved": "2026-11-08",
+   "gateApprovedBy": "david (owner)"
   },
   {
    "id": "P9",
@@ -126,7 +144,9 @@ window.TRACKER = {
    "gateCriteria": [
     "Each experimental feature has evidence (NFR-12 metrics) before it becomes default",
     "Linux and Windows pass the UAT suite"
-   ]
+   ],
+   "gateApproved": "2026-11-08",
+   "gateApprovedBy": "david (owner)"
   }
  ],
  "tasks": [

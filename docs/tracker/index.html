@@ -234,7 +234,7 @@ table.t tr.sec td { background:var(--bg); font-weight:600; font-size:12.5px; col
       '<div class="hd"><span class="id">' + p.id + '</span><span>' + (p.mvp ? '<span class="chip mvp">MVP</span> ' : "") + '<span class="chip ' + st + '">' + (st === "todo" ? "planned" : st) + '</span></span></div>' +
       '<div class="nm">' + esc(p.name) + '</div><div class="goal">' + esc(p.goal) + '</div>' + bar(pr) +
       '<div class="s" style="font-size:12px;color:var(--m)">' + l.length + ' tasks · ' + pr.pct + '%</div>' +
-      '<div class="gate"><b>◆ ' + esc(p.gate) + '</b><br>' + p.gateCriteria.map(esc).join("<br>") + '</div></div>';
+      '<div class="gate"><b>◆ ' + esc(p.gate) + '</b>' + (p.gateApproved ? ' <span class="chip done">✓ approved ' + esc(p.gateApproved) + '</span>' : '') + '<br>' + p.gateCriteria.map(esc).join("<br>") + '</div></div>';
   }).join("");
   document.querySelectorAll(".ph").forEach(function (el) { el.onclick = function () { $("#fphase").value = el.dataset.p; applyFilters(); show("tasks"); }; });
   var ready = D.tasks.filter(isReady);

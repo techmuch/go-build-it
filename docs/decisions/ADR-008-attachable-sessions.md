@@ -1,6 +1,6 @@
 # ADR-008: Attachable (headed) sessions use tmux (Q7)
 
-Status: Accepted (experimental) · 2026-11-08 · Tracker: P9-03
+Status: Accepted (experimental) · approved by the owner 2026-11-08 · Tracker: P9-03
 
 When `experimental.attachable_sessions` is on and tmux is installed, a session runs the harness's interactive TUI inside a tmux session named `gbi-<session id>`, in the task's worktree.
 
