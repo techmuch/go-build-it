@@ -252,8 +252,8 @@ The longest chain runs through the **harness spike (P0-04, Q2)**, the adapter in
 | **P9-02** Handoff vs compaction evaluation and graduation criteria ✅ · waits on Q3 | M | FR-72, NFR-12 | A-v12 | P9-01, P7-03 |
 | **P9-03** Attachable headed sessions: PTY/multiplexer, attach, detach, control handback ✅ · waits on Q7 | L | FR-67 | A-v05b, A-M10 | P3-16 |
 | **P9-04** Pi-agent adapter ✅ | M | FR-62 | — | P3-04 |
-| **P9-05** Linux support (systemd) 🔶 | M | NFR-01, FR-02 | — | P1-11 |
-| **P9-06** Windows support (service, paths) 🔶 | L | NFR-01, FR-02 | — | P1-11 |
+| **P9-05** Linux support (systemd) ✅ | M | NFR-01, FR-02 | — | P1-11 |
+| **P9-06** Windows support (service, paths) ✅ | L | NFR-01, FR-02 | — | P1-11 |
 | **P9-07** External interface challenge (if Q1 allows external access) ✅ · waits on Q1 | M | FR-18 | — | P1-06 |
 | **P9-08** Multi-user roles and review assignment ✅ · waits on Q4 | L | FR-17, FR-117a | — | P5-09 |
 
