@@ -19,9 +19,12 @@ var migrations embed.FS
 // Open opens (or creates) the database at path and migrates it to the latest schema.
 // Use ":memory:" in tests.
 func Open(path string) (*sql.DB, error) {
-	dsn := path
+	// Pragmas go in the DSN so every pooled connection gets them; a one-off Exec only
+	// configures one connection, and the others would fail with SQLITE_BUSY at once.
+	const pragmas = "_pragma=busy_timeout(10000)&_pragma=journal_mode(WAL)&_pragma=foreign_keys(1)"
+	dsn := "file:" + path + "?" + pragmas
 	if path == ":memory:" {
-		dsn = "file::memory:?cache=shared"
+		dsn = "file::memory:?cache=shared&" + pragmas
 	}
 	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
@@ -30,10 +33,9 @@ func Open(path string) (*sql.DB, error) {
 	if path == ":memory:" {
 		db.SetMaxOpenConns(1)
 	}
-	for _, p := range []string{"PRAGMA journal_mode=WAL", "PRAGMA busy_timeout=5000", "PRAGMA foreign_keys=ON"} {
-		if _, err := db.Exec(p); err != nil {
-			return nil, fmt.Errorf("%s: %w", p, err)
-		}
+	var timeout int
+	if err := db.QueryRow("PRAGMA busy_timeout").Scan(&timeout); err != nil || timeout < 10000 {
+		return nil, fmt.Errorf("sqlite pragmas not applied (busy_timeout=%d): %v", timeout, err)
 	}
 	if err := migrate(db); err != nil {
 		return nil, err
