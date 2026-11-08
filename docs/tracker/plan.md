@@ -153,7 +153,7 @@ The longest chain runs through the **harness spike (P0-04, Q2)**, the adapter in
 | **P4-03** Agent-assisted ops: merge conflicts, release notes ✅ | M | FR-92, FR-93 | — | P4-02, P3-15 |
 | **P4-04** Push guarantee and reconciliation loop ✅ | S | FR-94 | A-v01 | P4-02 |
 | **P4-05** Managed-project releases: CalVer tag and forge release ✅ | M | FR-92, FR-44 | A-v02 | P4-02 |
-| **P4-06** Pages publishing (GitHub / GitLab) and stored URL | M | FR-44 | A-v01, A-v02 | P4-05 |
+| **P4-06** Pages publishing (GitHub / GitLab) and stored URL ✅ | M | FR-44 | A-v01, A-v02 | P4-05 |
 | **P4-07** Artifact revisions committed by Courier ✅ | S | FR-46, FR-45a | A-v03b | P4-02 |
 
 ### P5 · Human-in-the-loop (MVP) (MVP)

@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -27,6 +28,9 @@ var gbiBin string
 func TestMain(m *testing.M) {
 	dir, _ := os.MkdirTemp("", "gbi-bin-")
 	gbiBin = filepath.Join(dir, "gbi")
+	if runtime.GOOS == "windows" {
+		gbiBin += ".exe"
+	}
 	cmd := exec.Command("go", "build", "-o", gbiBin, "../../cmd/gbi")
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
