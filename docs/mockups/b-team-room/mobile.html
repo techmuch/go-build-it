@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Approach B Mobile</title>
+<link rel="stylesheet" href="../frame.css">
+<style>
+.phone { --bg:#faf6ef; --card:#fffdf9; --line:#e8dfd1; --t:#2b2622; --m:#7a6f64; --acc:#c2562f; --acc-s:#f8e6dc; --sage:#5f7f63; --sage-s:#e6eee4; --gold:#b58a1b; --gold-s:#f6ecd0; --sky:#3f6f99;
+  background:var(--bg); color:var(--t); font:14px/1.5 "Iowan Old Style", Georgia, serif; }
+.ui { font-family:-apple-system, system-ui, sans-serif; }
+.hdr { padding:4px 18px 10px; flex:none; } .hdr h1 { margin:0; font-size:26px; font-weight:600; } .hdr .sub { font:12.5px -apple-system, system-ui, sans-serif; color:var(--m); }
+.body { flex:1; overflow:hidden; padding:6px 14px 12px; display:flex; flex-direction:column; gap:10px; }
+.tabbar { flex:none; height:66px; background:var(--card); border-top:1px solid var(--line); display:grid; grid-template-columns:repeat(4,1fr); font:11px -apple-system, system-ui, sans-serif; color:var(--m); text-align:center; padding-top:9px; }
+.tabbar b { display:block; font-size:18px; font-weight:400; } .tabbar .on { color:var(--acc); font-weight:600; }
+.tabbar .dot { background:var(--acc); color:#fff; border-radius:999px; font-size:10px; padding:0 5px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px 14px; }
+.card.hot { border:2px solid var(--acc); }
+.tag { display:inline-block; font:500 11px -apple-system, system-ui, sans-serif; padding:2px 8px; border-radius:999px; background:#efe8dc; color:#5b5148; }
+.tag.acc{background:var(--acc-s);color:var(--acc)} .tag.sage{background:var(--sage-s);color:var(--sage)} .tag.gold{background:var(--gold-s);color:var(--gold)}
+.m{color:var(--m)} .sm{font-size:12.5px} .mono{font:11.5px ui-monospace,Menlo,monospace}
+.av { width:32px; height:32px; border-radius:50%; display:inline-grid; place-items:center; font:700 11px -apple-system, system-ui, sans-serif; color:#fff; flex:none; }
+.av.s { width:24px; height:24px; font-size:10px; }
+.av.pm{background:#7b4f8e}.av.ar{background:#3f6f99}.av.dv{background:#5f7f63}.av.dv2{background:#8a9a4b}.av.qa{background:#b58a1b}.av.rv{background:#c2562f}.av.gt{background:#6b6158}.av.hu{background:#2b2622}
+.msg { display:flex; gap:10px; } .who { font:600 12.5px -apple-system, system-ui, sans-serif; } .who span { font-weight:400; color:var(--m); }
+.bubble { background:var(--card); border:1px solid var(--line); border-radius:4px 16px 16px 16px; padding:9px 12px; margin-top:3px; font-size:13.5px; }
+.bubble.me { background:#2b2622; color:#f6efe4; border-color:#2b2622; border-radius:16px 4px 16px 16px; }
+.bubble.ask { border:2px solid var(--acc); }
+.btn { display:block; text-align:center; font:600 14px -apple-system, system-ui, sans-serif; padding:12px; border-radius:999px; border:1px solid var(--line); background:#fff; }
+.btn.p { background:var(--acc); color:#fff; border-color:var(--acc); } .btn.s { background:var(--sage); color:#fff; border-color:var(--sage); }
+.rowb { display:flex; gap:8px; } .rowb > * { flex:1; }
+.fuel { height:8px; border-radius:999px; background:#efe8dc; overflow:hidden; } .fuel i { display:block; height:100%; background:var(--sage); } .fuel.w i { background:var(--gold); }
+.compose { border:1px solid var(--line); border-radius:999px; background:#fff; padding:10px 14px; font:13px -apple-system, system-ui, sans-serif; color:var(--m); display:flex; justify-content:space-between; }
+</style>
+</head>
+<body class="mock">
+<div class="rv-bar">
+  <span class="rv-title">Approach B: Team Room <small>Mobile · 9 screens · rev 2</small></span>
+  <a href="../index.html">← Overview &amp; review guide</a>
+  <a href="desktop.html">Approach B desktop</a>
+  <span class="rv-spacer"></span>
+  <a href="../a-mission-control/mobile.html">A mobile</a>
+  <a href="../c-roadmap-canvas/mobile.html">C mobile</a>
+</div>
+<div class="rv-intro">
+  <p><b>Mobile idea:</b> works like a messaging app. Tabs are Desk · Rooms · Team · More. The Desk is a stack of cards you work through one at a time, and rooms are chat threads with tap-to-answer replies. Big rounded buttons sit within thumb reach.</p>
+  <p style="background:#fff8e6;border:1px solid #ecd9a8;border-radius:8px;padding:8px 12px"><b>Rev 2:</b> attachments and previews open full size · 🎤 dictation everywhere you write · show &amp; tell rebuilt as an assessment (M5) · several people in a rehearsal (M6) · compaction by default, letters experimental, and a terminal peek (M8).</p>
+  <p><b>Look for:</b> does the chat model make quick replies feel natural on a phone? Can you still find a project's status without scrolling the conversation?</p>
+</div>
+<section class="view" id="m">
+  <header><h2>Mobile screens</h2><span class="req">FR-35</span><span class="req">FR-36</span></header>
+  <div class="phones">
+
+  <div class="phone-wrap"><h3>M1 · Rooms (home)</h3><p class="look">FR-40–44. Each room shows its status sentence, release, links and what it needs from you.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div class="sub">Tailnet · david@github</div><h1>Rooms</h1></div>
+    <div class="body">
+      <div class="card hot"><div style="display:flex;justify-content:space-between"><b style="font-size:17px">go-build-it</b><span class="tag acc">1 blocking</span></div><div class="sm" style="font-style:italic">"Forge is handing off; Atlas is designing usage reporting."</div><div class="ui sm m" style="margin-top:6px"><b style="color:var(--t)">2026.11.02.1</b> · 14 since · <span style="color:var(--sky)">Notes ↗ Site ↗</span></div></div>
+      <div class="card hot"><div style="display:flex;justify-content:space-between"><b style="font-size:17px">trailmap</b><span class="tag acc">1 blocking</span></div><div class="sm" style="font-style:italic">"Waiting on you: layout + download strategy."</div><div class="ui sm m" style="margin-top:6px">No stable release · Site not published</div></div>
+      <div class="card"><div style="display:flex;justify-content:space-between"><b style="font-size:17px">ledgerly</b><span class="tag gold">Gate ready</span></div><div class="sm" style="font-style:italic">"Import flow ready for a dress rehearsal."</div><div class="ui sm m" style="margin-top:6px"><b style="color:var(--t)">2026.10.18.2</b> · <span style="color:var(--sky)">Notes ↗ Site ↗</span></div></div>
+      <div class="card"><div style="display:flex;justify-content:space-between"><b style="font-size:17px">inkwell</b><span class="tag acc">CI failing</span></div><div class="sm" style="font-style:italic">"Spark is on the RSS bug; 2 unpushed commits."</div></div>
+    </div>
+    <div class="tabbar"><span><b>✉</b>Desk <span class="dot">7</span></span><span class="on"><b>☰</b>Rooms</span><span><b>☺</b>Team</span><span><b>⋯</b>More</span></div>
+  </div></div>
+
+  <div class="phone-wrap"><h3>M2 · Room thread</h3><p class="look">FR-36, FR-41, FR-100. Status is pinned at the top, the conversation sits below it, and you can answer inline.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div class="sub">‹ Rooms</div><h1 style="font-size:22px">go-build-it</h1></div>
+    <div class="body">
+      <div class="card ui sm" style="padding:8px 12px">M2 Harness adapters · 62% · ◆ Adapter demo next · CI ● · <span style="color:var(--sky)">2026.11.02.1 ↗</span></div>
+      <div class="msg"><span class="av s pm">Pi</span><div><div class="who">Pilot <span>13:05</span></div><div class="bubble">M2 is 13/21. One blocker below.</div></div></div>
+      <div class="msg"><span class="av s dv">Fg</span><div><div class="who">Forge <span>13:28 · blocking</span></div><div class="bubble ask"><b>How should OpenCode context usage be measured?</b><br><span class="sm">I'd estimate from token counts (±5%).</span><div class="rowb" style="margin-top:8px"><span class="btn s" style="padding:8px">Estimate</span><span class="btn" style="padding:8px">Server</span></div></div></div></div>
+      <div class="msg"><span class="av s rv">Ln</span><div><div class="who">Lens <span>13:50</span></div><div class="bubble">T-138 is ready for you. <span style="color:var(--sky)">Show &amp; tell →</span></div></div></div>
+      <div class="msg" style="flex-direction:row-reverse"><div class="bubble me">After lunch 👍</div></div>
+      <div class="compose" style="margin-top:auto">Message the team…<span>➤</span></div>
+    </div>
+  </div></div>
+
+  <div class="phone-wrap"><h3>M3 · Desk</h3><p class="look">FR-104. A card stack ordered with blocking items first. Swipe right to answer, left to skip.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><h1>Your desk</h1><div class="sub">7 waiting · 2 holding up work</div></div>
+    <div class="body">
+      <div style="position:relative;height:340px">
+        <div class="card" style="position:absolute;inset:24px 14px 0 14px;opacity:.5"></div>
+        <div class="card" style="position:absolute;inset:12px 7px 12px 7px;opacity:.8"></div>
+        <div class="card hot" style="position:absolute;inset:0 0 24px 0;display:flex;flex-direction:column;gap:10px">
+          <div class="msg"><span class="av dv">Fg</span><div><div class="who">Forge <span>go-build-it · 12m</span></div><span class="tag acc">work paused</span></div></div>
+          <b style="font-size:19px;line-height:1.3">How should I measure OpenCode's context usage?</b>
+          <div class="sm">The context monitor needs it. <span class="mono">opencode run</span> gives tokens, not the window size.</div>
+          <div class="ui sm m" style="margin-top:auto">1 of 7 · swipe → answer · ← skip</div>
+        </div>
+      </div>
+      <div class="ui sm m">Up next: Atlas (trailmap, blocking) · ledgerly gate · T-138 review · OS-3 options · 2 assumed answers</div>
+      <div class="btn p">Answer Forge</div>
+    </div>
+    <div class="tabbar"><span class="on"><b>✉</b>Desk <span class="dot">7</span></span><span><b>☰</b>Rooms</span><span><b>☺</b>Team</span><span><b>⋯</b>More</span></div>
+  </div></div>
+
+  <div class="phone-wrap"><h3>M4 · Answer</h3><p class="look">FR-101–103, FR-105. The persona's recommendation is highlighted and attachments can be opened inline.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div class="sub">‹ Desk · 1 of 7</div><h1 style="font-size:20px;line-height:1.25">How should I measure OpenCode's context usage?</h1></div>
+    <div class="body">
+      <div class="card" style="border:2px solid var(--sage)"><span class="tag sage">Forge would pick this</span><div style="font-weight:600;margin-top:4px">A · Estimate from token counts</div><div class="sm m">Simple, ±5% error.</div></div>
+      <div class="card"><span class="tag">Alternative</span><div style="font-weight:600;margin-top:4px">B · Server mode</div><div class="sm m">Exact, but heavier.</div></div>
+      <div class="ui sm" style="color:var(--sky)">📎 sample.json › · adapter.go diff › · usage mockup › <span class="m">(opens full screen)</span></div>
+      <div class="compose">Log estimates vs. real values…<span>🎤</span></div>
+      <label class="ui sm"><input type="checkbox" checked> Suggest as a principle</label>
+      <div class="btn p" style="margin-top:auto">Send A &amp; next →</div>
+    </div>
+  </div></div>
+
+  <div class="phone-wrap"><h3>M5 · Show &amp; tell</h3><p class="look">FR-110–112. <b>Rev 2:</b> the work is shown against what was agreed: the mockup next to the build, then tests, handbook, rehearsal notes and requirements. The code is a link to the PR.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div class="sub">‹ ledgerly · T-204 · PR #57 ↗</div><h1 style="font-size:20px;line-height:1.25">Column mapping, as agreed</h1></div>
+    <div class="body">
+      <div class="rowb"><div style="height:90px;border:1px dashed #cdbfa9;border-radius:12px;display:grid;place-items:center;background:#f3ede3" class="ui sm m">Mockup ⤢</div><div style="height:90px;border:1px dashed #cdbfa9;border-radius:12px;display:grid;place-items:center;background:#fff" class="ui sm m">Built ⤢</div></div>
+      <div class="msg"><span class="av s dv2">Sp</span><div class="bubble sm">Matches the mockup, plus your preview rows and maria's label. The bank logo is missing.</div></div>
+      <div class="msg"><span class="av s rv">Ln</span><div class="bubble sm">✓ 142 unit · ✓ 18 e2e<br>Handbook 9/10: one hard-coded "£"<br>✓ all 3 rehearsal notes<br>✓ FR-21 · ✓ FR-22 · ! FR-23 partly</div></div>
+      <div class="compose">Fix FR-23 and the £…<span>🎤</span></div>
+      <div class="btn s">👍 Ship it</div>
+      <div class="btn" style="border:2px solid var(--acc)">✎ Nearly: a few changes</div>
+    </div>
+  </div></div>
+
+  <div class="phone-wrap"><h3>M6 · Rehearsal step</h3><p class="look">FR-116–118, FR-117a. A meeting on a phone: the scenario on top and the notes thread below. Several people can attend.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div class="sub">‹ ledgerly · Dress rehearsal · ✓ ✓ ● ○ ○ ○ ○</div><h1 style="font-size:20px">3 · Map columns</h1></div>
+    <div class="body">
+      <div class="sm">You uploaded <span class="mono">barclays-oct.csv</span>. Check the guessed columns.</div>
+      <div style="height:130px;border:1px dashed #cdbfa9;border-radius:14px;display:grid;place-items:center;background:#f3ede3" class="ui sm m">Live preview · tap for full size ⤢</div>
+      <div class="msg" style="flex-direction:row-reverse"><div class="bubble me sm">Can't tell debits from credits. Preview 3 rows?</div></div>
+      <div class="msg"><span class="av s hu" style="background:#8a5a9e">mr</span><div class="bubble sm"><b>maria</b>: "Payee" is confusing.</div></div>
+      <div class="msg"><span class="av s dv">Fg</span><div class="bubble sm">I can do both now (~20 min) and re-run this step.</div></div>
+      <div class="rowb"><span class="btn s">Do it now</span><span class="btn">After</span></div>
+      <div class="rowb"><span class="btn">←</span><span class="btn p">Good → 4</span></div>
+    </div>
+  </div></div>
+
+  <div class="phone-wrap"><h3>M7 · Option set</h3><p class="look">FR-120–122. Swipe through options and react to each aspect. Atlas keeps a running summary.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div class="sub">‹ trailmap · OS-3 · ● ○ ○</div><h1 style="font-size:20px">A · Map first</h1></div>
+    <div class="body">
+      <div style="height:200px;border-radius:16px;background:linear-gradient(135deg,#d3e0cf,#b9cdb3);position:relative"><span class="ui sm" style="position:absolute;right:8px;top:8px;background:rgba(43,38,34,.8);color:#fff;padding:3px 9px;border-radius:999px">⤢ Full size</span><div style="position:absolute;left:0;right:0;bottom:0;height:50px;background:#fffdf9;border-radius:14px 14px 0 0"></div></div>
+      <div class="ui" style="display:flex;flex-direction:column;gap:6px">
+        <div class="card" style="padding:8px 12px;display:flex;justify-content:space-between">Full-bleed map<span>♥</span></div>
+        <div class="card" style="padding:8px 12px;display:flex;justify-content:space-between">Bottom sheet<span>♥</span></div>
+        <div class="card" style="padding:8px 12px;display:flex;justify-content:space-between;color:var(--m)">Floating zoom<span>✕</span></div>
+      </div>
+      <div class="msg"><span class="av s ar">At</span><div class="bubble sm" style="background:var(--sage-s)">So far: A's map + sheet, B's sparkline, C's thumbnails.</div></div>
+      <div class="btn p">Confirm combination</div>
+    </div>
+  </div></div>
+
+  <div class="phone-wrap"><h3>M8 · Who's working</h3><p class="look">FR-65, FR-66, FR-71–74. Energy bars for context. <b>Rev 2:</b> tools compact on their own by default. Handoff letters are experimental (on in go-build-it). Peek at any desk's terminal.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><h1>Who's working</h1><div class="sub">4 of 5 desks busy · letters: experimental</div></div>
+    <div class="body">
+      <div class="card" style="border:2px solid var(--gold)"><div class="msg"><span class="av dv">Fg</span><div style="flex:1"><div class="who">Forge <span>go-build-it</span></div><div class="fuel w" style="margin:6px 0"><i style="width:76%"></i></div><div class="ui sm" style="color:var(--gold)">76%: wrote a letter to the next Forge <span class="tag sky">exp.</span></div></div></div>
+        <div class="sm" style="margin:8px 0;font-style:italic">"You're picking up the stream-json parser… don't bother with json.Decoder…"</div>
+        <div class="rowb"><span class="btn" style="padding:9px">Read</span><span class="btn p" style="padding:9px">Start next</span></div></div>
+      <div class="card"><div class="msg"><span class="av s ar">At</span><div style="flex:1"><div class="who">Atlas <span>31% · compacted once</span></div><div class="fuel" style="margin-top:5px"><i style="width:31%"></i></div><div class="ui sm" style="color:var(--sky);margin-top:4px">⌨ Peek at terminal · take the keyboard</div></div></div></div>
+      <div class="card"><div class="msg"><span class="av s dv2">Sp</span><div style="flex:1"><div class="who">Spark <span>≈18%</span></div><div class="fuel" style="margin-top:5px"><i style="width:18%"></i></div></div></div></div>
+      <div class="card" style="opacity:.75"><div class="msg"><span class="av s pm">Pi</span><div class="who">Pilot <span>☕ resting until 14:20</span></div></div></div>
+    </div>
+    <div class="tabbar"><span><b>✉</b>Desk <span class="dot">7</span></span><span><b>☰</b>Rooms</span><span class="on"><b>☺</b>Team</span><span><b>⋯</b>More</span></div>
+  </div></div>
+
+  <div class="phone-wrap"><h3>M9 · More</h3><p class="look">Reading is the main use on a phone. The handbook, journal, team plan, docs and settings are here.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><h1>More</h1><div class="sub">v2026.11.07.1 · up to date</div></div>
+    <div class="body ui">
+      <div class="card">📓 Journal · <span class="m">today's story</span></div>
+      <div class="card">🔁 Retro · <span class="m">2 proposals waiting</span></div>
+      <div class="card">🗂 Team plan · <span class="m">23 ready</span></div>
+      <div class="card">📐 Handbook · <span class="m">9 chapters</span></div>
+      <div class="card">📖 Docs &amp; UAT walkthrough</div>
+      <div class="card">⚙ Settings · <span class="m">read-only on phone</span></div>
+    </div>
+    <div class="tabbar"><span><b>✉</b>Desk <span class="dot">7</span></span><span><b>☰</b>Rooms</span><span><b>☺</b>Team</span><span class="on"><b>⋯</b>More</span></div>
+  </div></div>
+
+  </div>
+</section>
+<p class="rv-foot">Approach B · Team Room · mobile mockups. <a href="../index.html">Back to overview</a></p>
+</body>
+</html>

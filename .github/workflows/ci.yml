@@ -1,0 +1,23 @@
+name: ci
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: cd web && npm ci && npm run build && touch dist/.keep
+      - run: git config --global user.email ci@example.com && git config --global user.name ci
+      - run: make test
+      - name: cross-compile
+        run: |
+          for p in darwin/arm64 linux/amd64 windows/amd64; do
+            GOOS=${p%/*} GOARCH=${p#*/} CGO_ENABLED=0 go build -o /tmp/gbi-${p%/*}-${p#*/} ./cmd/gbi
+          done

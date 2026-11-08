@@ -1,0 +1,51 @@
+/* Shared reviewer chrome for all go-build-it mockups.
+   Everything inside .frame / .phone belongs to the approach being shown;
+   everything outside is reviewer guidance. */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body.mock { margin: 0; background: #e8e6e1; color: #24272b;
+  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+.rv-bar { position: sticky; top: 0; z-index: 50; background: #fffdf8; border-bottom: 1px solid #d8d4cb;
+  padding: 10px 24px; display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+.rv-bar .rv-title { font-weight: 700; }
+.rv-bar .rv-title small { font-weight: 400; color: #6b6f76; margin-left: 6px; }
+.rv-bar a { color: #3a5a8c; text-decoration: none; font-size: 14px; }
+.rv-bar a:hover { text-decoration: underline; }
+.rv-bar .rv-spacer { flex: 1; }
+.rv-toc { max-width: 1290px; margin: 24px auto 0; padding: 0 24px; display: flex; flex-wrap: wrap; gap: 6px; }
+.rv-toc a { font-size: 13px; padding: 4px 10px; border-radius: 999px; background: #fffdf8; border: 1px solid #d8d4cb;
+  color: #333; text-decoration: none; }
+.rv-toc a:hover { border-color: #3a5a8c; color: #3a5a8c; }
+.rv-intro { max-width: 1290px; margin: 20px auto 0; padding: 0 24px; color: #4a4e55; }
+.rv-intro p { max-width: 90ch; margin: 6px 0; }
+.view { max-width: 1290px; margin: 48px auto; padding: 0 24px; scroll-margin-top: 70px; }
+.view > header { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; margin-bottom: 6px; }
+.view > header h2 { margin: 0; font-size: 20px; }
+.view > header .num { font: 600 12px ui-monospace, Menlo, monospace; color: #6b6f76; }
+.req { display: inline-block; font: 600 11px ui-monospace, Menlo, monospace; background: #dfe7f3; color: #2c4a78;
+  padding: 1px 7px; border-radius: 999px; margin: 0 2px; }
+.look { margin: 0 0 14px; color: #4a4e55; font-size: 14px; max-width: 110ch; }
+.look b { color: #24272b; }
+.scroll { overflow-x: auto; padding-bottom: 8px; }
+/* desktop browser frame */
+.frame { width: 1240px; border-radius: 10px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,.18);
+  border: 1px solid #c9c5bc; background: #fff; }
+.chrome { height: 34px; background: #dcd9d2; display: flex; align-items: center; gap: 7px; padding: 0 12px; }
+.chrome i { width: 11px; height: 11px; border-radius: 50%; background: #bbb6ac; display: inline-block; }
+.chrome .url { margin-left: 14px; flex: 1; max-width: 560px; background: #f3f1ec; border-radius: 6px; height: 22px;
+  font: 12px/22px ui-monospace, Menlo, monospace; color: #555; padding: 0 10px; white-space: nowrap; overflow: hidden; }
+/* phone frame */
+.phones { display: flex; flex-wrap: wrap; gap: 36px; }
+.phone-wrap { width: 390px; }
+.phone-wrap h3 { font-size: 15px; margin: 0 0 4px; }
+.phone-wrap .look { font-size: 13px; min-height: 40px; }
+.phone { width: 390px; height: 800px; border-radius: 44px; border: 10px solid #1d1f22; overflow: hidden;
+  position: relative; box-shadow: 0 12px 40px rgba(0,0,0,.22); background: #fff; display: flex; flex-direction: column; }
+.phone .status { height: 34px; flex: none; display: flex; justify-content: space-between; align-items: center;
+  padding: 0 22px; font: 600 13px -apple-system, system-ui, sans-serif; }
+.rv-foot { max-width: 1290px; margin: 60px auto 40px; padding: 0 24px; color: #6b6f76; font-size: 13px; }
+@media (max-width: 700px) {
+  .rv-bar { padding: 10px 16px; }
+  .view, .rv-toc, .rv-intro, .rv-foot { padding: 0 16px; }
+  .phone-wrap, .phone { width: 100%; max-width: 390px; }
+}

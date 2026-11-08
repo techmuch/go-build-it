@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>go-build-it Tracker</title>
+<style>
+:root {
+  --bg:#f4f6f7; --card:#ffffff; --line:#e1e5e8; --t:#1c2329; --m:#66727c; --side:#17212b; --side-t:#a9b7c3;
+  --acc:#0f9d8a; --acc-s:#e3f4f1; --red:#d1453b; --red-s:#fdecea; --amb:#b57500; --amb-s:#fff4dc;
+  --blue:#2f6fd1; --blue-s:#e7effc; --grn:#1f9d55; --grn-s:#e5f6ec; --chip:#eef1f3; --chip-t:#4a5560; --track:#e7ebee;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#0f1418; --card:#171e24; --line:#26313a; --t:#e3e9ee; --m:#8e9aa5; --side:#0b1014; --side-t:#9fb0bd;
+  --acc:#2cc1aa; --acc-s:#123630; --red:#f07067; --red-s:#3a1c1a; --amb:#f0b23d; --amb-s:#3a2c10;
+  --blue:#6ea5ff; --blue-s:#152a4a; --grn:#4fd08a; --grn-s:#12301f; --chip:#222c34; --chip-t:#b5c1cb; --track:#26313a; } }
+:root[data-theme="dark"] {
+  --bg:#0f1418; --card:#171e24; --line:#26313a; --t:#e3e9ee; --m:#8e9aa5; --side:#0b1014; --side-t:#9fb0bd;
+  --acc:#2cc1aa; --acc-s:#123630; --red:#f07067; --red-s:#3a1c1a; --amb:#f0b23d; --amb-s:#3a2c10;
+  --blue:#6ea5ff; --blue-s:#152a4a; --grn:#4fd08a; --grn-s:#12301f; --chip:#222c34; --chip-t:#b5c1cb; --track:#26313a; }
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; background:var(--bg); color:var(--t); font:14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+a { color:var(--blue); text-decoration:none; } a:hover { text-decoration:underline; }
+header.top { background:var(--side); color:#fff; padding:18px 24px 0; }
+.top .row1 { display:flex; align-items:center; gap:12px; flex-wrap:wrap; max-width:1280px; margin:0 auto; }
+.brand { display:flex; align-items:center; gap:10px; font-weight:700; font-size:17px; }
+.brand b { width:26px; height:26px; border-radius:7px; background:var(--acc); display:inline-grid; place-items:center; font-size:12px; color:#fff; }
+.top .sub { color:var(--side-t); font-size:13px; }
+.top .sp { flex:1; }
+.top button { background:transparent; border:1px solid #33424f; color:var(--side-t); border-radius:6px; padding:4px 10px; font:inherit; font-size:12.5px; cursor:pointer; }
+nav.tabs { display:flex; gap:4px; max-width:1280px; margin:14px auto 0; overflow-x:auto; }
+nav.tabs button { background:none; border:0; color:var(--side-t); font:inherit; padding:10px 14px; border-bottom:2px solid transparent; cursor:pointer; white-space:nowrap; }
+nav.tabs button.on { color:#fff; border-color:var(--acc); font-weight:600; }
+main { max-width:1280px; margin:0 auto; padding:20px 24px 60px; }
+.kpis { display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:12px; margin-bottom:18px; }
+.kpi { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+.kpi .l { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--m); }
+.kpi .v { font-size:24px; font-weight:700; margin-top:2px; }
+.kpi .s { font-size:12px; color:var(--m); }
+.bar { height:7px; background:var(--track); border-radius:4px; overflow:hidden; display:flex; }
+.bar i { display:block; height:100%; background:var(--acc); } .bar i.ip { background:var(--amb); opacity:.8; }
+h2 { font-size:17px; margin:26px 0 10px; }
+.phases { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:12px; }
+.ph { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; display:flex; flex-direction:column; gap:7px; cursor:pointer; }
+.ph:hover { border-color:var(--acc); }
+.ph.cur { box-shadow:inset 3px 0 0 var(--acc); }
+.ph .hd { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.ph .id { font:600 12px ui-monospace, Menlo, monospace; color:var(--m); }
+.ph .nm { font-weight:700; font-size:14.5px; }
+.ph .goal { font-size:12.5px; color:var(--m); }
+.ph .gate { font-size:12px; } .ph .gate b { color:var(--amb); }
+.chip { display:inline-block; font-size:11.5px; padding:1px 8px; border-radius:999px; background:var(--chip); color:var(--chip-t); white-space:nowrap; }
+.chip.done { background:var(--grn-s); color:var(--grn); } .chip.in-progress { background:var(--amb-s); color:var(--amb); }
+.chip.blocked { background:var(--red-s); color:var(--red); } .chip.todo { background:var(--chip); color:var(--chip-t); }
+.chip.ready { background:var(--acc-s); color:var(--acc); } .chip.q { background:var(--blue-s); color:var(--blue); }
+.chip.mvp { background:var(--acc-s); color:var(--acc); font-weight:600; }
+.chip.req { font-family:ui-monospace, Menlo, monospace; font-size:11px; background:var(--blue-s); color:var(--blue); }
+.filters { display:flex; gap:8px; flex-wrap:wrap; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; position:sticky; top:0; z-index:5; }
+.filters input[type=search], .filters select { font:inherit; font-size:13px; padding:5px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--t); }
+.filters input[type=search] { flex:1; min-width:180px; }
+.filters label { font-size:13px; display:flex; align-items:center; gap:5px; color:var(--m); white-space:nowrap; }
+.filters .count { margin-left:auto; font-size:12.5px; color:var(--m); }
+.group { margin-top:16px; background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+.group > .gh { padding:10px 14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; border-bottom:1px solid var(--line); }
+.group > .gh h3 { margin:0; font-size:14.5px; }
+.group > .gh .bar { width:140px; }
+.task { border-bottom:1px solid var(--line); }
+.task:last-child { border-bottom:0; }
+.task > .tr { display:grid; grid-template-columns:72px 1fr auto; gap:10px; padding:9px 14px; align-items:center; cursor:pointer; }
+.task > .tr:hover { background:var(--bg); }
+.task .tid { font:600 12px ui-monospace, Menlo, monospace; color:var(--m); }
+.task .tt { min-width:0; }
+.task .meta { display:flex; gap:5px; flex-wrap:wrap; justify-content:flex-end; }
+.task .det { display:none; padding:4px 14px 14px 96px; font-size:13px; }
+.task.open .det { display:block; }
+.task.flash > .tr { background:var(--acc-s); }
+.det dl { display:grid; grid-template-columns:110px 1fr; gap:6px 12px; margin:0; }
+.det dt { color:var(--m); } .det dd { margin:0; display:flex; gap:5px; flex-wrap:wrap; align-items:center; }
+table.t { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; font-size:13px; }
+table.t th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--m); padding:8px 10px; border-bottom:1px solid var(--line); background:var(--bg); }
+table.t td { padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+table.t tr.sec td { background:var(--bg); font-weight:600; font-size:12.5px; color:var(--m); }
+.tw { overflow-x:auto; }
+.note { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; font-size:13px; color:var(--m); }
+.note code { background:var(--chip); padding:1px 5px; border-radius:4px; color:var(--t); }
+.legend { display:flex; gap:8px; flex-wrap:wrap; font-size:12px; color:var(--m); align-items:center; margin:8px 0; }
+.empty { padding:24px; text-align:center; color:var(--m); }
+.view { display:none; } .view.on { display:block; }
+.mono { font-family:ui-monospace, Menlo, monospace; font-size:12px; }
+@media (max-width: 760px) {
+  header.top { padding:14px 16px 0; } main { padding:16px 16px 48px; }
+  .kpis { grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .task > .tr { grid-template-columns:58px 1fr; } .task .meta { grid-column:2; justify-content:flex-start; }
+  .task .det { padding:4px 14px 14px; } .det dl { grid-template-columns:1fr; }
+  .group > .gh .bar { width:100%; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="row1">
+    <div class="brand"><b>gb</b>go-build-it · delivery tracker</div>
+    <span class="sub" id="updated"></span>
+    <span class="sp"></span>
+    <a href="plan.html" style="color:var(--side-t);font-size:13px">Plan</a>
+    <a href="../requirements.html" style="color:var(--side-t);font-size:13px">Requirements</a>
+    <a href="../mockups/a-mission-control/desktop.html" style="color:var(--side-t);font-size:13px">Approach A</a>
+    <button id="theme" type="button" aria-label="Toggle theme">◐ Theme</button>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button data-v="overview" class="on">Overview</button>
+    <button data-v="tasks">Tasks</button>
+    <button data-v="reqs">Requirement coverage</button>
+    <button data-v="questions">Open questions</button>
+    <button data-v="howto">How to update</button>
+  </nav>
+</header>
+<main>
+  <section class="view on" id="v-overview">
+    <div class="kpis" id="kpis"></div>
+    <h2>Phases</h2>
+    <div class="legend"><span class="chip mvp">MVP</span> phases P0–P5 make the desktop MVP · ◆ = review gate that ends the phase · bars are weighted by size (S=1, M=3, L=8)</div>
+    <div class="phases" id="phases"></div>
+    <h2>Ready to start</h2>
+    <div class="legend">Tasks not started whose dependencies are all done.</div>
+    <div id="ready"></div>
+  </section>
+
+  <section class="view" id="v-tasks">
+    <div class="filters">
+      <input type="search" id="q" placeholder="Search tasks, IDs, requirements (e.g. FR-112, viewer)…">
+      <select id="fphase"><option value="">All phases</option></select>
+      <select id="fstatus"><option value="">Any status</option><option>todo</option><option>in-progress</option><option>blocked</option><option>done</option></select>
+      <select id="fsize"><option value="">Any size</option><option>S</option><option>M</option><option>L</option></select>
+      <label><input type="checkbox" id="fready"> Ready only</label>
+      <label><input type="checkbox" id="fmvp"> MVP only</label>
+      <span class="count" id="count"></span>
+    </div>
+    <div id="groups"></div>
+  </section>
+
+  <section class="view" id="v-reqs">
+    <div class="legend" id="reqsum"></div>
+    <div class="tw"><table class="t" id="reqtable"></table></div>
+  </section>
+
+  <section class="view" id="v-questions">
+    <div class="legend">Open questions from requirements §14 and the tasks that wait on them. Answer them before the phase that needs them.</div>
+    <div class="tw"><table class="t" id="qtable"></table></div>
+  </section>
+
+  <section class="view" id="v-howto">
+    <div class="note">
+      <p><b>Where the data lives.</b> Everything on this page comes from <code>docs/tracker/tracker-data.js</code>. The page itself never changes when status changes.</p>
+      <p><b>To update status,</b> edit a task's <code>"status"</code> to <code>todo</code>, <code>in-progress</code>, <code>blocked</code> or <code>done</code>, change <code>"updated"</code> at the top, and commit. The Git / Release Manager persona will do this once go-build-it manages itself (from the end of P4).</p>
+      <p><b>To add or change tasks,</b> follow the same shape: <code>id</code> (phase prefix), <code>title</code>, <code>reqs</code> (requirement IDs), <code>views</code> (Approach A mockup views such as <code>A-v05</code> or <code>A-M3</code>), <code>size</code> (S/M/L), <code>deps</code>, <code>done</code> (acceptance), <code>q</code> (open questions it waits on).</p>
+      <p><b>Coverage rule:</b> every requirement ID must map to at least one task. The <i>Requirement coverage</i> tab flags any that don't.</p>
+      <p>Filters and the theme choice are remembered in this browser only.</p>
+    </div>
+  </section>
+</main>
+
+<script src="tracker-data.js"></script>
+<script>
+(function () {
+  var D = window.TRACKER;
+  if (!D) { document.querySelector("main").innerHTML = '<div class="empty">tracker-data.js did not load.</div>'; return; }
+  var store = {
+    get: function (k, d) { try { var v = localStorage.getItem("gbi-tracker-" + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set: function (k, v) { try { localStorage.setItem("gbi-tracker-" + k, JSON.stringify(v)); } catch (e) {} }
+  };
+  var $ = function (s) { return document.querySelector(s); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var W = D.sizes, byId = {}, phaseById = {};
+  D.tasks.forEach(function (t) { byId[t.id] = t; t.dependents = []; });
+  D.tasks.forEach(function (t) { t.deps.forEach(function (d) { byId[d].dependents.push(t.id); }); });
+  D.phases.forEach(function (p) { phaseById[p.id] = p; });
+  function isReady(t) { return t.status === "todo" && t.deps.every(function (d) { return byId[d].status === "done"; }); }
+  function prog(list) {
+    var tot = 0, done = 0, ip = 0;
+    list.forEach(function (t) { var w = W[t.size] || 1; tot += w; if (t.status === "done") done += w; else if (t.status === "in-progress") ip += w; });
+    return { tot: tot, done: done, ip: ip, pct: tot ? Math.round(100 * done / tot) : 0, ipPct: tot ? Math.round(100 * ip / tot) : 0 };
+  }
+  function bar(p) { return '<div class="bar"><i style="width:' + p.pct + '%"></i><i class="ip" style="width:' + p.ipPct + '%"></i></div>'; }
+  function tasksOf(pid) { return D.tasks.filter(function (t) { return t.phase === pid; }); }
+  function phaseState(pid) {
+    var l = tasksOf(pid);
+    if (l.every(function (t) { return t.status === "done"; })) return "done";
+    if (l.some(function (t) { return t.status !== "todo"; })) return "in-progress";
+    return "todo";
+  }
+  function viewLink(v) {
+    if (v === "A-all") return '<a href="../mockups/index.html">mockups overview</a>';
+    var m = v.match(/^A-(v\w+)$/); if (m) return '<a href="../mockups/a-mission-control/desktop.html#' + m[1] + '">A ' + m[1].slice(1) + '</a>';
+    m = v.match(/^A-(M\d+)$/); if (m) return '<a href="../mockups/a-mission-control/mobile.html">A ' + m[1] + '</a>';
+    return esc(v);
+  }
+  function reqChip(r) { return '<a class="chip req" href="../requirements.html#' + r + '" title="' + esc((D.requirements[r] || {}).text || "") + '">' + r + '</a>'; }
+  function statusChip(t) { return '<span class="chip ' + t.status + '">' + t.status + '</span>'; }
+
+  $("#updated").textContent = "data updated " + D.updated + " · " + D.tasks.length + " tasks · " + D.phases.length + " phases";
+
+  // theme
+  var th = store.get("theme", null); if (th) document.documentElement.setAttribute("data-theme", th);
+  $("#theme").onclick = function () {
+    var cur = document.documentElement.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    var nx = cur === "dark" ? "light" : "dark"; document.documentElement.setAttribute("data-theme", nx); store.set("theme", nx);
+  };
+
+  // tabs
+  function show(v) {
+    document.querySelectorAll("#tabs button").forEach(function (b) { b.classList.toggle("on", b.dataset.v === v); });
+    document.querySelectorAll(".view").forEach(function (s) { s.classList.toggle("on", s.id === "v-" + v); });
+    store.set("tab", v);
+  }
+  document.querySelectorAll("#tabs button").forEach(function (b) { b.onclick = function () { show(b.dataset.v); }; });
+
+  // overview
+  var all = prog(D.tasks), mvpTasks = D.tasks.filter(function (t) { return phaseById[t.phase].mvp; }), mvp = prog(mvpTasks);
+  var cur = D.phases.filter(function (p) { return phaseState(p.id) !== "done"; })[0];
+  var nDone = D.tasks.filter(function (t) { return t.status === "done"; }).length;
+  var nIp = D.tasks.filter(function (t) { return t.status === "in-progress"; }).length;
+  var nBlk = D.tasks.filter(function (t) { return t.status === "blocked"; }).length;
+  $("#kpis").innerHTML =
+    '<div class="kpi"><div class="l">Whole project</div><div class="v">' + all.pct + '%</div>' + bar(all) + '<div class="s">' + all.done + ' / ' + all.tot + ' points</div></div>' +
+    '<div class="kpi"><div class="l">Desktop MVP (P0–P5)</div><div class="v">' + mvp.pct + '%</div>' + bar(mvp) + '<div class="s">' + mvpTasks.length + ' tasks</div></div>' +
+    '<div class="kpi"><div class="l">Current phase</div><div class="v" style="font-size:18px">' + (cur ? cur.id + " · " + esc(cur.name) : "All done") + '</div><div class="s">' + (cur ? "◆ " + esc(cur.gate) : "") + '</div></div>' +
+    '<div class="kpi"><div class="l">Tasks</div><div class="v">' + nDone + ' <span style="font-size:14px;color:var(--m)">done</span></div><div class="s">' + nIp + ' in progress · ' + nBlk + ' blocked · ' + (D.tasks.length - nDone - nIp - nBlk) + ' to do</div></div>' +
+    '<div class="kpi"><div class="l">Ready to start</div><div class="v">' + D.tasks.filter(isReady).length + '</div><div class="s">dependencies all done</div></div>';
+  $("#phases").innerHTML = D.phases.map(function (p) {
+    var l = tasksOf(p.id), pr = prog(l), st = phaseState(p.id);
+    return '<div class="ph' + (cur && cur.id === p.id ? " cur" : "") + '" data-p="' + p.id + '">' +
+      '<div class="hd"><span class="id">' + p.id + '</span><span>' + (p.mvp ? '<span class="chip mvp">MVP</span> ' : "") + '<span class="chip ' + st + '">' + (st === "todo" ? "planned" : st) + '</span></span></div>' +
+      '<div class="nm">' + esc(p.name) + '</div><div class="goal">' + esc(p.goal) + '</div>' + bar(pr) +
+      '<div class="s" style="font-size:12px;color:var(--m)">' + l.length + ' tasks · ' + pr.pct + '%</div>' +
+      '<div class="gate"><b>◆ ' + esc(p.gate) + '</b><br>' + p.gateCriteria.map(esc).join("<br>") + '</div></div>';
+  }).join("");
+  document.querySelectorAll(".ph").forEach(function (el) { el.onclick = function () { $("#fphase").value = el.dataset.p; applyFilters(); show("tasks"); }; });
+  var ready = D.tasks.filter(isReady);
+  $("#ready").innerHTML = ready.length ? '<div class="group">' + ready.map(taskHTML).join("") + '</div>' : '<div class="note">Nothing is ready: finish in-progress work first.</div>';
+
+  // tasks
+  function taskHTML(t) {
+    var meta = (isReady(t) ? '<span class="chip ready">ready</span>' : "") + t.q.map(function (q) { return '<span class="chip q" title="Waits on open question">' + q + '</span>'; }).join("") +
+      '<span class="chip">' + t.size + '</span>' + statusChip(t);
+    var det = '<dl>' +
+      (t.done ? '<dt>Done when</dt><dd>' + esc(t.done) + '</dd>' : "") +
+      '<dt>Requirements</dt><dd>' + (t.reqs.map(reqChip).join("") || "—") + '</dd>' +
+      '<dt>Mockups</dt><dd>' + (t.views.map(viewLink).join(" · ") || '<span style="color:var(--m)">no UI</span>') + '</dd>' +
+      '<dt>Depends on</dt><dd>' + (t.deps.map(function (d) { return '<a href="#" data-jump="' + d + '">' + d + '</a> ' + statusChip(byId[d]); }).join(" ") || "—") + '</dd>' +
+      '<dt>Unblocks</dt><dd>' + (t.dependents.map(function (d) { return '<a href="#" data-jump="' + d + '">' + d + '</a>'; }).join(" · ") || "—") + '</dd>' +
+      (t.q.length ? '<dt>Waits on</dt><dd>' + t.q.map(function (q) { return '<b>' + q + '</b> ' + esc(D.questions[q]).slice(0, 140) + '…'; }).join("<br>") + '</dd>' : "") +
+      '</dl>';
+    return '<div class="task" id="t-' + t.id + '"><div class="tr"><span class="tid">' + t.id + '</span><span class="tt">' + esc(t.title) + '</span><span class="meta">' + meta + '</span></div><div class="det">' + det + '</div></div>';
+  }
+  $("#fphase").innerHTML += D.phases.map(function (p) { return '<option value="' + p.id + '">' + p.id + " · " + esc(p.name) + '</option>'; }).join("");
+  var saved = store.get("filters", {});
+  ["q", "fphase", "fstatus", "fsize"].forEach(function (k) { if (saved[k]) $("#" + k).value = saved[k]; });
+  ["fready", "fmvp"].forEach(function (k) { $("#" + k).checked = !!saved[k]; });
+  function applyFilters() {
+    var f = { q: $("#q").value.trim().toLowerCase(), fphase: $("#fphase").value, fstatus: $("#fstatus").value, fsize: $("#fsize").value, fready: $("#fready").checked, fmvp: $("#fmvp").checked };
+    store.set("filters", f);
+    var list = D.tasks.filter(function (t) {
+      if (f.fphase && t.phase !== f.fphase) return false;
+      if (f.fstatus && t.status !== f.fstatus) return false;
+      if (f.fsize && t.size !== f.fsize) return false;
+      if (f.fready && !isReady(t)) return false;
+      if (f.fmvp && !phaseById[t.phase].mvp) return false;
+      if (f.q) { var hay = (t.id + " " + t.title + " " + t.reqs.join(" ") + " " + t.views.join(" ") + " " + t.done + " " + t.q.join(" ")).toLowerCase(); if (hay.indexOf(f.q) < 0) return false; }
+      return true;
+    });
+    $("#count").textContent = list.length + " of " + D.tasks.length + " tasks";
+    var html = D.phases.map(function (p) {
+      var l = list.filter(function (t) { return t.phase === p.id; }); if (!l.length) return "";
+      var pr = prog(tasksOf(p.id));
+      return '<div class="group"><div class="gh"><h3>' + p.id + " · " + esc(p.name) + '</h3>' + (p.mvp ? '<span class="chip mvp">MVP</span>' : "") +
+        '<span class="chip">◆ ' + esc(p.gate) + '</span><span style="margin-left:auto;font-size:12px;color:var(--m)">' + pr.pct + '%</span>' + bar(pr) + '</div>' + l.map(taskHTML).join("") + '</div>';
+    }).join("");
+    $("#groups").innerHTML = html || '<div class="empty">No tasks match these filters.</div>';
+  }
+  ["q", "fphase", "fstatus", "fsize", "fready", "fmvp"].forEach(function (k) { $("#" + k).addEventListener("input", applyFilters); $("#" + k).addEventListener("change", applyFilters); });
+  applyFilters();
+  document.addEventListener("click", function (e) {
+    var j = e.target.closest("[data-jump]");
+    if (j) {
+      e.preventDefault(); var id = j.dataset.jump;
+      ["q", "fphase", "fstatus", "fsize"].forEach(function (k) { $("#" + k).value = ""; }); $("#fready").checked = false; $("#fmvp").checked = false;
+      applyFilters(); show("tasks");
+      var el = document.getElementById("t-" + id); if (el) { el.classList.add("open", "flash"); el.scrollIntoView({ block: "center" }); setTimeout(function () { el.classList.remove("flash"); }, 1500); }
+      return;
+    }
+    var row = e.target.closest(".task > .tr");
+    if (row && !e.target.closest("a")) row.parentNode.classList.toggle("open");
+  });
+
+  // requirement coverage
+  var bySection = {}, order = [];
+  Object.keys(D.requirements).forEach(function (r) { var s = D.requirements[r].section; if (!bySection[s]) { bySection[s] = []; order.push(s); } bySection[s].push(r); });
+  var uncovered = 0, reqDone = 0;
+  var rows = '<tr><th style="width:90px">ID</th><th>Requirement</th><th>Tasks</th><th style="width:110px">Status</th></tr>';
+  order.forEach(function (s) {
+    rows += '<tr class="sec"><td colspan="4">' + esc(s) + '</td></tr>';
+    bySection[s].forEach(function (r) {
+      var ts = D.tasks.filter(function (t) { return t.reqs.indexOf(r) >= 0; });
+      var st = !ts.length ? "uncovered" : ts.every(function (t) { return t.status === "done"; }) ? "done" : ts.some(function (t) { return t.status !== "todo"; }) ? "in-progress" : "todo";
+      if (!ts.length) uncovered++; if (st === "done") reqDone++;
+      rows += '<tr><td>' + reqChip(r) + '</td><td>' + esc(D.requirements[r].text) + '</td><td>' +
+        (ts.map(function (t) { return '<a href="#" data-jump="' + t.id + '" class="chip ' + t.status + '">' + t.id + '</a>'; }).join(" ") || '<span class="chip blocked">none</span>') +
+        '</td><td><span class="chip ' + (st === "uncovered" ? "blocked" : st) + '">' + st + '</span></td></tr>';
+    });
+  });
+  $("#reqtable").innerHTML = rows;
+  var nReq = Object.keys(D.requirements).length;
+  $("#reqsum").innerHTML = '<b>' + nReq + '</b> requirements · <span class="chip done">' + reqDone + ' fully delivered</span> · ' +
+    (uncovered ? '<span class="chip blocked">' + uncovered + ' without a task</span>' : '<span class="chip ready">every requirement has a task</span>') + ' · a requirement counts as delivered when all of its tasks are done';
+
+  // questions
+  var qr = '<tr><th style="width:50px">#</th><th>Question</th><th>Waiting tasks</th><th style="width:120px">Needed by</th></tr>';
+  Object.keys(D.questions).forEach(function (q) {
+    var ts = D.tasks.filter(function (t) { return t.q.indexOf(q) >= 0; });
+    var first = ts.map(function (t) { return t.phase; }).sort()[0];
+    qr += '<tr><td><b>' + q + '</b></td><td>' + esc(D.questions[q]) + '</td><td>' + (ts.map(function (t) { return '<a href="#" data-jump="' + t.id + '" class="chip ' + t.status + '">' + t.id + '</a>'; }).join(" ") || "—") + '</td><td>' + (first ? first + " · " + esc(phaseById[first].name) : "—") + '</td></tr>';
+  });
+  $("#qtable").innerHTML = qr;
+
+  show(store.get("tab", "overview"));
+})();
+</script>
+</body>
+</html>

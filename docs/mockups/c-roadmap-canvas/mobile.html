@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Approach C Mobile</title>
+<link rel="stylesheet" href="../frame.css">
+<style>
+.phone { --bg:#0e1217; --p:#151b22; --p2:#1b232c; --line:#26313c; --t:#e4e9ee; --m:#8593a1; --vio:#8b7cf6; --vio-s:#2a2550; --lime:#9ad64a; --lime-s:#1f2f17; --amb:#f0b23d; --amb-s:#3a2c10; --cor:#f2685c; --cor-s:#3d1d1b; --sky:#5cb8f2; --sky-s:#13283a;
+  background:var(--bg); color:var(--t); font:13px/1.45 Inter, -apple-system, system-ui, sans-serif; border-color:#000; }
+.phone .status { color:var(--t); }
+.hdr { padding:2px 16px 10px; flex:none; display:flex; justify-content:space-between; align-items:flex-end; }
+.hdr h1 { margin:0; font-size:20px; font-weight:600; } .hdr .sub { font:11px ui-monospace, Menlo, monospace; color:var(--m); }
+.body { flex:1; overflow:hidden; padding:4px 12px 12px; display:flex; flex-direction:column; gap:9px; }
+.dock { flex:none; margin:0 12px 14px; height:56px; background:var(--p2); border:1px solid var(--line); border-radius:16px; display:grid; grid-template-columns:repeat(5,1fr); place-items:center; color:var(--m); font-size:17px; }
+.dock .on { color:var(--vio); } .dock .k { background:var(--vio); color:#fff; width:42px; height:42px; border-radius:12px; display:grid; place-items:center; font-size:13px; font-weight:700; }
+.pn { background:var(--p); border:1px solid var(--line); border-radius:12px; padding:10px 12px; }
+.pn.hot { box-shadow:inset 3px 0 0 var(--cor); border-color:#5d2a27; }
+.b { display:inline-block; font:500 10.5px ui-monospace, Menlo, monospace; padding:1px 6px; border-radius:4px; background:var(--p2); color:var(--m); border:1px solid var(--line); }
+.b.vio{background:var(--vio-s);color:#bdb3ff;border-color:#3d3670}.b.lime{background:var(--lime-s);color:var(--lime);border-color:#2f4a22}.b.amb{background:var(--amb-s);color:var(--amb);border-color:#5a4318}.b.cor{background:var(--cor-s);color:var(--cor);border-color:#5d2a27}.b.sky{background:var(--sky-s);color:var(--sky);border-color:#1f4260}
+.m{color:var(--m)} .xs{font-size:11px} .mono{font-family:ui-monospace,Menlo,monospace;font-size:11px}
+.btn { display:block; text-align:center; font-weight:600; padding:11px; border-radius:10px; border:1px solid var(--line); background:var(--p2); color:var(--t); }
+.btn.p { background:var(--vio); border-color:var(--vio); color:#fff; } .btn.g { background:var(--lime); border-color:var(--lime); color:#10180a; }
+.rowb { display:flex; gap:8px; } .rowb > * { flex:1; }
+.meter { height:5px; border-radius:3px; background:#25303a; overflow:hidden; } .meter i { display:block; height:100%; background:var(--vio); } .meter.w i { background:var(--amb); } .meter.g i { background:var(--lime); }
+.seg { display:flex; gap:4px; font:11px ui-monospace, Menlo, monospace; } .seg span { padding:4px 8px; border-radius:6px; background:var(--p2); color:var(--m); } .seg span.on { background:var(--vio-s); color:#bdb3ff; }
+.av { width:22px; height:22px; border-radius:6px; display:inline-grid; place-items:center; font:700 9.5px Inter, system-ui; color:#0e1217; flex:none; }
+.av.pm{background:#bdb3ff}.av.ar{background:#5cb8f2}.av.dv{background:#9ad64a}.av.dv2{background:#c9e36b}.av.qa{background:#f0b23d}.av.rv{background:#f2685c}.av.hu{background:#e4e9ee}
+textarea.ta { width:100%; min-height:56px; border:1px solid var(--line); border-radius:10px; padding:8px; background:#0b0f13; color:var(--t); font:12.5px Inter, system-ui; resize:none; }
+.shot { border:1px dashed #34414e; border-radius:10px; background:repeating-linear-gradient(45deg,#121820,#121820 8px,#151c25 8px,#151c25 16px); display:grid; place-items:center; color:var(--m); font-size:11px; }
+</style>
+</head>
+<body class="mock">
+<div class="rv-bar">
+  <span class="rv-title">Approach C: Roadmap Canvas <small>Mobile · 9 screens · rev 2</small></span>
+  <a href="../index.html">← Overview &amp; review guide</a>
+  <a href="desktop.html">Approach C desktop</a>
+  <span class="rv-spacer"></span>
+  <a href="../a-mission-control/mobile.html">A mobile</a>
+  <a href="../b-team-room/mobile.html">B mobile</a>
+</div>
+<div class="rv-intro">
+  <p><b>Mobile idea:</b> the boards and timelines reflow into <b>vertical</b> forms. Lifecycle columns become collapsible sections, and the roadmap becomes a top-to-bottom timeline. A floating dock has a center ⌘ button that opens the command palette, which is quicker than digging through tabs.</p>
+  <p style="background:#fff8e6;border:1px solid #ecd9a8;border-radius:8px;padding:8px 12px"><b>Rev 2:</b> attachments and frames open full size · 🎙 dictation · review rebuilt as mockup vs built plus a trace (M5) · several reviewers in a rehearsal (M6) · relay shows compaction by default, batons experimental, and a terminal view (M8).</p>
+  <p><b>Look for:</b> do the visual metaphors (stages, timeline, relay, filmstrip) still read well at phone width? Is the command palette a good primary navigation on a phone?</p>
+</div>
+<section class="view" id="m">
+  <header><h2>Mobile screens</h2><span class="req">FR-35</span><span class="req">FR-36</span></header>
+  <div class="phones">
+
+  <div class="phone-wrap"><h3>M1 · Portfolio by stage</h3><p class="look">FR-40–44. Stage sections, with projects that need you marked by a red edge. Release and links are on each tile.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div><div class="sub">tailnet · david@github</div><h1>Portfolio</h1></div><span class="b cor">5 need you</span></div>
+    <div class="body">
+      <div class="xs m mono">▾ DESIGN · 1</div>
+      <div class="pn hot"><div style="display:flex;justify-content:space-between"><b>trailmap</b><span><span class="b cor">?</span> <span class="b vio">OS-3</span></span></div><div class="xs m">Offline hiking maps.</div><div class="meter" style="margin:6px 0"><i style="width:45%"></i></div><div class="xs m">no release · site not published</div></div>
+      <div class="xs m mono">▾ IMPLEMENTATION · 1</div>
+      <div class="pn hot"><div style="display:flex;justify-content:space-between"><b>go-build-it</b><span><span class="b cor">?</span> <span class="b amb">review</span></span></div><div class="xs m">AI + human dev teams · M2 ◆ next</div><div class="meter" style="margin:6px 0"><i style="width:62%"></i></div><div class="xs"><b>2026.11.02.1</b> <span class="m">+14</span> · <span style="color:var(--sky)">notes ↗ site ↗</span></div></div>
+      <div class="xs m mono">▾ REVIEW · 1</div>
+      <div class="pn hot"><div style="display:flex;justify-content:space-between"><b>ledgerly</b><span class="b amb">◆ gate</span></div><div class="xs"><b>2026.10.18.2</b> · <span style="color:var(--sky)">notes ↗ site ↗</span></div></div>
+      <div class="xs m mono">▾ MAINTENANCE · 1 &nbsp; ▸ REQUIREMENTS · 1 &nbsp; ▸ PARKED · 1</div>
+      <div class="pn hot"><div style="display:flex;justify-content:space-between"><b>inkwell</b><span class="b cor">CI ✕ · ⚠ push</span></div></div>
+    </div>
+    <div class="dock"><span class="on">▦</span><span>◷</span><span class="k">⌘</span><span>⇶</span><span>≋</span></div>
+  </div></div>
+
+  <div class="phone-wrap"><h3>M2 · Vertical roadmap</h3><p class="look">FR-41, FR-115. The timeline runs downward with gates as diamonds. Questions are pinned where they block.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div><div class="sub">‹ portfolio · implementation</div><h1>go-build-it</h1></div><span class="b lime">CI ●</span></div>
+    <div class="body">
+      <div class="seg"><span class="on">timeline</span><span>flow</span><span>relay</span><span>trace</span></div>
+      <svg viewBox="0 0 340 380" width="100%"><g stroke="#26313c" stroke-width="2"><line x1="24" y1="10" x2="24" y2="370"/></g>
+        <circle cx="24" cy="24" r="7" fill="#9ad64a"/><text x="42" y="28" fill="#e4e9ee" font-size="12">M0 Requirements</text><text x="250" y="28" fill="#9ad64a" font-size="10">◆ done</text>
+        <circle cx="24" cy="74" r="7" fill="#9ad64a"/><text x="42" y="78" fill="#e4e9ee" font-size="12">M1 Core server</text><text x="250" y="78" fill="#9ad64a" font-size="10">◆ done</text>
+        <circle cx="24" cy="130" r="9" fill="#0e1217" stroke="#8b7cf6" stroke-width="3"/><text x="42" y="128" fill="#e4e9ee" font-size="12" font-weight="600">M2 Harness adapters</text><rect x="42" y="136" width="200" height="6" rx="3" fill="#25303a"/><rect x="42" y="136" width="124" height="6" rx="3" fill="#8b7cf6"/><text x="250" y="142" fill="#bdb3ff" font-size="10">62%</text>
+        <rect x="42" y="152" width="270" height="70" rx="8" fill="#151b22" stroke="#26313c"/><text x="52" y="170" fill="#9ad64a" font-size="10.5">▶ T-142 Forge · 76% · baton soon</text><text x="52" y="188" fill="#5cb8f2" font-size="10.5">▶ T-149 Atlas · 31%</text><text x="52" y="206" fill="#f2685c" font-size="10.5">⏸ T-151 blocked · ? Q-34</text>
+        <rect x="18" y="236" width="12" height="12" transform="rotate(45 24 242)" fill="#0e1217" stroke="#f0b23d" stroke-width="2"/><text x="42" y="246" fill="#f0b23d" font-size="12">◆ Gate: Adapter demo</text>
+        <circle cx="24" cy="290" r="7" fill="#1b232c" stroke="#34414e" stroke-width="2"/><text x="42" y="294" fill="#8593a1" font-size="12">M3 Questions &amp; gates</text>
+        <circle cx="24" cy="340" r="7" fill="#1b232c" stroke="#34414e" stroke-width="2"/><text x="42" y="344" fill="#8593a1" font-size="12">M4 Mobile, docs, update</text></svg>
+      <div class="pn xs"><b>2026.11.02.1</b> · 14 since · <span style="color:var(--sky)">notes ↗ site ↗ github ↗</span></div>
+    </div>
+    <div class="dock"><span class="on">▦</span><span>◷</span><span class="k">⌘</span><span>⇶</span><span>≋</span></div>
+  </div></div>
+
+  <div class="phone-wrap"><h3>M3 · Decisions</h3><p class="look">FR-104. A segmented control switches between Blocking, Assumed and Answered. Each card shows what it costs to leave it.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><h1>Decisions</h1><span class="sub">8 open</span></div>
+    <div class="body">
+      <div class="seg"><span class="on">blocking 2</span><span>assumed 3</span><span>gates 3</span><span>done</span></div>
+      <div class="pn hot"><div class="xs m">go-build-it · Forge · 12m</div><b>OpenCode context usage?</b><div class="xs" style="margin-top:4px"><span class="b cor">blocks T-151</span> <span class="b">rec A</span></div></div>
+      <div class="pn hot"><div class="xs m">trailmap · Atlas · 2h</div><b>Per trail or per region?</b><div class="xs" style="margin-top:4px"><span class="b cor">blocks 2 tasks</span> <span class="b">3 options</span></div></div>
+      <div class="xs m mono" style="margin-top:6px">ASSUMED (preview)</div>
+      <div class="pn"><b>UK CSV dates DD/MM?</b><div class="xs m">ledgerly · assumed DD/MM</div><div class="rowb" style="margin-top:8px"><span class="btn g" style="padding:7px">✓ Confirm</span><span class="btn" style="padding:7px">Correct</span></div></div>
+    </div>
+    <div class="dock"><span>▦</span><span class="on">◷</span><span class="k">⌘</span><span>⇶</span><span>≋</span></div>
+  </div></div>
+
+  <div class="phone-wrap"><h3>M4 · Answer (bottom sheet)</h3><p class="look">FR-101–103, FR-105. The question opens as a sheet over the board, so you keep your place.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="body" style="opacity:.3;flex:none;height:90px"><div class="pn hot"><b>OpenCode context usage?</b></div></div>
+    <div style="flex:1;background:var(--p);border-top:1px solid #34414e;border-radius:18px 18px 0 0;padding:10px 14px;display:flex;flex-direction:column;gap:9px">
+      <div style="width:40px;height:4px;border-radius:2px;background:#34414e;margin:0 auto 4px"></div>
+      <div class="xs m"><span class="av dv">Fg</span> Forge · T-151 · FR-71 · <span style="color:var(--cor)">blocking</span></div>
+      <b style="font-size:16px">How should OpenCode context usage be measured?</b>
+      <div class="xs m">Context monitor needs usage %. <span class="mono">opencode run</span> has no window size.</div>
+      <div class="pn" style="border-color:var(--vio)"><b>◉ A · Estimate from tokens</b> <span class="b vio">rec</span><div class="xs m">±5% · no extra process</div></div>
+      <div class="pn"><b>○ B · Server mode</b><div class="xs m">exact · +1 process</div></div>
+      <div class="xs" style="color:var(--sky)">📎 sample.json › · adapter.go +84 › · mockup › <span class="m">(full screen)</span></div>
+      <div style="position:relative"><textarea class="ta">Log estimates vs. real values.</textarea><span style="position:absolute;right:8px;bottom:10px;font-size:14px">🎙</span></div>
+      <div class="btn p">Answer · unblock T-151</div>
+    </div>
+  </div></div>
+
+  <div class="phone-wrap"><h3>M5 · Review</h3><p class="look">FR-110–112. <b>Rev 2:</b> mockup vs built with a slider, then a trace of requirements, standards, rehearsal feedback and tests. Code is a PR link.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div><div class="sub">‹ decisions · ledgerly · PR #57 ↗</div><h1>T-204 mapping</h1></div><span class="b amb">2 gaps</span></div>
+    <div class="body">
+      <div class="shot" style="height:130px;position:relative;overflow:hidden"><div style="position:absolute;inset:0 50% 0 0;border-right:2px solid var(--vio);display:grid;place-items:center">mockup</div><div style="position:absolute;inset:0 0 0 50%;display:grid;place-items:center">built</div><span style="position:absolute;right:6px;top:6px" class="b">⤢</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px"><span class="b lime">unit 142 ✓</span><span class="b lime">e2e 18 ✓</span><span class="b lime">FR-21 ✓</span><span class="b lime">FR-22 ✓</span><span class="b amb">FR-23 partly</span><span class="b amb">STD "£"</span><span class="b lime">CR-12 ✓</span><span class="b lime">CR-13 ✓</span><span class="b amb">logo missing</span></div>
+      <div style="position:relative"><textarea class="ta">Fix FR-23 + £; logo as new task.</textarea><span style="position:absolute;right:8px;bottom:10px;font-size:14px">🎙</span></div>
+      <div class="rowb"><span class="btn">Reject</span><span class="btn" style="border-color:var(--amb);color:var(--amb)">Changes</span><span class="btn g">Approve</span></div>
+      <div class="xs m">On approve: Courier merges → push → CI (no LLM)</div>
+    </div>
+  </div></div>
+
+  <div class="phone-wrap"><h3>M6 · Filmstrip rehearsal</h3><p class="look">FR-116–118, FR-117a. A horizontal filmstrip of steps, with the current frame large. Tap to drop a feedback pin; ⤢ opens full size. Pins come from every reviewer.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div><div class="sub">‹ ledgerly · ◆ G-5</div><h1>3 · Map columns</h1></div><span class="b amb">3/7</span></div>
+    <div class="body">
+      <div style="display:flex;gap:5px"><div class="shot" style="flex:1;height:38px;border-color:var(--lime)">1</div><div class="shot" style="flex:1;height:38px;border-color:var(--amb)">2</div><div class="shot" style="flex:1;height:38px;border:2px solid var(--vio)">3</div><div class="shot" style="flex:1;height:38px">4</div><div class="shot" style="flex:1;height:38px">5</div><div class="shot" style="flex:1;height:38px">6</div><div class="shot" style="flex:1;height:38px">7</div></div>
+      <div class="xs">Confirm guessed CSV columns for <span class="mono">barclays-oct.csv</span>.</div>
+      <div class="shot" style="height:180px;position:relative">live frame · tap to pin<span class="b" style="position:absolute;right:6px;top:6px">⤢</span><span style="position:absolute;left:60%;top:40%;width:20px;height:20px;border-radius:50% 50% 50% 0;background:var(--cor);color:#fff;display:grid;place-items:center;font-size:10px;font-weight:700">1</span></div>
+      <div class="pn xs"><span class="av hu">dv</span> Debit/credit unclear. Preview 3 rows?<br><span class="av hu" style="margin-top:4px;background:#d7a6ea">mr</span> maria: "Payee" label confusing<br><span class="av dv" style="margin-top:4px">Fg</span> ~20 min for both. Implement now?</div>
+      <div class="rowb"><span class="btn">Queue</span><span class="btn p">Implement now</span></div>
+      <div class="btn g">✓ Step OK → 4</div>
+    </div>
+  </div></div>
+
+  <div class="phone-wrap"><h3>M7 · Option set</h3><p class="look">FR-120–122. A breadcrumb shows the decision path. Options sit in a swipeable row, and aspect chips are tapped into the tray.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><div><div class="sub">OS-1 PWA › OS-2 sheets › <span style="color:#bdb3ff">OS-3</span></div><h1>Map layout</h1></div></div>
+    <div class="body">
+      <div style="display:flex;gap:8px;overflow:hidden">
+        <div class="pn" style="min-width:250px;padding:0;overflow:hidden;border-color:var(--vio)"><div style="height:140px;background:linear-gradient(135deg,#1f3a2a,#2b4a36);position:relative"><span class="b" style="position:absolute;right:6px;top:6px;z-index:2">⤢</span><div style="position:absolute;left:0;right:0;bottom:0;height:36px;background:#1b232c;border-radius:10px 10px 0 0"></div></div><div style="padding:8px 10px"><b>A · Map first</b><div class="xs m">offline ✓ one-hand ✓ battery ~</div><div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap"><span class="b vio">+ full-bleed</span><span class="b vio">+ sheet</span><span class="b">zoom</span></div></div></div>
+        <div class="pn" style="min-width:90px;opacity:.5"><b>B</b></div>
+      </div>
+      <div class="pn" style="border:1px dashed #3d3670;background:#14122a"><div class="xs m mono">TRAY · 4</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"><span class="b vio">A full-bleed</span><span class="b vio">A sheet</span><span class="b vio">B sparkline</span><span class="b vio">C thumbs</span></div></div>
+      <textarea class="ta">Map-first; sparkline in sheet; static thumbs.</textarea>
+      <div class="btn p">Commit choice</div>
+    </div>
+  </div></div>
+
+  <div class="phone-wrap"><h3>M8 · Relay</h3><p class="look">FR-65, FR-66, FR-71–74. <b>Rev 2:</b> lanes show ⟲ compaction by default. Batons (smart handoffs) appear only where the experimental setting is on. Each lane opens a terminal view.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><h1>Relay</h1><span class="sub">4 live · auto-compact</span></div>
+    <div class="body">
+      <div class="pn" style="border-color:#5a4318"><div style="display:flex;justify-content:space-between"><b>Forge · T-142</b><span class="b amb">baton · exp.</span></div>
+        <div style="display:flex;gap:3px;align-items:center;margin:8px 0"><div style="flex:1;height:14px;border-radius:3px;background:var(--vio-s);border:1px solid #3d3670"></div><span style="color:var(--lime)">◆</span><div style="flex:1.2;height:14px;border-radius:3px;background:var(--vio-s);border:1px solid #3d3670"></div><span style="color:var(--lime)">◆</span><div style="flex:1.2;height:14px;border-radius:3px;background:var(--amb-s);border:1px solid #5a4318"></div><span style="color:var(--amb)">◇</span></div>
+        <div class="xs"><span class="m">DONE</span> 4 event types · 31 tests<br><span class="m">NEXT</span> errors → rate_limit fixture → wire usage<br><span class="m">AVOID</span> json.Decoder</div>
+        <div class="rowb" style="margin-top:8px"><span class="btn" style="padding:8px">Full</span><span class="btn p" style="padding:8px">Pass baton</span></div></div>
+      <div class="pn"><b>Atlas · T-149</b> <span class="xs m">31% · ⟲ 1×</span><div class="meter" style="margin-top:6px"><i style="width:31%"></i></div><div class="xs" style="color:var(--sky);margin-top:6px">⌨ terminal › · attach</div></div>
+      <div class="pn"><b>Spark · T-310</b> <span class="xs m">≈18%</span><div class="meter g" style="margin-top:6px"><i style="width:18%"></i></div></div>
+      <div class="pn"><b>Pilot · T-012</b> <span class="b">paused · limit · 14:20</span></div>
+    </div>
+    <div class="dock"><span>▦</span><span>◷</span><span class="k">⌘</span><span class="on">⇶</span><span>≋</span></div>
+  </div></div>
+
+  <div class="phone-wrap"><h3>M9 · Command palette</h3><p class="look">FR-30, FR-130. The center ⌘ button opens search across everything: actions, docs, team, standards, settings and history.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="body" style="padding-top:10px">
+      <div class="pn" style="font-size:15px;border-color:var(--vio)">⌘ &nbsp;stand<span style="color:var(--vio)">▌</span></div>
+      <div class="xs m mono">GO TO</div>
+      <div class="pn">◈ Standards matrix <span class="xs m">· 5/6 compliant</span></div>
+      <div class="pn">◈ Frontend standard <span class="xs m">· 1 override</span></div>
+      <div class="xs m mono">DOCS</div>
+      <div class="pn">📖 Global standards · concepts</div>
+      <div class="xs m mono">ALSO</div>
+      <div class="pn xs">☷ Team matrix · ≋ Activity · ⚙ System map · 📖 UAT walkthrough</div>
+      <div class="xs m">CLI: <span class="mono">gbi standards list</span></div>
+    </div>
+    <div class="dock"><span>▦</span><span>◷</span><span class="k">⌘</span><span>⇶</span><span>≋</span></div>
+  </div></div>
+
+  </div>
+</section>
+<p class="rv-foot">Approach C · Roadmap Canvas · mobile mockups. <a href="../index.html">Back to overview</a></p>
+</body>
+</html>
