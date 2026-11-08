@@ -11,7 +11,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -125,8 +124,12 @@ func (g *Git) FindUnpushed(ctx context.Context, dir string) Unpushed {
 	return u
 }
 
-// CalVer tag pattern YYYY.MM.DD.N (FR-05).
-var calverRe = regexp.MustCompile(`^v?(\d{4})\.(\d{2})\.(\d{2})\.(\d+)$`)
+// calverRe matches CalVer release tags, YYYY.MM.DD.N (FR-05). Month and day may or may not be
+// zero-padded (2026.11.08.1 and v2026.11.8.1 are both releases).
+var calverRe = regexp.MustCompile(`^v?(\d{4})\.(\d{1,2})\.(\d{1,2})\.(\d+)$`)
+
+// semverRe matches stable SemVer tags (no pre-release or build suffix).
+var semverRe = regexp.MustCompile(`^v?(\d+)\.(\d+)\.(\d+)$`)
 
 // Release is a tagged release.
 type Release struct {
@@ -135,23 +138,36 @@ type Release struct {
 	Commits int    `json:"commitsSince"`
 }
 
-// LatestRelease finds the newest CalVer tag and counts commits since it.
-func (g *Git) LatestRelease(ctx context.Context, dir string) *Release {
-	out, err := g.git(ctx, dir, "tag", "--list")
-	if err != nil || out == "" {
-		return nil
-	}
-	var tags []string
-	for _, t := range strings.Fields(out) {
-		if calverRe.MatchString(t) {
-			tags = append(tags, t)
+// LatestTag picks the newest stable release tag: the highest CalVer tag, or
+// the highest SemVer tag when the repository has no CalVer tags.
+func LatestTag(tags []string) string {
+	best := func(re *regexp.Regexp) string {
+		var top string
+		for _, t := range tags {
+			if re.MatchString(t) && (top == "" || versionLess(re, top, t)) {
+				top = t
+			}
 		}
+		return top
 	}
-	if len(tags) == 0 {
+	if t := best(calverRe); t != "" {
+		return t
+	}
+	return best(semverRe)
+}
+
+// LatestRelease finds the newest stable release tag and counts commits since it.
+func (g *Git) LatestRelease(ctx context.Context, dir string) *Release {
+	tag := LatestTag(g.Tags(ctx, dir))
+	if tag == "" {
 		return nil
 	}
-	sort.Slice(tags, func(i, j int) bool { return calverLess(tags[i], tags[j]) })
-	tag := tags[len(tags)-1]
+	return g.ReleaseAt(ctx, dir, tag)
+}
+
+// ReleaseAt describes a known release tag: its date and the commits since it.
+// The tag may be missing locally (not fetched yet); then only Tag is set.
+func (g *Git) ReleaseAt(ctx context.Context, dir, tag string) *Release {
 	r := &Release{Tag: tag}
 	if d, err := g.git(ctx, dir, "log", "-1", "--format=%cs", tag); err == nil {
 		r.Date = d
@@ -162,9 +178,10 @@ func (g *Git) LatestRelease(ctx context.Context, dir string) *Release {
 	return r
 }
 
-func calverLess(a, b string) bool {
-	pa, pb := calverRe.FindStringSubmatch(a), calverRe.FindStringSubmatch(b)
-	for i := 1; i <= 4; i++ {
+// versionLess compares two tags matched by re, numerically part by part.
+func versionLess(re *regexp.Regexp, a, b string) bool {
+	pa, pb := re.FindStringSubmatch(a), re.FindStringSubmatch(b)
+	for i := 1; i < len(pa); i++ {
 		x, _ := strconv.Atoi(pa[i])
 		y, _ := strconv.Atoi(pb[i])
 		if x != y {
@@ -175,18 +192,24 @@ func calverLess(a, b string) bool {
 }
 
 // NextCalVer returns the next CalVer for today given existing tags (FR-05).
+// Existing tags count for today whether or not they zero-pad month and day.
 func NextCalVer(today time.Time, existing []string) string {
-	prefix := today.Format("2006.01.02")
 	n := 0
 	for _, t := range existing {
 		m := calverRe.FindStringSubmatch(t)
-		if m != nil && m[1]+"."+m[2]+"."+m[3] == prefix {
+		if m == nil {
+			continue
+		}
+		y, _ := strconv.Atoi(m[1])
+		mo, _ := strconv.Atoi(m[2])
+		d, _ := strconv.Atoi(m[3])
+		if y == today.Year() && mo == int(today.Month()) && d == today.Day() {
 			if v, _ := strconv.Atoi(m[4]); v > n {
 				n = v
 			}
 		}
 	}
-	return fmt.Sprintf("%s.%d", prefix, n+1)
+	return fmt.Sprintf("%s.%d", today.Format("2006.01.02"), n+1)
 }
 
 // Tags lists all tags.
@@ -339,6 +362,7 @@ type RepoInfo struct {
 	CIAt        string `json:"ciAt"`
 	WebsiteURL  string `json:"websiteUrl"`
 	ReleaseURL  string `json:"releaseUrl"`
+	LatestTag   string `json:"latestTag"` // the forge's "Latest" release, if any
 	RepoURL     string `json:"repoUrl"`
 	Description string `json:"description"`
 }
@@ -357,6 +381,10 @@ func (f *ForgeCLI) Info(ctx context.Context, forge, slug, dir string) (RepoInfo,
 	}
 	if out, err := f.Run(ctx, dir, "gh", "api", "repos/"+slug+"/pages", "--jq", ".html_url"); err == nil && out != "" {
 		ri.WebsiteURL = out
+	}
+	// gh's "latest" is the newest published, non-draft, non-prerelease release.
+	if out, err := f.Run(ctx, dir, "gh", "release", "view", "-R", slug, "--json", "tagName", "--jq", ".tagName"); err == nil {
+		ri.LatestTag = strings.TrimSpace(out)
 	}
 	if out, err := f.Run(ctx, dir, "gh", "pr", "list", "-R", slug, "--state", "open", "--json", "number", "--jq", "length"); err == nil {
 		ri.OpenPRs, _ = strconv.Atoi(out)
