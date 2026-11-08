@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>go-build-it — Requirements</title>
+<style>
+:root {
+  --bg: #fbfaf7; --surface: #ffffff; --text: #1f2328; --muted: #656d76;
+  --border: #e3e0d8; --accent: #2f6f5e; --accent-soft: #e6f0ec;
+  --code-bg: #f2efe8; --shall: #9a3412; --should: #1d4ed8; --may: #6b7280;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15171a; --surface: #1c1f23; --text: #e6e6e3; --muted: #9aa1a9;
+    --border: #2d3238; --accent: #6fc2a8; --accent-soft: #1f2e29;
+    --code-bg: #262a30; --shall: #fb923c; --should: #7aa2ff; --may: #9ca3af;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+.layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); max-width: 1180px; margin: 0 auto; gap: 48px; padding: 0 24px; }
+nav { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto; padding: 40px 0; }
+nav h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 12px; border: 0; padding: 0; }
+nav ol { list-style: none; padding: 0; margin: 0; }
+nav a { display: block; padding: 5px 10px; border-radius: 6px; color: var(--muted); text-decoration: none; font-size: 14px; }
+nav a:hover { background: var(--accent-soft); color: var(--accent); }
+main { padding: 40px 0 96px; min-width: 0; }
+h1 { font-size: 2.2rem; line-height: 1.2; margin: 0 0 8px; letter-spacing: -.01em; }
+.meta { color: var(--muted); margin-top: 0; font-size: 14px; }
+h2 { font-size: 1.45rem; margin: 56px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); scroll-margin-top: 16px; }
+h3 { font-size: 1.1rem; margin: 32px 0 10px; color: var(--accent); scroll-margin-top: 16px; }
+p, li { max-width: 78ch; }
+ul, ol { padding-left: 1.4em; }
+li { margin: 6px 0; }
+code { font: 0.88em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+.rid { display: inline-block; font: 600 12px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--accent); background: var(--accent-soft); padding: 1px 7px; border-radius: 999px; margin-right: 2px; scroll-margin-top: 16px; }
+.kw { font-size: 0.78em; font-weight: 700; letter-spacing: .04em; }
+.kw-SHALL, .kw-SHALLNOT { color: var(--shall); }
+.kw-SHOULD { color: var(--should); }
+.kw-MAY { color: var(--may); }
+.table-wrap { overflow-x: auto; margin: 16px 0; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: var(--code-bg); }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; gap: 0; padding: 0 16px; }
+  nav { position: static; max-height: none; padding: 24px 0 0; }
+  nav ol { display: flex; flex-wrap: wrap; gap: 4px; }
+  td:first-child { white-space: normal; }
+  h1 { font-size: 1.7rem; }
+}
+@media print {
+  nav { display: none; }
+  .layout { display: block; }
+  body { background: #fff; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav aria-label="Contents"><h2>Contents</h2><ol>
+<li><a href="#1-overview">1. Overview</a></li>
+<li><a href="#2-glossary">2. Glossary</a></li>
+<li><a href="#3-platform-installation-and-runtime">3. Platform, installation and runtime</a></li>
+<li><a href="#4-users-team-and-roles">4. Users, team and roles</a></li>
+<li><a href="#5-user-interfaces">5. User interfaces</a></li>
+<li><a href="#6-projects">6. Projects</a></li>
+<li><a href="#7-global-standards">7. Global standards</a></li>
+<li><a href="#8-agent-harness-orchestration">8. Agent harness orchestration</a></li>
+<li><a href="#9-git-github-and-gitlab-workflow">9. Git, GitHub and GitLab workflow</a></li>
+<li><a href="#10-human-interaction">10. Human interaction</a></li>
+<li><a href="#11-observability-and-self-improvement">11. Observability and self-improvement</a></li>
+<li><a href="#12-built-in-documentation">12. Built-in documentation</a></li>
+<li><a href="#13-security-posture">13. Security posture</a></li>
+<li><a href="#14-open-questions">14. Open questions</a></li>
+<li><a href="#15-out-of-scope-for-now">15. Out of scope (for now)</a></li>
+</ol></nav>
+<main>
+<h1>go-build-it — Requirements</h1>
+<p class="meta">Status: Draft · Last updated: 2026-11-07</p>
+<h2 id="1-overview">1. Overview</h2>
+<p>go-build-it is a Go application with an embedded React frontend that manages long-running software project development. It is installed globally on a machine and provides a web UI and a CLI. A team of AI personas and humans works through it to take projects from problem definition to released software. The app coordinates external agent harnesses such as Claude Code, Antigravity and OpenCode, and it drives them headlessly.</p>
+<h3 id="conventions">Conventions</h3>
+<ul><li>
+<strong><span class="kw kw-SHALL">SHALL</span></strong>: required for the release the requirement is assigned to.
+</li><li>
+<strong><span class="kw kw-SHOULD">SHOULD</span></strong>: strongly desired. It can be deferred, but the reason must be recorded.
+</li><li>
+<strong><span class="kw kw-MAY">MAY</span></strong>: optional.
+</li><li>
+Requirement IDs (<code>FR-xx</code>, <code>NFR-xx</code>) are stable. Tests, the UAT walkthrough and the docs refer to them by ID.
+</li></ul>
+<h2 id="2-glossary">2. Glossary</h2>
+<div class="table-wrap"><table><thead><tr><th>Term</th><th>Definition</th></tr></thead><tbody>
+<tr><td><strong>Project</strong></td><td>A software product managed by go-build-it. It is backed by a git repository and has its own requirements, values, roadmap, task queue and history.</td></tr>
+<tr><td><strong>Team</strong></td><td>A user-defined set of team members assigned to work on one or more projects.</td></tr>
+<tr><td><strong>Team member</strong></td><td>Either an <strong>AI persona</strong> or a <strong>human user</strong>, holding one role.</td></tr>
+<tr><td><strong>AI persona</strong></td><td>A configured agent identity: role, instructions or prompt, assigned harness, model, and any role-specific standards.</td></tr>
+<tr><td><strong>Role</strong></td><td>A responsibility within the team. See §4.3.</td></tr>
+<tr><td><strong>Agent harness</strong></td><td>An external agent CLI (e.g. Claude Code, Antigravity, OpenCode, Pi-agent) that go-build-it drives headlessly to carry out a task.</td></tr>
+<tr><td><strong>Session</strong></td><td>One run of a harness working on a task, with its own context window.</td></tr>
+<tr><td><strong>Handoff</strong></td><td>A curated briefing produced when a session ends, mainly when its context window is nearly full. The next session starts from it instead of from a raw memory dump.</td></tr>
+<tr><td><strong>Global standards</strong></td><td>Rules and conventions that apply to every project, e.g. the standard backend stack, frontend stack and test requirements.</td></tr>
+<tr><td><strong>Values</strong></td><td>A project's guiding principles, discovered as work proceeds. They are used to judge and generate solutions.</td></tr>
+<tr><td><strong>Question</strong></td><td>A request for input sent from a team member (usually an AI persona) to a human. It carries the context and artifacts needed to answer it.</td></tr>
+<tr><td><strong>Review gate</strong></td><td>A planned point in a project's roadmap where work pauses for human review, such as a dress rehearsal.</td></tr>
+<tr><td><strong>Dress rehearsal</strong></td><td>A guided, feature-by-feature walkthrough of the application, done as a tabletop exercise before implementation or as a UAT run after it. The human reviewer gives feedback on each feature.</td></tr>
+<tr><td><strong>Option set</strong></td><td>Two or three alternative approaches to a problem, presented for the human to choose among or combine.</td></tr>
+</tbody></table></div>
+<h2 id="3-platform-installation-and-runtime">3. Platform, installation and runtime</h2>
+<ul><li>
+<strong class="rid" id="FR-01">FR-01</strong>: The application <span class="kw kw-SHALL">SHALL</span> be a single Go binary with the React frontend embedded.
+</li><li>
+<strong class="rid" id="FR-02">FR-02</strong>: The application <span class="kw kw-SHALL">SHALL</span> be installable globally on a machine and <span class="kw kw-SHOULD">SHOULD</span> run as a background service (launchd on macOS, systemd on Linux, a Windows service on Windows).
+</li><li>
+<strong class="rid" id="NFR-01">NFR-01</strong>: macOS <span class="kw kw-SHALL">SHALL</span> be the initial target platform. Linux and Windows <span class="kw kw-SHALL">SHALL</span> be supported later. Code <span class="kw kw-SHALLNOT">SHALL NOT</span> assume macOS-only paths, shells or tools without a cross-platform abstraction.
+</li><li>
+<strong class="rid" id="FR-03">FR-03</strong>: All application state <span class="kw kw-SHALL">SHALL</span> live under <code>~/.go-build-it/</code> (<code>%USERPROFILE%\.go-build-it\</code> on Windows). This includes:
+<ul><li>
+configuration files
+</li><li>
+the SQLite database
+</li><li>
+logs and session transcripts
+</li></ul>
+</li><li>
+<strong class="rid" id="FR-04">FR-04</strong>: Persistence <span class="kw kw-SHALL">SHALL</span> use SQLite.
+</li><li>
+<strong class="rid" id="FR-05">FR-05</strong>: The application <span class="kw kw-SHALL">SHALL</span> use calendar versioning in the format <code>YYYY.MM.DD.N</code>, where <code>N</code> is the release number for that day, starting at 1. The application is not intended to be consumed as a Go module.
+</li><li>
+<strong class="rid" id="FR-06">FR-06</strong>: The application <span class="kw kw-SHALL">SHALL</span> be able to install new releases automatically:
+<ul><li>
+Releases <span class="kw kw-SHALL">SHALL</span> be verified by checksum and <span class="kw kw-SHOULD">SHOULD</span> be signed.
+</li><li>
+An update <span class="kw kw-SHALLNOT">SHALL NOT</span> be applied while agent sessions are running. It <span class="kw kw-SHALL">SHALL</span> wait for them to finish or for an idle window.
+</li><li>
+The previous version <span class="kw kw-SHALL">SHALL</span> be kept so the user can roll back.
+</li><li>
+The user <span class="kw kw-SHALL">SHALL</span> be able to turn automatic updates off.
+</li></ul>
+</li></ul>
+<h2 id="4-users-team-and-roles">4. Users, team and roles</h2>
+<h3 id="4-1-team-members">4.1 Team members</h3>
+<ul><li>
+<strong class="rid" id="FR-10">FR-10</strong>: A team member <span class="kw kw-SHALL">SHALL</span> be either an AI persona or a human user.
+</li><li>
+<strong class="rid" id="FR-11">FR-11</strong>: The user <span class="kw kw-SHALL">SHALL</span> be able to create, edit and remove teams, and assign teams to projects.
+</li><li>
+<strong class="rid" id="FR-12">FR-12</strong>: Each AI persona <span class="kw kw-SHALL">SHALL</span> be configurable with: role, instructions, assigned harness, model, and any role-specific standards that add to the global standards.
+</li></ul>
+<h3 id="4-2-access-and-identity">4.2 Access and identity</h3>
+<p>Authentication is delegated to Tailscale. go-build-it does not run its own login system for local or tailnet access.</p>
+<ul><li>
+<strong class="rid" id="FR-15">FR-15</strong>: The application <span class="kw kw-SHALL">SHALL</span> detect how each request reaches it and classify it as one of:
+<ol><li>
+<strong>Local</strong>: a loopback connection (<code>localhost</code> / <code>127.0.0.1</code> / <code>::1</code>).
+</li><li>
+<strong>Tailscale Serve</strong>: proxied by <code>tailscale serve</code> on the tailnet.
+</li><li>
+<strong>External interface</strong>: a direct connection on a non-loopback network interface.
+</li></ol>
+</li><li>
+<strong class="rid" id="FR-16">FR-16</strong>: <strong>Local</strong> requests <span class="kw kw-SHALLNOT">SHALL NOT</span> be challenged. They <span class="kw kw-SHALL">SHALL</span> be attributed to a configurable default local user.
+</li><li>
+<strong class="rid" id="FR-17">FR-17</strong>: <strong>Tailscale Serve</strong> requests <span class="kw kw-SHALL">SHALL</span> be treated as trusted, the same as local requests, because the user has already authenticated with Tailscale. When Tailscale identity headers are present (e.g. <code>Tailscale-User-Login</code>), the request <span class="kw kw-SHOULD">SHOULD</span> be attributed to that Tailscale user, so actions in the history show who performed them.
+</li><li>
+<strong class="rid" id="FR-18">FR-18</strong>: <strong>External interface</strong> requests <span class="kw kw-SHALL">SHALL</span> be challenged before access is granted. See open question Q1.
+</li><li>
+<strong class="rid" id="FR-19">FR-19</strong>: By default the application <span class="kw kw-SHALL">SHALL</span> listen only on loopback. Listening on external interfaces <span class="kw kw-SHALL">SHALL</span> require explicit configuration.
+</li><li>
+<strong class="rid" id="FR-20">FR-20</strong>: The application <span class="kw kw-SHALL">SHALL</span> help the user set up Tailscale Serve, for example by detecting whether Tailscale is installed and logged in and then offering to configure <code>tailscale serve</code>. It <span class="kw kw-SHALL">SHALL</span> show clear guidance when Tailscale is missing.
+</li></ul>
+<h3 id="4-3-roles">4.3 Roles</h3>
+<ul><li>
+<strong class="rid" id="FR-25">FR-25</strong>: The application <span class="kw kw-SHALL">SHALL</span> provide these built-in roles. Each can be filled by an AI persona or a human:
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Role</th><th>Responsibility</th></tr></thead><tbody>
+<tr><td><strong>Project Manager</strong></td><td>Owns the roadmap, the task queue, prioritization, review gates and the flow of questions to humans.</td></tr>
+<tr><td><strong>Architect</strong></td><td>Owns technical design, makes sure work follows the global standards, and produces design option sets.</td></tr>
+<tr><td><strong>Developer</strong></td><td>Implements tasks.</td></tr>
+<tr><td><strong>QA</strong></td><td>Writes and runs unit and end-to-end tests, and runs dress rehearsals and UAT.</td></tr>
+<tr><td><strong>Reviewer</strong></td><td>Reviews completed work against requirements, standards and values.</td></tr>
+<tr><td><strong>Git / Release Manager</strong></td><td>Handles all git and forge operations (see §9), so other personas don't spend tokens on them.</td></tr>
+</tbody></table></div>
+<ul><li>
+<strong class="rid" id="FR-26">FR-26</strong>: Users <span class="kw kw-SHOULD">SHOULD</span> be able to define additional custom roles.
+</li></ul>
+<h2 id="5-user-interfaces">5. User interfaces</h2>
+<ul><li>
+<strong class="rid" id="FR-30">FR-30</strong>: Everything that can be done in the web UI <span class="kw kw-SHALL">SHALL</span> also be possible through the CLI, so AI agents can operate the application. (AI-native requirement.)
+</li><li>
+<strong class="rid" id="FR-31">FR-31</strong>: The application <span class="kw kw-SHALL">SHALL</span> be API-first. The web UIs and the CLI <span class="kw kw-SHALL">SHALL</span> be clients of the same HTTP API. The API <span class="kw kw-SHOULD">SHOULD</span> be described by an OpenAPI spec.
+</li><li>
+<strong class="rid" id="FR-32">FR-32</strong>: CLI commands <span class="kw kw-SHALL">SHALL</span> support machine-readable output (<code>--json</code>).
+</li><li>
+<strong class="rid" id="FR-33">FR-33</strong>: The application <span class="kw kw-SHOULD">SHOULD</span> expose an MCP server so external agents can drive it.
+</li><li>
+<strong class="rid" id="FR-34">FR-34</strong>: The application <span class="kw kw-SHALL">SHALL</span> provide a <strong>desktop web UI</strong> designed for laptop and desktop screens.
+</li><li>
+<strong class="rid" id="FR-35">FR-35</strong>: The application <span class="kw kw-SHALL">SHALL</span> provide a separate <strong>mobile web UI</strong> designed for phones. It <span class="kw kw-SHALL">SHALL</span> put the most common mobile tasks first: answering questions, reviewing and giving feedback, checking project status, and approving review gates.
+</li><li>
+<strong class="rid" id="FR-36">FR-36</strong>: User interactions <span class="kw kw-SHALL">SHALL</span> feel interactive and dynamic, like working with a team. Updates (agent progress, new questions, status changes) <span class="kw kw-SHALL">SHALL</span> be pushed to the UI live, without manual refresh.
+</li></ul>
+<h2 id="6-projects">6. Projects</h2>
+<h3 id="6-1-project-catalog">6.1 Project catalog</h3>
+<ul><li>
+<strong class="rid" id="FR-40">FR-40</strong>: The landing view <span class="kw kw-SHALL">SHALL</span> be the project catalog, showing all managed projects as quick-view cards.
+</li><li>
+<strong class="rid" id="FR-41">FR-41</strong>: At a glance, each card <span class="kw kw-SHALL">SHALL</span> show:
+<ul><li>
+<strong>What the project is</strong>: name, a one-line purpose, and its key values or goal.
+</li><li>
+<strong>Where it stands</strong>: lifecycle state, current roadmap phase, active sessions, open questions (blocking count highlighted), pending review gates, last activity, and CI status.
+</li><li>
+<strong>What has shipped</strong>: the latest stable release (version, release date, and a link to its release notes), plus how many commits have landed since that release.
+</li><li>
+<strong>Where to find it</strong>: links to the project website (see FR-44), the repository on GitHub or GitLab, and the project's embedded documentation.
+</li><li>
+<strong>Other useful information</strong>:
+<ul><li>
+open PRs/MRs and open issues
+</li><li>
+the assigned team
+</li><li>
+a warning for unpushed work (see FR-94)
+</li><li>
+test status from the latest CI run
+</li></ul>
+</li></ul>
+</li><li>
+<strong class="rid" id="FR-41a">FR-41a</strong>: Clicking a card's release or website link <span class="kw kw-SHALL">SHALL</span> open the target directly. Cards <span class="kw kw-SHALL">SHALL</span> show a clear placeholder (e.g. "No stable release yet", "Website not published") when information doesn't exist yet, rather than leaving gaps.
+</li><li>
+<strong class="rid" id="FR-42">FR-42</strong>: The catalog <span class="kw kw-SHALL">SHALL</span> support search, filtering (by state, team, or needs-attention) and sorting, because many projects will be managed at once.
+</li><li>
+<strong class="rid" id="FR-43">FR-43</strong>: Projects <span class="kw kw-SHALL">SHALL</span> have a defined lifecycle. Initial states: <em>Discovery → Requirements → Design → Implementation → Review → Released → Maintenance</em>, plus <em>Paused</em> and <em>Archived</em>.
+</li><li>
+<strong class="rid" id="FR-44">FR-44</strong>: Each project <span class="kw kw-SHALL">SHALL</span> have a website hosted on GitHub Pages. GitLab-hosted projects <span class="kw kw-SHOULD">SHOULD</span> use GitLab Pages instead. The Git / Release Manager role <span class="kw kw-SHALL">SHALL</span> publish or update the website as part of each stable release. The website URL <span class="kw kw-SHALL">SHALL</span> be stored with the project and shown on its card.
+</li></ul>
+<h3 id="6-2-project-artifacts">6.2 Project artifacts</h3>
+<ul><li>
+<strong class="rid" id="FR-45">FR-45</strong>: The team <span class="kw kw-SHALL">SHALL</span> be able to develop the following with the user for each project:
+<ul><li>
+requirements documents
+</li><li>
+mockups
+</li><li>
+roadmaps
+</li><li>
+a record of the project's <strong>values</strong>
+</li></ul>
+</li><li>
+<strong class="rid" id="FR-46">FR-46</strong>: Project artifacts <span class="kw kw-SHOULD">SHOULD</span> be stored in the project's git repository (e.g. under <code>docs/</code>) so they are versioned with the code. Operational state (queues, sessions, history) <span class="kw kw-SHALL">SHALL</span> live in the application database.
+</li></ul>
+<h2 id="7-global-standards">7. Global standards</h2>
+<ul><li>
+<strong class="rid" id="FR-50">FR-50</strong>: The application <span class="kw kw-SHALL">SHALL</span> maintain a set of global standards that apply to every project. Examples:
+<ul><li>
+standard backend stack
+</li><li>
+standard frontend stack
+</li><li>
+unit tests required
+</li><li>
+end-to-end tests required
+</li><li>
+documentation requirements
+</li></ul>
+</li><li>
+<strong class="rid" id="FR-51">FR-51</strong>: Standards <span class="kw kw-SHALL">SHALL</span> be authored as Markdown and managed in the UI and the CLI.
+</li><li>
+<strong class="rid" id="FR-52">FR-52</strong>: A project <span class="kw kw-MAY">MAY</span> override or extend a global standard. Every override <span class="kw kw-SHALL">SHALL</span> be recorded with its reason.
+</li><li>
+<strong class="rid" id="FR-53">FR-53</strong>: Standards <span class="kw kw-SHALL">SHALL</span> be supplied to every agent session automatically, for example by generating the harness's instruction file (<code>CLAUDE.md</code>, <code>AGENTS.md</code> or equivalent), or by injecting them into the session context.
+</li><li>
+<strong class="rid" id="FR-54">FR-54</strong>: The Reviewer role <span class="kw kw-SHALL">SHALL</span> check completed work against the applicable standards.
+</li></ul>
+<h2 id="8-agent-harness-orchestration">8. Agent harness orchestration</h2>
+<h3 id="8-1-harness-integration">8.1 Harness integration</h3>
+<ul><li>
+<strong class="rid" id="FR-60">FR-60</strong>: The application <span class="kw kw-SHALL">SHALL</span> drive agent harnesses headlessly through their command-line interfaces, at the direction of the development team.
+</li><li>
+<strong class="rid" id="FR-61">FR-61</strong>: Harness support <span class="kw kw-SHALL">SHALL</span> be implemented through an adapter interface providing:
+<ul><li>
+start a session with a prepared context
+</li><li>
+stream output and events
+</li><li>
+send input
+</li><li>
+interrupt or cancel
+</li><li>
+report context-window usage
+</li><li>
+report exit status
+</li></ul>
+</li><li>
+<strong class="rid" id="FR-62">FR-62</strong>: Initial adapters: <strong>Claude Code</strong> (Anthropic subscription), <strong>Antigravity</strong> (Google / Gemini subscription) and <strong>OpenCode</strong> (open-source harness that works with multiple model providers). Pi-agent and others <span class="kw kw-SHOULD">SHOULD</span> be addable through the same interface.
+</li><li>
+<strong class="rid" id="FR-63">FR-63</strong>: Harnesses and their settings (binary path, model, flags, permission mode) <span class="kw kw-SHALL">SHALL</span> be configurable in the UI and the CLI.
+</li><li>
+<strong class="rid" id="FR-64">FR-64</strong>: Concurrent sessions on the same project <span class="kw kw-SHOULD">SHOULD</span> work in isolated workspaces, such as git worktrees, so they don't interfere with each other.
+</li><li>
+<strong class="rid" id="FR-65">FR-65</strong>: Cost is limited by the user's AI subscriptions, so no budget controls are needed. The application <span class="kw kw-SHALL">SHALL</span> detect subscription rate or usage limits reported by a harness. It <span class="kw kw-SHALL">SHALL</span> then pause the affected work and resume it automatically when the limit resets.
+</li></ul>
+<h3 id="8-2-context-management-and-smart-handoffs">8.2 Context management and smart handoffs</h3>
+<ul><li>
+<strong class="rid" id="FR-70">FR-70</strong>: The application <span class="kw kw-SHALL">SHALL</span> prepare each session's starting context deliberately: the task, the relevant requirements, standards, values, and the incoming handoff (if any). It <span class="kw kw-SHALLNOT">SHALL NOT</span> dump all of the project's history.
+</li><li>
+<strong class="rid" id="FR-71">FR-71</strong>: The application <span class="kw kw-SHALL">SHALL</span> monitor each session's context-window usage while it runs.
+</li><li>
+<strong class="rid" id="FR-72">FR-72</strong>: When usage reaches a configurable threshold (e.g. 70–80%), the application <span class="kw kw-SHALL">SHALL</span> step in and start a smart handoff <strong>before</strong> the harness auto-compacts.
+</li><li>
+<strong class="rid" id="FR-73">FR-73</strong>: A handoff <span class="kw kw-SHALL">SHALL</span> be a curated briefing, written as if handing responsibility to another person. At minimum it <span class="kw kw-SHALL">SHALL</span> contain:
+<ul><li>
+objective and definition of done
+</li><li>
+current state and what has been completed
+</li><li>
+decisions made and why
+</li><li>
+open problems, risks and dead ends to avoid
+</li><li>
+specific next steps
+</li><li>
+pointers to the relevant files and artifacts (references, not copies)
+</li></ul>
+</li><li>
+<strong class="rid" id="FR-74">FR-74</strong>: The next session <span class="kw kw-SHALL">SHALL</span> start from the handoff and FR-70's prepared context. Every handoff <span class="kw kw-SHALL">SHALL</span> be stored in the history.
+</li><li>
+<strong class="rid" id="FR-75">FR-75</strong>: Tasks <span class="kw kw-SHOULD">SHOULD</span> be sized so most of them fit in one session. The Project Manager role <span class="kw kw-SHOULD">SHOULD</span> split tasks that repeatedly need handoffs.
+</li></ul>
+<h3 id="8-3-task-queues">8.3 Task queues</h3>
+<ul><li>
+<strong class="rid" id="FR-80">FR-80</strong>: Each project <span class="kw kw-SHALL">SHALL</span> have a persistent task queue that can manage large numbers of tasks.
+</li><li>
+<strong class="rid" id="FR-81">FR-81</strong>: Queues <span class="kw kw-SHALL">SHALL</span> support:
+<ul><li>
+priorities
+</li><li>
+dependencies between tasks
+</li><li>
+concurrency limits per project and globally
+</li><li>
+retries
+</li><li>
+assignment of tasks to roles or personas
+</li></ul>
+</li><li>
+<strong class="rid" id="FR-82">FR-82</strong>: Queue state <span class="kw kw-SHALL">SHALL</span> survive application and machine restarts. Interrupted sessions <span class="kw kw-SHALL">SHALL</span> be resumed or restarted from their latest handoff.
+</li></ul>
+<h2 id="9-git-github-and-gitlab-workflow">9. Git, GitHub and GitLab workflow</h2>
+<ul><li>
+<strong class="rid" id="FR-90">FR-90</strong>: The application <span class="kw kw-SHALL">SHALL</span> work with both GitHub (<code>gh</code>) and GitLab (<code>glab</code>), and <span class="kw kw-SHALL">SHALL</span> detect which one each project uses and whether its CLI is authenticated.
+</li><li>
+<strong class="rid" id="FR-91">FR-91</strong>: The application <span class="kw kw-SHALL">SHALL</span> enforce a defined development workflow, configurable per project with a global default. For example: branch per task → commits → push → PR/MR → review → merge.
+</li><li>
+<strong class="rid" id="FR-92">FR-92</strong>: All git and forge operations <span class="kw kw-SHALL">SHALL</span> be carried out by the <strong>Git / Release Manager</strong> role, including:
+<ul><li>
+branching and committing
+</li><li>
+pushing
+</li><li>
+opening PRs/MRs
+</li><li>
+reading CI status
+</li><li>
+merging
+</li><li>
+tagging releases
+</li></ul>
+</li><li>
+<strong class="rid" id="FR-93">FR-93</strong>: Deterministic git operations (e.g. push, open PR, read CI status) <span class="kw kw-SHOULD">SHOULD</span> be run directly by the application rather than through an LLM session, to save tokens. The Git / Release Manager persona is responsible for them and calls in an agent only when judgment is needed, such as resolving merge conflicts or writing release notes.
+</li><li>
+<strong class="rid" id="FR-94">FR-94</strong>: The application <span class="kw kw-SHALL">SHALL</span> make sure completed work is pushed to the remote. Unpushed work <span class="kw kw-SHALL">SHALL</span> be shown as a warning on the project card.
+</li></ul>
+<h2 id="10-human-interaction">10. Human interaction</h2>
+<h3 id="10-1-questions">10.1 Questions</h3>
+<ul><li>
+<strong class="rid" id="FR-100">FR-100</strong>: Team members <span class="kw kw-SHALL">SHALL</span> be able to send questions to human team members through a dedicated channel.
+</li><li>
+<strong class="rid" id="FR-101">FR-101</strong>: Each question <span class="kw kw-SHALL">SHALL</span> be marked <strong>blocking</strong> (the asking work pauses until it is answered) or <strong>non-blocking</strong> (work continues on a stated assumption, which the human can later confirm or correct).
+</li><li>
+<strong class="rid" id="FR-102">FR-102</strong>: Each question <span class="kw kw-SHALL">SHALL</span> carry everything needed to answer it without digging:
+<ul><li>
+the question itself
+</li><li>
+why it matters
+</li><li>
+the related task and requirement IDs
+</li><li>
+the asker's recommendation, if it has one
+</li><li>
+attached artifacts, such as mockups, diffs, screenshots, logs or option sets
+</li></ul>
+</li><li>
+<strong class="rid" id="FR-103">FR-103</strong>: Questions <span class="kw kw-MAY">MAY</span> offer structured answers (choices, yes/no, pick-an-option) as well as free text.
+</li><li>
+<strong class="rid" id="FR-104">FR-104</strong>: A <strong>Questions dashboard</strong> (on desktop and mobile) <span class="kw kw-SHALL">SHALL</span> list open questions across all projects. It <span class="kw kw-SHALL">SHALL</span> put blocking questions first and <span class="kw kw-SHALL">SHALL</span> let the user answer each question in place, with its context, so they can get through them quickly.
+</li><li>
+<strong class="rid" id="FR-105">FR-105</strong>: Answers <span class="kw kw-SHALL">SHALL</span> be sent back to the asking session or task automatically. Answers that reveal a project value <span class="kw kw-SHALL">SHALL</span> be offered for recording in the project's values (§10.4).
+</li><li>
+<strong class="rid" id="FR-106">FR-106</strong>: Email and other out-of-app notifications are out of scope for now. In-app live updates (FR-36) are in scope.
+</li></ul>
+<h3 id="10-2-feedback-on-completed-work">10.2 Feedback on completed work</h3>
+<ul><li>
+<strong class="rid" id="FR-110">FR-110</strong>: The application <span class="kw kw-SHALL">SHALL</span> provide an easy way to give feedback on completed work. The verdicts are: approve, request changes, or reject. Comments <span class="kw kw-SHALL">SHALL</span> attach to a specific artifact, screen or diff location.
+</li><li>
+<strong class="rid" id="FR-111">FR-111</strong>: Feedback <span class="kw kw-SHALL">SHALL</span> go into the context of the follow-up task automatically, and <span class="kw kw-SHALL">SHALL</span> be recorded in the history.
+</li></ul>
+<h3 id="10-3-review-gates-and-dress-rehearsals">10.3 Review gates and dress rehearsals</h3>
+<ul><li>
+<strong class="rid" id="FR-115">FR-115</strong>: Roadmaps <span class="kw kw-SHALL">SHALL</span> support <strong>review gates</strong>: defined points where work pauses for human review and feedback before going on.
+</li><li>
+<strong class="rid" id="FR-116">FR-116</strong>: A review gate <span class="kw kw-MAY">MAY</span> be a <strong>dress rehearsal</strong>. The application walks the human step by step through every feature or scenario in scope. It can do this as a tabletop exercise before implementation (using mockups and scenarios) or as a UAT run after it (using the working application).
+</li><li>
+<strong class="rid" id="FR-117">FR-117</strong>: During a dress rehearsal, the human <span class="kw kw-SHALL">SHALL</span> be able to give feedback on each step, and <span class="kw kw-SHALL">SHALL</span> be able to talk with the agents live to request changes or improvements as the rehearsal goes on.
+</li><li>
+<strong class="rid" id="FR-118">FR-118</strong>: Rehearsal outcomes (feedback per step, changes requested, approval) <span class="kw kw-SHALL">SHALL</span> be recorded. A gate <span class="kw kw-SHALLNOT">SHALL NOT</span> be passed until the human explicitly approves it.
+</li></ul>
+<h3 id="10-4-exploratory-design-and-values">10.4 Exploratory design and values</h3>
+<ul><li>
+<strong class="rid" id="FR-120">FR-120</strong>: For significant design or implementation decisions, the team <span class="kw kw-SHALL">SHALL</span> present an <strong>option set</strong> of 2–3 alternative approaches, not a single answer.
+</li><li>
+<strong class="rid" id="FR-121">FR-121</strong>: Each option <span class="kw kw-SHALL">SHALL</span> include a summary and tradeoffs, and <span class="kw kw-SHALL">SHALL</span> include a visual artifact where relevant (an HTML mockup or an image).
+</li><li>
+<strong class="rid" id="FR-122">FR-122</strong>: The human <span class="kw kw-SHALL">SHALL</span> be able to choose one option, or combine parts of several options and explain why. Choices and reasons <span class="kw kw-SHALL">SHALL</span> be recorded.
+</li><li>
+<strong class="rid" id="FR-123">FR-123</strong>: The application <span class="kw kw-SHALL">SHALL</span> keep a living <strong>problem definition</strong> and a set of <strong>values</strong> (guiding principles) for each project. Both <span class="kw kw-SHALL">SHALL</span> be refined from the human's choices, answers and feedback.
+</li><li>
+<strong class="rid" id="FR-124">FR-124</strong>: Future option sets <span class="kw kw-SHALL">SHALL</span> be generated with the recorded values in mind, so options get closer to what the human wants as understanding grows.
+</li></ul>
+<h2 id="11-observability-and-self-improvement">11. Observability and self-improvement</h2>
+<ul><li>
+<strong class="rid" id="NFR-10">NFR-10</strong>: The application <span class="kw kw-SHALL">SHALL</span> keep a complete, searchable history of what happened, when, why, and who or which persona did it. This includes:
+<ul><li>
+session transcripts
+</li><li>
+handoffs
+</li><li>
+task state changes
+</li><li>
+questions and answers
+</li><li>
+feedback and design choices
+</li><li>
+git operations
+</li></ul>
+</li><li>
+<strong class="rid" id="NFR-11">NFR-11</strong>: It <span class="kw kw-SHALL">SHALL</span> always be possible to determine what the system is currently doing and why. Live views <span class="kw kw-SHALL">SHALL</span> show active sessions, their tasks, and their context usage.
+</li><li>
+<strong class="rid" id="NFR-12">NFR-12</strong>: Records <span class="kw kw-SHALL">SHALL</span> be structured so AI agents can analyze the application's own performance. Examples:
+<ul><li>
+handoff quality
+</li><li>
+rework rates
+</li><li>
+question volume
+</li><li>
+time per task
+</li></ul>
+</li><li>
+<strong class="rid" id="NFR-13">NFR-13</strong>: Agents <span class="kw kw-SHALL">SHALL</span> be able to use that analysis to propose and make improvements to go-build-it itself, such as prompts, persona definitions, handoff templates or code. These changes go through the normal review workflow.
+</li></ul>
+<h2 id="12-built-in-documentation">12. Built-in documentation</h2>
+<ul><li>
+<strong class="rid" id="FR-130">FR-130</strong>: Documentation <span class="kw kw-SHALL">SHALL</span> be embedded in the application, searchable, and linked from the relevant places in the UI.
+</li><li>
+<strong class="rid" id="FR-131">FR-131</strong>: Documentation <span class="kw kw-SHALL">SHALL</span> be fully illustrated with screenshots.
+</li><li>
+<strong class="rid" id="FR-132">FR-132</strong>: Documentation <span class="kw kw-SHALL">SHALL</span> include a dress-rehearsal / UAT walkthrough that covers every feature, step by step, for every role.
+</li><li>
+<strong class="rid" id="FR-133">FR-133</strong>: The UAT walkthrough <span class="kw kw-SHOULD">SHOULD</span> be written as automated end-to-end scripts (e.g. Playwright) that both verify the features and regenerate the documentation screenshots, so screenshots stay current.
+</li></ul>
+<h2 id="13-security-posture">13. Security posture</h2>
+<ul><li>
+<strong class="rid" id="NFR-20">NFR-20</strong>: Agents <span class="kw kw-MAY">MAY</span> run arbitrary code on the development machine. Container or VM sandboxing is explicitly <strong>not</strong> required.
+</li><li>
+<strong class="rid" id="NFR-21">NFR-21</strong>: Access control relies on network exposure and Tailscale (§4.2). The application <span class="kw kw-SHALLNOT">SHALL NOT</span> expose itself on external interfaces without the challenge required by FR-18.
+</li></ul>
+<h2 id="14-open-questions">14. Open questions</h2>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Question</th></tr></thead><tbody>
+<tr><td>Q1</td><td>For access through an external network interface (FR-18), what should the challenge be: a local password or token, an OAuth/OIDC provider, or refusing external access completely and requiring Tailscale Serve?</td></tr>
+<tr><td>Q2</td><td>Check that each target harness supports headless operation <strong>and</strong> reports context-window usage. Claude Code reports usage in its streaming JSON output. OpenCode offers a non-interactive mode (<code>opencode run</code>) and a server mode; how it reports context usage needs to be confirmed. Antigravity's headless and CLI support needs to be confirmed.</td></tr>
+<tr><td>Q3</td><td>What is the default context threshold for a handoff, and should it be configurable per harness or model?</td></tr>
+<tr><td>Q4</td><td>Can multiple humans collaborate on the same projects (e.g. different Tailscale users with different roles), or is it single-user with optional reviewers?</td></tr>
+<tr><td>Q5</td><td>What is the exact default git workflow (branch naming, PR/MR requirements, merge strategy)?</td></tr>
+<tr><td>Q6</td><td>What is the mechanism and channel for auto-updates (GitHub Releases, Homebrew tap, etc.)?</td></tr>
+</tbody></table></div>
+<h2 id="15-out-of-scope-for-now">15. Out of scope (for now)</h2>
+<ul><li>
+Email or other external notifications
+</li><li>
+Container or VM sandboxing of agents
+</li><li>
+Cost and budget tracking beyond detecting subscription limits
+</li><li>
+Consuming go-build-it as a Go module
+</li></ul>
+</main>
+</div>
+</body>
+</html>
