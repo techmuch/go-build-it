@@ -76,6 +76,13 @@ func setup(t *testing.T) *env {
 	t.Cleanup(func() { db.Close() })
 	a := Wire(cfg, db, "test", slog.New(slog.NewTextHandler(io.Discard, nil)))
 	a.Reviews.RunTests = false
+	// Let agent processes exit before temp dirs are removed (Windows can't delete a dir in use).
+	t.Cleanup(func() {
+		for i := 0; i < 150 && a.Sessions.LiveCount() > 0; i++ {
+			time.Sleep(100 * time.Millisecond)
+		}
+		time.Sleep(300 * time.Millisecond)
+	})
 	mux := http.NewServeMux()
 	api.Mount(mux, a.Routes())
 	srv := httptest.NewServer(access.Middleware("owner", func() access.ExternalPolicy { return access.ExternalPolicy{} }, mux))
