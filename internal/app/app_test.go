@@ -102,12 +102,14 @@ func setup(t *testing.T) *env {
 	if _, err := a.Projects.Import(ctx, repo, "demo", "A demo project", "Implementation"); err != nil {
 		t.Fatal(err)
 	}
-	for _, m := range []team.Member{
-		{ID: "forge", Name: "Forge", Kind: "ai", Role: "developer", Harness: "fake", Instructions: "Implement tasks."},
-		{ID: "lens", Name: "Lens", Kind: "ai", Role: "reviewer", Harness: "fake", Instructions: "Review."},
-		{ID: "atlas", Name: "Atlas", Kind: "ai", Role: "architect", Harness: "fake"},
-	} {
-		if _, err := a.Team.Save(ctx, m); err != nil {
+	fake := "fake"
+	for _, m := range []struct{ arch, name, tuning string }{{"developer", "Forge", "Implement tasks."}, {"reviewer", "Lens", "Review."}, {"architect", "Atlas", ""}} {
+		mem, err := a.Team.AddFromArchetype(ctx, "demo", m.arch, m.name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		tuning := m.tuning
+		if _, err := a.Team.Tune(ctx, mem.ID, team.Tuning{Harness: &fake, Tuning: &tuning}); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -148,7 +150,7 @@ func TestFullWorkflow(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if s.MemberID != "forge" {
+	if s.MemberID != "forge@demo" {
 		t.Fatalf("picked %s, want forge", s.MemberID)
 	}
 	tk = e.waitStatus(tk.ID, queue.Review)
@@ -220,12 +222,12 @@ func TestFullWorkflow(t *testing.T) {
 func TestBlockingQuestionAndAnswer(t *testing.T) {
 	e := setup(t)
 	tk, _ := e.a.Queue.Add(e.ctx, queue.Task{ProjectID: "demo", Title: "Decide something", Description: "FAKE:ask"})
-	if _, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge"); err != nil {
+	if _, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge@demo"); err != nil {
 		t.Fatal(err)
 	}
 	e.waitStatus(tk.ID, queue.Blocked)
 	qs, _ := e.a.Questions.List(e.ctx, "demo", "open")
-	if len(qs) != 1 || !qs[0].Blocking || qs[0].Asker != "forge" || qs[0].TaskID != tk.ID {
+	if len(qs) != 1 || !qs[0].Blocking || qs[0].Asker != "forge@demo" || qs[0].TaskID != tk.ID {
 		t.Fatalf("questions %+v", qs)
 	}
 	inbox := e.a.inboxItems(e.ctx, "")
@@ -248,7 +250,7 @@ func TestBlockingQuestionAndAnswer(t *testing.T) {
 func TestRateLimitPauseAndResume(t *testing.T) {
 	e := setup(t)
 	tk, _ := e.a.Queue.Add(e.ctx, queue.Task{ProjectID: "demo", Title: "Hit a limit", Description: "FAKE:limit"})
-	s, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge")
+	s, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge@demo")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -276,7 +278,7 @@ func TestRateLimitPauseAndResume(t *testing.T) {
 func TestCompactionLogged(t *testing.T) {
 	e := setup(t)
 	tk, _ := e.a.Queue.Add(e.ctx, queue.Task{ProjectID: "demo", Title: "Long change", Description: "FAKE:compact"})
-	if _, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge"); err != nil {
+	if _, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge@demo"); err != nil {
 		t.Fatal(err)
 	}
 	got := e.waitStatus(tk.ID, queue.Review)
@@ -332,7 +334,7 @@ func TestGateBlocksLaterMilestone(t *testing.T) {
 func TestArtifactEditAndChat(t *testing.T) {
 	e := setup(t)
 	p := mustProject(t, e.a, "demo")
-	reply, err := e.a.Agent.Edit(e.ctx, "atlas", "project artifact", "docs/requirements.md", "# Req\n\n- **FR-01**: The demo SHALL work.", "Add FR-02 for offline mode", nil)
+	reply, err := e.a.Agent.Edit(e.ctx, "atlas@demo", "project artifact", "docs/requirements.md", "# Req\n\n- **FR-01**: The demo SHALL work.", "Add FR-02 for offline mode", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -407,7 +409,7 @@ func TestMergeConflictGoesBackToDeveloper(t *testing.T) {
 	t1, _ := e.a.Queue.Add(e.ctx, queue.Task{ProjectID: "demo", Title: "First change"})
 	t2, _ := e.a.Queue.Add(e.ctx, queue.Task{ProjectID: "demo", Title: "Second change"})
 	for _, tk := range []queue.Task{t1, t2} {
-		if _, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge"); err != nil {
+		if _, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge@demo"); err != nil {
 			t.Fatal(err)
 		}
 		e.waitStatus(tk.ID, queue.Review)
@@ -443,7 +445,7 @@ func TestCourierPushesToRemote(t *testing.T) {
 		t.Fatal(err)
 	}
 	tk, _ := e.a.Queue.Add(e.ctx, queue.Task{ProjectID: "demo", Title: "Pushed work"})
-	if _, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge"); err != nil {
+	if _, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge@demo"); err != nil {
 		t.Fatal(err)
 	}
 	tk = e.waitStatus(tk.ID, queue.Review)
@@ -462,7 +464,7 @@ func TestSmartHandoffExperimental(t *testing.T) {
 	e.a.Cfg.Experimental.SmartHandoffProjects = []string{"demo"}
 	e.a.Cfg.Experimental.HandoffThreshold = 0.75
 	tk, _ := e.a.Queue.Add(e.ctx, queue.Task{ProjectID: "demo", Title: "Very long change", Description: "FAKE:handoff"})
-	s, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge")
+	s, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge@demo")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -475,7 +477,7 @@ func TestSmartHandoffExperimental(t *testing.T) {
 		t.Fatalf("session %+v", sess)
 	}
 	// The next session starts from the briefing (FR-74) and finishes normally.
-	if _, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge"); err != nil {
+	if _, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge@demo"); err != nil {
 		t.Fatal(err)
 	}
 	e.waitStatus(tk.ID, queue.Review)
@@ -496,7 +498,7 @@ func TestAttachableSessionWithTmux(t *testing.T) {
 	e := setup(t)
 	e.a.Cfg.Experimental.AttachableSessions = true
 	tk, _ := e.a.Queue.Add(e.ctx, queue.Task{ProjectID: "demo", Title: "Headed work"})
-	s, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge")
+	s, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge@demo")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -521,15 +523,10 @@ func TestAttachableSessionWithTmux(t *testing.T) {
 
 func TestReviewAssignmentAndOwners(t *testing.T) {
 	e := setup(t)
-	if _, err := e.a.Team.SaveTeam(e.ctx, "core", "Core"); err != nil {
+	if _, err := e.a.Team.AddHuman(e.ctx, "demo", "maria", "maria@github", "reviewer"); err != nil {
 		t.Fatal(err)
 	}
-	for _, m := range []team.Member{{ID: "maria", Name: "maria", Kind: "human", Role: "reviewer", TeamID: "core", Login: "maria@github"}, {ID: "sam", Name: "sam", Kind: "human", Role: "reviewer", TeamID: "core"}} {
-		if _, err := e.a.Team.Save(e.ctx, m); err != nil {
-			t.Fatal(err)
-		}
-	}
-	if _, err := e.a.Projects.Update(e.ctx, "demo", "", "", "", "", "core"); err != nil {
+	if _, err := e.a.Team.AddHuman(e.ctx, "demo", "sam", "", "reviewer"); err != nil {
 		t.Fatal(err)
 	}
 	a1, _ := e.a.Queue.Add(e.ctx, queue.Task{ProjectID: "demo", Title: "one"})

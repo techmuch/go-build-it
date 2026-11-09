@@ -98,9 +98,19 @@ test.describe('desktop · owner', () => {
     await shot(page, 'review');
   });
 
-  test('10 team and persona coach', async ({ page }) => {
-    await page.goto('/team/forge');
+  test('10 persona archetypes with change review and coach', async ({ page }) => {
+    await page.goto('/archetypes/developer');
     await expect(page.getByText('Persona coach')).toBeVisible();
+    await expect(page.getByText(/Change review/)).toBeVisible();
+    await shot(page, 'archetypes');
+  });
+
+  test('10b project team: tuning, diff and promote', async ({ page }) => {
+    await page.goto('/projects/ledgerly/team/' + encodeURIComponent('forge@ledgerly'));
+    await expect(page.getByRole('button', { name: 'Save tuning' })).toBeVisible();
+    await expect(page.getByText('Promote to the archetype')).toBeVisible();
+    await page.getByRole('button', { name: 'Diff vs archetype' }).click();
+    await expect(page.getByText('fixture for every new bank').first()).toBeVisible();
     await shot(page, 'team');
   });
 
@@ -130,6 +140,7 @@ test.describe('desktop · owner', () => {
 
   test('⌘K palette shows CLI equivalents', async ({ page }) => {
     await page.goto('/');
+    await expect(page.locator('.pcard').first()).toBeVisible(); // shortcuts are live once the page has mounted
     await page.keyboard.press('Meta+k');
     await page.getByPlaceholder('Search projects, tasks, docs, commands…').fill('review');
     await expect(page.locator('.palette .hit').first()).toBeVisible();

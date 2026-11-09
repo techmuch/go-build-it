@@ -3,95 +3,9 @@ import { api } from '../api.gen';
 import { useData } from '../live';
 import { navigate, query } from '../router';
 import { Shell } from '../shell';
-import { A, AgentChat, Av, Card, Chip, Editor, Empty, Err, Loading, Markdown, Proposals, Seg, Status, Toggle, ago, applyHunks, day, useAction, type Hunk } from '../ui';
+import { A, AgentChat, Av, Card, Chip, Editor, Empty, Err, Loading, Markdown, Proposals, Status, Toggle, ago, applyHunks, day, useAction, type Hunk } from '../ui';
 import { EventRow } from './Projects';
-import { usePersonas } from './Artifacts';
-import { clickable } from '../keys';
-
-// Parse the persona Markdown back into instructions + role standards (FR-13).
-function parsePersona(md: string) {
-  const lines = md.split('\n');
-  const body: string[] = []; const stds: string[] = [];
-  let inStd = false;
-  for (const l of lines) {
-    if (/^# /.test(l)) continue;
-    if (/^## Role standards/i.test(l)) { inStd = true; continue; }
-    if (inStd && /^- /.test(l)) { stds.push(l.slice(2).trim()); continue; }
-    if (inStd && /^## /.test(l)) inStd = false;
-    if (!inStd) body.push(l);
-  }
-  return { instructions: body.join('\n').trim(), standards: stds };
-}
-
-// v10 · Team & personas with persona coach (FR-10–FR-13, FR-25, FR-26)
-export function Team({ mid }: { mid?: string }) {
-  const { data: members } = useData<any[]>(() => api.members.list(), [], (e) => e.type.startsWith('member'));
-  const { data: teams } = useData<any[]>(() => api.teams.list(), [], (e) => e.type.startsWith('team'));
-  const { data: roles } = useData<any[]>(() => api.roles.list(), [], (e) => e.type.startsWith('role'));
-  const { data: harn } = useData<any[]>(() => api.harnesses.list(), []);
-  const sel = mid === 'new' ? 'new' : mid || members?.[0]?.id || '';
-  const { run } = useAction();
-  return <Shell title="Team" right={<span className="small muted">Teams: {(teams || []).map((t) => t.name).join(' · ') || 'none'} · <button type="button" className="lnk" onClick={() => { const n = window.prompt('New team name'); if (n) run(() => api.teams.save({ id: n.toLowerCase().replace(/\W+/g, '-'), name: n }), 'Team created'); }}>+ Team</button></span>}>
-    <div className="row">
-      <Card style={{ width: 270, padding: '6px 10px' }}>
-        <table className="t small"><tbody><tr><th /><th>Member</th><th>Harness</th></tr>
-          {(members || []).map((m) => <tr key={m.id} className={'click ' + (m.id === sel ? 'sel' : '')} {...clickable(() => navigate('/team/' + m.id), { role: 'link' })}>
-            <td><Av name={m.name} role={m.kind === 'human' ? 'human' : m.role} /></td><td><b>{m.name}</b><br /><span className="muted">{(roles || []).find((r) => r.id === m.role)?.name || m.role}{m.teamId ? ' · ' + m.teamId : ''}</span></td><td>{m.kind === 'human' ? <span className="muted">human</span> : m.harness}</td></tr>)}</tbody></table>
-        {!members?.length && <Empty>No team yet. Add AI personas for each role.</Empty>}
-        <div className="row c wrap" style={{ gap: 6, margin: '8px 0' }}><A to="/team/new" className="btn">+ Member</A>
-          <button type="button" className="btn" onClick={() => { const n = window.prompt('Custom role name'); if (n) run(() => api.roles.add({ id: n.toLowerCase().replace(/\W+/g, '-'), name: n }), 'Role added'); }}>+ Role</button></div>
-      </Card>
-      {sel && <MemberEditor key={sel} id={sel} teams={teams || []} roles={roles || []} harnesses={(harn || []).map((h) => h.name).concat(['fake'])} />}
-    </div>
-  </Shell>;
-}
-
-function MemberEditor({ id, teams, roles, harnesses }: { id: string; teams: any[]; roles: any[]; harnesses: string[] }) {
-  const isNew = id === 'new';
-  const personas = usePersonas();
-  const [m, setM] = useState<any>(isNew ? { id: '', name: '', kind: 'ai', role: 'developer', teamId: '', harness: 'claude', model: '', instructions: '', login: '', standards: [] } : null);
-  const [doc, setDoc] = useState('');
-  const [mode, setMode] = useState<'wysiwyg' | 'markdown' | 'split'>('markdown');
-  const [coach, setCoach] = useState('');
-  const [prop, setProp] = useState<{ hunks: Hunk[]; base: string } | null>(null);
-  const [acc, setAcc] = useState<Set<number>>(new Set());
-  const { run, busy } = useAction();
-  useEffect(() => { if (!isNew) api.members.get(id).then((r) => { setM(r.member); setDoc(r.persona); }); else setDoc('# New persona\n\nDescribe how this persona works.\n'); }, [id, isNew]);
-  useEffect(() => { if (!coach && personas.length) setCoach((personas.find((p) => p.role === 'architect') || personas[0]).id); }, [personas, coach]);
-  if (!m) return <Loading />;
-  const save = () => {
-    const p = parsePersona(doc);
-    return run(() => api.members.save({ ...m, instructions: m.kind === 'ai' ? p.instructions : m.instructions, standards: p.standards }), `Saved ${m.name}`).then((r) => r && isNew && navigate('/team/' + r.id));
-  };
-  const field = (label: string, el: React.ReactNode) => <label className="small" style={{ display: 'flex', gap: 6, alignItems: 'center' }}>{label} {el}</label>;
-  return <>
-    <div className="col grow">
-      <Card style={{ padding: '10px 14px' }}><div className="row c wrap" style={{ gap: 10 }}>
-        <Av name={m.name || '?'} role={m.kind === 'human' ? 'human' : m.role} />
-        <input placeholder="Name" value={m.name} onChange={(e) => setM({ ...m, name: e.target.value })} style={{ width: 120, fontWeight: 700 }} />
-        {field('Kind', <Seg value={m.kind} onChange={(v) => setM({ ...m, kind: v })} options={[['ai', 'AI'], ['human', 'Human']]} />)}
-        {field('Role', <select value={m.role} onChange={(e) => setM({ ...m, role: e.target.value })}>{roles.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}</select>)}
-        {field('Team', <select value={m.teamId} onChange={(e) => setM({ ...m, teamId: e.target.value })}><option value="">—</option>{teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select>)}
-        {m.kind === 'ai' ? <>{field('Harness', <select value={m.harness} onChange={(e) => setM({ ...m, harness: e.target.value })}>{harnesses.map((h) => <option key={h}>{h}</option>)}</select>)}
-          {field('Model', <input value={m.model} onChange={(e) => setM({ ...m, model: e.target.value })} placeholder="default" style={{ width: 150 }} />)}</>
-          : field('Tailscale login', <input value={m.login} onChange={(e) => setM({ ...m, login: e.target.value })} placeholder="name@github" />)}
-        {!isNew && <span className="small muted">rev {m.rev}</span>}
-      </div></Card>
-      {m.kind === 'ai' && <>
-        {prop && <><Proposals hunks={prop.hunks} accepted={acc} setAccepted={setAcc} /><div className="row c"><span className="right" /><button type="button" className="btn" onClick={() => setProp(null)}>Discard</button>
-          <button type="button" className="btn p" onClick={async () => { setDoc(await applyHunks(prop.base, prop.hunks, acc)); setProp(null); }}>Apply {acc.size} accepted</button></div></>}
-        <Editor value={doc} onChange={setDoc} mode={mode} onMode={setMode} toolbarRight={<span className="mono">personas/{m.id || 'new'}.md</span>} />
-        <span className="small muted">Write how the persona works. Bullets under “## Role standards” are added on top of the global standards (FR-12).</span>
-      </>}
-      <div className="row c">{!isNew && <button type="button" className="btn d" onClick={() => { if (window.confirm('Remove ' + m.name + '?')) run(() => api.members.remove(id), 'Removed').then(() => navigate('/team')); }}>Remove</button>}
-        <span className="right" /><button type="button" className="btn p" disabled={busy || !m.name} onClick={save}>{isNew ? 'Add member' : `Save rev ${(m.rev || 0) + 1}`}</button></div>
-    </div>
-    {m.kind === 'ai' && <div style={{ width: 300 }}><AgentChat title="Persona coach" personas={personas} persona={coach} setPersona={setCoach} placeholder={`Describe how ${m.name || 'this persona'} should behave…`}
-      suggestions={['Interview me', 'Check against standards', 'Learn from history']}
-      send={(msg, h) => (isNew ? Promise.reject(new Error('Save the member first, then use the coach.')) : api.members.chat(id, { coach, message: msg, content: doc, history: h }))}
-      onProposal={(_d, hunks) => { setProp({ hunks, base: doc }); setAcc(new Set(hunks.map((_, k) => k))); }} /></div>}
-  </>;
-}
+import { usePersonas } from './Team';
 
 // v11 · Global standards with agent chat (FR-50–FR-54, FR-91)
 export function Standards({ sid }: { sid?: string }) {

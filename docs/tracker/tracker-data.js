@@ -2,7 +2,7 @@
 // (todo | in-progress | blocked | done) and update "updated". The page reads this file.
 window.TRACKER = {
  "project": "go-build-it",
- "updated": "2026-11-08",
+ "updated": "2026-11-09",
  "sizes": {
   "S": 1,
   "M": 3,
@@ -189,7 +189,10 @@ window.TRACKER = {
     "Every imported project has a team made from starter archetypes",
     "A member's tuning, its difference from the archetype, and an archetype change applied per member are shown",
     "Each member's instruction file is generated in its worktree"
-   ]
+   ],
+   "gateApproved": "2026-11-09",
+   "gateApprovedBy": "david (owner)",
+   "gateEvidence": "Archetypes with revisions and starter archetypes; per-project members (forge@project) made from archetypes; tuning, effective persona, diff, change review with per-member and bulk apply (Q10), promote; humans per project; starter team on import; Archetypes library and project Team tab (A-v10, A-v10b), team on card/overview/mobile; task assignment to a specific member. Team unit tests, app suite and 28 e2e tests pass."
   },
   {
    "id": "P13",
@@ -2465,7 +2468,7 @@ window.TRACKER = {
    "deps": [
     "P10-03"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2482,7 +2485,7 @@ window.TRACKER = {
    "deps": [
     "P12-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2500,7 +2503,7 @@ window.TRACKER = {
    "deps": [
     "P12-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2519,7 +2522,7 @@ window.TRACKER = {
     "P12-03",
     "P10-06"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": [
     "Q10"
@@ -2540,7 +2543,7 @@ window.TRACKER = {
    "deps": [
     "P12-03"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2562,7 +2565,7 @@ window.TRACKER = {
     "P12-03",
     "P10-07"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2578,7 +2581,7 @@ window.TRACKER = {
    "deps": [
     "P12-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2596,7 +2599,7 @@ window.TRACKER = {
    "deps": [
     "P12-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2617,7 +2620,7 @@ window.TRACKER = {
     "P12-06",
     "P11-05"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },

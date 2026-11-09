@@ -49,11 +49,11 @@ func TestFakeMemberInHerdr(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("pane shell syntax differs on Windows (P15-04)")
 	}
+	dir, tx := t.TempDir(), t.TempDir() // before the session: cleanup stops herdr first
 	s := herdr.TestSession(t)
 	c := s.C
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-	dir, tx := t.TempDir(), t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, ".gbi-task.md"), []byte("# Task: Add work log\n\nDo it.\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}

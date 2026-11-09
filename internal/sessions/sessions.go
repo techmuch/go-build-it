@@ -389,14 +389,14 @@ func (m *Manager) pickMember(ctx context.Context, t queue.Task, p projects.Proje
 		if mem.Kind != "ai" {
 			return mem, fmt.Errorf("%s is a human; assign an AI persona to run the task", mem.Name)
 		}
+		if mem.ProjectID != "" && mem.ProjectID != p.ID {
+			return mem, fmt.Errorf("%s is on %s's team, not %s's (team members are per project)", mem.Name, mem.ProjectID, p.ID)
+		}
 		return mem, nil
 	}
-	cands, err := m.team.ByRole(ctx, t.Role, p.TeamID)
+	cands, err := m.team.ByRole(ctx, t.Role, p.ID)
 	if err != nil {
 		return team.Member{}, err
-	}
-	if len(cands) == 0 && p.TeamID != "" {
-		cands, _ = m.team.ByRole(ctx, t.Role, "")
 	}
 	busy := map[string]bool{}
 	live, _ := m.List(ctx, "", "", true)
@@ -411,7 +411,7 @@ func (m *Manager) pickMember(ctx context.Context, t queue.Task, p projects.Proje
 	if len(cands) > 0 {
 		return team.Member{}, fmt.Errorf("every %s persona is busy", t.Role)
 	}
-	return team.Member{}, fmt.Errorf("no AI persona holds the %s role", t.Role)
+	return team.Member{}, fmt.Errorf("%s has no AI member with the %s role; add one in the project's Team tab", p.ID, t.Role)
 }
 
 func (m *Manager) appendLine(ctx context.Context, s *Session, act *active, kind, text string) {

@@ -5,10 +5,7 @@ import { navigate, query } from '../router';
 import { ProjectTabs, Shell } from '../shell';
 import { A, AgentChat, Card, Chip, DictArea, Editor, Empty, Err, Loading, Markdown, Proposals, Viewer, applyHunks, day, kindOf, useAction, type Hunk } from '../ui';
 
-function usePersonas() {
-  const { data } = useData<any[]>(() => api.members.list(), []);
-  return (data || []).filter((m) => m.kind === 'ai').map((m) => ({ id: m.id, name: m.name, role: m.role }));
-}
+import { usePersonas } from './Team';
 
 // v03 · Project artifacts, problem definition & values (FR-45, FR-46, FR-123)
 export function Artifacts({ id }: { id: string }) {
@@ -74,7 +71,7 @@ export function Artifacts({ id }: { id: string }) {
 // v03b · Artifact editor: chat with an agent or edit directly (FR-45a)
 export function ArtifactEditor({ id }: { id: string }) {
   const path = query('path');
-  const personas = usePersonas();
+  const personas = usePersonas(id);
   const [persona, setPersona] = useState('');
   const [text, setText] = useState<string | null>(null);
   const [base, setBase] = useState('');

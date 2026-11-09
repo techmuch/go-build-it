@@ -5,7 +5,8 @@ import { Catalog, MilestoneDetail, ProjectHistory, ProjectOverview, ProjectRelea
 import { ArtifactEditor, Artifacts } from './pages/Artifacts';
 import { Queue, Questions, SessionDetail, Sessions } from './pages/Work';
 import { OptionSets, Rehearsals, Reviews } from './pages/Review';
-import { Docs, EventDetail, HerdrSetup, History, Settings, Standards, Team } from './pages/Org';
+import { Docs, EventDetail, HerdrSetup, History, Settings, Standards } from './pages/Org';
+import { Archetypes, ProjectTeam } from './pages/Team';
 import { MobileApp } from './mobile/Mobile';
 
 type R = [string, (p: Record<string, string>) => JSX.Element];
@@ -31,8 +32,11 @@ const routes: R[] = [
   ['/options/:oid', (p) => <OptionSets oid={p.oid} />],
   ['/rehearsals', () => <Rehearsals />],
   ['/rehearsals/:gid', (p) => <Rehearsals gid={p.gid} />],
-  ['/team', () => <Team />],
-  ['/team/:mid', (p) => <Team mid={p.mid} />],
+  ['/archetypes', () => <Archetypes />],
+  ['/archetypes/:aid', (p) => <Archetypes aid={p.aid} />],
+  ['/team', () => <Archetypes />],
+  ['/projects/:id/team', (p) => <ProjectTeam id={p.id} />],
+  ['/projects/:id/team/:mid', (p) => <ProjectTeam id={p.id} mid={p.mid} />],
   ['/standards', () => <Standards />],
   ['/standards/:sid', (p) => <Standards sid={p.sid} />],
   ['/history', () => <History />],

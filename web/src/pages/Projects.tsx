@@ -67,6 +67,8 @@ function ProjectCard({ p }: { p: any }) {
       <div>Open PRs / issues<b>{p.forge === 'github' ? `${l.repo?.openPrs ?? 0} / ${l.repo?.openIssues ?? 0}` : '—'}</b></div>
       <div>Sessions<b>{p.running} running</b>{p.queued} queued</div>
     </div>
+    {(p.team || []).length > 0 && <div className="row c small" style={{ gap: 4 }}>{p.team.filter((m: any) => m.kind === 'ai').map((m: any) => <Av key={m.id} s name={m.name} role={m.role} />)}
+      <span className="muted">&nbsp;{p.team.length} member{p.team.length === 1 ? '' : 's'}{p.team.some((m: any) => m.tuned) ? ' · tuned' : ''}</span></div>}
     <div className="links" onClick={(e) => e.stopPropagation()}>
       {rel && l.repo?.releaseUrl ? <a href={l.repo.releaseUrl} target="_blank" rel="noreferrer">Release notes ↗</a> : <span className="muted">No stable release yet</span>}
       {web ? <a href={web} target="_blank" rel="noreferrer">Website ↗</a> : <span className="muted">Website not published</span>}
@@ -149,7 +151,11 @@ export function ProjectOverview({ id }: { id: string }) {
             <dt>Workflow</dt><dd>{wfText(data.workflow)}</dd><dt>CI</dt><dd>{l.repo?.ci && l.repo.ci !== 'none' ? <Chip c={l.repo.ci === 'passing' ? 'grn' : l.repo.ci === 'failing' ? 'red' : 'amb'}>{l.repo.ci}</Chip> : '—'}</dd>
             <dt>Unpushed</dt><dd>{l.unpushed?.commits || l.unpushed?.uncommitted ? <Chip c="red">{l.unpushed.commits} commits · {l.unpushed.uncommitted} files</Chip> : 'None'}</dd><dt>Path</dt><dd className="mono">{p.path}</dd></dl>
         </Card>
-        {p.teamMembers?.length > 0 && <Card title="Team"><div className="row c wrap" style={{ gap: 4 }}>{p.teamMembers.map((m: string) => <Av key={m} name={m} />)}</div></Card>}
+        <Card title="Team" right={<A to={`/projects/${id}/team`} className="small">Manage ›</A>}>
+          {(p.team || []).length === 0 ? <Empty>No team yet. <A to={`/projects/${id}/team`}>Add members from archetypes</A>.</Empty> :
+            <table className="t small"><tbody>{p.team.map((m: any) => <tr key={m.id}><td><Av s name={m.name} role={m.kind === 'human' ? 'human' : m.role} /> <A to={`/projects/${id}/team/${encodeURIComponent(m.id)}`}>{m.name}</A></td>
+              <td className="muted">{m.kind === 'human' ? `human · ${m.role}` : `${m.role}${m.tuned ? ' · tuned' : ''}`}</td><td>{m.state ? <Chip c={m.state === 'blocked' ? 'red' : m.state === 'working' ? 'acc' : ''}>{m.state}</Chip> : null}</td></tr>)}</tbody></table>}
+        </Card>
       </div>
     </div>
     {newM && <MilestoneDialog projectId={id} onClose={() => setNewM(false)} />}
@@ -272,7 +278,6 @@ export function EventRow({ e }: { e: any }) {
 
 export function ProjectSettings({ id }: { id: string }) {
   const { data } = useData<any>(() => api.projects.get(id), [id]);
-  const { data: teams } = useData<any[]>(() => api.teams.list(), []);
   const { data: wf } = useData<any>(() => api.git.workflow(id), [id]);
   const { run } = useAction();
   const p = data?.project;
@@ -282,7 +287,7 @@ export function ProjectSettings({ id }: { id: string }) {
       <Card title="Project" style={{ flex: 1 }}>
         <div className="col" style={{ gap: 10 }}>
           <div className="form-row"><label>Stage</label><select value={p.stage} onChange={(e) => run(() => api.projects.update(id, { stage: e.target.value }), 'Stage changed')}>{STAGES.map((s) => <option key={s}>{s}</option>)}</select></div>
-          <div className="form-row"><label>Team</label><select value={p.teamId} onChange={(e) => run(() => api.projects.update(id, { teamId: e.target.value }), 'Team assigned')}><option value="">(any persona)</option>{(teams || []).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></div>
+          <div className="form-row"><label>Team</label><span className="small">Each project has its own team, made from <A to="/archetypes">archetypes</A>. <A to={`/projects/${id}/team`}>Manage the team ›</A></span></div>
           <div className="form-row"><label>Website URL</label><input defaultValue={p.websiteUrl} onBlur={(e) => e.target.value !== p.websiteUrl && run(() => api.projects.update(id, { websiteUrl: e.target.value }), 'Saved')} /></div>
           <button type="button" className="btn d" style={{ alignSelf: 'flex-start' }} onClick={() => { if (window.confirm('Unregister this project? Files are not touched.')) run(() => api.projects.remove(id), 'Removed').then(() => navigate('/')); }}>Remove from go-build-it</button>
         </div>

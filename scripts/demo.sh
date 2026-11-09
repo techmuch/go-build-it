@@ -75,19 +75,23 @@ EOF
 mockup "$LG/docs/mockups/column-mapping.html" "Map CSV columns" '<div class="card">Date → <b>Date</b></div><div class="card">Amount → <b>Amount</b> (debit/credit?)</div><div class="card">Payee → <b>Description</b></div>'
 commit "$LG" "requirements and mockup"
 
+# Archetypes use the scripted fake harness (no subscription use). Saved before importing,
+# so the starter team each import creates is made from these revisions (ADR-010).
+for p in "pm Pilot" "architect Atlas" "developer Forge" "qa Probe" "reviewer Lens"; do
+  set -- $p
+  gbi archetypes save --id "$1" --name "$2" --role "$1" --harness fake --instructions "You are $2. Work one task at a time and ask when unsure." >/dev/null
+done
+
 gbi projects import --path "$TM" --purpose "Offline hiking maps you can use one-handed." --stage Design >/dev/null
 gbi projects import --path "$LG" --purpose "Personal finance ledger with bank CSV import." --stage Implementation >/dev/null
 
-# Team (scripted fake harness: no subscription use)
-gbi teams save --id core --name Core >/dev/null
-for p in "pilot Pilot pm" "atlas Atlas architect" "forge Forge developer" "probe Probe qa" "lens Lens reviewer"; do
-  set -- $p
-  gbi members save --id "$1" --name "$2" --kind ai --role "$3" --harness fake --teamId core --instructions "You are $2. Work one task at a time and ask when unsure." >/dev/null
+# Teams are per project: the starter team came with the import; add QA and the humans.
+for proj in trailmap ledgerly; do
+  gbi members add "$proj" --archetype qa >/dev/null
+  gbi members add "$proj" --kind human --name david --login david@github --role pm >/dev/null
+  gbi members add "$proj" --kind human --name maria --login maria@github --role reviewer >/dev/null
 done
-gbi members save --id david --name david --kind human --role pm --teamId core --login david@github >/dev/null
-gbi members save --id maria --name maria --kind human --role reviewer --teamId core --login maria@github >/dev/null
-gbi projects update trailmap --teamId core >/dev/null
-gbi projects update ledgerly --teamId core >/dev/null
+gbi members tune forge@ledgerly --tuning $'- Bank CSVs vary: add a fixture for every new bank.\n- Ask before adding a dependency.' >/dev/null
 
 # Standards
 gbi standards save git-workflow --title "Git workflow" --body $'# Git workflow\n\n1. One branch per task.\n2. Courier pushes and opens the PR.\n3. Lens review, then a human approves.\n4. Squash-merge.\n5. Releases are tagged YYYY.MM.DD.N and Pages is published.' >/dev/null
@@ -119,7 +123,7 @@ gbi rehearsals create --project ledgerly --milestone "$M1" --title "CSV import w
  {"title":"Import again","scenario":"Upload next month. The mapping is remembered.","reqs":["FR-23"]}]}' >/dev/null
 G=$(gbi rehearsals list --json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["id"])')
 gbi rehearsals finding "$G" --step 1 --text "Amount is right but I cannot tell debit vs credit. Show 3 preview rows?" >/dev/null
-GBI_PERSONA=probe gbi rehearsals finding "$G" --step 1 --text "Keyboard order skips the Date column." >/dev/null
+GBI_PERSONA=probe@ledgerly gbi rehearsals finding "$G" --step 1 --text "Keyboard order skips the Date column." >/dev/null
 
 # Work: one task through the full flow (fake agent → Courier → Lens review)
 T1=$(gbi tasks add --project ledgerly --title "Column mapping screen" --description "Build the mapping screen from the approved mockup." --reqs FR-21,FR-22 --milestone "$M1" --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')
@@ -130,12 +134,12 @@ for _ in $(seq 1 60); do st=$(gbi tasks get "$T1" --json | python3 -c 'import js
 T2=$(gbi tasks add --project ledgerly --title "Remember mapping per bank" --description "FAKE:ask" --reqs FR-23 --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')
 gbi tasks run "$T2" >/dev/null
 sleep 4
-GBI_PERSONA=atlas gbi questions ask --project trailmap --title "Download maps per trail or per region?" --why "Trail packs are 10–40 MB, regions 300 MB+. This drives storage design." --blocking --data '{"options":[{"key":"A","title":"Per trail","detail":"Small, predictable downloads","recommended":true},{"key":"B","title":"Per region","detail":"One download covers everything"}],"attachments":[{"name":"map-layout-a.html","kind":"html","path":"docs/mockups/map-layout-a.html"},{"name":"sizes.json","kind":"json","body":"{\"trail\": \"10-40 MB\", \"region\": \"300 MB+\"}"}],"reqs":["FR-08"]}' >/dev/null
-GBI_PERSONA=probe gbi questions ask --project ledgerly --title "UK bank CSV dates — DD/MM?" --assumption "DD/MM for GB banks" --why "Barclays exports use DD/MM/YYYY." >/dev/null
+GBI_PERSONA=atlas@trailmap gbi questions ask --project trailmap --title "Download maps per trail or per region?" --why "Trail packs are 10–40 MB, regions 300 MB+. This drives storage design." --blocking --data '{"options":[{"key":"A","title":"Per trail","detail":"Small, predictable downloads","recommended":true},{"key":"B","title":"Per region","detail":"One download covers everything"}],"attachments":[{"name":"map-layout-a.html","kind":"html","path":"docs/mockups/map-layout-a.html"},{"name":"sizes.json","kind":"json","body":"{\"trail\": \"10-40 MB\", \"region\": \"300 MB+\"}"}],"reqs":["FR-08"]}' >/dev/null
+GBI_PERSONA=probe@ledgerly gbi questions ask --project ledgerly --title "UK bank CSV dates — DD/MM?" --assumption "DD/MM for GB banks" --why "Barclays exports use DD/MM/YYYY." >/dev/null
 
 # More queued work
 gbi tasks add --project ledgerly --title "Categorize transactions" --role developer --milestone "$(gbi milestones list ledgerly --json | python3 -c 'import json,sys; print(json.load(sys.stdin)[1]["id"])')" >/dev/null
 gbi tasks add --project trailmap --title "Draft offline storage ADR" --role architect --priority 1 >/dev/null
-GBI_PERSONA=lens gbi proposals create --title "Shorter developer briefs" --body "Trim task context notes to bullets." --evidence "Tasks with notes over 2k tokens had 18% more rework (demo data)." >/dev/null
+GBI_PERSONA=lens@ledgerly gbi proposals create --title "Shorter developer briefs" --body "Trim task context notes to bullets." --evidence "Tasks with notes over 2k tokens had 18% more rework (demo data)." >/dev/null
 
 echo "demo ready at $GBI_URL (server pid $(cat "$GBI_HOME/server.pid"))"

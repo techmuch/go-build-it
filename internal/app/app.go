@@ -146,7 +146,7 @@ func (a *App) valueTexts(ctx context.Context, projectID string) []string {
 // assignReviewer picks the human reviewer with the fewest pending reviews (P9-08), or "" for the owner.
 func (a *App) assignReviewer(ctx context.Context, t queue.Task) string {
 	p, _ := a.Projects.Get(ctx, t.ProjectID)
-	ms, _ := a.Team.Members(ctx, p.TeamID)
+	ms, _ := a.Team.Members(ctx, p.ID)
 	best, bestN := "", 1<<30
 	for _, m := range ms {
 		if m.Kind != "human" || m.Role != "reviewer" {
@@ -161,13 +161,9 @@ func (a *App) assignReviewer(ctx context.Context, t queue.Task) string {
 	return best
 }
 
-// reviewer returns the first AI persona with the reviewer role.
+// reviewer returns an AI reviewer: a project member when one exists, else the reviewer archetype.
 func (a *App) reviewer(ctx context.Context) string {
-	ms, _ := a.Team.ByRole(ctx, "reviewer", "")
-	if len(ms) > 0 {
-		return ms[0].ID
-	}
-	return ""
+	return a.defaultPersona(ctx, "", "reviewer")
 }
 
 func (a *App) lens(ctx context.Context, prompt string) (string, error) {

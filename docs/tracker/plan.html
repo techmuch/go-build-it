@@ -74,7 +74,7 @@ td:first-child { white-space: nowrap; }
 </ol></nav>
 <main>
 <h1>go-build-it — Phased delivery plan</h1>
-<p class="meta">Status: Draft · 2026-11-08 · Based on [requirements rev 3](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)</p>
+<p class="meta">Status: Draft · 2026-11-09 · Based on [requirements rev 3](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)</p>
 <h2 id="1-how-this-plan-is-built">1. How this plan is built</h2>
 <ul><li>
 <strong>Approach A is the UI baseline.</strong> Every UI task names the Approach A view it implements (desktop <code>A-v01</code>…<code>A-v14</code> plus detail views <code>02b</code>, <code>03b</code>, <code>04b</code>, <code>05b</code>, <code>12b</code>; mobile <code>A-M1</code>…<code>A-M11</code>).
@@ -397,15 +397,15 @@ A member's tuning, its difference from the archetype, and an archetype change ap
 Each member's instruction file is generated in its worktree
 </li></ul>
 <div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
-<tr><td><strong>P12-01</strong> Schema: archetypes and project_members replace global teams and personas</td><td>M</td><td>FR-11, FR-12, FR-12d, FR-12e</td><td>—</td><td>P10-03</td></tr>
-<tr><td><strong>P12-02</strong> Starter archetype per built-in role</td><td>S</td><td>FR-12, FR-25</td><td>—</td><td>P12-01</td></tr>
-<tr><td><strong>P12-03</strong> API, CLI and MCP: archetypes, project members (add, tune, remove), human roles per project</td><td>M</td><td>FR-30, FR-12a, FR-12e</td><td>—</td><td>P12-01</td></tr>
-<tr><td><strong>P12-04</strong> Archetype change review: affected members, per-member apply keeping tuning · waits on Q10</td><td>M</td><td>FR-12b</td><td>A-v10</td><td>P12-03, P10-06</td></tr>
-<tr><td><strong>P12-05</strong> Promote member tuning to its archetype through the artifact editor</td><td>S</td><td>FR-12c, FR-13</td><td>A-v03b</td><td>P12-03</td></tr>
-<tr><td><strong>P12-06</strong> Archetypes library and project Team tab with member detail and tuning</td><td>L</td><td>FR-13, FR-12a, FR-10</td><td>A-v10, A-v10b</td><td>P12-03, P10-07</td></tr>
-<tr><td><strong>P12-07</strong> Per-member instruction file generated in the member's worktree</td><td>S</td><td>FR-53</td><td>—</td><td>P12-01</td></tr>
-<tr><td><strong>P12-08</strong> Queue assignment to a role or a specific member; dispatcher picks a free member</td><td>M</td><td>FR-81</td><td>A-v06</td><td>P12-01</td></tr>
-<tr><td><strong>P12-09</strong> Catalog card and overview show the project team and each member's herdr state</td><td>S</td><td>FR-41</td><td>A-v01, A-v02, A-M2</td><td>P12-06, P11-05</td></tr>
+<tr><td><strong>P12-01</strong> Schema: archetypes and project_members replace global teams and personas ✅</td><td>M</td><td>FR-11, FR-12, FR-12d, FR-12e</td><td>—</td><td>P10-03</td></tr>
+<tr><td><strong>P12-02</strong> Starter archetype per built-in role ✅</td><td>S</td><td>FR-12, FR-25</td><td>—</td><td>P12-01</td></tr>
+<tr><td><strong>P12-03</strong> API, CLI and MCP: archetypes, project members (add, tune, remove), human roles per project ✅</td><td>M</td><td>FR-30, FR-12a, FR-12e</td><td>—</td><td>P12-01</td></tr>
+<tr><td><strong>P12-04</strong> Archetype change review: affected members, per-member apply keeping tuning ✅ · waits on Q10</td><td>M</td><td>FR-12b</td><td>A-v10</td><td>P12-03, P10-06</td></tr>
+<tr><td><strong>P12-05</strong> Promote member tuning to its archetype through the artifact editor ✅</td><td>S</td><td>FR-12c, FR-13</td><td>A-v03b</td><td>P12-03</td></tr>
+<tr><td><strong>P12-06</strong> Archetypes library and project Team tab with member detail and tuning ✅</td><td>L</td><td>FR-13, FR-12a, FR-10</td><td>A-v10, A-v10b</td><td>P12-03, P10-07</td></tr>
+<tr><td><strong>P12-07</strong> Per-member instruction file generated in the member's worktree ✅</td><td>S</td><td>FR-53</td><td>—</td><td>P12-01</td></tr>
+<tr><td><strong>P12-08</strong> Queue assignment to a role or a specific member; dispatcher picks a free member ✅</td><td>M</td><td>FR-81</td><td>A-v06</td><td>P12-01</td></tr>
+<tr><td><strong>P12-09</strong> Catalog card and overview show the project team and each member's herdr state ✅</td><td>S</td><td>FR-41</td><td>A-v01, A-v02, A-M2</td><td>P12-06, P11-05</td></tr>
 </tbody></table></div>
 <h3 id="p13-team-members-on-herdr">P13 · Team members on herdr</h3>
 <p><strong>Goal:</strong> Run every AI team member as a long-running harness in its herdr pane: profiles, pane lifecycle, dispatch, transcripts, status, limits, conversation rotation, reconnection and labels. Remove tmux and headless runs.</p>

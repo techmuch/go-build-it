@@ -136,7 +136,7 @@ export function useGlobalKeys() {
 /** Global go-to shortcuts: "g" then a letter, "/" for search, "?" for help. Desktop only. */
 export const GOTO: [string, string, string][] = [
   ['p', '/', 'Projects'], ['q', '/questions', 'Questions'], ['s', '/sessions', 'Sessions'], ['u', '/queue', 'Queue'],
-  ['r', '/reviews', 'Reviews'], ['o', '/options', 'Options'], ['e', '/rehearsals', 'Rehearsals'], ['t', '/team', 'Team'],
+  ['r', '/reviews', 'Reviews'], ['o', '/options', 'Options'], ['e', '/rehearsals', 'Rehearsals'], ['t', '/archetypes', 'Archetypes'],
   ['a', '/standards', 'Standards'], ['h', '/history', 'History'], [',', '/settings', 'Settings'], ['d', '/docs', 'Docs'],
 ];
 
