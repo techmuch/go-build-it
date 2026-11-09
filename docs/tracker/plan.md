@@ -281,13 +281,13 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 | **P10-01** Requirements rev 3: herdr backend, per-project team members, upstream tracking ✅ | M | FR-01, FR-07 | — | — |
 | **P10-02** ADR-009: herdr is the only agent backend; ADR-008 superseded ✅ | S | FR-60, FR-07 | — | P10-01 |
 | **P10-03** ADR-010: per-project team members from global persona archetypes ✅ | S | FR-11, FR-12 | — | P10-01 |
-| **P10-04** Spike: gbi herdr session, agent start + prompt --wait, agent_session → transcript usage, terminal observe → xterm.js | M | FR-60, FR-61, FR-66, FR-71 | — | P10-02 |
+| **P10-04** Spike: gbi herdr session, agent start + prompt --wait, agent_session → transcript usage, terminal observe → xterm.js ✅ | M | FR-60, FR-61, FR-66, FR-71 | — | P10-02 |
 | **P10-05** Decide conversation rotation policy from spike cost data ✅ · waits on Q8 | S | FR-76 | — | P10-04 |
 | **P10-06** Decide how archetype changes reach project members ✅ · waits on Q10 | S | FR-12b | — | P10-03 |
-| **P10-07** Mockups rev 3, desktop: live members, live terminal, archetypes, project team, herdr settings and setup, card and overview team panel, queue assignment | L | FR-34, FR-12a, FR-66, FR-67 | A-v01, A-v02, A-v05, A-v05b, A-v06, A-v10, A-v10b, A-v13, A-v15 | P10-02, P10-03 |
-| **P10-08** Mockups rev 3, mobile: members, terminal control and takeover, project team, blocked members in Inbox | M | FR-35, FR-66 | A-M2, A-M3, A-M8, A-M10 | P10-07 |
-| **P10-09** herdr layout spec: what herdr --session gbi shows (workspaces, grouped worktrees, pane labels, tokens, summaries, notifications) | S | FR-67 | — | P10-04 |
-| **P10-10** Upstream baseline: docs/upstream/ with herdr and Ovis revisions reviewed and findings | S | NFR-30 | — | P10-02 |
+| **P10-07** Mockups rev 3, desktop: live members, live terminal, archetypes, project team, herdr settings and setup, card and overview team panel, queue assignment ✅ | L | FR-34, FR-12a, FR-66, FR-67 | A-v01, A-v02, A-v05, A-v05b, A-v06, A-v10, A-v10b, A-v13, A-v15 | P10-02, P10-03 |
+| **P10-08** Mockups rev 3, mobile: members, terminal control and takeover, project team, blocked members in Inbox ✅ | M | FR-35, FR-66 | A-M2, A-M3, A-M8, A-M10 | P10-07 |
+| **P10-09** herdr layout spec: what herdr --session gbi shows (workspaces, grouped worktrees, pane labels, tokens, summaries, notifications) ✅ | S | FR-67 | — | P10-04 |
+| **P10-10** Upstream baseline: docs/upstream/ with herdr and Ovis revisions reviewed and findings ✅ | S | NFR-30 | — | P10-02 |
 | **P10-11** Docs tooling in the repo: tracker, plan and HTML generators under scripts/docs ✅ | S |  | — | — |
 
 ### P11 · herdr runtime foundation

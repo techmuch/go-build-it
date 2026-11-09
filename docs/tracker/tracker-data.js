@@ -159,7 +159,10 @@ window.TRACKER = {
     "Spike: a Claude member in the gbi herdr session takes a prompt, finishes, reports its conversation ID and usage, and streams live to a browser",
     "Q8 and Q10 decided (Q9 can wait for P15)",
     "Rev 3 mockups (desktop, mobile, herdr layout) reviewed"
-   ]
+   ],
+   "gateApproved": "2026-11-08",
+   "gateApprovedBy": "david (owner)",
+   "gateEvidence": "Requirements rev 3 and ADR-009/010 merged (#4); spike passed end to end (ADR-009 findings); Q8–Q10 decided by owner; rev 3 mockups desktop 05/05b/10/10b/13/15 + 01/02/06 and mobile M2/M3/M8/M10; layout spec and upstream baseline written."
   },
   {
    "id": "P11",
@@ -2253,7 +2256,7 @@ window.TRACKER = {
     "P10-02",
     "P10-03"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2275,7 +2278,7 @@ window.TRACKER = {
    "deps": [
     "P10-07"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2291,7 +2294,7 @@ window.TRACKER = {
    "deps": [
     "P10-04"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2307,7 +2310,7 @@ window.TRACKER = {
    "deps": [
     "P10-02"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
