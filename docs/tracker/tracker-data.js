@@ -147,6 +147,80 @@ window.TRACKER = {
    ],
    "gateApproved": "2026-11-08",
    "gateApprovedBy": "david (owner)"
+  },
+  {
+   "id": "P10",
+   "name": "herdr direction: decisions, spike & design",
+   "mvp": false,
+   "goal": "Record rev 3 (herdr as the only backend, per-project team members from archetypes), prove the herdr integration with a spike, decide the open questions, and redesign the affected mockups before building.",
+   "gate": "herdr direction review",
+   "gateCriteria": [
+    "Requirements rev 3, ADR-009 and ADR-010 approved by the owner",
+    "Spike: a Claude member in the gbi herdr session takes a prompt, finishes, reports its conversation ID and usage, and streams live to a browser",
+    "Q8 and Q10 decided (Q9 can wait for P15)",
+    "Rev 3 mockups (desktop, mobile, herdr layout) reviewed"
+   ]
+  },
+  {
+   "id": "P11",
+   "name": "herdr runtime foundation",
+   "mvp": false,
+   "goal": "go-build-it owns and supervises the gbi herdr session: generated client, version and capability checks, onboarding and integrations, login service, event reconciliation, fake harness, CI with herdr on every platform.",
+   "gate": "Runtime demo",
+   "gateCriteria": [
+    "Login starts go-build-it and the gbi herdr session; restarting go-build-it leaves agents running",
+    "Doctor shows herdr version, session and integration status, and fixes outdated integrations",
+    "CI is green on macOS, Linux and Windows with a pinned herdr"
+   ]
+  },
+  {
+   "id": "P12",
+   "name": "Per-project teams from archetypes",
+   "mvp": false,
+   "goal": "Replace global teams and personas with global persona archetypes and per-project team members that can be tuned, compared with their archetype, and promoted back.",
+   "gate": "Team review",
+   "gateCriteria": [
+    "Every imported project has a team made from starter archetypes",
+    "A member's tuning, its difference from the archetype, and an archetype change applied per member are shown",
+    "Each member's instruction file is generated in its worktree"
+   ]
+  },
+  {
+   "id": "P13",
+   "name": "Team members on herdr",
+   "mvp": false,
+   "goal": "Run every AI team member as a long-running harness in its herdr pane: profiles, pane lifecycle, dispatch, transcripts, status, limits, conversation rotation, reconnection and labels. Remove tmux and headless runs.",
+   "gate": "Member demo",
+   "gateCriteria": [
+    "Claude Code, Antigravity and Pi members each finish a task end to end through herdr, reviewed by Lens",
+    "A blocked member shows as needing the human; herdr restart resumes members in their conversations",
+    "herdr --session gbi shows every project and member labelled with role, task and context %",
+    "No tmux or stream-json code remains"
+   ]
+  },
+  {
+   "id": "P14",
+   "name": "Live terminal & UI",
+   "mvp": false,
+   "goal": "Watch and steer any team member from the desktop and mobile UI through herdr's terminal streams, and bring herdr state into the live views, Inbox, settings and history.",
+   "gate": "Watch & steer UAT",
+   "gateCriteria": [
+    "Watch any member live on desktop and phone; take control and hand it back",
+    "Blocked members appear in the Questions dashboard and mobile Inbox",
+    "Every herdr state change, rotation and takeover is in the history"
+   ]
+  },
+  {
+   "id": "P15",
+   "name": "Rev 3 docs, UAT & upstream watch",
+   "mvp": false,
+   "goal": "Update the embedded docs, UAT scripts and screenshots for the herdr flow, schedule the weekly herdr/Ovis upstream review, and settle Windows support.",
+   "gate": "Rev 3 UAT",
+   "gateCriteria": [
+    "UAT scripts for every role pass on the herdr flow and regenerate screenshots",
+    "The first scheduled upstream review has run and recorded its findings",
+    "Windows support level decided (Q9) and documented"
+   ]
   }
  ],
  "tasks": [
@@ -2048,11 +2122,985 @@ window.TRACKER = {
    "q": [
     "Q4"
    ]
+  },
+  {
+   "id": "P10-01",
+   "phase": "P10",
+   "title": "Requirements rev 3: herdr backend, per-project team members, upstream tracking",
+   "reqs": [
+    "FR-01",
+    "FR-07"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [],
+   "status": "done",
+   "done": "docs/requirements.md rev 3; Q7 answered, Q8–Q10 added.",
+   "q": []
+  },
+  {
+   "id": "P10-02",
+   "phase": "P10",
+   "title": "ADR-009: herdr is the only agent backend; ADR-008 superseded",
+   "reqs": [
+    "FR-60",
+    "FR-07"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P10-01"
+   ],
+   "status": "done",
+   "done": "docs/decisions/ADR-009-herdr-backend.md",
+   "q": []
+  },
+  {
+   "id": "P10-03",
+   "phase": "P10",
+   "title": "ADR-010: per-project team members from global persona archetypes",
+   "reqs": [
+    "FR-11",
+    "FR-12"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P10-01"
+   ],
+   "status": "done",
+   "done": "docs/decisions/ADR-010-project-team-members.md",
+   "q": []
+  },
+  {
+   "id": "P10-04",
+   "phase": "P10",
+   "title": "Spike: gbi herdr session, agent start + prompt --wait, agent_session → transcript usage, terminal observe → xterm.js",
+   "reqs": [
+    "FR-60",
+    "FR-61",
+    "FR-66",
+    "FR-71"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P10-02"
+   ],
+   "status": "done",
+   "done": "Spike notes appended to ADR-009; throwaway code not merged.",
+   "q": []
+  },
+  {
+   "id": "P10-05",
+   "phase": "P10",
+   "title": "Decide conversation rotation policy from spike cost data",
+   "reqs": [
+    "FR-76"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P10-04"
+   ],
+   "status": "done",
+   "done": "",
+   "q": [
+    "Q8"
+   ]
+  },
+  {
+   "id": "P10-06",
+   "phase": "P10",
+   "title": "Decide how archetype changes reach project members",
+   "reqs": [
+    "FR-12b"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P10-03"
+   ],
+   "status": "done",
+   "done": "",
+   "q": [
+    "Q10"
+   ]
+  },
+  {
+   "id": "P10-07",
+   "phase": "P10",
+   "title": "Mockups rev 3, desktop: live members, live terminal, archetypes, project team, herdr settings and setup, card and overview team panel, queue assignment",
+   "reqs": [
+    "FR-34",
+    "FR-12a",
+    "FR-66",
+    "FR-67"
+   ],
+   "views": [
+    "A-v01",
+    "A-v02",
+    "A-v05",
+    "A-v05b",
+    "A-v06",
+    "A-v10",
+    "A-v10b",
+    "A-v13",
+    "A-v15"
+   ],
+   "size": "L",
+   "deps": [
+    "P10-02",
+    "P10-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P10-08",
+   "phase": "P10",
+   "title": "Mockups rev 3, mobile: members, terminal control and takeover, project team, blocked members in Inbox",
+   "reqs": [
+    "FR-35",
+    "FR-66"
+   ],
+   "views": [
+    "A-M2",
+    "A-M3",
+    "A-M8",
+    "A-M10"
+   ],
+   "size": "M",
+   "deps": [
+    "P10-07"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P10-09",
+   "phase": "P10",
+   "title": "herdr layout spec: what herdr --session gbi shows (workspaces, grouped worktrees, pane labels, tokens, summaries, notifications)",
+   "reqs": [
+    "FR-67"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P10-04"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P10-10",
+   "phase": "P10",
+   "title": "Upstream baseline: docs/upstream/ with herdr and Ovis revisions reviewed and findings",
+   "reqs": [
+    "NFR-30"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P10-02"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P10-11",
+   "phase": "P10",
+   "title": "Docs tooling in the repo: tracker, plan and HTML generators under scripts/docs",
+   "reqs": [],
+   "views": [],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "scripts/docs/{add_rev3_phases,genmd,md2html,setstatus}.py",
+   "q": []
+  },
+  {
+   "id": "P11-01",
+   "phase": "P11",
+   "title": "herdr client: socket/named-pipe NDJSON transport, types generated from herdr api schema, ping capability check, supported version range",
+   "reqs": [
+    "NFR-32",
+    "FR-07"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P10-04"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P11-02",
+   "phase": "P11",
+   "title": "Supervise herdr server --session gbi: start, health, restart, stop",
+   "reqs": [
+    "FR-07"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P11-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P11-03",
+   "phase": "P11",
+   "title": "Doctor and onboarding: herdr install and version, integration status, install or update integrations",
+   "reqs": [
+    "FR-07"
+   ],
+   "views": [
+    "A-v15",
+    "A-v13"
+   ],
+   "size": "M",
+   "deps": [
+    "P11-01",
+    "P10-07"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P11-04",
+   "phase": "P11",
+   "title": "Login service brings up go-build-it and the gbi session; go-build-it restarts and updates leave agents running",
+   "reqs": [
+    "FR-08",
+    "FR-02",
+    "FR-06"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P11-02"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P11-05",
+   "phase": "P11",
+   "title": "Event subscription and snapshot reconciler with events_lost recovery",
+   "reqs": [
+    "NFR-11",
+    "FR-68"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P11-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P11-06",
+   "phase": "P11",
+   "title": "Fake harness in herdr: reports state with pane.report_agent and writes a transcript",
+   "reqs": [
+    "FR-61"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P11-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P11-07",
+   "phase": "P11",
+   "title": "CI installs a pinned herdr on macOS, Linux and Windows; weekly job against latest herdr",
+   "reqs": [
+    "NFR-32",
+    "NFR-01"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P11-06"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P12-01",
+   "phase": "P12",
+   "title": "Schema: archetypes and project_members replace global teams and personas",
+   "reqs": [
+    "FR-11",
+    "FR-12",
+    "FR-12d",
+    "FR-12e"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P10-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P12-02",
+   "phase": "P12",
+   "title": "Starter archetype per built-in role",
+   "reqs": [
+    "FR-12",
+    "FR-25"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P12-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P12-03",
+   "phase": "P12",
+   "title": "API, CLI and MCP: archetypes, project members (add, tune, remove), human roles per project",
+   "reqs": [
+    "FR-30",
+    "FR-12a",
+    "FR-12e"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P12-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P12-04",
+   "phase": "P12",
+   "title": "Archetype change review: affected members, per-member apply keeping tuning",
+   "reqs": [
+    "FR-12b"
+   ],
+   "views": [
+    "A-v10"
+   ],
+   "size": "M",
+   "deps": [
+    "P12-03",
+    "P10-06"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": [
+    "Q10"
+   ]
+  },
+  {
+   "id": "P12-05",
+   "phase": "P12",
+   "title": "Promote member tuning to its archetype through the artifact editor",
+   "reqs": [
+    "FR-12c",
+    "FR-13"
+   ],
+   "views": [
+    "A-v03b"
+   ],
+   "size": "S",
+   "deps": [
+    "P12-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P12-06",
+   "phase": "P12",
+   "title": "Archetypes library and project Team tab with member detail and tuning",
+   "reqs": [
+    "FR-13",
+    "FR-12a",
+    "FR-10"
+   ],
+   "views": [
+    "A-v10",
+    "A-v10b"
+   ],
+   "size": "L",
+   "deps": [
+    "P12-03",
+    "P10-07"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P12-07",
+   "phase": "P12",
+   "title": "Per-member instruction file generated in the member's worktree",
+   "reqs": [
+    "FR-53"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P12-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P12-08",
+   "phase": "P12",
+   "title": "Queue assignment to a role or a specific member; dispatcher picks a free member",
+   "reqs": [
+    "FR-81"
+   ],
+   "views": [
+    "A-v06"
+   ],
+   "size": "M",
+   "deps": [
+    "P12-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P12-09",
+   "phase": "P12",
+   "title": "Catalog card and overview show the project team and each member's herdr state",
+   "reqs": [
+    "FR-41"
+   ],
+   "views": [
+    "A-v01",
+    "A-v02",
+    "A-M2"
+   ],
+   "size": "S",
+   "deps": [
+    "P12-06",
+    "P11-05"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P13-01",
+   "phase": "P13",
+   "title": "Harness profiles: Claude Code, Antigravity, Pi, OpenCode (kind, launch and resume args, transcript reader, limit signals)",
+   "reqs": [
+    "FR-61",
+    "FR-62",
+    "FR-63"
+   ],
+   "views": [],
+   "size": "L",
+   "deps": [
+    "P11-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P13-02",
+   "phase": "P13",
+   "title": "Member pane lifecycle: workspace per project, member worktree opened grouped, agent start, name, release",
+   "reqs": [
+    "FR-12d",
+    "FR-64",
+    "FR-67"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P12-01",
+    "P11-02"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P13-03",
+   "phase": "P13",
+   "title": "Dispatch: write .gbi-task.md, agent prompt --wait, hand completion to Courier and Lens",
+   "reqs": [
+    "FR-60",
+    "FR-70"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P13-02",
+    "P12-08"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P13-04",
+   "phase": "P13",
+   "title": "Transcript readers: structured events, messages and usage (measured or estimated) per harness",
+   "reqs": [
+    "FR-66",
+    "FR-71",
+    "NFR-10"
+   ],
+   "views": [],
+   "size": "L",
+   "deps": [
+    "P13-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P13-05",
+   "phase": "P13",
+   "title": "Status mapping: herdr state drives session and task state; blocked becomes a needs-you item",
+   "reqs": [
+    "FR-68"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P11-05",
+    "P13-02"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P13-06",
+   "phase": "P13",
+   "title": "Rate and usage limit detection with pause and auto-resume",
+   "reqs": [
+    "FR-65"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P13-04"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P13-07",
+   "phase": "P13",
+   "title": "Conversation continuity and rotation per policy; smart handoff starts the new conversation",
+   "reqs": [
+    "FR-69",
+    "FR-76",
+    "FR-72",
+    "FR-73",
+    "FR-74"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P13-04",
+    "P10-05"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": [
+    "Q8"
+   ]
+  },
+  {
+   "id": "P13-08",
+   "phase": "P13",
+   "title": "Reconnect after herdr or machine restart by conversation ID; queue resumes",
+   "reqs": [
+    "FR-69",
+    "FR-82"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P13-05"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P13-09",
+   "phase": "P13",
+   "title": "herdr labels: pane metadata (name, role, task, context %), workspace summaries, notifications for gates and questions",
+   "reqs": [
+    "FR-67"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P13-02",
+    "P10-09"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P13-10",
+   "phase": "P13",
+   "title": "Permission prompts: permission modes, per-project allowlists, optional Claude permission hook as structured approval",
+   "reqs": [
+    "FR-68"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P13-05"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P13-11",
+   "phase": "P13",
+   "title": "Lens reviews run in a fresh conversation per review",
+   "reqs": [
+    "FR-54",
+    "FR-112"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P13-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P13-12",
+   "phase": "P13",
+   "title": "Interrupt, cancel and restart a member through herdr",
+   "reqs": [
+    "FR-61"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P13-02"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P13-13",
+   "phase": "P13",
+   "title": "Remove tmux mode, attachable_sessions flag and the headless stream-json path",
+   "reqs": [
+    "FR-60"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P13-03",
+    "P13-04"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P14-01",
+   "phase": "P14",
+   "title": "Terminal bridge: herdr terminal session observe/control → WebSocket with ack-based flow control and takeover",
+   "reqs": [
+    "FR-66"
+   ],
+   "views": [],
+   "size": "L",
+   "deps": [
+    "P11-01",
+    "P10-04"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P14-02",
+   "phase": "P14",
+   "title": "Desktop terminal view with take control and hand back",
+   "reqs": [
+    "FR-66"
+   ],
+   "views": [
+    "A-v05b"
+   ],
+   "size": "M",
+   "deps": [
+    "P14-01",
+    "P10-07"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P14-03",
+   "phase": "P14",
+   "title": "Mobile terminal with key bar",
+   "reqs": [
+    "FR-35",
+    "FR-66"
+   ],
+   "views": [
+    "A-M10"
+   ],
+   "size": "M",
+   "deps": [
+    "P14-01",
+    "P10-08"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P14-04",
+   "phase": "P14",
+   "title": "Live members view: herdr state, task, context %, structured view",
+   "reqs": [
+    "NFR-11",
+    "FR-66"
+   ],
+   "views": [
+    "A-v05",
+    "A-M8"
+   ],
+   "size": "M",
+   "deps": [
+    "P13-04",
+    "P13-05"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P14-05",
+   "phase": "P14",
+   "title": "Blocked members in the Questions dashboard and mobile Inbox",
+   "reqs": [
+    "FR-68",
+    "FR-104"
+   ],
+   "views": [
+    "A-v04",
+    "A-M3"
+   ],
+   "size": "S",
+   "deps": [
+    "P13-05"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P14-06",
+   "phase": "P14",
+   "title": "Open in herdr: copy herdr --session gbi and focus the member's pane",
+   "reqs": [
+    "FR-67"
+   ],
+   "views": [
+    "A-v05"
+   ],
+   "size": "S",
+   "deps": [
+    "P13-02"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P14-07",
+   "phase": "P14",
+   "title": "Settings: herdr section (version, session, socket, integrations)",
+   "reqs": [
+    "FR-63",
+    "FR-07"
+   ],
+   "views": [
+    "A-v13"
+   ],
+   "size": "S",
+   "deps": [
+    "P11-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P14-08",
+   "phase": "P14",
+   "title": "History events for herdr state changes, rotations and takeovers",
+   "reqs": [
+    "NFR-10",
+    "NFR-14"
+   ],
+   "views": [
+    "A-v12",
+    "A-v12b"
+   ],
+   "size": "S",
+   "deps": [
+    "P13-05",
+    "P14-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P15-01",
+   "phase": "P15",
+   "title": "User docs rewrite: install, team, sessions, settings, mobile and CLI for herdr and archetypes",
+   "reqs": [
+    "FR-130"
+   ],
+   "views": [
+    "A-v14"
+   ],
+   "size": "M",
+   "deps": [
+    "P14-04",
+    "P12-06"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P15-02",
+   "phase": "P15",
+   "title": "UAT scripts for the herdr flow per role; regenerate screenshots",
+   "reqs": [
+    "FR-132",
+    "FR-133",
+    "FR-131"
+   ],
+   "views": [
+    "A-v14"
+   ],
+   "size": "L",
+   "deps": [
+    "P15-01",
+    "P11-06"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P15-03",
+   "phase": "P15",
+   "title": "Weekly upstream review job for herdr and Ovis that opens an issue or PR",
+   "reqs": [
+    "NFR-31"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P10-10"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P15-04",
+   "phase": "P15",
+   "title": "Windows at herdr's support level",
+   "reqs": [
+    "NFR-01"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P11-07"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": [
+    "Q9"
+   ]
+  },
+  {
+   "id": "P15-05",
+   "phase": "P15",
+   "title": "Rev 3 close-out: retire obsolete tests and text, mockup change log, coverage check",
+   "reqs": [
+    "FR-01"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P15-02"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
   }
  ],
  "requirements": {
   "FR-01": {
    "text": "The application SHALL be a single Go binary with the React frontend embedded.",
+   "section": "3. Platform, installation and runtime"
+  },
+  "FR-07": {
+   "text": "go-build-it SHALL require herdr and SHALL use it as its only agent backend:",
+   "section": "3. Platform, installation and runtime"
+  },
+  "FR-08": {
+   "text": "The background service (FR-02) SHALL ensure both go-build-it and its herdr session are running at login.",
    "section": "3. Platform, installation and runtime"
   },
   "FR-02": {
@@ -2080,19 +3128,39 @@ window.TRACKER = {
    "section": "3. Platform, installation and runtime"
   },
   "FR-10": {
-   "text": "A team member SHALL be either an AI persona or a human user.",
+   "text": "A team member SHALL be either an AI team member or a human user.",
    "section": "4.1 Team members"
   },
   "FR-11": {
-   "text": "The user SHALL be able to create, edit and remove teams, and assign teams to projects.",
+   "text": "Each project SHALL have its own team.",
    "section": "4.1 Team members"
   },
   "FR-12": {
-   "text": "Each AI persona SHALL be configurable with:",
+   "text": "The application SHALL maintain global persona archetypes.",
+   "section": "4.1 Team members"
+  },
+  "FR-12a": {
+   "text": "An AI team member SHALL be created in a project from an archetype.",
+   "section": "4.1 Team members"
+  },
+  "FR-12b": {
+   "text": "When an archetype changes, the application SHALL show which project members it affects and SHALL let the user apply the change to each of them, keeping their project tuning.",
+   "section": "4.1 Team members"
+  },
+  "FR-12c": {
+   "text": "Tuning made in a project MAY be promoted back to the archetype, through the artifact editor's normal accept or reject flow.",
+   "section": "4.1 Team members"
+  },
+  "FR-12d": {
+   "text": "Each AI team member SHALL be bound to exactly one harness and model, one current harness conversation, one long-lived git worktree, and one herdr pane in the gbi herdr session (§8.",
+   "section": "4.1 Team members"
+  },
+  "FR-12e": {
+   "text": "Human users SHALL remain global identities (§4.2).",
    "section": "4.1 Team members"
   },
   "FR-13": {
-   "text": "Persona definitions SHALL be edited in the artifact editor (FR-45a).",
+   "text": "Archetypes and project members' tuning SHALL be edited in the artifact editor (FR-45a).",
    "section": "4.1 Team members"
   },
   "FR-15": {
@@ -2216,11 +3284,11 @@ window.TRACKER = {
    "section": "7. Global standards"
   },
   "FR-60": {
-   "text": "The application SHALL drive agent harnesses headlessly through their command-line interfaces, at the direction of the development team.",
+   "text": "The application SHALL run every agent harness interactively in a herdr pane of the gbi herdr session (FR-07), at the direction of the development team.",
    "section": "8.1 Harness integration"
   },
   "FR-61": {
-   "text": "Harness support SHALL be implemented through an adapter interface providing:",
+   "text": "Harness support SHALL be implemented through a harness profile that describes, for each harness:",
    "section": "8.1 Harness integration"
   },
   "FR-62": {
@@ -2232,15 +3300,23 @@ window.TRACKER = {
    "section": "8.1 Harness integration"
   },
   "FR-66": {
-   "text": "The live view of a session SHALL offer two modes:",
+   "text": "The live view of an AI team member SHALL offer two modes:",
    "section": "8.1 Harness integration"
   },
   "FR-67": {
-   "text": "The application MAY support attachable (headed) sessions:",
+   "text": "The gbi herdr session SHALL be organized so that opening it shows everything go-build-it is doing:",
    "section": "8.1 Harness integration"
   },
   "FR-64": {
-   "text": "Concurrent sessions on the same project SHOULD work in isolated workspaces, such as git worktrees, so they don't interfere with each other.",
+   "text": "Each AI team member SHALL work in its own long-lived git worktree, so concurrent members don't interfere.",
+   "section": "8.1 Harness integration"
+  },
+  "FR-68": {
+   "text": "The application SHALL treat herdr's agent state as the source of truth for whether a member is working, blocked, done or idle.",
+   "section": "8.1 Harness integration"
+  },
+  "FR-69": {
+   "text": "Each AI team member's conversation SHALL continue across tasks until it is rotated (§8.2).",
    "section": "8.1 Harness integration"
   },
   "FR-65": {
@@ -2252,7 +3328,7 @@ window.TRACKER = {
    "section": "8.2 Context management and smart handoffs"
   },
   "FR-71": {
-   "text": "The application SHALL monitor each session's context-window usage while it runs.",
+   "text": "The application SHALL monitor each AI team member's context-window usage, read from its harness transcript, and SHALL show whether the value is measured or estimated.",
    "section": "8.2 Context management and smart handoffs"
   },
   "FR-72": {
@@ -2265,6 +3341,10 @@ window.TRACKER = {
   },
   "FR-74": {
    "text": "The next session SHALL start from the handoff and FR-70's prepared context.",
+   "section": "8.2 Context management and smart handoffs"
+  },
+  "FR-76": {
+   "text": "A member's lasting knowledge SHALL live in go-build-it (persona, project values, decisions, notes from finished tasks), not only in its conversation.",
    "section": "8.2 Context management and smart handoffs"
   },
   "FR-75": {
@@ -2282,6 +3362,18 @@ window.TRACKER = {
   "FR-82": {
    "text": "Queue state SHALL survive application and machine restarts.",
    "section": "8.3 Task queues"
+  },
+  "NFR-30": {
+   "text": "Because go-build-it depends on herdr, it SHALL keep a record of the herdr and Ovis (a herdr web client) source revisions last reviewed, what changed, and what go-build-it did about",
+   "section": "8.4 Upstream tracking"
+  },
+  "NFR-31": {
+   "text": "A scheduled review SHOULD run at least weekly.",
+   "section": "8.4 Upstream tracking"
+  },
+  "NFR-32": {
+   "text": "go-build-it's herdr client types SHALL be generated from herdr's published API schema, so an incompatible change fails the build.",
+   "section": "8.4 Upstream tracking"
   },
   "FR-90": {
    "text": "The application SHALL work with both GitHub (gh) and GitLab (glab), and SHALL detect which one each project uses and whether its CLI is authenticated.",
@@ -2447,6 +3539,9 @@ window.TRACKER = {
   "Q4": "Can multiple humans collaborate on the same projects (e.g. different Tailscale users with different roles), or is it single-user with optional reviewers?",
   "Q5": "What is the exact default git workflow (branch naming, PR/MR requirements, merge strategy)?",
   "Q6": "What is the mechanism and channel for auto-updates (GitHub Releases, Homebrew tap, etc.)?",
-  "Q7": "How should attachable (headed) sessions work (FR-67): which terminal multiplexer or PTY approach, and how does the app read context usage and events from an interactive session?"
+  "Q7": "How should attachable (headed) sessions work? Answered (rev 3): every session runs in herdr; see ADR-009.",
+  "Q8": "Conversation rotation policy (FR-76)? Answered 2026-11-08: keep one conversation per member across tasks until context reaches the handoff threshold (75%), then rotate, starting from a handoff plus the member's notes. Lens starts a fresh conversation for every review. See ADR-010.",
+  "Q9": "Windows support level? Answered 2026-11-08: ship Windows at herdr's beta level, with herdr in the Windows CI job. A herdr capability missing on Windows is shown as unavailable there. See ADR-009.",
+  "Q10": "Archetype change propagation (FR-12b)? Answered 2026-11-08: a proposal per affected member, plus one action to apply the change to every member that has not overridden the changed fields. See ADR-010."
  }
 };

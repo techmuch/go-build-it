@@ -1,10 +1,10 @@
 # go-build-it — Requirements
 
-Status: Draft · Last updated: 2026-11-07 (rev. 2: mockup review feedback)
+Status: Draft · Last updated: 2026-11-08 (rev. 3: herdr as the only agent backend; per-project team members from global archetypes. See [ADR-009](decisions/ADR-009-herdr-backend.md) and [ADR-010](decisions/ADR-010-project-team-members.md))
 
 ## 1. Overview
 
-go-build-it is a Go application with an embedded React frontend that manages long-running software project development. It is installed globally on a machine and provides a web UI and a CLI. A team of AI personas and humans works through it to take projects from problem definition to released software. The app coordinates external agent harnesses such as Claude Code, Antigravity and OpenCode, and it drives them headlessly.
+go-build-it is a Go application with an embedded React frontend that manages long-running software project development. It is installed globally on a machine and provides a web UI and a CLI. A team of AI personas and humans works through it to take projects from problem definition to released software. The app coordinates external agent harnesses such as Claude Code, Antigravity and OpenCode. Every harness runs interactively inside [herdr](https://herdr.dev), a terminal workspace manager for coding agents, in a herdr session that go-build-it owns. Opening that session in any terminal shows everything go-build-it is doing, organized by project and team member.
 
 ### Conventions
 
@@ -18,12 +18,16 @@ go-build-it is a Go application with an embedded React frontend that manages lon
 | Term | Definition |
 |---|---|
 | **Project** | A software product managed by go-build-it. It is backed by a git repository and has its own requirements, values, roadmap, task queue and history. |
-| **Team** | A user-defined set of team members assigned to work on one or more projects. |
-| **Team member** | Either an **AI persona** or a **human user**, holding one role. |
-| **AI persona** | A configured agent identity: role, instructions or prompt, assigned harness, model, and any role-specific standards. |
+| **Team** | The team members working on one project. Each project has its own team. |
+| **Team member** | Either an **AI team member** or a **human user**, holding one role in a project. |
+| **Persona archetype** | A global, reusable template for an AI team member: role, base instructions, default harness and model, and role-specific standards. Archetypes do no work themselves. |
+| **AI team member** | An archetype made concrete inside one project, with optional project-specific tuning. It is bound to one harness and model, one long-running harness conversation, one git worktree and one herdr pane. Also called an *AI persona*. |
 | **Role** | A responsibility within the team. See §4.3. |
-| **Agent harness** | An external agent CLI (e.g. Claude Code, Antigravity, OpenCode, Pi-agent) that go-build-it drives headlessly to carry out a task. |
-| **Session** | One run of a harness working on a task, with its own context window. |
+| **Agent harness** | An external agent CLI (e.g. Claude Code, Antigravity, OpenCode, Pi-agent) that go-build-it runs interactively in a herdr pane to carry out tasks. |
+| **herdr** | The terminal workspace manager that owns every harness process for go-build-it. It reports agent state (working, blocked, done, idle) and exposes a socket API. It is the only agent backend. |
+| **gbi herdr session** | The named herdr session (`gbi`) that go-build-it starts and supervises. Open it with `herdr --session gbi`. |
+| **Conversation** | A harness's own resumable conversation (e.g. a Claude Code session ID). Each AI team member keeps one current conversation across tasks until it is rotated. |
+| **Session** | The span of one AI team member working on one task: from the prompt that starts the task to its completion, inside the member's conversation. |
 | **Handoff** | A curated briefing produced when a session ends, mainly when its context window is nearly full. The next session starts from it instead of from a raw memory dump. Smart handoffs are an **experimental** feature; the MVP relies on the harness's own compaction (§8.2). |
 | **Artifact editor** | The view for changing a project artifact, standard or persona definition: chat with an AI agent to make changes, or edit directly in a rich editor. Saving creates a new revision. |
 | **Global standards** | Rules and conventions that apply to every project, e.g. the standard backend stack, frontend stack and test requirements. |
@@ -35,18 +39,26 @@ go-build-it is a Go application with an embedded React frontend that manages lon
 
 ## 3. Platform, installation and runtime
 
-- **FR-01**: The application SHALL be a single Go binary with the React frontend embedded.
+- **FR-01**: The application SHALL be a single Go binary with the React frontend embedded. Its one required runtime dependency is herdr (FR-07).
+- **FR-07**: go-build-it SHALL require herdr and SHALL use it as its only agent backend:
+  - It SHALL check that herdr is installed and within the supported version range, and SHALL guide the user to install or update it (e.g. `brew install herdr`).
+  - It SHALL start and supervise a headless herdr server for a named session `gbi` (`herdr server --session gbi`), and restart it if it stops.
+  - It SHALL check that herdr's integration for each enabled harness is installed and current (`herdr integration status`), and SHALL offer to install or update it.
+  - It SHALL check herdr's advertised API methods at connect time and report a clear error when a required method is missing.
+- **FR-08**: The background service (FR-02) SHALL ensure both go-build-it and its herdr session are running at login. Stopping or updating go-build-it SHALL NOT stop running harnesses, because herdr owns them.
 - **FR-02**: The application SHALL be installable globally on a machine and SHOULD run as a background service (launchd on macOS, systemd on Linux, a Windows service on Windows).
-- **NFR-01**: macOS SHALL be the initial target platform. Linux and Windows SHALL be supported later. Code SHALL NOT assume macOS-only paths, shells or tools without a cross-platform abstraction.
+- **NFR-01**: macOS SHALL be the initial target platform. Linux and Windows SHALL be supported later. Code SHALL NOT assume macOS-only paths, shells or tools without a cross-platform abstraction. Platform support SHALL follow herdr's: a platform where herdr is in beta (currently Windows) is supported at the same level.
 - **FR-03**: All application state SHALL live under `~/.go-build-it/` (`%USERPROFILE%\.go-build-it\` on Windows). This includes:
   - configuration files
   - the SQLite database
   - logs and session transcripts
+
+  herdr's own state lives in herdr's config directory under its `gbi` session.
 - **FR-04**: Persistence SHALL use SQLite.
 - **FR-05**: The application SHALL use calendar versioning in the format `YYYY.MM.DD.N`, where `N` is the release number for that day, starting at 1. The application is not intended to be consumed as a Go module.
 - **FR-06**: The application SHALL be able to install new releases automatically:
   - Releases SHALL be verified by checksum and SHOULD be signed.
-  - An update SHALL NOT be applied while agent sessions are running. It SHALL wait for them to finish or for an idle window.
+  - Because herdr owns the harness processes (FR-08), an update MAY be applied while AI team members are working; go-build-it SHALL reconnect to the gbi herdr session after restarting. Updating herdr itself is left to herdr's own updater or package manager, and go-build-it SHALL warn when herdr falls outside the supported range.
   - The previous version SHALL be kept so the user can roll back.
   - The user SHALL be able to turn automatic updates off.
 
@@ -54,10 +66,15 @@ go-build-it is a Go application with an embedded React frontend that manages lon
 
 ### 4.1 Team members
 
-- **FR-10**: A team member SHALL be either an AI persona or a human user.
-- **FR-11**: The user SHALL be able to create, edit and remove teams, and assign teams to projects.
-- **FR-12**: Each AI persona SHALL be configurable with: role, instructions, assigned harness, model, and any role-specific standards that add to the global standards.
-- **FR-13**: Persona definitions SHALL be edited in the artifact editor (FR-45a). The user can write the definition directly, or chat with an AI agent that helps develop the persona (e.g. interviews the user, suggests instructions, checks for conflicts with global standards).
+- **FR-10**: A team member SHALL be either an AI team member or a human user.
+- **FR-11**: Each project SHALL have its own team. The user SHALL be able to add, tune and remove team members per project. There are no global teams.
+- **FR-12**: The application SHALL maintain global **persona archetypes**. Each archetype SHALL be configurable with: role, base instructions, default harness, default model, and any role-specific standards that add to the global standards. go-build-it SHALL ship a starter archetype for each built-in role (§4.3).
+- **FR-12a**: An AI team member SHALL be created in a project from an archetype. The project MAY tune it: extra or replacement instructions, a different harness or model, a display name, and project-specific standards. The member SHALL keep a link to its archetype and SHALL show where it differs.
+- **FR-12b**: When an archetype changes, the application SHALL show which project members it affects and SHALL let the user apply the change to each of them, keeping their project tuning. Changes SHALL NOT be pushed to members silently.
+- **FR-12c**: Tuning made in a project MAY be promoted back to the archetype, through the artifact editor's normal accept or reject flow.
+- **FR-12d**: Each AI team member SHALL be bound to exactly one harness and model, one current harness conversation, one long-lived git worktree, and one herdr pane in the gbi herdr session (§8.1). One member works on one task at a time; more parallel work means more members.
+- **FR-12e**: Human users SHALL remain global identities (§4.2). A human SHALL hold a role per project.
+- **FR-13**: Archetypes and project members' tuning SHALL be edited in the artifact editor (FR-45a). The user can write the definition directly, or chat with an AI agent that helps develop it (e.g. interviews the user, suggests instructions, checks for conflicts with global standards).
 
 ### 4.2 Access and identity
 
@@ -149,29 +166,34 @@ Authentication is delegated to Tailscale. go-build-it does not run its own login
 
 ### 8.1 Harness integration
 
-- **FR-60**: The application SHALL drive agent harnesses headlessly through their command-line interfaces, at the direction of the development team.
-- **FR-61**: Harness support SHALL be implemented through an adapter interface providing:
-  - start a session with a prepared context
-  - stream output and events
-  - send input
-  - interrupt or cancel
-  - report context-window usage
-  - report exit status
+- **FR-60**: The application SHALL run every agent harness interactively in a herdr pane of the gbi herdr session (FR-07), at the direction of the development team. herdr SHALL be the only process host: there SHALL be no tmux, direct-PTY or headless (`-p` / `stream-json`) execution path.
+- **FR-61**: Harness support SHALL be implemented through a harness profile that describes, for each harness:
+  - its herdr agent kind and launch arguments (model, permission mode, flags)
+  - how to resume a conversation (e.g. `claude --resume <id>`)
+  - where its transcript lives and how to read events, messages and context-window usage from it
+  - how it reports rate or usage limits
+  The application SHALL start the harness with `agent start`, send work with `agent prompt`, follow state through herdr events, interrupt with `agent send-keys`, and detect exit through pane events.
 - **FR-62**: Initial adapters: **Claude Code** (Anthropic subscription), **Antigravity** (Google / Gemini subscription) and **OpenCode** (open-source harness that works with multiple model providers). Pi-agent and others SHOULD be addable through the same interface.
 - **FR-63**: Harnesses and their settings (binary path, model, flags, permission mode) SHALL be configurable in the UI and the CLI.
-- **FR-66**: The live view of a session SHALL offer two modes:
-  - a **structured view**: the harness's events rendered natively (edits, commands, test results, messages)
-  - a **terminal view**: the harness's raw terminal output
-- **FR-67**: The application MAY support **attachable (headed) sessions**: the harness runs interactively in a persistent terminal session that the user can attach to from the desktop or mobile UI, to watch and take control when needed (similar to terminal agent multiplexers such as Herdr and its web front-ends). When the user detaches, control returns to the application.
-- **FR-64**: Concurrent sessions on the same project SHOULD work in isolated workspaces, such as git worktrees, so they don't interfere with each other.
+- **FR-66**: The live view of an AI team member SHALL offer two modes:
+  - a **structured view**: events and messages read from the harness's transcript (edits, commands, test results, messages)
+  - a **terminal view**: the member's herdr pane streamed live to the desktop and mobile UI (herdr `terminal session observe`), with the option to take control (`terminal session control`) and type, resize and use keys. Several viewers can watch at once; one controls at a time.
+- **FR-67**: The gbi herdr session SHALL be organized so that opening it shows everything go-build-it is doing:
+  - one herdr workspace per project, with each AI team member's worktree grouped under it
+  - each member's pane labelled with its name, role and current task, plus small status values such as context usage (herdr pane metadata)
+  - each project workspace showing a summary such as "2 working · 1 needs you" (herdr workspace metadata)
+  - review gates and questions that need the human raised as herdr notifications
+- **FR-64**: Each AI team member SHALL work in its own long-lived git worktree, so concurrent members don't interfere. Each task SHALL get a fresh branch in that worktree. The application SHALL keep creating worktrees itself and SHALL ask herdr to open them grouped under the project workspace.
+- **FR-68**: The application SHALL treat herdr's agent state as the source of truth for whether a member is working, blocked, done or idle. A **blocked** member SHALL appear in the UI as needing the human, linked to its live terminal view. The application SHALL NOT try to understand harness dialogs from the screen. It SHOULD avoid permission prompts through permission modes and per-project allowlists, and MAY use harness hooks (e.g. Claude Code's permission hooks) to offer structured approvals.
+- **FR-69**: Each AI team member's conversation SHALL continue across tasks until it is rotated (§8.2). After a herdr or machine restart, the application SHALL find each member's pane again by its conversation ID and SHALL resume or relaunch it.
 - **FR-65**: Cost is limited by the user's AI subscriptions, so no budget controls are needed. The application SHALL detect subscription rate or usage limits reported by a harness. It SHALL then pause the affected work and resume it automatically when the limit resets.
 
 ### 8.2 Context management and smart handoffs
 
-For the MVP, sessions SHALL rely on each harness's built-in auto-compaction when the context window fills. Smart handoffs (FR-72–FR-74) are an **experimental** feature: off by default and enabled in Settings, globally or per project. FR-70 and FR-71 apply in both modes.
+By default, an AI team member's conversation relies on the harness's built-in auto-compaction when the context window fills. Smart handoffs (FR-72–FR-74) rotate the member to a new conversation instead; they are **experimental**, off by default and enabled in Settings, globally or per project. FR-70, FR-71 and FR-76 apply in both modes.
 
 - **FR-70**: The application SHALL prepare each session's starting context deliberately: the task, the relevant requirements, standards, values, and the incoming handoff (if any). It SHALL NOT dump all of the project's history.
-- **FR-71**: The application SHALL monitor each session's context-window usage while it runs.
+- **FR-71**: The application SHALL monitor each AI team member's context-window usage, read from its harness transcript, and SHALL show whether the value is measured or estimated.
 - **FR-72**: *(Experimental.)* When smart handoffs are enabled and usage reaches a configurable threshold (e.g. 70–80%), the application SHALL step in and start a smart handoff **before** the harness auto-compacts. When they are disabled, the application SHALL record each compaction event in the history.
 - **FR-73**: A handoff SHALL be a curated briefing, written as if handing responsibility to another person. At minimum it SHALL contain:
   - objective and definition of done
@@ -181,6 +203,7 @@ For the MVP, sessions SHALL rely on each harness's built-in auto-compaction when
   - specific next steps
   - pointers to the relevant files and artifacts (references, not copies)
 - **FR-74**: The next session SHALL start from the handoff and FR-70's prepared context. Every handoff SHALL be stored in the history.
+- **FR-76**: A member's lasting knowledge SHALL live in go-build-it (persona, project values, decisions, notes from finished tasks), not only in its conversation. The application SHALL rotate a member to a new conversation when the rotation policy says so (see Q8), starting it from FR-70's prepared context and the member's notes.
 - **FR-75**: Tasks SHOULD be sized so most of them fit in one session. The Project Manager role SHOULD split tasks that repeatedly need handoffs.
 
 ### 8.3 Task queues
@@ -191,8 +214,14 @@ For the MVP, sessions SHALL rely on each harness's built-in auto-compaction when
   - dependencies between tasks
   - concurrency limits per project and globally
   - retries
-  - assignment of tasks to roles or personas
-- **FR-82**: Queue state SHALL survive application and machine restarts. Interrupted sessions SHALL be resumed or restarted from their latest handoff.
+  - assignment of tasks to roles or to specific AI team members
+- **FR-82**: Queue state SHALL survive application and machine restarts. Work interrupted by a restart SHALL continue in the member's resumed conversation (FR-69), or from its latest handoff if the conversation cannot be resumed.
+
+### 8.4 Upstream tracking
+
+- **NFR-30**: Because go-build-it depends on herdr, it SHALL keep a record of the herdr and Ovis (a herdr web client) source revisions last reviewed, what changed, and what go-build-it did about it (`docs/upstream/`).
+- **NFR-31**: A scheduled review SHOULD run at least weekly. It compares the latest herdr and Ovis sources, herdr's API schema (`herdr api schema --json`) and changelogs with the recorded revisions, and opens an issue or PR when something affects go-build-it.
+- **NFR-32**: go-build-it's herdr client types SHALL be generated from herdr's published API schema, so an incompatible change fails the build. The supported herdr version range SHALL be declared in one place and tested in CI.
 
 ## 9. Git, GitHub and GitLab workflow
 
@@ -265,7 +294,7 @@ For the MVP, sessions SHALL rely on each harness's built-in auto-compaction when
   - questions and answers
   - feedback and design choices
   - git operations
-- **NFR-11**: It SHALL always be possible to determine what the system is currently doing and why. Live views SHALL show active sessions, their tasks, and their context usage.
+- **NFR-11**: It SHALL always be possible to determine what the system is currently doing and why. Live views SHALL show active AI team members, their herdr state, their tasks, and their context usage.
 - **NFR-12**: Records SHALL be structured so AI agents can analyze the application's own performance. Examples:
   - handoff quality
   - rework rates
@@ -296,7 +325,10 @@ For the MVP, sessions SHALL rely on each harness's built-in auto-compaction when
 | Q4 | Can multiple humans collaborate on the same projects (e.g. different Tailscale users with different roles), or is it single-user with optional reviewers? |
 | Q5 | What is the exact default git workflow (branch naming, PR/MR requirements, merge strategy)? |
 | Q6 | What is the mechanism and channel for auto-updates (GitHub Releases, Homebrew tap, etc.)? |
-| Q7 | How should attachable (headed) sessions work (FR-67): which terminal multiplexer or PTY approach, and how does the app read context usage and events from an interactive session? |
+| Q7 | ~~How should attachable (headed) sessions work?~~ **Answered (rev 3):** every session runs in herdr; see ADR-009. |
+| Q8 | ~~Conversation rotation policy (FR-76)?~~ **Answered 2026-11-08:** keep one conversation per member across tasks until context reaches the handoff threshold (75%), then rotate, starting from a handoff plus the member's notes. Lens starts a fresh conversation for every review. See ADR-010. |
+| Q9 | ~~Windows support level?~~ **Answered 2026-11-08:** ship Windows at herdr's beta level, with herdr in the Windows CI job. A herdr capability missing on Windows is shown as unavailable there. See ADR-009. |
+| Q10 | ~~Archetype change propagation (FR-12b)?~~ **Answered 2026-11-08:** a proposal per affected member, plus one action to apply the change to every member that has not overridden the changed fields. See ADR-010. |
 
 ## 15. Out of scope (for now)
 
@@ -304,3 +336,6 @@ For the MVP, sessions SHALL rely on each harness's built-in auto-compaction when
 - Container or VM sandboxing of agents
 - Cost and budget tracking beyond detecting subscription limits
 - Consuming go-build-it as a Go module
+- Agent process hosts other than herdr (tmux, a built-in PTY, headless `-p` / `stream-json` runs)
+- Driving herdr on remote machines (herdr's saved SSH machines); go-build-it uses the local gbi session only
+- Parsing harness dialogs from the screen to answer them on the user's behalf
