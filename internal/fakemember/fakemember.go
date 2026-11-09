@@ -93,13 +93,13 @@ const handoffBrief = "<<<HANDOFF\nObjective and definition of done: finish the l
 
 type agent struct {
 	handedOff bool
-	h       *herdr.Client
-	pane    string
-	session string
-	tx      *os.File
-	out     io.Writer
-	seq     int64
-	used    int
+	h         *herdr.Client
+	pane      string
+	session   string
+	tx        *os.File
+	out       io.Writer
+	seq       int64
+	used      int
 }
 
 // Run starts the agent. --session-id <id> starts a conversation with that ID (go-build-it
