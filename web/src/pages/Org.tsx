@@ -214,6 +214,34 @@ export function EventDetail({ eid }: { eid: string }) {
 }
 
 // v13 · Settings (FR-05, FR-06, FR-15–FR-20, FR-63, FR-67, FR-72, FR-90)
+// v13 herdr card + v15 setup & doctor (FR-07, FR-08, ADR-009).
+function HerdrCard() {
+  const { data: st } = useData<any>(() => api.herdr.status(), [], (e) => e.type.startsWith('herdr'));
+  return <Card title={<span id="herdr">herdr</span>} right={<A to="/settings/herdr" className="small">Run doctor ›</A>}>
+    <div className="row small" style={{ flexWrap: 'wrap', gap: 14 }}>
+      {st?.running ? <><span><b>herdr {st.version}</b></span><span>Session <span className="mono">{st.session}</span> <Chip c="grn">running · supervised</Chip></span>
+        <span>Socket <span className="mono">{st.socket}</span></span><span>Open it: <code>herdr --session {st.session}</code></span></>
+        : <span><Chip c="red">not running</Chip> {st?.error || 'go-build-it starts its herdr session automatically'} · <A to="/settings/herdr">Fix ›</A></span>}
+    </div>
+  </Card>;
+}
+
+export function HerdrSetup() {
+  const { data, error, reload } = useData<any>(() => api.herdr.doctor(), [], (e) => e.type.startsWith('herdr'));
+  const { run, busy } = useAction();
+  const fixes = (data?.checks || []).filter((c: any) => !c.ok || c.warn).length;
+  return <Shell title="herdr setup" crumb={<A to="/settings">Settings</A>} right={data && (fixes ? <Chip c="amb">{fixes} to fix</Chip> : <Chip c="grn">all good</Chip>)}>
+    <Err msg={error} />
+    <Card title="Checks" right={<button type="button" className="lnk small" onClick={reload}>Run again</button>}>
+      {!data ? <Loading /> : <table className="t"><tbody>{data.checks.map((c: any) => <tr key={c.name}>
+        <td style={{ width: 24 }}>{!c.ok ? '❌' : c.warn ? '⚠️' : '✅'}</td><td><b>{c.name}</b></td><td className="small">{c.detail}</td><td className="small muted">{c.hint}</td>
+        <td>{c.fix && <button type="button" className="btn p sm" disabled={busy} onClick={() => run(() => api.herdr.fix({ action: c.fix }), 'Done').then(reload)}>{c.fix.startsWith('install-integration') ? 'Update' : 'Fix'}</button>}</td></tr>)}</tbody></table>}
+      {data && <div className="small muted" style={{ marginTop: 8 }}>Missing herdr? <code>{data.installHint}</code>. go-build-it uses its own herdr session; your default session is never touched. CLI: <code>gbi herdr doctor</code></div>}
+    </Card>
+    <Card title="See it in a terminal"><div className="small">Run <code>herdr --session {data?.status?.session || 'gbi'}</code>: one workspace per project, each member's worktree grouped under it, labelled with role, current task and context. Detach with <kbd>ctrl</kbd>+<kbd>b</kbd> <kbd>q</kbd>; the agents keep running.</div></Card>
+  </Shell>;
+}
+
 export function Settings() {
   const { data: cfg, reload } = useData<any>(() => api.settings.get(), [], (e) => e.type.startsWith('settings'));
   const { data: harn } = useData<any[]>(() => api.harnesses.list(), []);
@@ -225,9 +253,10 @@ export function Settings() {
   const patch = (p: any, ok = 'Saved') => run(() => api.settings.update(p), ok).then(reload);
   const exp = cfg.experimental || {};
   return <Shell title="Settings" right={<span className="muted small mono">{sys?.dataDir}/config.toml</span>}>
+    <HerdrCard />
     <div className="row">
       <Card style={{ width: 180, padding: 10, alignSelf: 'flex-start' }}><div className="col small" style={{ gap: 7 }}>
-        {[['harnesses', 'Agent harnesses'], ['access', 'Access & identity'], ['forges', 'Forge connections'], ['dispatch', 'Dispatch'], ['experimental', 'Experimental'], ['updates', 'Updates']].map(([k, l]) => <a key={k} href={'#' + k}>{l}</a>)}
+        {[['herdr', 'herdr'], ['harnesses', 'Agent harnesses'], ['access', 'Access & identity'], ['forges', 'Forge connections'], ['dispatch', 'Dispatch'], ['experimental', 'Experimental'], ['updates', 'Updates']].map(([k, l]) => <a key={k} href={'#' + k}>{l}</a>)}
         <span className="muted" style={{ borderTop: '1px solid var(--line)', paddingTop: 6 }}>Git workflow → <A to="/standards/git-workflow">Standards</A></span></div></Card>
       <div className="col grow">
         <Card title={<span id="harnesses">Agent harnesses</span>} right={<span className="small muted">detected on this machine</span>}>

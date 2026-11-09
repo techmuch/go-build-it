@@ -19,6 +19,7 @@ import (
 	"github.com/techmuch/go-build-it/internal/agent"
 	"github.com/techmuch/go-build-it/internal/api"
 	"github.com/techmuch/go-build-it/internal/harness"
+	"github.com/techmuch/go-build-it/internal/herdr"
 	"github.com/techmuch/go-build-it/internal/history"
 	"github.com/techmuch/go-build-it/internal/metrics"
 	"github.com/techmuch/go-build-it/internal/options"
@@ -27,6 +28,7 @@ import (
 	"github.com/techmuch/go-build-it/internal/questions"
 	"github.com/techmuch/go-build-it/internal/queue"
 	"github.com/techmuch/go-build-it/internal/rehearsals"
+	"github.com/techmuch/go-build-it/internal/service"
 	"github.com/techmuch/go-build-it/internal/standards"
 	"github.com/techmuch/go-build-it/internal/tailscale"
 	"github.com/techmuch/go-build-it/internal/team"
@@ -250,6 +252,9 @@ func (a *App) Routes() []api.Route {
 			return metrics.Compute(c.R.Context(), a.DB, c.Query("project"), atoi(c.Query("days"), 7))
 		}, f("project", ""), fi("days", "default 7")),
 		r("GET", "/api/metrics/compare", "metrics.compare", "metrics compare", "Smart handoffs vs compaction (graduation evidence)", func(c *api.Ctx) (any, error) { return metrics.Compare(c.R.Context(), a.DB, atoi(c.Query("days"), 30)) }, fi("days", "default 30")),
+		r("GET", "/api/herdr", "herdr.status", "herdr status", "The supervised gbi herdr session (FR-07)", func(c *api.Ctx) (any, error) { return a.Herdr.Status(), nil }),
+		r("GET", "/api/herdr/doctor", "herdr.doctor", "herdr doctor", "Check herdr, the gbi session, API compatibility, integrations and the login service", a.herdrDoctor),
+		r("POST", "/api/herdr/fix", "herdr.fix", "herdr fix", "Run a doctor fix (start-session, install-integration:<target>)", a.herdrFix, f("action", "fix from the doctor")),
 		r("GET", "/api/pins", "pins.list", "pins list", "Comments pinned to spots on attachments and mockups", func(c *api.Ctx) (any, error) {
 			return a.Pins.List(c.R.Context(), c.Query("subject"), c.Query("item"))
 		}, f("subject", "what the viewer was opened for, e.g. Q-34"), f("item", "attachment URL or name (empty: all items)")),
@@ -691,6 +696,36 @@ func (a *App) projectRefresh(c *api.Ctx) (any, error) {
 		return nil, notFound(err)
 	}
 	return a.Projects.Refresh(c.R.Context(), p), nil
+}
+
+func (a *App) herdrDoctor(c *api.Ctx) (any, error) {
+	var hs []string
+	for name, h := range a.Cfg.Harnesses {
+		if h.Enabled && name != "fake" {
+			hs = append(hs, name)
+		}
+	}
+	installed := false
+	if exe, err := os.Executable(); err == nil {
+		if p, err := service.Build(exe, a.Cfg.Dir()); err == nil && p.File != "" {
+			_, statErr := os.Stat(p.File)
+			installed = statErr == nil
+		}
+	}
+	checks := a.Herdr.Doctor(c.R.Context(), hs, installed)
+	return map[string]any{"checks": checks, "status": a.Herdr.Status(), "installHint": herdr.InstallHint()}, nil
+}
+
+func (a *App) herdrFix(c *api.Ctx) (any, error) {
+	var b struct{ Action string }
+	if err := c.Bind(&b); err != nil {
+		return nil, err
+	}
+	if err := a.Herdr.Fix(c.R.Context(), b.Action); err != nil {
+		return nil, bad(err)
+	}
+	a.Hist.Must(c.R.Context(), history.Event{Type: "herdr.fix", Subject: b.Action, Summary: "Ran herdr fix " + b.Action})
+	return a.herdrDoctor(c)
 }
 
 func (a *App) pinAdd(c *api.Ctx) (any, error) {

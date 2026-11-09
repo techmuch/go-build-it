@@ -31,6 +31,15 @@ type Experimental struct {
 	AttachableSessions   bool     `toml:"attachable_sessions" json:"attachableSessions"`
 }
 
+// Herdr configures the agent backend (FR-07, ADR-009).
+type Herdr struct {
+	Binary  string `toml:"binary" json:"binary"`   // herdr executable; default "herdr" on PATH
+	Session string `toml:"session" json:"session"` // herdr session go-build-it owns; default "gbi"
+	// ConfigHome, when set, is passed to herdr as XDG_CONFIG_HOME so the session lives
+	// in an isolated herdr config directory (tests and demos use this).
+	ConfigHome string `toml:"config_home" json:"configHome"`
+}
+
 // Updates configures auto-update (FR-06, ADR-004).
 type Updates struct {
 	Channel     string `toml:"channel" json:"channel"`
@@ -51,6 +60,7 @@ type Config struct {
 	Harnesses     map[string]Harness `toml:"harnesses" json:"harnesses"`
 	Experimental  Experimental       `toml:"experimental" json:"experimental"`
 	Updates       Updates            `toml:"updates" json:"updates"`
+	Herdr         Herdr              `toml:"herdr" json:"herdr"`
 	dir           string
 }
 
@@ -87,6 +97,7 @@ func Default() Config {
 		},
 		Experimental: Experimental{HandoffThreshold: 0.75},
 		Updates:      Updates{Channel: "stable", Repo: "techmuch/go-build-it", AutoInstall: true},
+		Herdr:        Herdr{Binary: "herdr", Session: "gbi"},
 	}
 }
 

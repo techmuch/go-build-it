@@ -301,13 +301,13 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 
 | Task | Size | Requirements | Approach A views | Depends on |
 |---|---|---|---|---|
-| **P11-01** herdr client: socket/named-pipe NDJSON transport, types generated from herdr api schema, ping capability check, supported version range | M | NFR-32, FR-07 | — | P10-04 |
-| **P11-02** Supervise herdr server --session gbi: start, health, restart, stop | M | FR-07 | — | P11-01 |
-| **P11-03** Doctor and onboarding: herdr install and version, integration status, install or update integrations | M | FR-07 | A-v15, A-v13 | P11-01, P10-07 |
-| **P11-04** Login service brings up go-build-it and the gbi session; go-build-it restarts and updates leave agents running | S | FR-08, FR-02, FR-06 | — | P11-02 |
-| **P11-05** Event subscription and snapshot reconciler with events_lost recovery | M | NFR-11, FR-68 | — | P11-01 |
-| **P11-06** Fake harness in herdr: reports state with pane.report_agent and writes a transcript | M | FR-61 | — | P11-01 |
-| **P11-07** CI installs a pinned herdr on macOS, Linux and Windows; weekly job against latest herdr | M | NFR-32, NFR-01 | — | P11-06 |
+| **P11-01** herdr client: socket/named-pipe NDJSON transport, types generated from herdr api schema, ping capability check, supported version range ✅ | M | NFR-32, FR-07 | — | P10-04 |
+| **P11-02** Supervise herdr server --session gbi: start, health, restart, stop ✅ | M | FR-07 | — | P11-01 |
+| **P11-03** Doctor and onboarding: herdr install and version, integration status, install or update integrations ✅ | M | FR-07 | A-v15, A-v13 | P11-01, P10-07 |
+| **P11-04** Login service brings up go-build-it and the gbi session; go-build-it restarts and updates leave agents running ✅ | S | FR-08, FR-02, FR-06 | — | P11-02 |
+| **P11-05** Event subscription and snapshot reconciler with events_lost recovery ✅ | M | NFR-11, FR-68 | — | P11-01 |
+| **P11-06** Fake harness in herdr: reports state with pane.report_agent and writes a transcript ✅ | M | FR-61 | — | P11-01 |
+| **P11-07** CI installs a pinned herdr on macOS, Linux and Windows; weekly job against latest herdr ✅ | M | NFR-32, NFR-01 | — | P11-06 |
 
 ### P12 · Per-project teams from archetypes
 

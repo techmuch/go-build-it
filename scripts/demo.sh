@@ -20,6 +20,10 @@ max_concurrent = 2
 [harnesses.fake]
 enabled = true
 binary = "$GBI"
+# An isolated herdr: the demo never touches the user's own herdr sessions (ADR-009).
+[herdr]
+session = "gbi"
+config_home = "$GBI_HOME/h"
 EOF
 
 "$GBI" serve > "$GBI_HOME/server.log" 2>&1 &

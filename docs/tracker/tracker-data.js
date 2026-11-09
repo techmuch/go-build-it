@@ -174,7 +174,10 @@ window.TRACKER = {
     "Login starts go-build-it and the gbi herdr session; restarting go-build-it leaves agents running",
     "Doctor shows herdr version, session and integration status, and fixes outdated integrations",
     "CI is green on macOS, Linux and Windows with a pinned herdr"
-   ]
+   ],
+   "gateApproved": "2026-11-08",
+   "gateApprovedBy": "david (owner)",
+   "gateEvidence": "herdr client generated from the vendored schema (gen -check in make vet); supervisor adopts/starts a detached gbi session and restarts it; doctor + fixes (API, CLI, Settings → herdr setup); watcher with snapshot reconciliation; fake member runs in herdr; live tests pass against an isolated herdr; CI installs pinned herdr on Linux and macOS (required) and Windows (informational, beta), weekly latest-herdr job."
   },
   {
    "id": "P12",
@@ -2339,7 +2342,7 @@ window.TRACKER = {
    "deps": [
     "P10-04"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2355,7 +2358,7 @@ window.TRACKER = {
    "deps": [
     "P11-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2375,7 +2378,7 @@ window.TRACKER = {
     "P11-01",
     "P10-07"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2393,7 +2396,7 @@ window.TRACKER = {
    "deps": [
     "P11-02"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2410,7 +2413,7 @@ window.TRACKER = {
    "deps": [
     "P11-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2426,7 +2429,7 @@ window.TRACKER = {
    "deps": [
     "P11-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2443,7 +2446,7 @@ window.TRACKER = {
    "deps": [
     "P11-06"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },

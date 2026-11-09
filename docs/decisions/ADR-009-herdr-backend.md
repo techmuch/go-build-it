@@ -94,3 +94,15 @@ Run in an isolated session (`herdr --session gbispike server`), then deleted.
   - `workspace report-metadata --token` takes the same form.
 
 Result: the direction holds. No change to the decision.
+
+### Further findings while building P11 (2026-11-08)
+
+- **Session IDs from custom agents aren't kept.** herdr stores a session reference only from its official integrations (`src/agent_resume.rs`, `is_official_agent_source`). go-build-it therefore **chooses each conversation ID itself at launch**: Claude Code takes `--session-id <uuid>` for a new conversation and `--resume <uuid>` to continue it. herdr's `agent_session`, when present, is only a cross-check.
+- **Agent commands work only for agent kinds herdr detects.** `agent.prompt` and `agent.send_keys` require one of herdr's known kinds (`effective_known_agent`), so custom agents such as the fake member cannot use them. go-build-it uses one dispatch path for every harness:
+  1. Record the agent's `state_change_seq`.
+  2. Submit the prompt: `agent.prompt` for known kinds, or `pane.send_text` plus Enter for custom agents.
+  3. Poll `agent.get` until `state_change_seq` has advanced and the status is idle, done or blocked.
+
+  This is race-free, and a stall timeout covers prompts that never start.
+- **Status subscriptions are per pane.** `pane.agent_status_changed` must name a `pane_id`. The watcher subscribes for each member pane plus the global lifecycle events, and resubscribes whenever members change.
+- **Isolated herdr for tests.** herdr honours `XDG_CONFIG_HOME`, so tests and demos run an entirely separate herdr (`[herdr] config_home`) and never touch the user's sessions.

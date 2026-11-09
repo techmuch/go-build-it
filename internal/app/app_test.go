@@ -69,6 +69,7 @@ func setup(t *testing.T) *env {
 	}
 	cfg.DefaultUser = "owner"
 	cfg.Harnesses["fake"] = config.Harness{Enabled: true, Binary: gbiBin}
+	cfg.Herdr = config.Herdr{Binary: "herdr", Session: "gbi", ConfigHome: filepath.Join(home, "h")} // never the user's herdr
 	db, err := store.Open(filepath.Join(home, "test.db"))
 	if err != nil {
 		t.Fatal(err)
