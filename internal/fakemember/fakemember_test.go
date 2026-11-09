@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/techmuch/go-build-it/internal/herdr"
+	"github.com/techmuch/go-build-it/internal/sessions"
 )
 
 // The test binary doubles as the fake agent when GBI_RUN_FAKE_MEMBER=1.
@@ -29,7 +29,7 @@ func TestMain(m *testing.M) {
 func startInPane(t *testing.T, c *herdr.Client, pane, tx string) {
 	t.Helper()
 	exe, _ := os.Executable()
-	cmd := fmt.Sprintf("GBI_RUN_FAKE_MEMBER=1 GBI_FAKE_TRANSCRIPTS=%q %q --session-id fake-test1\n", tx, exe)
+	cmd := sessions.ShellCommand(map[string]string{"GBI_RUN_FAKE_MEMBER": "1", "GBI_FAKE_TRANSCRIPTS": tx}, exe, []string{"--session-id", "fake-test1"})
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	if err := c.Call(ctx, herdr.MethodPaneSendText, map[string]any{"pane_id": pane, "text": cmd}, nil); err != nil {
@@ -46,9 +46,6 @@ func startInPane(t *testing.T, c *herdr.Client, pane, tx string) {
 }
 
 func TestFakeMemberInHerdr(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("pane shell syntax differs on Windows (P15-04)")
-	}
 	dir, tx := t.TempDir(), t.TempDir() // before the session: cleanup stops herdr first
 	s := herdr.TestSession(t)
 	c := s.C

@@ -121,7 +121,7 @@ jobs:
           Expand-Archive "$dir\herdr.zip" -DestinationPath $dir -Force
           $env:PATH = "$dir;$env:PATH"
           herdr --version
-          go test ./internal/herdr/ -run 'TestLiveSession|TestWatcher' -v
+          go test ./internal/herdr/ ./internal/fakemember/ -v
       - run: go build -o "$env:RUNNER_TEMP\gbi.exe" ./cmd/gbi
       - name: install, check, uninstall the service
         shell: pwsh

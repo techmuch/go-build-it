@@ -1,5 +1,11 @@
 # herdr review log
 
+## 2026-11-09 · `ee5bfb5` (re-check by the weekly job)
+
+- No commits since the baseline touch the API, protocol or CLI docs.
+- The latest herdr (0.9.5) produces identical generated types.
+- Windows: CI shows the client, named-pipe transport, events and the watcher working on herdr's Windows beta. The only failure was test cleanup order (temp folders removed while a pane still used them), which is fixed in the tests.
+
 ## 2026-11-08 · `ee5bfb5` · 0.9.5 (baseline)
 
 This is the baseline review done for ADR-009. go-build-it depends on the following:

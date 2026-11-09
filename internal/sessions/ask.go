@@ -71,7 +71,7 @@ func (m *Manager) Ask(ctx context.Context, mem team.Member, prompt string) (stri
 		}
 	} else {
 		bin := firstNonEmpty(hc.Binary, m.GbiBin)
-		cmd := fmt.Sprintf("GBI_FAKE_TRANSCRIPTS=%s %s %s\n", shq(harness.FakeTranscriptDir()), shq(bin), strings.Join(shqAll(args), " "))
+		cmd := ShellCommand(map[string]string{"GBI_FAKE_TRANSCRIPTS": harness.FakeTranscriptDir()}, bin, args)
 		if err := h.Call(ctx, herdr.MethodPaneSendText, map[string]any{"pane_id": sp, "text": cmd}, nil); err != nil {
 			return "", err
 		}

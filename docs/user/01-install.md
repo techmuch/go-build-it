@@ -28,3 +28,11 @@ go-build-it starts and supervises its own herdr session, called `gbi`, and keeps
 - that herdr's integration for each harness is current; it can update an outdated one for you
 
 To see everything go-build-it is doing from a terminal, run `herdr --session gbi`.
+
+## Windows (beta)
+
+go-build-it supports Windows at the same level as herdr, whose Windows build is in beta (Q9, ADR-009).
+- **What CI checks:** go-build-it's Windows CI installs herdr and checks the client, the named-pipe connection, events and the fake member in herdr. Those herdr checks are informational and don't fail the build.
+- **Pane commands:** inside herdr panes, go-build-it types PowerShell commands.
+- **Missing features:** anything herdr does not yet support on Windows is shown as unavailable rather than worked around.
+- **Login service:** `gbi service install` creates a scheduled task that runs at logon.
