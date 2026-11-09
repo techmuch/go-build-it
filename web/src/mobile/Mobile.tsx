@@ -7,18 +7,19 @@ import { useSystem } from '../shell';
 import { Bar, Chip, DictArea, Empty, Loading, Markdown, Status, Viewer, ago, clock, day, kfmt, kindOf, useAction } from '../ui';
 import { attachmentsFor } from '../pages/Artifacts';
 import './mobile.css';
+import { clickable, useGlobalKeys } from '../keys';
 
 function Tabbar({ on }: { on: string }) {
   const { data: inbox } = useData<any[]>(() => api.inbox.list(), [], (e) => /^(question|review|rehearsal|options|value)\./.test(e.type));
   const n = inbox?.length || 0;
   const t: [string, string, string][] = [['projects', '▦', 'Projects'], ['inbox', '✉', 'Inbox'], ['sessions', '◉', 'Sessions'], ['more', '⋯', 'More']];
-  return <nav className="m-tabbar">{t.map(([k, i, l]) => <a key={k} className={on === k ? 'on' : ''} onClick={() => navigate(k === 'projects' ? '/m/' : '/m/' + k)}><b>{i}</b>{l}{k === 'inbox' && n > 0 && <span className="m-dot">{n}</span>}</a>)}</nav>;
+  return <nav className="m-tabbar">{t.map(([k, i, l]) => <button type="button" key={k} className={'lnk ' + (on === k ? 'on' : '')} onClick={() => navigate(k === 'projects' ? '/m/' : '/m/' + k)}><b>{i}</b>{l}{k === 'inbox' && n > 0 && <span className="m-dot">{n}</span>}</button>)}</nav>;
 }
 
 function Screen({ title, sub, back, tab, children, dark, foot }: { title: ReactNode; sub?: ReactNode; back?: string; tab?: string; children: ReactNode; dark?: boolean; foot?: ReactNode }) {
   const sys = useSystem();
   return <div className={'m-screen ' + (dark ? 'dark' : '')}>
-    <header className="m-hdr">{back ? <a className="m-sub" onClick={() => (back === 'back' ? history.back() : navigate(back))}>‹ Back</a> : <div className="m-sub">● {sys?.actor?.origin === 'tailscale' ? `Tailnet · ${sys.actor.login}` : `Local · ${sys?.actor?.name || ''}`}</div>}
+    <header className="m-hdr">{back ? <button type="button" className="lnk m-sub" onClick={() => (back === 'back' ? history.back() : navigate(back))}>‹ Back</button> : <div className="m-sub">● {sys?.actor?.origin === 'tailscale' ? `Tailnet · ${sys.actor.login}` : `Local · ${sys?.actor?.name || ''}`}</div>}
       <h1>{title}</h1>{sub && <div className="m-sub">{sub}</div>}</header>
     <main className="m-body">{children}</main>
     {foot}
@@ -33,7 +34,7 @@ function Home() {
     {!data ? <Loading /> : data.length === 0 ? <Empty>No projects yet. Import one on desktop.</Empty> : data.map((p) => {
       const un = p.live?.unpushed || {};
       const attn = p.needsYou > 0 || un.commits > 0;
-      return <div key={p.id} className={'m-card ' + (attn ? 'attn' : '')} onClick={() => navigate('/m/projects/' + p.id)}>
+      return <div key={p.id} className={'m-card ' + (attn ? 'attn' : '')} {...clickable(() => navigate('/m/projects/' + p.id), { role: 'link' })}>
         <div className="m-row"><b>{p.name}</b><Chip c="blue">{p.stage}</Chip></div>
         <div className="small muted">{p.purpose}</div>
         <div className="small" style={{ marginTop: 4 }}>{p.blocking > 0 && <Chip c="red">{p.blocking} blocking</Chip>} {p.needsYou - p.blocking > 0 && <Chip c="amb">{p.needsYou - p.blocking} waiting</Chip>} {un.commits > 0 && <Chip c="red">⚠ {un.commits} unpushed</Chip>}</div>
@@ -49,9 +50,9 @@ function ProjectStatus({ id }: { id: string }) {
   if (!data) return <Screen title={id} back="/m/" tab="projects"><Loading /></Screen>;
   const p = data.project;
   return <Screen title={p.name} sub={`${p.stage}${p.milestone ? ' · ' + p.milestone : ''}`} back="/m/" tab="projects">
-    {data.needsYou.length > 0 && <div className="m-card" style={{ borderColor: 'var(--red)' }}><h4>Needs you</h4>{data.needsYou.map((n: any) => <div key={n.kind + n.id} className="small" style={{ margin: '4px 0' }} onClick={() => navigate(mlink(n))}><Chip c={n.blocking ? 'red' : 'amb'}>{n.blocking ? 'Blocking' : n.kind}</Chip> {n.title} ›</div>)}</div>}
+    {data.needsYou.length > 0 && <div className="m-card" style={{ borderColor: 'var(--red)' }}><h4>Needs you</h4>{data.needsYou.map((n: any) => <div key={n.kind + n.id} className="small" style={{ margin: '4px 0' }} {...clickable(() => navigate(mlink(n)), { role: 'link' })}><Chip c={n.blocking ? 'red' : 'amb'}>{n.blocking ? 'Blocking' : n.kind}</Chip> {n.title} ›</div>)}</div>}
     <div className="m-card"><h4>Roadmap</h4>{data.milestones?.map((m: any) => <div key={m.id} className="small" style={{ margin: '4px 0' }}>{m.status === 'done' ? '✅' : m.status === 'active' ? '▶' : '○'} {m.name} {m.total ? `${m.done}/${m.total}` : ''}{m.gateName && <span className="muted"> · ◆ {m.gateName}</span>}{m.status === 'active' && <Bar pct={m.total ? (100 * m.done) / m.total : 0} />}</div>)}{!data.milestones?.length && <span className="muted small">No roadmap yet.</span>}</div>
-    <div className="m-card"><h4>Running</h4>{data.sessions.map((s: any) => <div key={s.id} className="small" onClick={() => navigate('/m/sessions/' + s.id)} style={{ margin: '4px 0' }}>{s.memberId} · {s.taskId} · {Math.round(s.fraction * 100)}%{s.compactions ? ` · compacted ${s.compactions}×` : ''}<Bar pct={s.fraction * 100} warn={70} /></div>)}{data.sessions.length === 0 && <span className="muted small">Nothing running.</span>}</div>
+    <div className="m-card"><h4>Running</h4>{data.sessions.map((s: any) => <div key={s.id} className="small" {...clickable(() => navigate('/m/sessions/' + s.id), { role: 'link' })} style={{ margin: '4px 0' }}>{s.memberId} · {s.taskId} · {Math.round(s.fraction * 100)}%{s.compactions ? ` · compacted ${s.compactions}×` : ''}<Bar pct={s.fraction * 100} warn={70} /></div>)}{data.sessions.length === 0 && <span className="muted small">Nothing running.</span>}</div>
     <div className="m-card"><h4>Release & links</h4><div className="small">{p.live?.release ? <><b>{p.live.release.tag}</b> · {day(p.live.release.date)}</> : 'No stable release yet'} {p.live?.repo?.ci && p.live.repo.ci !== 'none' && <>· CI <Status s={p.live.repo.ci === 'passing' ? 'done' : 'failed'} /></>}<br />
       {p.live?.repo?.releaseUrl && <a href={p.live.repo.releaseUrl}>Notes ↗ </a>}{p.websiteUrl && <a href={p.websiteUrl}>Website ↗ </a>}{p.live?.repo?.repoUrl && <a href={p.live.repo.repoUrl}>Repo ↗</a>}</div></div>
   </Screen>;
@@ -65,7 +66,7 @@ function mlink(n: any) {
 function Inbox() {
   const { data } = useData<any[]>(() => api.inbox.list(), [], (e) => /^(question|review|rehearsal|options|value)\./.test(e.type));
   const items = data || [];
-  const group = (label: string, xs: any[]) => xs.length > 0 && <><div className="m-label">{label}</div>{xs.map((n) => <div key={n.kind + n.id} className="m-li" onClick={() => navigate(mlink(n))}>
+  const group = (label: string, xs: any[]) => xs.length > 0 && <><div className="m-label">{label}</div>{xs.map((n) => <div key={n.kind + n.id} className="m-li" {...clickable(() => navigate(mlink(n)), { role: 'link' })}>
     <div><div className="small muted">{[n.projectId, n.from, ago(n.createdAt)].filter(Boolean).join(' · ')}</div><b>{n.title}</b>{n.detail && <div className="small muted">{n.detail.slice(0, 80)}</div>}</div><Chip c={n.blocking ? 'red' : n.kind === 'review' || n.kind === 'gate' ? 'amb' : 'blue'}>{n.kind === 'question' ? 'Q' : n.kind}</Chip></div>)}</>;
   return <Screen title="Inbox" sub={`${items.filter((i) => i.blocking).length} blocking · ${items.length} total`} tab="inbox">
     <div className="m-flush">{group('Blocking · work paused', items.filter((i) => i.blocking))}{group('Needs decision', items.filter((i) => !i.blocking && i.kind !== 'question'))}{group('Non-blocking · assumed', items.filter((i) => !i.blocking && i.kind === 'question'))}
@@ -87,11 +88,11 @@ function Answer({ id }: { id: string }) {
     <div className="small"><b>{q.asker}</b>{q.taskId && ` · ${q.taskId}`}{q.reqs?.length ? ` · ${q.reqs.join(', ')}` : ''}</div>
     {q.why && <div className="m-card small"><h4>Why it matters</h4>{q.why}</div>}
     {!q.blocking && <div className="m-card small">Assumed: <b>{q.assumption}</b></div>}
-    {q.options.map((o: any) => <div key={o.key} className={'m-opt ' + (choice === o.key ? 'sel' : '')} onClick={() => setChoice(o.key)}><b>{choice === o.key ? '◉' : '○'} {o.key}. {o.title}</b> {o.recommended && <Chip c="acc">Recommended</Chip>}{o.detail && <div className="small muted">{o.detail}</div>}</div>)}
-    {atts.length > 0 && <div className="small">📎 {atts.map((a, k) => <a key={k} onClick={() => setViewer(k)}>{a.name} › </a>)}</div>}
+    {q.options.map((o: any) => <div key={o.key} className={'m-opt ' + (choice === o.key ? 'sel' : '')} {...clickable(() => setChoice(o.key))}><b>{choice === o.key ? '◉' : '○'} {o.key}. {o.title}</b> {o.recommended && <Chip c="acc">Recommended</Chip>}{o.detail && <div className="small muted">{o.detail}</div>}</div>)}
+    {atts.length > 0 && <div className="small">📎 {atts.map((a, k) => <button type="button" className="lnk" key={k} onClick={() => setViewer(k)}>{a.name} › </button>)}</div>}
     <DictArea value={text} onChange={setText} placeholder="Add a note (optional) — tap 🎙 to dictate" />
     <button type="button" className="m-btn p" disabled={busy || (!choice && !text)} onClick={() => run(() => api.questions.answer(id, { answer: text, choice }), 'Answered').then((r) => r && navigate('/m/inbox'))}>{q.blocking ? 'Answer & resume work' : 'Answer'}</button>
-    {viewer !== null && <Viewer items={atts} index={viewer} onClose={() => setViewer(null)} title={q.id} />}
+    {viewer !== null && <Viewer items={atts} index={viewer} onClose={() => setViewer(null)} title={q.id} projectId={q.projectId} />}
   </Screen>;
 }
 
@@ -108,7 +109,7 @@ function ReviewScreen({ id }: { id: string }) {
   const items = pair ? [pair.mockup && { name: 'Mockup', kind: kindOf(pair.mockup), url: `/raw/${r.projectId}/${pair.mockup}` }, pair.built && { name: 'Built', kind: 'image', url: `/raw/${r.projectId}/${pair.built}` }].filter(Boolean) : [];
   const verdict = (v: string) => run(() => api.reviews.verdict(id, { verdict: v, comment: text }), 'Review submitted').then((x) => x && navigate('/m/inbox'));
   return <Screen title={`${r.taskId} ${r.taskTitle}`} sub={<>{r.projectId}{a.prUrl && <> · <a href={a.prUrl}>PR ↗</a></>} · Lens: {a.recommendation === 'changes' ? 'recommends changes' : 'ready'}</>} back="/m/inbox">
-    {items.length > 0 && <div className="m-row" style={{ gap: 6 }} onClick={() => setViewer(true)}>
+    {items.length > 0 && <div className="m-row" style={{ gap: 6 }} {...clickable(() => setViewer(true))}>
       <div className="m-shot">{pair?.mockup ? 'Mockup ⤢' : 'no mockup'}</div><div className="m-shot" style={{ background: 'var(--card)' }}>{pair?.built ? <img src={`/raw/${r.projectId}/${pair.built}`} alt="built" style={{ maxWidth: '100%', maxHeight: 90 }} /> : 'no screenshot'}</div></div>}
     {a.summary && <div className="small">{a.summary}</div>}
     <div className="m-card m-flush">
@@ -120,7 +121,7 @@ function ReviewScreen({ id }: { id: string }) {
     {r.status === 'pending' ? <><DictArea value={text} onChange={setText} placeholder="Comment (required to request changes)" />
       <div className="m-row" style={{ gap: 8 }}><button type="button" className="m-btn d" disabled={busy} onClick={() => verdict('reject')}>Reject</button><button type="button" className="m-btn" disabled={busy || !text} onClick={() => verdict('changes')}>Changes</button><button type="button" className="m-btn p" disabled={busy} onClick={() => verdict('approve')}>Approve</button></div></>
       : <div className="small muted">{r.reviewer} {r.status} {ago(r.decidedAt)}</div>}
-    {viewer && <Viewer items={items as any} index={0} onClose={() => setViewer(false)} title={r.id} />}
+    {viewer && <Viewer items={items as any} index={0} onClose={() => setViewer(false)} title={r.id} projectId={r.projectId} />}
   </Screen>;
 }
 
@@ -136,9 +137,9 @@ function RehearsalStep({ id }: { id: string }) {
   const screen = st.screen ? (st.screen.startsWith('http') ? st.screen : `/raw/${g.projectId}/${st.screen}`) : '';
   return <Screen title={`${g.current + 1} · ${st.title || ''}`} sub={<>{g.projectId} · {g.id} · Step {g.current + 1} / {g.steps.length}<Bar pct={(100 * (g.current + 1)) / g.steps.length} /></>} back="/m/inbox">
     <div className="small">{st.scenario}</div>
-    <div className="m-shot" style={{ height: 150 }} onClick={() => screen && setViewer(true)}>{screen ? 'Screen preview · tap for full size ⤢' : 'No screen for this step'}</div>
+    <div className="m-shot" style={{ height: 150 }} {...clickable(() => screen && setViewer(true))}>{screen ? 'Screen preview · tap for full size ⤢' : 'No screen for this step'}</div>
     <div className="small muted">Findings · {fs.length} from {g.reviewers.join(', ') || 'nobody yet'}</div>
-    {fs.map((f: any) => <div key={f.id} className="small"><b>{f.author}</b>: {f.text} {f.changeRequest ? <Chip c="acc">{f.changeRequest}</Chip> : <a onClick={() => run(() => api.findings.changeRequest(String(f.id), { now: true }), 'Running now')}>Do it now</a>}</div>)}
+    {fs.map((f: any) => <div key={f.id} className="small"><b>{f.author}</b>: {f.text} {f.changeRequest ? <Chip c="acc">{f.changeRequest}</Chip> : <button type="button" className="lnk" onClick={() => run(() => api.findings.changeRequest(String(f.id), { now: true }), 'Running now')}>Do it now</button>}</div>)}
     <DictArea value={text} onChange={setText} placeholder="Feedback on this step (🎙)" rows={2} />
     <div className="m-row" style={{ gap: 8 }}>
       <button type="button" className="m-btn" disabled={g.current === 0} onClick={() => run(() => api.rehearsals.advance(id, { step: g.current - 1 }))}>◀</button>
@@ -162,8 +163,8 @@ function OptionScreen({ id }: { id: string }) {
   const has = (a: string) => tray.some((t) => t.option === o.key && t.aspect === a);
   const tog = (a: string) => setTray(has(a) ? tray.filter((t) => !(t.option === o.key && t.aspect === a)) : [...tray, { option: o.key, aspect: a }]);
   return <Screen title={s.title} sub={`${s.projectId} · ${s.id} · option ${k + 1} of ${s.options.length}`} back="/m/inbox">
-    <div className="m-shot" style={{ height: 220 }} onClick={() => o.mockup && setViewer(true)}>{o.mockup ? <iframe title={o.title} src={`/raw/${s.projectId}/${o.mockup}`} sandbox="allow-scripts" style={{ width: '100%', height: '100%', border: 0, pointerEvents: 'none', background: '#fff' }} /> : 'No visual'}</div>
-    {o.mockup && <a className="small" onClick={() => setViewer(true)}>⤢ Full screen</a>}
+    <div className="m-shot" style={{ height: 220 }} {...clickable(() => o.mockup && setViewer(true))}>{o.mockup ? <iframe title={o.title} src={`/raw/${s.projectId}/${o.mockup}`} sandbox="allow-scripts" style={{ width: '100%', height: '100%', border: 0, pointerEvents: 'none', background: '#fff' }} /> : 'No visual'}</div>
+    {o.mockup && <button type="button" className="lnk small" onClick={() => setViewer(true)}>⤢ Full screen</button>}
     <b>{o.key} · {o.title}</b><div className="small">{o.summary}</div>
     <div className="small">{(o.pros || []).map((p: string) => <div key={p} style={{ color: 'var(--grn)' }}>+ {p}</div>)}{(o.cons || []).map((c: string) => <div key={c} style={{ color: 'var(--red)' }}>− {c}</div>)}</div>
     <div className="m-card small"><h4>Keep these aspects</h4><label><input type="checkbox" checked={has('')} onChange={() => tog('')} /> Whole option</label>{(o.aspects || []).map((a: string) => <div key={a}><label><input type="checkbox" checked={has(a)} onChange={() => tog(a)} /> {a}</label></div>)}</div>
@@ -180,7 +181,7 @@ function SessionsScreen() {
   const sys = useSystem();
   const { data } = useData<any[]>(() => api.sessions.list({ live: true }), [], (e) => e.type.startsWith('session'));
   return <Screen title="Sessions" sub={`${data?.length || 0} running · auto-compact${sys?.experimental?.smartHandoffs ? ' · handoffs exp.' : ''}`} tab="sessions">
-    {(data || []).map((s) => <div key={s.id} className="m-card" onClick={() => navigate('/m/sessions/' + s.id)}>
+    {(data || []).map((s) => <div key={s.id} className="m-card" {...clickable(() => navigate('/m/sessions/' + s.id), { role: 'link' })}>
       <div className="m-row"><b>{s.memberId} · {s.projectId}</b><Status s={s.status} /></div><div className="small muted">{s.taskId} · {s.harness}</div>
       <Bar pct={s.fraction * 100} warn={70} /><div className="small">{Math.round(s.fraction * 100)}%{s.measured ? '' : ' (est.)'}{s.compactions ? ` · compacted ${s.compactions}×` : ''}{s.resumeAt && s.status === 'rate_limited' ? ` · resumes ${clock(s.resumeAt)}` : ''}</div>
       <div className="m-row" style={{ gap: 6, marginTop: 6 }}><span className="m-btn sm">Structured</span><span className="m-btn sm">⌨ Terminal ›</span></div></div>)}
@@ -201,10 +202,10 @@ function Terminal({ sid }: { sid: string }) {
   useEffect(() => { box.current?.scrollTo(0, box.current.scrollHeight); }, [lines]);
   const key = (k: string) => setInput((v) => v + ({ Tab: '\t', Esc: '', '⏎': '' } as any)[k]);
   return <Screen title={`${s?.memberId || ''} · ${sid}`} sub={<div className="m-row" style={{ gap: 6 }}><span className="seg">{(['structured', 'terminal'] as const).map((v) => <button key={v} type="button" className={view === v ? 'on' : ''} onClick={() => setView(v)}>{v === 'terminal' ? 'Terminal' : 'Structured'}</button>)}</span>{s && <Chip c="acc">{s.live ? 'watching' : s.status}</Chip>}</div>} back="/m/sessions" dark
-    foot={<><div className="m-keys">{['Esc', 'Tab', 'Ctrl', '↑', '↓', '⏎'].map((k) => <span key={k} onClick={() => key(k)}>{k}</span>)}</div>
+    foot={<><div className="m-keys">{['Esc', 'Tab', 'Ctrl', '↑', '↓', '⏎'].map((k) => <span key={k} {...clickable(() => key(k))}>{k}</span>)}</div>
       <div className="m-termfoot">{s?.live ? <div className="m-row" style={{ gap: 6 }}><input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Send input to the agent" style={{ flex: 1 }} /><button type="button" className="m-btn p sm" onClick={() => run(() => api.sessions.send(sid, { text: input }), 'Sent').then((r) => r && setInput(''))}>Send</button></div>
         : <div className="small" style={{ color: '#6f8190', textAlign: 'center' }}>{s?.exitReason}</div>}
-        <div className="small" style={{ color: '#6f8190', textAlign: 'center', marginTop: 6 }}>{s?.attach ? <>Take control: <code>{s.attach}</code> · <a onClick={() => run(() => api.sessions.finish(sid), 'Finished')}>Finish</a></> : 'Attach & take control needs attachable sessions (experimental, FR-67)'}</div></div></>}>
+        <div className="small" style={{ color: '#6f8190', textAlign: 'center', marginTop: 6 }}>{s?.attach ? <>Take control: <code>{s.attach}</code> · <button type="button" className="lnk" onClick={() => run(() => api.sessions.finish(sid), 'Finished')}>Finish</button></> : 'Attach & take control needs attachable sessions (experimental, FR-67)'}</div></div></>}>
     <div ref={box} className="m-term">{lines.map((l) => <div key={l.seq} className={'k-' + l.kind}>{l.text}</div>)}{lines.length === 0 && <span style={{ color: '#6f8190' }}>No output yet.</span>}</div>
   </Screen>;
 }
@@ -220,7 +221,7 @@ function More() {
   return <Screen title="More" sub={`v${sys?.version || ''}`} tab="more">
     <div className="m-flush">
       {[['👥 Team & personas', '/team'], ['📐 Global standards', '/standards'], ['☰ Task queue', '/queue'], ['🕘 History & insights', '/history'], ['⚙ Settings', '/settings'], ['🖥 Desktop UI', '/']].map(([l, to]) => <a key={to} className="m-li" href={to}><span>{l}</span><span className="muted">›</span></a>)}
-      <div className="m-label">Docs</div>{(docs || []).map((d) => <div key={d.slug} className="m-li" onClick={() => setDoc(d.slug)}><span>📖 {d.title}</span><span className="muted">›</span></div>)}
+      <div className="m-label">Docs</div>{(docs || []).map((d) => <div key={d.slug} className="m-li" {...clickable(() => setDoc(d.slug))}><span>📖 {d.title}</span><span className="muted">›</span></div>)}
       <div className="m-label">Theme</div><div className="m-li"><span className="seg"><button type="button" onClick={() => setTheme('light')}>Light</button><button type="button" onClick={() => setTheme('dark')}>Dark</button></span></div>
       <div style={{ padding: 12 }} className="small muted">Access: {sys?.actor?.origin} ({sys?.actor?.login || sys?.actor?.name}). Personas, standards and artifacts can be changed by chatting with an agent on desktop; the rich editor is desktop-first. Add this page to your home screen to install it.</div>
     </div>
@@ -229,6 +230,7 @@ function More() {
 
 export function MobileApp() {
   const path = usePath();
+  useGlobalKeys();
   const routes: [string, (p: any) => JSX.Element][] = [
     ['/m', () => <Home />], ['/m/projects/:id', (p) => <ProjectStatus id={p.id} />], ['/m/inbox', () => <Inbox />], ['/m/q/:id', (p) => <Answer id={p.id} />],
     ['/m/review/:id', (p) => <ReviewScreen id={p.id} />], ['/m/rehearsal/:id', (p) => <RehearsalStep id={p.id} />], ['/m/options/:id', (p) => <OptionScreen id={p.id} />],

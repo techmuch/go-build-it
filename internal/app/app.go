@@ -16,6 +16,7 @@ import (
 	"github.com/techmuch/go-build-it/internal/gitx"
 	"github.com/techmuch/go-build-it/internal/history"
 	"github.com/techmuch/go-build-it/internal/options"
+	"github.com/techmuch/go-build-it/internal/pins"
 	"github.com/techmuch/go-build-it/internal/projects"
 	"github.com/techmuch/go-build-it/internal/proposals"
 	"github.com/techmuch/go-build-it/internal/questions"
@@ -49,6 +50,7 @@ type App struct {
 	Rehearsals *rehearsals.Service
 	Options    *options.Service
 	Proposals  *proposals.Service
+	Pins       *pins.Service
 	Agent      *agent.Caller
 	Updater    *update.Updater
 }
@@ -79,6 +81,7 @@ func Wire(cfg *config.Config, db *sql.DB, version string, log *slog.Logger) *App
 	a.Rehearsals = rehearsals.New(db, a.Hist, a.Queue, a.Projects)
 	a.Options = options.New(db, a.Hist)
 	a.Proposals = proposals.New(db, a.Hist)
+	a.Pins = pins.New(db, a.Hist)
 	a.Agent = agent.New(cfg, a.Team)
 	a.Updater = update.New(cfg.Updates.Repo, version)
 

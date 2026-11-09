@@ -22,6 +22,7 @@ import (
 	"github.com/techmuch/go-build-it/internal/history"
 	"github.com/techmuch/go-build-it/internal/metrics"
 	"github.com/techmuch/go-build-it/internal/options"
+	"github.com/techmuch/go-build-it/internal/pins"
 	"github.com/techmuch/go-build-it/internal/projects"
 	"github.com/techmuch/go-build-it/internal/questions"
 	"github.com/techmuch/go-build-it/internal/queue"
@@ -249,6 +250,17 @@ func (a *App) Routes() []api.Route {
 			return metrics.Compute(c.R.Context(), a.DB, c.Query("project"), atoi(c.Query("days"), 7))
 		}, f("project", ""), fi("days", "default 7")),
 		r("GET", "/api/metrics/compare", "metrics.compare", "metrics compare", "Smart handoffs vs compaction (graduation evidence)", func(c *api.Ctx) (any, error) { return metrics.Compare(c.R.Context(), a.DB, atoi(c.Query("days"), 30)) }, fi("days", "default 30")),
+		r("GET", "/api/pins", "pins.list", "pins list", "Comments pinned to spots on attachments and mockups", func(c *api.Ctx) (any, error) {
+			return a.Pins.List(c.R.Context(), c.Query("subject"), c.Query("item"))
+		}, f("subject", "what the viewer was opened for, e.g. Q-34"), f("item", "attachment URL or name (empty: all items)")),
+		r("POST", "/api/pins", "pins.add", "pins add", "Pin a comment to a spot on an attachment or mockup", a.pinAdd, f("subject", ""), f("item", ""), f("projectId", ""), fj("x", "percent of width"), fj("y", "percent of height"), f("text", "")),
+		r("DELETE", "/api/pins/{pid}", "pins.remove", "pins remove", "Remove a pinned comment", func(c *api.Ctx) (any, error) {
+			id, _ := strconv.ParseInt(c.Param("pid"), 10, 64)
+			if err := a.Pins.Remove(c.R.Context(), id); err != nil {
+				return nil, notFound(err)
+			}
+			return map[string]bool{"ok": true}, nil
+		}),
 		r("GET", "/api/proposals", "proposals.list", "proposals list", "Improvement proposals", func(c *api.Ctx) (any, error) { return a.Proposals.List(c.R.Context()) }),
 		r("POST", "/api/proposals", "proposals.create", "proposals create", "Propose an improvement (with evidence)", a.proposalCreate, f("title", ""), f("body", ""), f("evidence", "")),
 		r("POST", "/api/proposals/{pid}/decide", "proposals.decide", "proposals decide", "Accept or reject a proposal", a.proposalDecide, f("decision", "accepted|rejected"), f("note", "")),
@@ -679,6 +691,18 @@ func (a *App) projectRefresh(c *api.Ctx) (any, error) {
 		return nil, notFound(err)
 	}
 	return a.Projects.Refresh(c.R.Context(), p), nil
+}
+
+func (a *App) pinAdd(c *api.Ctx) (any, error) {
+	var p pins.Pin
+	if err := c.Bind(&p); err != nil {
+		return nil, err
+	}
+	out, err := a.Pins.Add(c.R.Context(), p)
+	if err != nil {
+		return nil, bad(err)
+	}
+	return out, nil
 }
 
 func (a *App) valueAdd(c *api.Ctx) (any, error) {

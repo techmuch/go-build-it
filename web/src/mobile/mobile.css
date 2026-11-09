@@ -3,10 +3,10 @@
 .m-screen { display: flex; flex-direction: column; min-height: 100vh; }
 .m-hdr { background: #17212b; color: #fff; padding: calc(10px + env(safe-area-inset-top)) 16px 12px; position: sticky; top: 0; z-index: 5; }
 .m-hdr h1 { margin: 2px 0 0; font-size: 20px; line-height: 1.25; }
-.m-sub { font-size: 12px; color: #a9b7c3; } a.m-sub { cursor: pointer; text-decoration: none; }
+.m-sub { font-size: 12px; color: #a9b7c3; } a.m-sub, button.m-sub { cursor: pointer; text-decoration: none; } button.lnk.m-sub { color: #a9b7c3; }
 .m-body { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 10px; padding-bottom: 80px; }
 .m-tabbar { position: sticky; bottom: 0; height: calc(64px + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); background: var(--card); border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(4, 1fr); font-size: 11px; color: var(--m); text-align: center; padding-top: 8px; z-index: 5; }
-.m-tabbar a { color: var(--m); cursor: pointer; text-decoration: none; position: relative; } .m-tabbar a b { display: block; font-size: 18px; font-weight: 400; } .m-tabbar a.on { color: var(--acc); font-weight: 600; }
+.m-tabbar a, .m-tabbar .lnk { color: var(--m); cursor: pointer; text-decoration: none; position: relative; text-align: center; } .m-tabbar a b, .m-tabbar .lnk b { display: block; font-size: 18px; font-weight: 400; } .m-tabbar a.on, .m-tabbar .lnk.on { color: var(--acc); font-weight: 600; }
 .m-dot { background: var(--red); color: #fff; border-radius: 999px; font-size: 10px; padding: 0 5px; margin-left: 2px; }
 .m-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
 .m-card.attn { border-left: 3px solid var(--red); }
