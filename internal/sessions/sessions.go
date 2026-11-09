@@ -513,6 +513,7 @@ func (m *Manager) consume(ctx context.Context, s Session, t queue.Task, act *act
 		cur.ContextNote = strings.TrimSpace(cur.ContextNote + "\n\nHandoff briefing from " + s.ID + ":\n" + s.Handoff)
 		_, _ = m.queue.Update(ctx, cur)
 		_, _ = m.queue.Bump(ctx, t.ID, "handoffs")
+		_ = m.write(ctx, s) // session first: readers never see a re-queued task with a running session
 		_, _ = m.queue.SetStatus(ctx, t.ID, queue.Queued, "handed off at "+fmt.Sprintf("%.0f%%", s.Fraction*100)+"; a fresh session continues from the briefing")
 		m.hist.Must(ctx, history.Event{ProjectID: s.ProjectID, Type: "handoff.written", Subject: s.ID, Summary: fmt.Sprintf("Handoff written for %s (%s)", t.ID, s.ID),
 			Why: "experimental smart handoffs; context reached the threshold", Data: history.Data(map[string]any{"task": t.ID, "briefing": s.Handoff, "usedBefore": s.Used, "missingSections": MissingHandoffSections(s.Handoff)})})
@@ -520,6 +521,7 @@ func (m *Manager) consume(ctx context.Context, s Session, t queue.Task, act *act
 		s.Status, s.ExitReason = "done", "stopped for a blocking question"
 	case waitErr != nil || resultErr:
 		s.Status, s.ExitReason = "failed", firstNonEmpty(resultText, errString(waitErr))
+		_ = m.write(ctx, s)
 		_, _ = m.queue.Fail(ctx, t.ID, "session failed: "+trunc(s.ExitReason, 200))
 		m.hist.Must(ctx, history.Event{ProjectID: s.ProjectID, Type: "session.failed", Subject: s.ID, Summary: fmt.Sprintf("%s failed (%s)", s.ID, t.ID), Why: trunc(s.ExitReason, 300)})
 	default:
@@ -532,10 +534,12 @@ func (m *Manager) consume(ctx context.Context, s Session, t queue.Task, act *act
 		if m.Hooks.Completed != nil {
 			if err := m.Hooks.Completed(ctx, s, cur); err != nil {
 				m.hist.Must(ctx, history.Event{ProjectID: s.ProjectID, Type: "courier.error", Subject: t.ID, Summary: "Courier could not finish " + t.ID, Why: err.Error()})
+				_ = m.write(ctx, s)
 				_, _ = m.queue.SetStatus(ctx, t.ID, queue.Failed, "courier: "+err.Error())
 				break
 			}
 		}
+		_ = m.write(ctx, s) // session first: readers never see a task in review with a running session
 		if cur2, _ := m.queue.Get(ctx, t.ID); cur2.Status == queue.Running {
 			_, _ = m.queue.SetStatus(ctx, t.ID, queue.Review, "session completed: "+trunc(resultText, 160))
 		}
