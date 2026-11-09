@@ -121,6 +121,7 @@ func TestProgressFromHistory(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() { db.Close() }) // Windows cannot remove an open database file
 	ctx := access.WithActor(context.Background(), access.Actor{Name: "david", Kind: "human", Origin: access.Local})
 	h := history.New(db)
 	ls, err := Parse(fstest.MapFS{"04-w.md": {Data: []byte(`title: W
