@@ -32,6 +32,7 @@ func TestGeneratedTypesMatchSchema(t *testing.T) {
 }
 
 func TestLiveSession(t *testing.T) {
+	dir := t.TempDir() // before the session, so cleanup stops herdr before removing it (Windows)
 	s := TestSession(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
@@ -50,7 +51,6 @@ func TestLiveSession(t *testing.T) {
 	if miss, err := c.MissingMethods(ctx); err != nil || len(miss) > 0 {
 		t.Fatalf("installed herdr lacks %v (%v)", miss, err)
 	}
-	dir := t.TempDir()
 	cr, err := c.CreateWorkspace(ctx, dir, "demo")
 	if err != nil {
 		t.Fatal(err)
@@ -100,11 +100,12 @@ func TestLiveSession(t *testing.T) {
 }
 
 func TestWatcher(t *testing.T) {
+	dir := t.TempDir()
 	s := TestSession(t)
 	c := s.C
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-	cr, err := c.CreateWorkspace(ctx, t.TempDir(), "w")
+	cr, err := c.CreateWorkspace(ctx, dir, "w")
 	if err != nil {
 		t.Fatal(err)
 	}

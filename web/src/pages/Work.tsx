@@ -221,6 +221,7 @@ function TaskDialog({ project, projects, onClose }: { project: string; projects:
   const [t, setT] = useState<any>({ project: project || projects[0]?.id || '', title: '', description: '', role: 'developer', priority: 2, deps: '', reqs: '', milestone: '' });
   const { data: roles } = useData<any[]>(() => api.roles.list(), []);
   const { data: ms } = useData<any[]>(() => (t.project ? api.milestones.list(t.project) : Promise.resolve([])), [t.project]);
+  const { data: members } = useData<any[]>(() => (t.project ? api.members.list(t.project) : Promise.resolve([])), [t.project]);
   const { run, busy } = useAction();
   const split = (s: string) => s.split(',').map((x) => x.trim()).filter(Boolean);
   const dlg = useRef<HTMLDivElement>(null);
@@ -230,6 +231,7 @@ function TaskDialog({ project, projects, onClose }: { project: string; projects:
       <h2 style={{ fontSize: 16 }}>Queue a task</h2>
       <div className="row"><div className="form-row grow"><label>Project</label><select value={t.project} onChange={(e) => setT({ ...t, project: e.target.value })}>{projects.map((p) => <option key={p.id}>{p.id}</option>)}</select></div>
         <div className="form-row"><label>Role</label><select value={t.role} onChange={(e) => setT({ ...t, role: e.target.value })}>{(roles || []).map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}</select></div>
+        <div className="form-row"><label>Assign to</label><select value={t.assignee || ''} onChange={(e) => setT({ ...t, assignee: e.target.value })}><option value="">any free {t.role} member</option>{(members || []).filter((m) => m.kind === 'ai' && m.role === t.role).map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}</select></div>
         <div className="form-row"><label>Priority</label><select value={t.priority} onChange={(e) => setT({ ...t, priority: +e.target.value })}>{[1, 2, 3].map((p) => <option key={p} value={p}>P{p}</option>)}</select></div></div>
       <div className="form-row"><label>Title</label><input autoFocus value={t.title} onChange={(e) => setT({ ...t, title: e.target.value })} /></div>
       <div className="form-row"><label>Description and definition of done</label><DictArea value={t.description} onChange={(v) => setT({ ...t, description: v })} rows={4} /></div>

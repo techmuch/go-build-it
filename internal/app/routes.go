@@ -79,7 +79,7 @@ func (a *App) Routes() []api.Route {
 		r("GET", "/api/projects", "projects.list", "projects list", "Catalog: every project with card data", a.projectList, fb("refresh", "refresh git/forge data")),
 		r("POST", "/api/projects", "projects.import", "projects import", "Import an existing git repository", a.projectImport, f("path", "repository path"), f("id", "project id"), f("purpose", "one-line purpose"), f("stage", "lifecycle stage")),
 		r("GET", "/api/projects/{id}", "projects.get", "projects get", "Project overview", a.projectGet),
-		r("PATCH", "/api/projects/{id}", "projects.update", "projects update", "Change name, purpose, stage, website or team", a.projectUpdate, f("name", ""), f("purpose", ""), f("stage", ""), f("websiteUrl", ""), f("teamId", "")),
+		r("PATCH", "/api/projects/{id}", "projects.update", "projects update", "Change name, purpose, stage or website", a.projectUpdate, f("name", ""), f("purpose", ""), f("stage", ""), f("websiteUrl", "")),
 		r("DELETE", "/api/projects/{id}", "projects.remove", "projects remove", "Unregister a project (files untouched)", func(c *api.Ctx) (any, error) {
 			return map[string]bool{"ok": true}, a.Projects.Remove(c.R.Context(), c.Param("id"))
 		}),
@@ -110,20 +110,30 @@ func (a *App) Routes() []api.Route {
 
 	// Team & standards -----------------------------------------------------
 	add(
-		r("GET", "/api/teams", "teams.list", "teams list", "Teams", func(c *api.Ctx) (any, error) { return a.Team.Teams(c.R.Context()) }),
-		r("POST", "/api/teams", "teams.save", "teams save", "Create or rename a team", a.teamSave, f("id", ""), f("name", "")),
-		r("DELETE", "/api/teams/{tid}", "teams.remove", "teams remove", "Remove a team", func(c *api.Ctx) (any, error) {
-			return map[string]bool{"ok": true}, a.Team.RemoveTeam(c.R.Context(), c.Param("tid"))
-		}),
 		r("GET", "/api/roles", "roles.list", "roles list", "Roles", func(c *api.Ctx) (any, error) { return a.Team.Roles(c.R.Context()) }),
 		r("POST", "/api/roles", "roles.add", "roles add", "Define a custom role", a.roleAdd, f("id", ""), f("name", ""), f("description", "")),
-		r("GET", "/api/members", "members.list", "members list", "Team members", func(c *api.Ctx) (any, error) { return a.Team.Members(c.R.Context(), c.Query("team")) }, f("team", "team id")),
-		r("GET", "/api/members/{mid}", "members.get", "members get", "A member with its persona definition", a.memberGet),
-		r("POST", "/api/members", "members.save", "members save", "Add or update a persona or human", a.memberSave, f("id", ""), f("name", ""), f("kind", "ai|human"), f("role", ""), f("teamId", ""), f("harness", ""), f("model", ""), f("instructions", ""), f("login", ""), fj("standards", "list")),
+		r("GET", "/api/archetypes", "archetypes.list", "archetypes list", "Global persona archetypes (FR-12)", func(c *api.Ctx) (any, error) { return a.Team.Archetypes(c.R.Context()) }),
+		r("GET", "/api/archetypes/{aid}", "archetypes.get", "archetypes get", "An archetype with its definition and pending member changes", a.archetypeGet),
+		r("POST", "/api/archetypes", "archetypes.save", "archetypes save", "Create an archetype or save a new revision", a.archetypeSave, f("id", ""), f("name", ""), f("role", ""), f("harness", ""), f("model", ""), f("instructions", ""), fj("standards", "list")),
+		r("DELETE", "/api/archetypes/{aid}", "archetypes.remove", "archetypes remove", "Remove an unused archetype", func(c *api.Ctx) (any, error) {
+			if err := a.Team.RemoveArchetype(c.R.Context(), c.Param("aid")); err != nil {
+				return nil, bad(err)
+			}
+			return map[string]bool{"ok": true}, nil
+		}),
+		r("GET", "/api/archetypes/{aid}/changes", "archetypes.changes", "archetypes changes", "Members behind the archetype's latest revision (FR-12b)", func(c *api.Ctx) (any, error) { return a.Team.Changes(c.R.Context(), c.Param("aid")) }),
+		r("POST", "/api/archetypes/{aid}/apply", "archetypes.apply", "archetypes apply", "Apply the latest revision to one member, or to every member without overrides", a.archetypeApply, f("member", "member id (omit with --all)"), fb("all", "every member that has not overridden the changed fields")),
+		r("POST", "/api/members/{mid}/promote", "members.promote", "members promote", "Promote tuning text into the member's archetype (FR-12c)", a.memberPromote, f("text", "tuning lines to promote")),
+		r("GET", "/api/projects/{id}/members", "members.list", "members list", "A project's team (FR-11)", func(c *api.Ctx) (any, error) { return a.Team.Members(c.R.Context(), c.Param("id")) }),
+		r("POST", "/api/projects/{id}/members", "members.add", "members add", "Add an AI member from an archetype, or a human with a role", a.memberAdd, f("archetype", "archetype id (AI member)"), f("name", "display name"), f("kind", "ai|human"), f("login", "human: Tailscale login"), f("role", "human: role")),
+		r("POST", "/api/projects/{id}/members/starter", "members.starter", "members starter", "Give a project with no AI members the starter team", func(c *api.Ctx) (any, error) { return a.Team.EnsureStarterTeam(c.R.Context(), c.Param("id")) }),
+		r("GET", "/api/members", "members.all", "members all", "Every member across projects", func(c *api.Ctx) (any, error) { return a.Team.Members(c.R.Context(), "") }),
+		r("GET", "/api/members/{mid}", "members.get", "members get", "A member with its effective definition and archetype", a.memberGet),
+		r("PATCH", "/api/members/{mid}", "members.tune", "members tune", "Tune a member for its project", a.memberTune, f("name", ""), f("role", ""), f("tuning", "project-specific instructions"), fb("replaceInstructions", "use tuning instead of the archetype instructions"), f("harness", "override; empty clears"), f("model", "override; empty clears"), fj("standards", "extra standards"), f("login", "")),
 		r("DELETE", "/api/members/{mid}", "members.remove", "members remove", "Remove a member", func(c *api.Ctx) (any, error) {
 			return map[string]bool{"ok": true}, a.Team.Remove(c.R.Context(), c.Param("mid"))
 		}),
-		r("POST", "/api/members/{mid}/chat", "members.chat", "members chat", "Persona coach: develop a persona with an agent", a.memberChat, f("coach", "persona doing the coaching"), f("message", ""), f("content", "current definition"), fj("history", "")),
+		r("POST", "/api/members/{mid}/chat", "members.chat", "members chat", "Persona coach: develop a member's tuning or an archetype with an agent", a.memberChat, f("coach", "persona doing the coaching"), f("message", ""), f("content", "current definition"), fj("history", "")),
 		r("GET", "/api/standards", "standards.list", "standards list", "Global standards", func(c *api.Ctx) (any, error) { return a.Standards.List(c.R.Context()) }),
 		r("GET", "/api/standards/{sid}", "standards.get", "standards get", "One standard", func(c *api.Ctx) (any, error) {
 			s, err := a.Standards.Get(c.R.Context(), c.Param("sid"))
@@ -550,6 +560,7 @@ type Card struct {
 	StatusLine  string        `json:"statusLine"`
 	Milestone   string        `json:"milestone"`
 	TeamMembers []string      `json:"teamMembers"`
+	Team        []CardMember  `json:"team"`
 }
 
 func (a *App) card(ctx context.Context, p projects.Project, refresh bool) Card {
@@ -583,13 +594,22 @@ func (a *App) card(ctx context.Context, p projects.Project, refresh bool) Card {
 		}
 	}
 	c.StatusLine = statusLine(c)
-	if p.TeamID != "" {
-		mem, _ := a.Team.Members(ctx, p.TeamID)
-		for _, m := range mem {
-			c.TeamMembers = append(c.TeamMembers, m.Name)
-		}
+	mem, _ := a.Team.Members(ctx, p.ID)
+	for _, m := range mem {
+		c.TeamMembers = append(c.TeamMembers, m.Name)
+		c.Team = append(c.Team, CardMember{ID: m.ID, Name: m.Name, Role: m.Role, Kind: m.Kind, Tuned: m.Tuned()})
 	}
 	return c
+}
+
+// CardMember is a team member as shown on a project card (FR-41, FR-12a).
+type CardMember struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Role  string `json:"role"`
+	Kind  string `json:"kind"`
+	Tuned bool   `json:"tuned"`
+	State string `json:"state,omitempty"` // herdr state when the member runs (P13)
 }
 
 func statusLine(c Card) string {
@@ -641,6 +661,9 @@ func (a *App) projectImport(c *api.Ctx) (any, error) {
 	if err != nil {
 		return nil, bad(err)
 	}
+	if _, err := a.Team.EnsureStarterTeam(c.R.Context(), p.ID); err != nil {
+		a.Log.Warn("could not create the starter team", "project", p.ID, "err", err)
+	}
 	return p, nil
 }
 
@@ -676,11 +699,11 @@ func (a *App) projectGet(c *api.Ctx) (any, error) {
 }
 
 func (a *App) projectUpdate(c *api.Ctx) (any, error) {
-	var b struct{ Name, Purpose, Stage, WebsiteURL, TeamID string }
+	var b struct{ Name, Purpose, Stage, WebsiteURL string }
 	if err := c.Bind(&b); err != nil {
 		return nil, err
 	}
-	p, err := a.Projects.Update(c.R.Context(), c.Param("id"), b.Name, b.Purpose, b.Stage, b.WebsiteURL, b.TeamID)
+	p, err := a.Projects.Update(c.R.Context(), c.Param("id"), b.Name, b.Purpose, b.Stage, b.WebsiteURL, "")
 	if errors.Is(err, projects.ErrNotFound) {
 		return nil, notFound(err)
 	}
@@ -1006,10 +1029,22 @@ type chatReq struct {
 	History                         []string
 }
 
-func (a *App) defaultPersona(ctx context.Context, roles ...string) string {
+// defaultPersona picks a member of the project holding one of roles, else that role's archetype.
+func (a *App) defaultPersona(ctx context.Context, projectID string, roles ...string) string {
 	for _, role := range roles {
-		if ms, _ := a.Team.ByRole(ctx, role, ""); len(ms) > 0 {
-			return ms[0].ID
+		if projectID != "" {
+			if ms, _ := a.Team.ByRole(ctx, role, projectID); len(ms) > 0 {
+				return ms[0].ID
+			}
+		}
+	}
+	for _, role := range roles {
+		if as, _ := a.Team.Archetypes(ctx); len(as) > 0 {
+			for _, ar := range as {
+				if ar.Role == role && ar.Harness != "courier" {
+					return ar.ID
+				}
+			}
 		}
 	}
 	return ""
@@ -1017,7 +1052,11 @@ func (a *App) defaultPersona(ctx context.Context, roles ...string) string {
 
 func (a *App) chatEdit(ctx context.Context, persona, kind, path, content, message string, hist []string, roles ...string) (any, error) {
 	if persona == "" {
-		persona = a.defaultPersona(ctx, roles...)
+		project := ""
+		if kind == "project artifact" {
+			project = strings.SplitN(path, "/", 2)[0]
+		}
+		persona = a.defaultPersona(ctx, project, roles...)
 	}
 	if persona == "" {
 		return nil, api.BadRequest("add an AI persona to the team first")
@@ -1080,18 +1119,6 @@ func (a *App) release(c *api.Ctx) (any, error) {
 
 // Team handlers ------------------------------------------------------------
 
-func (a *App) teamSave(c *api.Ctx) (any, error) {
-	var b struct{ ID, Name string }
-	if err := c.Bind(&b); err != nil {
-		return nil, err
-	}
-	t, err := a.Team.SaveTeam(c.R.Context(), b.ID, b.Name)
-	if err != nil {
-		return nil, bad(err)
-	}
-	return t, nil
-}
-
 func (a *App) roleAdd(c *api.Ctx) (any, error) {
 	var b struct{ ID, Name, Description string }
 	if err := c.Bind(&b); err != nil {
@@ -1105,30 +1132,122 @@ func (a *App) roleAdd(c *api.Ctx) (any, error) {
 }
 
 func (a *App) memberGet(c *api.Ctx) (any, error) {
-	m, err := a.Team.Member(c.R.Context(), c.Param("mid"))
+	ctx := c.R.Context()
+	m, err := a.Team.Member(ctx, c.Param("mid"))
 	if err != nil {
 		return nil, notFound(err)
 	}
-	live, _ := a.Sessions.List(c.R.Context(), "", "", true)
+	live, _ := a.Sessions.List(ctx, "", "", true)
 	busy := 0
 	for _, s := range live {
 		if s.MemberID == m.ID {
 			busy++
 		}
 	}
-	return map[string]any{"member": m, "persona": team.Persona(m), "liveSessions": busy}, nil
+	out := map[string]any{"member": m, "persona": team.Persona(m), "liveSessions": busy, "tuned": m.Tuned()}
+	if m.ArchetypeID != "" {
+		base, _ := a.Team.ArchetypeAt(ctx, m.ArchetypeID, m.ArchetypeRev)
+		out["archetype"] = base
+		if m.ArchetypeLatest > m.ArchetypeRev {
+			latest, _ := a.Team.Archetype(ctx, m.ArchetypeID)
+			out["latest"] = latest
+		}
+	}
+	return out, nil
 }
 
-func (a *App) memberSave(c *api.Ctx) (any, error) {
-	var m team.Member
-	if err := c.Bind(&m); err != nil {
+func (a *App) memberAdd(c *api.Ctx) (any, error) {
+	var b struct{ Archetype, Name, Kind, Login, Role string }
+	if err := c.Bind(&b); err != nil {
 		return nil, err
 	}
-	out, err := a.Team.Save(c.R.Context(), m)
+	var m team.Member
+	var err error
+	if b.Kind == "human" {
+		m, err = a.Team.AddHuman(c.R.Context(), c.Param("id"), b.Name, b.Login, b.Role)
+	} else {
+		m, err = a.Team.AddFromArchetype(c.R.Context(), c.Param("id"), b.Archetype, b.Name)
+	}
 	if err != nil {
 		return nil, bad(err)
 	}
-	return out, nil
+	return m, nil
+}
+
+func (a *App) memberTune(c *api.Ctx) (any, error) {
+	var t team.Tuning
+	if err := c.Bind(&t); err != nil {
+		return nil, err
+	}
+	m, err := a.Team.Tune(c.R.Context(), c.Param("mid"), t)
+	if err != nil {
+		return nil, bad(err)
+	}
+	return m, nil
+}
+
+func (a *App) memberPromote(c *api.Ctx) (any, error) {
+	var b struct{ Text string }
+	if err := c.Bind(&b); err != nil {
+		return nil, err
+	}
+	ar, m, err := a.Team.Promote(c.R.Context(), c.Param("mid"), b.Text)
+	if err != nil {
+		return nil, bad(err)
+	}
+	return map[string]any{"archetype": ar, "member": m}, nil
+}
+
+func (a *App) archetypeGet(c *api.Ctx) (any, error) {
+	ar, err := a.Team.Archetype(c.R.Context(), c.Param("aid"))
+	if err != nil {
+		return nil, notFound(err)
+	}
+	ch, _ := a.Team.Changes(c.R.Context(), ar.ID)
+	ms, _ := a.Team.Members(c.R.Context(), "")
+	var used []team.Member
+	for _, m := range ms {
+		if m.ArchetypeID == ar.ID {
+			used = append(used, m)
+		}
+	}
+	return map[string]any{"archetype": ar, "changes": ch, "members": used,
+		"persona": team.Persona(team.Member{Name: ar.Name, Role: ar.Role, Instructions: ar.Instructions, Standards: ar.Standards})}, nil
+}
+
+func (a *App) archetypeSave(c *api.Ctx) (any, error) {
+	var ar team.Archetype
+	if err := c.Bind(&ar); err != nil {
+		return nil, err
+	}
+	out, err := a.Team.SaveArchetype(c.R.Context(), ar)
+	if err != nil {
+		return nil, bad(err)
+	}
+	ch, _ := a.Team.Changes(c.R.Context(), out.ID)
+	return map[string]any{"archetype": out, "changes": ch}, nil
+}
+
+func (a *App) archetypeApply(c *api.Ctx) (any, error) {
+	var b struct {
+		Member string
+		All    bool
+	}
+	if err := c.Bind(&b); err != nil {
+		return nil, err
+	}
+	if b.All {
+		ms, err := a.Team.ApplyClean(c.R.Context(), c.Param("aid"))
+		if err != nil {
+			return nil, bad(err)
+		}
+		return map[string]any{"applied": ms}, nil
+	}
+	m, err := a.Team.Apply(c.R.Context(), b.Member)
+	if err != nil {
+		return nil, bad(err)
+	}
+	return map[string]any{"applied": []team.Member{m}}, nil
 }
 
 func (a *App) memberChat(c *api.Ctx) (any, error) {
@@ -1144,7 +1263,11 @@ func (a *App) memberChat(c *api.Ctx) (any, error) {
 	if content == "" {
 		content = team.Persona(m)
 	}
-	return a.chatEdit(c.R.Context(), b.Coach, "persona definition", "personas/"+m.ID+".md", content, b.Message, b.History, "architect", "pm")
+	path := "archetypes/" + m.ID + ".md"
+	if m.ProjectID != "" {
+		path = m.ProjectID + "/team/" + m.ID + ".md"
+	}
+	return a.chatEdit(c.R.Context(), b.Coach, "persona definition", path, content, b.Message, b.History, "architect", "pm")
 }
 
 func (a *App) standardSave(c *api.Ctx) (any, error) {

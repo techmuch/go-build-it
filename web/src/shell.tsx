@@ -24,7 +24,7 @@ function Identity() {
 }
 
 const NAV: [string, string, string?][] = [['Projects', '/'], ['Questions', '/questions', 'q'], ['Sessions', '/sessions', 's'], ['Queue', '/queue'], ['Reviews', '/reviews', 'r'], ['Options', '/options', 'o'], ['Rehearsals', '/rehearsals', 'g']];
-const ORG: [string, string][] = [['Team', '/team'], ['Standards', '/standards'], ['History', '/history']];
+const ORG: [string, string][] = [['Archetypes', '/archetypes'], ['Standards', '/standards'], ['History', '/history']];
 const SYS: [string, string][] = [['Settings', '/settings'], ['Docs', '/docs']];
 
 export function Shell({ title, crumb, right, tabs, children, noPad }: { title: ReactNode; crumb?: ReactNode; right?: ReactNode; tabs?: ReactNode; children: ReactNode; noPad?: boolean }) {
@@ -60,7 +60,7 @@ export function Shell({ title, crumb, right, tabs, children, noPad }: { title: R
     <div className="main" id="main" tabIndex={-1}>
       <div className="topbar"><h1>{crumb && <span className="crumb">{crumb} / </span>}{title}</h1>{right}
         <button type="button" className="search" onClick={() => setPal(true)} aria-keyshortcuts="Meta+K /">Search, run a command…  ⌘K</button>
-        <button type="button" className="lnk small" onClick={() => setHelp(true)} title="Keyboard shortcuts (?)" aria-keyshortcuts="?">⌨ <kbd>?</kbd></button><Identity /></div>
+        <button type="button" className="lnk small" onClick={() => setHelp(true)} title="Keyboard shortcuts (?)" aria-keyshortcuts="?">Keys <kbd>?</kbd></button><Identity /></div>
       {tabs}
       {noPad ? children : <div className="content">{children}</div>}
     </div>
@@ -70,7 +70,7 @@ export function Shell({ title, crumb, right, tabs, children, noPad }: { title: R
 }
 
 export function ProjectTabs({ id, on }: { id: string; on: string }) {
-  const t: [string, string][] = [['overview', 'Overview'], ['artifacts', 'Artifacts'], ['queue', 'Queue'], ['sessions', 'Sessions'], ['releases', 'Releases'], ['history', 'History'], ['settings', 'Settings']];
+  const t: [string, string][] = [['overview', 'Overview'], ['artifacts', 'Artifacts'], ['team', 'Team'], ['queue', 'Queue'], ['sessions', 'Sessions'], ['releases', 'Releases'], ['history', 'History'], ['settings', 'Settings']];
   return <nav className="tabs">{t.map(([k, l]) => <A key={k} to={k === 'overview' ? `/projects/${id}` : `/projects/${id}/${k}`} className={on === k ? 'on' : ''}>{l}</A>)}</nav>;
 }
 

@@ -1,6 +1,6 @@
 # go-build-it — Phased delivery plan
 
-Status: Draft · 2026-11-08 · Based on [requirements rev 3](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
+Status: Draft · 2026-11-09 · Based on [requirements rev 3](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
 
 ## 1. How this plan is built
 
@@ -320,15 +320,15 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 
 | Task | Size | Requirements | Approach A views | Depends on |
 |---|---|---|---|---|
-| **P12-01** Schema: archetypes and project_members replace global teams and personas | M | FR-11, FR-12, FR-12d, FR-12e | — | P10-03 |
-| **P12-02** Starter archetype per built-in role | S | FR-12, FR-25 | — | P12-01 |
-| **P12-03** API, CLI and MCP: archetypes, project members (add, tune, remove), human roles per project | M | FR-30, FR-12a, FR-12e | — | P12-01 |
-| **P12-04** Archetype change review: affected members, per-member apply keeping tuning · waits on Q10 | M | FR-12b | A-v10 | P12-03, P10-06 |
-| **P12-05** Promote member tuning to its archetype through the artifact editor | S | FR-12c, FR-13 | A-v03b | P12-03 |
-| **P12-06** Archetypes library and project Team tab with member detail and tuning | L | FR-13, FR-12a, FR-10 | A-v10, A-v10b | P12-03, P10-07 |
-| **P12-07** Per-member instruction file generated in the member's worktree | S | FR-53 | — | P12-01 |
-| **P12-08** Queue assignment to a role or a specific member; dispatcher picks a free member | M | FR-81 | A-v06 | P12-01 |
-| **P12-09** Catalog card and overview show the project team and each member's herdr state | S | FR-41 | A-v01, A-v02, A-M2 | P12-06, P11-05 |
+| **P12-01** Schema: archetypes and project_members replace global teams and personas ✅ | M | FR-11, FR-12, FR-12d, FR-12e | — | P10-03 |
+| **P12-02** Starter archetype per built-in role ✅ | S | FR-12, FR-25 | — | P12-01 |
+| **P12-03** API, CLI and MCP: archetypes, project members (add, tune, remove), human roles per project ✅ | M | FR-30, FR-12a, FR-12e | — | P12-01 |
+| **P12-04** Archetype change review: affected members, per-member apply keeping tuning ✅ · waits on Q10 | M | FR-12b | A-v10 | P12-03, P10-06 |
+| **P12-05** Promote member tuning to its archetype through the artifact editor ✅ | S | FR-12c, FR-13 | A-v03b | P12-03 |
+| **P12-06** Archetypes library and project Team tab with member detail and tuning ✅ | L | FR-13, FR-12a, FR-10 | A-v10, A-v10b | P12-03, P10-07 |
+| **P12-07** Per-member instruction file generated in the member's worktree ✅ | S | FR-53 | — | P12-01 |
+| **P12-08** Queue assignment to a role or a specific member; dispatcher picks a free member ✅ | M | FR-81 | A-v06 | P12-01 |
+| **P12-09** Catalog card and overview show the project team and each member's herdr state ✅ | S | FR-41 | A-v01, A-v02, A-M2 | P12-06, P11-05 |
 
 ### P13 · Team members on herdr
 

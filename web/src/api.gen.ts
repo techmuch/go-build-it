@@ -2,6 +2,20 @@
 import { call } from './http';
 
 export const api = {
+  archetypes: {
+    /** Apply the latest revision to one member, or to every member without overrides */
+    apply: (aid: string, body?: unknown) => call<any>('POST', `/api/archetypes/${encodeURIComponent(aid)}/apply`, body),
+    /** Members behind the archetype's latest revision (FR-12b) */
+    changes: (aid: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/archetypes/${encodeURIComponent(aid)}/changes`, undefined, query),
+    /** An archetype with its definition and pending member changes */
+    get: (aid: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/archetypes/${encodeURIComponent(aid)}`, undefined, query),
+    /** Global persona archetypes (FR-12) */
+    list: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/archetypes`, undefined, query),
+    /** Remove an unused archetype */
+    remove: (aid: string, body?: unknown) => call<any>('DELETE', `/api/archetypes/${encodeURIComponent(aid)}`, body),
+    /** Create an archetype or save a new revision */
+    save: (body?: unknown) => call<any>('POST', `/api/archetypes`, body),
+  },
   artifacts: {
     /** Ask a persona to change an artifact */
     chat: (id: string, body?: unknown) => call<any>('POST', `/api/projects/${encodeURIComponent(id)}/chat/artifact`, body),
@@ -77,16 +91,24 @@ export const api = {
     list: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/inbox`, undefined, query),
   },
   members: {
-    /** Persona coach: develop a persona with an agent */
+    /** Add an AI member from an archetype, or a human with a role */
+    add: (id: string, body?: unknown) => call<any>('POST', `/api/projects/${encodeURIComponent(id)}/members`, body),
+    /** Every member across projects */
+    all: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/members`, undefined, query),
+    /** Persona coach: develop a member's tuning or an archetype with an agent */
     chat: (mid: string, body?: unknown) => call<any>('POST', `/api/members/${encodeURIComponent(mid)}/chat`, body),
-    /** A member with its persona definition */
+    /** A member with its effective definition and archetype */
     get: (mid: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/members/${encodeURIComponent(mid)}`, undefined, query),
-    /** Team members */
-    list: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/members`, undefined, query),
+    /** A project's team (FR-11) */
+    list: (id: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/projects/${encodeURIComponent(id)}/members`, undefined, query),
+    /** Promote tuning text into the member's archetype (FR-12c) */
+    promote: (mid: string, body?: unknown) => call<any>('POST', `/api/members/${encodeURIComponent(mid)}/promote`, body),
     /** Remove a member */
     remove: (mid: string, body?: unknown) => call<any>('DELETE', `/api/members/${encodeURIComponent(mid)}`, body),
-    /** Add or update a persona or human */
-    save: (body?: unknown) => call<any>('POST', `/api/members`, body),
+    /** Give a project with no AI members the starter team */
+    starter: (id: string, body?: unknown) => call<any>('POST', `/api/projects/${encodeURIComponent(id)}/members/starter`, body),
+    /** Tune a member for its project */
+    tune: (mid: string, body?: unknown) => call<any>('PATCH', `/api/members/${encodeURIComponent(mid)}`, body),
   },
   metrics: {
     /** Smart handoffs vs compaction (graduation evidence) */
@@ -137,7 +159,7 @@ export const api = {
     refresh: (id: string, body?: unknown) => call<any>('POST', `/api/projects/${encodeURIComponent(id)}/refresh`, body),
     /** Unregister a project (files untouched) */
     remove: (id: string, body?: unknown) => call<any>('DELETE', `/api/projects/${encodeURIComponent(id)}`, body),
-    /** Change name, purpose, stage, website or team */
+    /** Change name, purpose, stage or website */
     update: (id: string, body?: unknown) => call<any>('PATCH', `/api/projects/${encodeURIComponent(id)}`, body),
   },
   proposals: {
@@ -263,14 +285,6 @@ export const api = {
     status: (tid: string, body?: unknown) => call<any>('POST', `/api/tasks/${encodeURIComponent(tid)}/status`, body),
     /** Edit a task */
     update: (tid: string, body?: unknown) => call<any>('PATCH', `/api/tasks/${encodeURIComponent(tid)}`, body),
-  },
-  teams: {
-    /** Teams */
-    list: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/teams`, undefined, query),
-    /** Remove a team */
-    remove: (tid: string, body?: unknown) => call<any>('DELETE', `/api/teams/${encodeURIComponent(tid)}`, body),
-    /** Create or rename a team */
-    save: (body?: unknown) => call<any>('POST', `/api/teams`, body),
   },
   updates: {
     /** Check for a newer release */
