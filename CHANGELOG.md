@@ -6,6 +6,8 @@ To release, run `gbi dev changelog release YYYY.MM.DD.N`, then `VERSION=YYYY.MM.
 
 ## [Unreleased]
 
+## [2026.11.09.1] - 2026-11-09
+
 ### Added
 
 - **Doctor tiers** (FR-07a–FR-07e). The doctor now proves the stack works:
