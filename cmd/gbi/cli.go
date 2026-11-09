@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -216,6 +217,11 @@ func cliCall(args []string) error {
 			req.Header.Set(h, v)
 		}
 	}
+	if req.Header.Get("X-GBI-Persona") == "" {
+		if p := personaFromCwd(); p != "" {
+			req.Header.Set("X-GBI-Persona", p)
+		}
+	}
 	resp, err := (&http.Client{Timeout: 10 * time.Minute}).Do(req)
 	if err != nil {
 		return fmt.Errorf("cannot reach go-build-it at %s (is `gbi serve` running?): %w", baseURL(), err)
@@ -395,4 +401,24 @@ func watch(p string, flags map[string]string) error {
 		}
 	}
 	return sc.Err()
+}
+
+// personaFromCwd recognises a member's worktree (…/worktrees/<project>/members/<slug>) and
+// returns its member ID, so an agent running `gbi` in its herdr pane is attributed to it.
+func personaFromCwd() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		return ""
+	}
+	return memberFromPath(wd)
+}
+
+func memberFromPath(p string) string {
+	parts := strings.Split(filepath.ToSlash(filepath.Clean(p)), "/")
+	for i := len(parts) - 1; i >= 3; i-- {
+		if parts[i-1] == "members" && parts[i-3] == "worktrees" {
+			return parts[i] + "@" + parts[i-2]
+		}
+	}
+	return ""
 }

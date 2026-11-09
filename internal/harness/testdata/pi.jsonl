@@ -1,0 +1,4 @@
+{"type":"session","id":"01a10f8e"}
+{"type":"message","message":{"role":"user","content":[{"type":"text","text":"Read .gbi-task.md"}]}}
+{"type":"message","message":{"role":"assistant","model":"claude-sonnet-5-5","content":[{"type":"text","text":"On it."},{"type":"toolCall","name":"read"}],"usage":{"input":3121,"output":2,"cacheRead":500,"cacheWrite":100,"totalTokens":3723}}}
+{"type":"message","message":{"role":"assistant","content":[],"errorMessage":"429 rate limit exceeded, resets at 14:30"}}

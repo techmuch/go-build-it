@@ -33,19 +33,62 @@ import (
 	"github.com/techmuch/go-build-it/internal/herdr"
 )
 
+var (
+	askRe    = regexp.MustCompile(`(\.gbi-ask-[A-Za-z0-9-]+\.md)`)
+	answerRe = regexp.MustCompile(`(\.gbi-answer-[A-Za-z0-9-]+\.md)`)
+	docRe    = regexp.MustCompile(`(?s)<<<DOC\n(.*?)\nDOC>>>`)
+)
+
+// ask answers a one-shot helper request (artifact or persona edits, Lens): it reads the
+// brief and writes the answer file the brief names, like a real harness would.
+func (a *agent) ask(file string) {
+	b, err := os.ReadFile(file)
+	brief := string(b)
+	m := answerRe.FindStringSubmatch(brief)
+	if err != nil || m == nil {
+		a.say("I could not read "+file, 500)
+		a.report("idle", "")
+		return
+	}
+	answer := "OK"
+	switch {
+	case docRe.MatchString(brief):
+		req := ""
+		if i := strings.Index(brief, "Request: "); i >= 0 {
+			req = strings.SplitN(brief[i+9:], "\n", 2)[0]
+		}
+		doc := strings.TrimRight(docRe.FindStringSubmatch(brief)[1], "\n") + "\n- " + strings.TrimSpace(req)
+		answer = "I added your request as a new line at the end.\n<<<DOC\n" + doc + "\nDOC>>>"
+	case strings.Contains(brief, `"checks"`):
+		answer = `{"summary":"Fake Lens: the change is small and tested.","recommendation":"approve","checks":[]}`
+	case strings.Contains(strings.ToLower(brief), "release notes"):
+		answer = "## Highlights\n- Fake release notes."
+	}
+	a.assistant([]map[string]any{{"type": "tool_use", "name": "Write", "input": map[string]string{"file_path": m[1]}}}, 1500)
+	_ = os.WriteFile(m[1], []byte(answer+"\n"), 0o644)
+	a.say("DONE", 200)
+	a.report("idle", "")
+}
+
 // Source is the herdr report source for the fake agent.
 const Source = "gbi-fake"
 
-// TranscriptDir is where fake transcripts go: $GBI_FAKE_TRANSCRIPTS, else <home>/.gbi-fake.
+// TranscriptDir is where fake transcripts go: $GBI_FAKE_TRANSCRIPTS, else <GBI_HOME>/fake-transcripts.
 func TranscriptDir() string {
 	if d := os.Getenv("GBI_FAKE_TRANSCRIPTS"); d != "" {
 		return d
 	}
+	if d := os.Getenv("GBI_HOME"); d != "" {
+		return filepath.Join(d, "fake-transcripts")
+	}
 	h, _ := os.UserHomeDir()
-	return filepath.Join(h, ".gbi-fake")
+	return filepath.Join(h, ".go-build-it", "fake-transcripts")
 }
 
+const handoffBrief = "<<<HANDOFF\nObjective and definition of done: finish the long change.\nCurrent state: half done.\nDecisions made and why: kept it simple.\nOpen problems, risks and dead ends to avoid: none.\nSpecific next steps: finish the second half.\nPointers: FAKE_WORK.md\nHANDOFF>>>"
+
 type agent struct {
+	handedOff bool
 	h       *herdr.Client
 	pane    string
 	session string
@@ -91,6 +134,9 @@ func Run(args []string, in io.Reader, out io.Writer) error {
 		if line == "/exit" {
 			break
 		}
+		if line == "/cancel" {
+			continue // turns are synchronous; nothing to interrupt
+		}
 		a.turn(line, sc)
 	}
 	if a.h != nil {
@@ -135,6 +181,18 @@ func (a *agent) turn(prompt string, sc *bufio.Scanner) {
 	a.report("working", "")
 	fmt.Fprintln(a.out, "❯ "+prompt)
 	a.write(map[string]any{"type": "user", "message": map[string]any{"role": "user", "content": prompt}})
+	if m := askRe.FindStringSubmatch(prompt); m != nil {
+		a.ask(m[1])
+		return
+	}
+	if strings.Contains(prompt, "<<<HANDOFF") || strings.Contains(prompt, "handoff briefing") {
+		if !a.handedOff {
+			a.say(handoffBrief, 1000)
+			a.handedOff = true
+		}
+		a.report("idle", "")
+		return
+	}
 	task := prompt
 	if strings.Contains(prompt, ".gbi-task.md") {
 		if b, err := os.ReadFile(".gbi-task.md"); err == nil {
@@ -167,15 +225,19 @@ func (a *agent) turn(prompt string, sc *bufio.Scanner) {
 		a.report("idle", "")
 		return
 	case strings.Contains(task, "FAKE:ask"):
-		body, _ := json.Marshal(map[string]any{"task": os.Getenv("GBI_TASK"), "title": "Fake agent needs a decision", "why": "testing blocking questions", "blocking": true,
-			"options": []map[string]any{{"key": "A", "title": "Option A", "recommended": true}, {"key": "B", "title": "Option B"}}})
-		if m := regexp.MustCompile(`GBI_TASK=(\S+)`).FindStringSubmatch(task); m != nil {
-			body, _ = json.Marshal(map[string]any{"task": m[1], "title": "Fake agent needs a decision", "why": "testing blocking questions", "blocking": true,
-				"options": []map[string]any{{"key": "A", "title": "Option A", "recommended": true}, {"key": "B", "title": "Option B"}}})
+		taskID := os.Getenv("GBI_TASK")
+		if m := regexp.MustCompile(`working on task (T-\d+)`).FindStringSubmatch(task); m != nil {
+			taskID = m[1]
 		}
+		body, _ := json.Marshal(map[string]any{"task": taskID, "title": "Fake agent needs a decision", "why": "testing blocking questions", "blocking": true,
+			"options": []map[string]any{{"key": "A", "title": "Option A", "recommended": true}, {"key": "B", "title": "Option B"}}})
 		req, _ := http.NewRequest(http.MethodPost, os.Getenv("GBI_URL")+"/api/questions", bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("X-GBI-Persona", os.Getenv("GBI_PERSONA"))
+		persona := os.Getenv("GBI_PERSONA")
+		if persona == "" {
+			persona = memberFromCwd() // like `gbi` itself, identify by the member worktree
+		}
+		req.Header.Set("X-GBI-Persona", persona)
 		if resp, err := http.DefaultClient.Do(req); err == nil {
 			resp.Body.Close()
 		}
@@ -188,6 +250,14 @@ func (a *agent) turn(prompt string, sc *bufio.Scanner) {
 		a.used = 30000
 	case strings.Contains(task, "FAKE:big"):
 		a.say("Working through a long change.", 140000)
+	case strings.Contains(task, "FAKE:handoff") && !strings.Contains(task, "Handoff briefing from"):
+		// Fill the context, then hand off in the same turn (the request may also arrive as a prompt).
+		a.say("Working through a long change.", 170000)
+		time.Sleep(300 * time.Millisecond)
+		a.say(handoffBrief, 2000)
+		a.handedOff = true
+		a.report("idle", "")
+		return
 	}
 	title := "task"
 	if m := regexp.MustCompile(`# Task: (.*)`).FindStringSubmatch(task); m != nil {
@@ -202,4 +272,19 @@ func (a *agent) turn(prompt string, sc *bufio.Scanner) {
 	a.say("Implemented "+title+". Tested by reading the file back.", 1500)
 	a.write(map[string]any{"type": "system", "subtype": "result", "is_error": false, "result": "Implemented " + title})
 	a.report("idle", "")
+}
+
+// memberFromCwd recognises …/worktrees/<project>/members/<slug> and returns <slug>@<project>.
+func memberFromCwd() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		return ""
+	}
+	parts := strings.Split(filepath.ToSlash(filepath.Clean(wd)), "/")
+	for i := len(parts) - 1; i >= 3; i-- {
+		if parts[i-1] == "members" && parts[i-3] == "worktrees" {
+			return parts[i] + "@" + parts[i-2]
+		}
+	}
+	return ""
 }

@@ -123,6 +123,14 @@ func (a *App) Routes() []api.Route {
 		}),
 		r("GET", "/api/archetypes/{aid}/changes", "archetypes.changes", "archetypes changes", "Members behind the archetype's latest revision (FR-12b)", func(c *api.Ctx) (any, error) { return a.Team.Changes(c.R.Context(), c.Param("aid")) }),
 		r("POST", "/api/archetypes/{aid}/apply", "archetypes.apply", "archetypes apply", "Apply the latest revision to one member, or to every member without overrides", a.archetypeApply, f("member", "member id (omit with --all)"), fb("all", "every member that has not overridden the changed fields")),
+		r("POST", "/api/members/{mid}/restart", "members.restart", "members restart", "Stop the member's harness in herdr; --fresh starts a new conversation next task", func(c *api.Ctx) (any, error) {
+			var b struct{ Fresh bool }
+			_ = c.Bind(&b)
+			if err := a.Sessions.RestartMember(c.R.Context(), c.Param("mid"), b.Fresh); err != nil {
+				return nil, bad(err)
+			}
+			return map[string]bool{"ok": true}, nil
+		}, fb("fresh", "start a new conversation next task")),
 		r("POST", "/api/members/{mid}/promote", "members.promote", "members promote", "Promote tuning text into the member's archetype (FR-12c)", a.memberPromote, f("text", "tuning lines to promote")),
 		r("GET", "/api/projects/{id}/members", "members.list", "members list", "A project's team (FR-11)", func(c *api.Ctx) (any, error) { return a.Team.Members(c.R.Context(), c.Param("id")) }),
 		r("POST", "/api/projects/{id}/members", "members.add", "members add", "Add an AI member from an archetype, or a human with a role", a.memberAdd, f("archetype", "archetype id (AI member)"), f("name", "display name"), f("kind", "ai|human"), f("login", "human: Tailscale login"), f("role", "human: role")),
@@ -167,7 +175,7 @@ func (a *App) Routes() []api.Route {
 		}),
 		r("GET", "/api/sessions", "sessions.list", "sessions list", "Sessions", func(c *api.Ctx) (any, error) {
 			return a.Sessions.List(c.R.Context(), c.Query("project"), c.Query("task"), c.Query("live") == "true")
-		}, f("project", ""), f("task", ""), fb("live", "only running/paused")),
+		}, f("project", ""), f("task", ""), fb("live", "only live sessions (starting, running, blocked, rate-limited)")),
 		r("GET", "/api/sessions/{sid}", "sessions.get", "sessions get", "Session detail", func(c *api.Ctx) (any, error) {
 			s, err := a.Sessions.Get(c.R.Context(), c.Param("sid"))
 			if err != nil {
@@ -175,16 +183,10 @@ func (a *App) Routes() []api.Route {
 			}
 			return s, nil
 		}),
-		r("GET", "/api/sessions/{sid}/output", "sessions.output", "sessions output", "Session output (structured or terminal)", func(c *api.Ctx) (any, error) {
+		r("GET", "/api/sessions/{sid}/output", "sessions.output", "sessions output", "Structured session output read from the transcript (the terminal streams from herdr)", func(c *api.Ctx) (any, error) {
 			return a.Sessions.Output(c.R.Context(), c.Param("sid"), atoi(c.Query("after"), 0), c.Query("view"))
 		}, fi("after", "sequence number"), f("view", "structured|terminal")),
 		r("POST", "/api/sessions/{sid}/input", "sessions.send", "sessions send", "Send input to a live session", a.sessionSend, f("text", "")),
-		r("POST", "/api/sessions/{sid}/finish", "sessions.finish", "sessions finish", "Finish an attachable session (Courier then commits and opens the review)", func(c *api.Ctx) (any, error) {
-			if err := a.Sessions.Finish(c.R.Context(), c.Param("sid")); err != nil {
-				return nil, bad(err)
-			}
-			return map[string]bool{"ok": true}, nil
-		}),
 		r("POST", "/api/sessions/{sid}/cancel", "sessions.cancel", "sessions cancel", "Cancel a live session", func(c *api.Ctx) (any, error) {
 			return map[string]bool{"ok": true}, a.Sessions.Cancel(c.R.Context(), c.Param("sid"))
 		}),
@@ -461,6 +463,20 @@ func (a *App) inboxItems(ctx context.Context, project string) []InboxItem {
 			out = append(out, InboxItem{Kind: "question", ID: q.ID, ProjectID: q.ProjectID, Title: q.Title, Detail: d, Blocking: q.Blocking, From: q.Asker, CreatedAt: q.CreatedAt})
 		}
 	}
+	// Members herdr reports blocked need the human in their terminal (FR-68).
+	if ss, err := a.Sessions.List(ctx, project, "", true); err == nil {
+		for _, se := range ss {
+			if se.Status != "blocked" {
+				continue
+			}
+			name := se.MemberID
+			if m, err := a.Team.Member(ctx, se.MemberID); err == nil {
+				name = m.Name
+			}
+			out = append(out, InboxItem{Kind: "member", ID: se.ID, ProjectID: se.ProjectID, Title: name + " is waiting for you (" + se.TaskID + ")",
+				Detail: firstNonEmptyStr(se.ExitReason, "Open the live terminal to answer"), Blocking: true, From: se.MemberID, CreatedAt: se.StartedAt})
+		}
+	}
 	if rs, err := a.Reviews.List(ctx, project, "pending"); err == nil {
 		for _, rv := range rs {
 			d := rv.Assessment.Summary
@@ -594,10 +610,26 @@ func (a *App) card(ctx context.Context, p projects.Project, refresh bool) Card {
 		}
 	}
 	c.StatusLine = statusLine(c)
+	state := map[string]string{}
+	if ss, err := a.Sessions.List(ctx, p.ID, "", true); err == nil {
+		for _, se := range ss {
+			st := "working"
+			if se.Status == "blocked" {
+				st = "blocked"
+			} else if se.Status == "rate_limited" {
+				st = "rate-limited"
+			}
+			state[se.MemberID] = st
+		}
+	}
 	mem, _ := a.Team.Members(ctx, p.ID)
 	for _, m := range mem {
 		c.TeamMembers = append(c.TeamMembers, m.Name)
-		c.Team = append(c.Team, CardMember{ID: m.ID, Name: m.Name, Role: m.Role, Kind: m.Kind, Tuned: m.Tuned()})
+		st := state[m.ID]
+		if st == "" && m.Kind == "ai" && m.PaneID != "" {
+			st = "idle"
+		}
+		c.Team = append(c.Team, CardMember{ID: m.ID, Name: m.Name, Role: m.Role, Kind: m.Kind, Tuned: m.Tuned(), State: st})
 	}
 	return c
 }
@@ -1655,6 +1687,15 @@ func (a *App) updateInstall(c *api.Ctx) (any, error) {
 }
 
 func firstNonEmpty(a ...string) string {
+	for _, s := range a {
+		if s != "" {
+			return s
+		}
+	}
+	return ""
+}
+
+func firstNonEmptyStr(a ...string) string {
 	for _, s := range a {
 		if s != "" {
 			return s

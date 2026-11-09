@@ -1,134 +1,104 @@
 package harness
 
 import (
-	"bufio"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
 
-func parseFile(t *testing.T, p Parser, path string) []Event {
-	t.Helper()
-	f, err := os.Open(path)
+func kinds(es []Event) string {
+	var k []string
+	for _, e := range es {
+		k = append(k, e.Kind)
+	}
+	return strings.Join(k, ",")
+}
+
+func lastUsage(es []Event) int {
+	n := 0
+	for _, e := range es {
+		if e.Usage != nil {
+			n = e.Usage.Used
+		}
+	}
+	return n
+}
+
+func TestClaudeReader(t *testing.T) {
+	p, _ := Get("claude")
+	es, err := p.NewReader().Read(filepath.Join("testdata", "claude.jsonl"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
-	var out []Event
-	sc := bufio.NewScanner(f)
-	sc.Buffer(make([]byte, 0, 1<<20), 16<<20)
-	for sc.Scan() {
-		out = append(out, p.Parse(sc.Bytes())...)
+	if got := kinds(es); got != "user,tool,system,tool,system,compacted,limit,text,system" {
+		t.Fatalf("kinds %s", got)
 	}
-	return out
-}
-
-func TestClaudeFixture(t *testing.T) {
-	evs := parseFile(t, Claude{}.NewParser(Spec{}), "testdata/claude-ok.jsonl")
-	var text, result bool
-	var last *Usage
-	for _, e := range evs {
-		switch e.Kind {
-		case KText:
-			text = text || e.Text == "OK"
-		case KResult:
-			result = true
-		case KUsage:
-			last = e.Usage
-		}
+	if lastUsage(es) != 2+247+42296 {
+		t.Fatalf("usage %d", lastUsage(es))
 	}
-	if !text || !result || last == nil {
-		t.Fatalf("text=%v result=%v usage=%v", text, result, last)
-	}
-	if last.Used != 2+10903+9075+4 {
-		t.Errorf("used = %d", last.Used)
+	if es[1].Text != "Read .gbi-task.md" || es[6].Limit == nil || es[6].Limit.ResetsAt.Hour() != 15 {
+		t.Fatalf("events %+v", es)
 	}
 }
 
-func TestClaudeRateLimitAndCompaction(t *testing.T) {
-	p := Claude{}.NewParser(Spec{})
-	evs := p.Parse([]byte(`{"type":"rate_limit_event","rate_limit_info":{"status":"rejected","resetsAt":1794120000,"rateLimitType":"five_hour"}}`))
-	if len(evs) != 1 || evs[0].Kind != KLimit || evs[0].Limit.ResetsAt.Unix() != 1794120000 {
-		t.Fatalf("limit events: %+v", evs)
+func TestReaderIsIncremental(t *testing.T) {
+	dir := t.TempDir()
+	f := filepath.Join(dir, "t.jsonl")
+	src, _ := os.ReadFile(filepath.Join("testdata", "claude.jsonl"))
+	lines := strings.SplitAfter(string(src), "\n")
+	os.WriteFile(f, []byte(lines[0]+lines[1]+lines[2][:20]), 0o644) // last line incomplete
+	r := (&claudeReader{})
+	es, _ := r.Read(f)
+	if kinds(es) != "user,tool,system" {
+		t.Fatalf("first read %s", kinds(es))
 	}
-	if evs := p.Parse([]byte(`{"type":"rate_limit_event","rate_limit_info":{"status":"allowed"}}`)); len(evs) != 0 {
-		t.Fatalf("allowed should be silent: %+v", evs)
+	os.WriteFile(f, []byte(lines[0]+lines[1]+lines[2]), 0o644)
+	es, _ = r.Read(f)
+	if kinds(es) != "tool,system" {
+		t.Fatalf("second read %s", kinds(es))
 	}
-	big := `{"type":"assistant","message":{"content":[],"usage":{"input_tokens":150000,"output_tokens":10}}}`
-	small := `{"type":"assistant","message":{"content":[],"usage":{"input_tokens":30000,"output_tokens":10}}}`
-	p.Parse([]byte(big))
-	found := false
-	for _, e := range p.Parse([]byte(small)) {
-		found = found || e.Kind == KCompacted
-	}
-	if !found {
-		t.Fatal("expected compaction to be detected")
-	}
-	if evs := p.Parse([]byte(`{"type":"system","subtype":"compact_boundary"}`)); len(evs) != 1 || evs[0].Kind != KCompacted {
-		t.Fatalf("compact_boundary: %+v", evs)
+	if es, _ = r.Read(f); len(es) != 0 {
+		t.Fatalf("no new lines, got %d", len(es))
 	}
 }
 
-func TestAntigravityFixture(t *testing.T) {
-	evs := parseFile(t, Antigravity{}.NewParser(Spec{}), "testdata/antigravity-ok.jsonl")
-	var usage *Usage
-	var result bool
-	for _, e := range evs {
-		if e.Usage != nil {
-			usage = e.Usage
-		}
-		result = result || e.Kind == KResult
+func TestAgyAndPiReaders(t *testing.T) {
+	a, _ := Get("antigravity")
+	es, err := a.NewReader().Read(filepath.Join("testdata", "agy.jsonl"))
+	if err != nil || kinds(es) != "user,text,tool,system" || lastUsage(es) != 10822 || es[0].Text != "Read .gbi-task.md" {
+		t.Fatalf("agy %s %d %v %+v", kinds(es), lastUsage(es), err, es)
 	}
-	if usage == nil || usage.Measured || usage.Window != 1_000_000 || usage.Used != 9717+23 {
-		t.Fatalf("usage = %+v", usage)
-	}
-	if !result {
-		t.Fatal("no result")
+	p, _ := Get("pi")
+	es, err = p.NewReader().Read(filepath.Join("testdata", "pi.jsonl"))
+	if err != nil || kinds(es) != "user,text,tool,system,limit" || lastUsage(es) != 3721 {
+		t.Fatalf("pi %s %d %v", kinds(es), lastUsage(es), err)
 	}
 }
 
-func TestOpenCodeParser(t *testing.T) {
-	p := OpenCode{}.NewParser(Spec{Model: "anthropic/claude-sonnet-4"})
-	evs := p.Parse([]byte(`{"type":"text","part":{"text":"hello"}}`))
-	if len(evs) != 1 || evs[0].Text != "hello" {
-		t.Fatalf("%+v", evs)
+func TestLaunchArgsAndPaths(t *testing.T) {
+	c, _ := Get("claude")
+	if got := strings.Join(c.Args("opus", nil, "abc", false), " "); got != "--permission-mode acceptEdits --model opus --session-id abc" {
+		t.Fatalf("claude new %q", got)
 	}
-	evs = p.Parse([]byte(`{"type":"step_finish","part":{"tokens":{"input":1000,"output":50,"cache":{"read":200}}}}`))
-	var u *Usage
-	var res bool
-	for _, e := range evs {
-		if e.Usage != nil {
-			u = e.Usage
-		}
-		res = res || e.Kind == KResult
+	if got := strings.Join(c.Args("", nil, "abc", true), " "); got != "--permission-mode acceptEdits --resume abc" {
+		t.Fatalf("claude resume %q", got)
 	}
-	if u == nil || u.Used != 1250 || u.Measured || !res {
-		t.Fatalf("usage %+v result %v", u, res)
+	if p := c.TranscriptPath("/tmp/x.y_z", "abc"); !strings.HasSuffix(p, filepath.Join("projects", "-tmp-x-y-z", "abc.jsonl")) && !strings.Contains(p, "-private-tmp-x-y-z") {
+		t.Fatalf("claude path %s", p)
 	}
-	evs = p.Parse([]byte(`{"type":"error","error":"429 Too Many Requests"}`))
-	if evs[0].Kind != KLimit {
-		t.Fatalf("expected limit: %+v", evs)
+	pi, _ := Get("pi")
+	if got := strings.Join(pi.Args("", nil, "id1", false), " "); got != "--session-id id1" {
+		t.Fatalf("pi %q", got)
 	}
-}
-
-func TestEstimateWindow(t *testing.T) {
-	if EstimateWindow("gemini-3-pro", 0) != 1_000_000 || EstimateWindow("", 123) != 123 {
-		t.Fatal("window table")
+	agy, _ := Get("antigravity")
+	if got := strings.Join(agy.Args("", nil, "conv", true), " "); got != "--mode accept-edits --conversation conv" {
+		t.Fatalf("agy %q", got)
 	}
-}
-
-func TestPiParser(t *testing.T) {
-	evs := parseFile(t, Pi{}.NewParser(Spec{}), "testdata/pi-connection-error.jsonl")
-	var retry bool
-	for _, e := range evs {
-		retry = retry || (e.Kind == KSystem && strings.Contains(e.Text, "Connection error"))
+	if id := c.NewConversationID(); len(id) != 36 || agy.NewConversationID() != "" {
+		t.Fatalf("ids %q", id)
 	}
-	if !retry {
-		t.Fatalf("expected retry notice from the recorded run: %+v", evs)
-	}
-	p := Pi{}.NewParser(Spec{Model: "gemini-3-pro"})
-	evs = p.Parse([]byte(`{"type":"message_end","message":{"role":"assistant","content":[{"type":"text","text":"OK"}],"usage":{"input":1200,"output":10,"cacheRead":300,"cacheWrite":0,"totalTokens":1510}}}`))
-	if len(evs) != 2 || evs[0].Text != "OK" || evs[1].Usage.Used != 1510 || evs[1].Usage.Window != 1_000_000 {
-		t.Fatalf("%+v", evs)
+	if len(Names()) != 4 {
+		t.Fatalf("names %v", Names())
 	}
 }

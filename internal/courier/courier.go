@@ -210,7 +210,10 @@ func (c *Courier) Merge(ctx context.Context, taskID string) error {
 			}
 		}
 	}
-	_ = c.git.RemoveWorktree(ctx, p.Path, c.worktree(p.ID, t.ID))
+	// Member worktrees are long-lived (ADR-010); only legacy per-task worktrees are removed.
+	if dir := c.worktree(p.ID, t.ID); dir != p.Path && filepath.Base(filepath.Dir(dir)) != "members" {
+		_ = c.git.RemoveWorktree(ctx, p.Path, dir)
+	}
 	c.hist.Must(ctx, history.Event{ProjectID: p.ID, Type: "git.merge", Subject: t.ID, Summary: fmt.Sprintf("Merged %s (%s)", t.ID, map[bool]string{true: "squash", false: "merge"}[wf.Squash]), Why: "review approved"})
 	_, err = c.queue.SetStatus(ctx, t.ID, queue.Done, "merged by Courier")
 	return err

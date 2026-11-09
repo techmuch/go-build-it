@@ -19,6 +19,7 @@ import (
 	"github.com/techmuch/go-build-it/internal/config"
 	"github.com/techmuch/go-build-it/internal/projects"
 	"github.com/techmuch/go-build-it/internal/queue"
+	"github.com/techmuch/go-build-it/internal/sessions"
 	"github.com/techmuch/go-build-it/internal/store"
 	"github.com/techmuch/go-build-it/internal/team"
 )
@@ -62,7 +63,19 @@ func git(t *testing.T, dir string, args ...string) string {
 
 func setup(t *testing.T) *env {
 	t.Helper()
-	home := t.TempDir()
+	if _, err := exec.LookPath("herdr"); err != nil {
+		if os.Getenv("GBI_REQUIRE_HERDR") == "1" {
+			t.Fatal("herdr is required (GBI_REQUIRE_HERDR=1) but not on PATH")
+		}
+		t.Skip("herdr not installed: members run only in herdr (ADR-009)")
+	}
+	// A short home keeps the isolated herdr's socket path under the Unix limit.
+	home, err := os.MkdirTemp("", "gbt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { os.RemoveAll(home) })
+	t.Setenv("GBI_FAKE_TRANSCRIPTS", filepath.Join(home, "fx"))
 	cfg, err := config.LoadFrom(home)
 	if err != nil {
 		t.Fatal(err)
@@ -77,6 +90,13 @@ func setup(t *testing.T) *env {
 	t.Cleanup(func() { db.Close() })
 	a := Wire(cfg, db, "test", slog.New(slog.NewTextHandler(io.Discard, nil)))
 	a.Reviews.RunTests = false
+	a.Sessions.Poll = 100 * time.Millisecond
+	hctx, hcancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer hcancel()
+	if _, err := a.Herdr.Ensure(hctx); err != nil {
+		t.Fatalf("isolated herdr: %v", err)
+	}
+	t.Cleanup(func() { _ = a.Herdr.Stop(context.Background()) })
 	// Let agent processes exit before temp dirs are removed (Windows can't delete a dir in use).
 	t.Cleanup(func() {
 		for i := 0; i < 150 && a.Sessions.LiveCount() > 0; i++ {
@@ -173,9 +193,12 @@ func TestFullWorkflow(t *testing.T) {
 	if sess.Status != "done" || sess.Used == 0 || !sess.Measured {
 		t.Fatalf("session %+v", sess)
 	}
-	out, _ := e.a.Sessions.Output(ctx, s.ID, 0, "terminal")
+	out, _ := e.a.Sessions.Output(ctx, s.ID, 0, "")
 	if len(out) == 0 {
-		t.Fatal("no terminal output recorded (FR-66)")
+		t.Fatal("no structured output read from the transcript (FR-66)")
+	}
+	if sess.PaneID == "" || !sessions.IsMemberWorktree(sess.Workdir) {
+		t.Fatalf("not run in a member pane and worktree: %+v", sess)
 	}
 	rs, _ := e.a.Reviews.List(ctx, "demo", "pending")
 	if len(rs) != 1 {
@@ -195,8 +218,8 @@ func TestFullWorkflow(t *testing.T) {
 	if b, err := os.ReadFile(filepath.Join(e.repo, "FAKE_WORK.md")); err != nil || !strings.Contains(string(b), "Add work log") {
 		t.Fatalf("merged work missing: %v", err)
 	}
-	if _, err := os.Stat(wt); err == nil {
-		t.Fatal("worktree should be removed after merge")
+	if _, err := os.Stat(wt); err != nil {
+		t.Fatal("the member's worktree is long-lived and must survive the merge (ADR-010)")
 	}
 	// Release: CalVer tag (FR-05).
 	rel, err := e.a.Courier.Release(ctx, "demo", false)
@@ -488,36 +511,6 @@ func TestSmartHandoffExperimental(t *testing.T) {
 	// Disabled for other projects: compaction stays the default.
 	if e.a.Cfg.HandoffsEnabledFor("other") {
 		t.Fatal("handoffs should be limited to listed projects")
-	}
-}
-
-func TestAttachableSessionWithTmux(t *testing.T) {
-	if _, err := exec.LookPath("tmux"); err != nil {
-		t.Skip("tmux not installed")
-	}
-	e := setup(t)
-	e.a.Cfg.Experimental.AttachableSessions = true
-	tk, _ := e.a.Queue.Add(e.ctx, queue.Task{ProjectID: "demo", Title: "Headed work"})
-	s, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge@demo")
-	if err != nil {
-		t.Fatal(err)
-	}
-	got, _ := e.a.Sessions.Get(e.ctx, s.ID)
-	if !got.Live || !strings.Contains(got.Attach, "tmux attach -t gbi-") {
-		t.Fatalf("session %+v", got)
-	}
-	e.waitStatus(tk.ID, queue.Review)
-	out, _ := e.a.Sessions.Output(e.ctx, s.ID, 0, "terminal")
-	joined := ""
-	for _, l := range out {
-		joined += l.Text + "\n"
-	}
-	if !strings.Contains(joined, "fake agent ready") {
-		t.Fatalf("pane not mirrored:\n%s", joined)
-	}
-	wt := e.a.Sessions.WorktreePath("demo", tk.ID)
-	if !strings.Contains(git(t, wt, "log", "-1", "--stat"), "FAKE_WORK.md") {
-		t.Fatal("work from the attachable session was not committed")
 	}
 }
 

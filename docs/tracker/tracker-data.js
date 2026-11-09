@@ -205,7 +205,10 @@ window.TRACKER = {
     "A blocked member shows as needing the human; herdr restart resumes members in their conversations",
     "herdr --session gbi shows every project and member labelled with role, task and context %",
     "No tmux or stream-json code remains"
-   ]
+   ],
+   "gateApproved": "2026-11-09",
+   "gateApprovedBy": "david (owner)",
+   "gateEvidence": "Members run as long-lived harnesses in herdr panes, one worktree each: profiles for Claude Code, Antigravity, Pi, OpenCode; transcript readers (Claude, Antigravity, Pi) with measured usage; dispatch through .gbi-task.md and Submit/WaitSettled; blocked → needs-you (inbox, card); rate limits; conversation continuity and rotation at 75% with member notes (Q8); reattach after restart; herdr labels and workspace summary; helper conversations for chat/Lens in herdr; tmux, attachable flag and headless stream-json removed. Real run: Claude Code and Antigravity finished end to end; Pi ran mechanically end to end but its configured local model returned empty output (paid OpenRouter models not used without asking). Go suite, 3 new member tests and 28 e2e tests pass."
   },
   {
    "id": "P14",
@@ -2638,7 +2641,7 @@ window.TRACKER = {
    "deps": [
     "P11-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2657,7 +2660,7 @@ window.TRACKER = {
     "P12-01",
     "P11-02"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2675,7 +2678,7 @@ window.TRACKER = {
     "P13-02",
     "P12-08"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2693,7 +2696,7 @@ window.TRACKER = {
    "deps": [
     "P13-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2710,7 +2713,7 @@ window.TRACKER = {
     "P11-05",
     "P13-02"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2726,7 +2729,7 @@ window.TRACKER = {
    "deps": [
     "P13-04"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2747,7 +2750,7 @@ window.TRACKER = {
     "P13-04",
     "P10-05"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": [
     "Q8"
@@ -2766,7 +2769,7 @@ window.TRACKER = {
    "deps": [
     "P13-05"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2783,7 +2786,7 @@ window.TRACKER = {
     "P13-02",
     "P10-09"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2799,7 +2802,7 @@ window.TRACKER = {
    "deps": [
     "P13-05"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2816,7 +2819,7 @@ window.TRACKER = {
    "deps": [
     "P13-03"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2832,7 +2835,7 @@ window.TRACKER = {
    "deps": [
     "P13-02"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2849,7 +2852,7 @@ window.TRACKER = {
     "P13-03",
     "P13-04"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },

@@ -106,3 +106,15 @@ Result: the direction holds. No change to the decision.
   This is race-free, and a stall timeout covers prompts that never start.
 - **Status subscriptions are per pane.** `pane.agent_status_changed` must name a `pane_id`. The watcher subscribes for each member pane plus the global lifecycle events, and resubscribes whenever members change.
 - **Isolated herdr for tests.** herdr honours `XDG_CONFIG_HOME`, so tests and demos run an entirely separate herdr (`[herdr] config_home`) and never touch the user's sessions.
+
+### P13 real-harness run (2026-11-09: Claude Code 2.1.319, Antigravity 1.5.3, Pi 0.85.1, herdr 0.9.5)
+
+A scratch project with one member per harness ran one small task each through herdr. Each member had its own worktree and pane.
+
+- **Claude Code and Antigravity** completed end to end:
+  - launch, folder trust, prompt, edit, settle, transcript usage (43k and 19k tokens, both measured), Courier commit, review.
+  - Both showed a one-time "trust this folder" prompt for the new member worktree. go-build-it showed it as `blocked` / needs you and waited. Antigravity showed its prompt only after `agent start` had returned, so go-build-it checks for a blocked status after a successful start as well.
+- **Pi** worked mechanically: launch with `--session-id`, prompt, settle, and the transcript found through the chosen ID. However, the local model configured in this Pi install returned empty replies with zero tokens, so nothing changed in the worktree. Pi's other configured models go through OpenRouter, which bills per token, so they were not used without asking the owner.
+- **Timing fixes** found by this run:
+  - A freshly opened pane may still be starting its shell (`agent_pane_busy`), so `agent start` is retried briefly.
+  - A just-started agent can be refused by `agent prompt` (`agent_not_ready`) for a moment, so go-build-it waits for `interactive_ready` and retries.

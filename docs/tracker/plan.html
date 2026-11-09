@@ -420,19 +420,19 @@ herdr --session gbi shows every project and member labelled with role, task and 
 No tmux or stream-json code remains
 </li></ul>
 <div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
-<tr><td><strong>P13-01</strong> Harness profiles: Claude Code, Antigravity, Pi, OpenCode (kind, launch and resume args, transcript reader, limit signals)</td><td>L</td><td>FR-61, FR-62, FR-63</td><td>—</td><td>P11-01</td></tr>
-<tr><td><strong>P13-02</strong> Member pane lifecycle: workspace per project, member worktree opened grouped, agent start, name, release</td><td>M</td><td>FR-12d, FR-64, FR-67</td><td>—</td><td>P12-01, P11-02</td></tr>
-<tr><td><strong>P13-03</strong> Dispatch: write .gbi-task.md, agent prompt --wait, hand completion to Courier and Lens</td><td>M</td><td>FR-60, FR-70</td><td>—</td><td>P13-02, P12-08</td></tr>
-<tr><td><strong>P13-04</strong> Transcript readers: structured events, messages and usage (measured or estimated) per harness</td><td>L</td><td>FR-66, FR-71, NFR-10</td><td>—</td><td>P13-01</td></tr>
-<tr><td><strong>P13-05</strong> Status mapping: herdr state drives session and task state; blocked becomes a needs-you item</td><td>M</td><td>FR-68</td><td>—</td><td>P11-05, P13-02</td></tr>
-<tr><td><strong>P13-06</strong> Rate and usage limit detection with pause and auto-resume</td><td>S</td><td>FR-65</td><td>—</td><td>P13-04</td></tr>
-<tr><td><strong>P13-07</strong> Conversation continuity and rotation per policy; smart handoff starts the new conversation · waits on Q8</td><td>M</td><td>FR-69, FR-76, FR-72, FR-73, FR-74</td><td>—</td><td>P13-04, P10-05</td></tr>
-<tr><td><strong>P13-08</strong> Reconnect after herdr or machine restart by conversation ID; queue resumes</td><td>M</td><td>FR-69, FR-82</td><td>—</td><td>P13-05</td></tr>
-<tr><td><strong>P13-09</strong> herdr labels: pane metadata (name, role, task, context %), workspace summaries, notifications for gates and questions</td><td>S</td><td>FR-67</td><td>—</td><td>P13-02, P10-09</td></tr>
-<tr><td><strong>P13-10</strong> Permission prompts: permission modes, per-project allowlists, optional Claude permission hook as structured approval</td><td>M</td><td>FR-68</td><td>—</td><td>P13-05</td></tr>
-<tr><td><strong>P13-11</strong> Lens reviews run in a fresh conversation per review</td><td>S</td><td>FR-54, FR-112</td><td>—</td><td>P13-03</td></tr>
-<tr><td><strong>P13-12</strong> Interrupt, cancel and restart a member through herdr</td><td>S</td><td>FR-61</td><td>—</td><td>P13-02</td></tr>
-<tr><td><strong>P13-13</strong> Remove tmux mode, attachable_sessions flag and the headless stream-json path</td><td>S</td><td>FR-60</td><td>—</td><td>P13-03, P13-04</td></tr>
+<tr><td><strong>P13-01</strong> Harness profiles: Claude Code, Antigravity, Pi, OpenCode (kind, launch and resume args, transcript reader, limit signals) ✅</td><td>L</td><td>FR-61, FR-62, FR-63</td><td>—</td><td>P11-01</td></tr>
+<tr><td><strong>P13-02</strong> Member pane lifecycle: workspace per project, member worktree opened grouped, agent start, name, release ✅</td><td>M</td><td>FR-12d, FR-64, FR-67</td><td>—</td><td>P12-01, P11-02</td></tr>
+<tr><td><strong>P13-03</strong> Dispatch: write .gbi-task.md, agent prompt --wait, hand completion to Courier and Lens ✅</td><td>M</td><td>FR-60, FR-70</td><td>—</td><td>P13-02, P12-08</td></tr>
+<tr><td><strong>P13-04</strong> Transcript readers: structured events, messages and usage (measured or estimated) per harness ✅</td><td>L</td><td>FR-66, FR-71, NFR-10</td><td>—</td><td>P13-01</td></tr>
+<tr><td><strong>P13-05</strong> Status mapping: herdr state drives session and task state; blocked becomes a needs-you item ✅</td><td>M</td><td>FR-68</td><td>—</td><td>P11-05, P13-02</td></tr>
+<tr><td><strong>P13-06</strong> Rate and usage limit detection with pause and auto-resume ✅</td><td>S</td><td>FR-65</td><td>—</td><td>P13-04</td></tr>
+<tr><td><strong>P13-07</strong> Conversation continuity and rotation per policy; smart handoff starts the new conversation ✅ · waits on Q8</td><td>M</td><td>FR-69, FR-76, FR-72, FR-73, FR-74</td><td>—</td><td>P13-04, P10-05</td></tr>
+<tr><td><strong>P13-08</strong> Reconnect after herdr or machine restart by conversation ID; queue resumes ✅</td><td>M</td><td>FR-69, FR-82</td><td>—</td><td>P13-05</td></tr>
+<tr><td><strong>P13-09</strong> herdr labels: pane metadata (name, role, task, context %), workspace summaries, notifications for gates and questions ✅</td><td>S</td><td>FR-67</td><td>—</td><td>P13-02, P10-09</td></tr>
+<tr><td><strong>P13-10</strong> Permission prompts: permission modes, per-project allowlists, optional Claude permission hook as structured approval ✅</td><td>M</td><td>FR-68</td><td>—</td><td>P13-05</td></tr>
+<tr><td><strong>P13-11</strong> Lens reviews run in a fresh conversation per review ✅</td><td>S</td><td>FR-54, FR-112</td><td>—</td><td>P13-03</td></tr>
+<tr><td><strong>P13-12</strong> Interrupt, cancel and restart a member through herdr ✅</td><td>S</td><td>FR-61</td><td>—</td><td>P13-02</td></tr>
+<tr><td><strong>P13-13</strong> Remove tmux mode, attachable_sessions flag and the headless stream-json path ✅</td><td>S</td><td>FR-60</td><td>—</td><td>P13-03, P13-04</td></tr>
 </tbody></table></div>
 <h3 id="p14-live-terminal-ui">P14 · Live terminal &amp; UI</h3>
 <p><strong>Goal:</strong> Watch and steer any team member from the desktop and mobile UI through herdr's terminal streams, and bring herdr state into the live views, Inbox, settings and history.</p>

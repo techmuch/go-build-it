@@ -199,14 +199,14 @@ function Terminal({ sid }: { sid: string }) {
   const box = useRef<HTMLDivElement>(null);
   const { run } = useAction();
   useEffect(() => { api.sessions.output(sid, { view }).then(setLines); }, [sid, view]);
-  useLive((e) => { if (e.type === 'session.output' && e.subject === sid && (view === 'terminal') === (e.data?.kind === 'raw')) setLines((l) => [...l, { seq: e.data.seq, text: e.summary, kind: e.data.kind }]); });
+  useLive((e) => { if (e.type === 'session.output' && e.subject === sid) setLines((l) => [...l, { seq: e.data.seq, text: e.summary, kind: e.data.kind }]); });
   useEffect(() => { box.current?.scrollTo(0, box.current.scrollHeight); }, [lines]);
   const key = (k: string) => setInput((v) => v + ({ Tab: '\t', Esc: '', '⏎': '' } as any)[k]);
   return <Screen title={`${s?.memberId || ''} · ${sid}`} sub={<div className="m-row" style={{ gap: 6 }}><span className="seg">{(['structured', 'terminal'] as const).map((v) => <button key={v} type="button" className={view === v ? 'on' : ''} onClick={() => setView(v)}>{v === 'terminal' ? 'Terminal' : 'Structured'}</button>)}</span>{s && <Chip c="acc">{s.live ? 'watching' : s.status}</Chip>}</div>} back="/m/sessions" dark
     foot={<><div className="m-keys">{['Esc', 'Tab', 'Ctrl', '↑', '↓', '⏎'].map((k) => <span key={k} {...clickable(() => key(k))}>{k}</span>)}</div>
       <div className="m-termfoot">{s?.live ? <div className="m-row" style={{ gap: 6 }}><input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Send input to the agent" style={{ flex: 1 }} /><button type="button" className="m-btn p sm" onClick={() => run(() => api.sessions.send(sid, { text: input }), 'Sent').then((r) => r && setInput(''))}>Send</button></div>
         : <div className="small" style={{ color: '#6f8190', textAlign: 'center' }}>{s?.exitReason}</div>}
-        <div className="small" style={{ color: '#6f8190', textAlign: 'center', marginTop: 6 }}>{s?.attach ? <>Take control: <code>{s.attach}</code> · <button type="button" className="lnk" onClick={() => run(() => api.sessions.finish(sid), 'Finished')}>Finish</button></> : 'Attach & take control needs attachable sessions (experimental, FR-67)'}</div></div></>}>
+        <div className="small" style={{ color: '#6f8190', textAlign: 'center', marginTop: 6 }}>{s?.status === 'blocked' ? 'Waiting for you: answer in its herdr terminal' : 'Runs in herdr: herdr --session gbi'}</div></div></>}>
     <div ref={box} className="m-term">{lines.map((l) => <div key={l.seq} className={'k-' + l.kind}>{l.text}</div>)}{lines.length === 0 && <span style={{ color: '#6f8190' }}>No output yet.</span>}</div>
   </Screen>;
 }

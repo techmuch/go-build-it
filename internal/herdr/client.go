@@ -447,6 +447,7 @@ type Metadata struct {
 	DisplayAgent string
 	Title        string
 	Tokens       map[string]string
+	ClearTokens  []string // keys to remove (token updates are patches)
 	StateLabels  map[string]string
 }
 
@@ -459,11 +460,14 @@ func (c *Client) ReportMetadata(ctx context.Context, paneID string, m Metadata) 
 	if m.Title != "" {
 		p.Title = &m.Title
 	}
-	if len(m.Tokens) > 0 {
+	if len(m.Tokens) > 0 || len(m.ClearTokens) > 0 {
 		p.Tokens = map[string]*string{}
 		for k, v := range m.Tokens {
 			v := v
 			p.Tokens[k] = &v
+		}
+		for _, k := range m.ClearTokens {
+			p.Tokens[k] = nil
 		}
 	}
 	return c.Call(ctx, MethodPaneReportMetadata, p, nil)
@@ -692,4 +696,20 @@ func envValue(env []string, key string) string {
 		}
 	}
 	return ""
+}
+
+// NewTab opens a tab (with one pane) in a workspace at cwd and returns the pane ID.
+func (c *Client) NewTab(ctx context.Context, workspaceID, cwd, label string, env map[string]string) (string, error) {
+	var r struct {
+		Tab      TabInfo  `json:"tab"`
+		RootPane PaneInfo `json:"root_pane"`
+	}
+	p := map[string]any{"workspace_id": workspaceID, "cwd": cwd, "label": label, "focus": false}
+	if len(env) > 0 {
+		p["env"] = env
+	}
+	if err := c.Call(ctx, MethodTabCreate, p, &r); err != nil {
+		return "", err
+	}
+	return r.RootPane.PaneID, nil
 }

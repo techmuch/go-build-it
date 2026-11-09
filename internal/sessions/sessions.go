@@ -1,5 +1,11 @@
-// Package sessions runs harness sessions for tasks and dispatches work from the queue
-// (FR-60, FR-64, FR-65, FR-70–FR-72, FR-81, FR-82).
+// Package sessions runs AI team members in herdr and dispatches work from the queue
+// (FR-60–FR-69, FR-70–FR-76, FR-81, FR-82; ADR-009, ADR-010).
+//
+// Every member is a long-running harness in its own herdr pane, working in its own
+// long-lived git worktree. A session is the span of one member working on one task
+// inside its conversation: go-build-it writes .gbi-task.md, submits a short prompt,
+// follows herdr's agent state and the harness transcript, and hands the result to
+// Courier when the member settles. There is no other way to run a harness.
 package sessions
 
 import (
@@ -19,6 +25,7 @@ import (
 	"github.com/techmuch/go-build-it/internal/config"
 	"github.com/techmuch/go-build-it/internal/gitx"
 	"github.com/techmuch/go-build-it/internal/harness"
+	"github.com/techmuch/go-build-it/internal/herdr"
 	"github.com/techmuch/go-build-it/internal/history"
 	"github.com/techmuch/go-build-it/internal/projects"
 	"github.com/techmuch/go-build-it/internal/queue"
@@ -27,7 +34,7 @@ import (
 	"github.com/techmuch/go-build-it/internal/team"
 )
 
-// Session is one harness run on a task.
+// Session is one member working on one task.
 type Session struct {
 	ID             string  `json:"id"`
 	TaskID         string  `json:"taskId"`
@@ -35,24 +42,25 @@ type Session struct {
 	MemberID       string  `json:"memberId"`
 	Harness        string  `json:"harness"`
 	Model          string  `json:"model"`
-	Status         string  `json:"status"`
+	Status         string  `json:"status"` // starting | running | blocked | rate_limited | done | failed | cancelled
 	StartedAt      string  `json:"startedAt"`
 	EndedAt        string  `json:"endedAt"`
 	Used           int     `json:"used"`
 	Window         int     `json:"window"`
 	Measured       bool    `json:"measured"`
 	Compactions    int     `json:"compactions"`
-	HarnessSession string  `json:"harnessSession"`
+	HarnessSession string  `json:"harnessSession"` // the conversation ID
 	Workdir        string  `json:"workdir"`
 	ResumeAt       string  `json:"resumeAt"`
 	ExitReason     string  `json:"exitReason"`
 	Handoff        string  `json:"handoff"`
+	PaneID         string  `json:"paneId"`
 	Fraction       float64 `json:"fraction"`
 	Live           bool    `json:"live"`
-	Attach         string  `json:"attach,omitempty"` // tmux attach command for attachable sessions
+	HerdrState     string  `json:"herdrState,omitempty"`
 }
 
-// Line is one line of session output (structured or raw, FR-66).
+// Line is one line of structured session output read from the transcript (FR-66).
 type Line struct {
 	Seq  int    `json:"seq"`
 	TS   string `json:"ts"`
@@ -64,11 +72,11 @@ type Line struct {
 type Hooks struct {
 	// Completed runs when a session ends successfully, before the task moves to review (Courier commits/pushes here).
 	Completed func(ctx context.Context, s Session, t queue.Task) error
-	// Handoff asks for a briefing when smart handoffs are enabled (experimental, P9).
+	// Handoff returns the briefing request sent when smart handoffs are enabled (experimental).
 	Handoff func(ctx context.Context, s Session, t queue.Task) string
 }
 
-// Manager runs sessions.
+// Manager runs members in herdr.
 type Manager struct {
 	db        *sql.DB
 	hist      *history.Recorder
@@ -81,31 +89,46 @@ type Manager struct {
 	Hooks     Hooks
 	log       *slog.Logger
 
-	mu       sync.Mutex
-	active   map[string]*active
-	attached map[string]chan string // attachable (tmux) sessions, experimental
-	auto     bool
-	stop     chan struct{}
-}
+	// H talks to the gbi herdr session; nil until SetHerdr (agents cannot run without it).
+	H *herdr.Client
+	// GbiBin is the go-build-it executable (the fake harness runs `gbi dev fake-member`).
+	GbiBin string
+	// Poll is how often a running session is checked (tests shorten it).
+	Poll time.Duration
 
-type active struct {
-	proc   *harness.Process
-	cancel context.CancelFunc
-	seq    int
-	reason string
+	mu         sync.Mutex
+	running    map[string]*run
+	workspaces map[string]string // project ID → herdr workspace ID
+	launching  map[string]*sync.Mutex
+	auto       bool
+	stop       chan struct{}
 }
 
 // New returns a session manager.
 func New(db *sql.DB, h *history.Recorder, cfg *config.Config, p *projects.Service, q *queue.Service, t *team.Service, st *standards.Service, g *gitx.Git, log *slog.Logger) *Manager {
-	return &Manager{db: db, hist: h, cfg: cfg, projects: p, queue: q, team: t, standards: st, git: g, log: log, active: map[string]*active{}, attached: map[string]chan string{}}
+	exe, _ := os.Executable()
+	return &Manager{db: db, hist: h, cfg: cfg, projects: p, queue: q, team: t, standards: st, git: g, log: log, GbiBin: exe, Poll: 500 * time.Millisecond,
+		running: map[string]*run{}, workspaces: map[string]string{}, launching: map[string]*sync.Mutex{}}
 }
 
-const cols = `id,task_id,project_id,member_id,harness,model,status,started_at,ended_at,used,window,measured,compactions,harness_session,workdir,resume_at,exit_reason,handoff`
+// SetHerdr connects the manager to the gbi herdr session.
+func (m *Manager) SetHerdr(c *herdr.Client) { m.mu.Lock(); m.H = c; m.mu.Unlock() }
+
+func (m *Manager) herdr() (*herdr.Client, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.H == nil {
+		return nil, errors.New("the gbi herdr session is not available; see Settings → herdr setup")
+	}
+	return m.H, nil
+}
+
+const cols = `id,task_id,project_id,member_id,harness,model,status,started_at,ended_at,used,window,measured,compactions,harness_session,workdir,resume_at,exit_reason,handoff,pane_id`
 
 func scan(sc interface{ Scan(...any) error }) (Session, error) {
 	var s Session
 	err := sc.Scan(&s.ID, &s.TaskID, &s.ProjectID, &s.MemberID, &s.Harness, &s.Model, &s.Status, &s.StartedAt, &s.EndedAt, &s.Used, &s.Window, &s.Measured,
-		&s.Compactions, &s.HarnessSession, &s.Workdir, &s.ResumeAt, &s.ExitReason, &s.Handoff)
+		&s.Compactions, &s.HarnessSession, &s.Workdir, &s.ResumeAt, &s.ExitReason, &s.Handoff, &s.PaneID)
 	if s.Window > 0 {
 		s.Fraction = float64(s.Used) / float64(s.Window)
 	}
@@ -113,11 +136,12 @@ func scan(sc interface{ Scan(...any) error }) (Session, error) {
 }
 
 func (m *Manager) write(ctx context.Context, s Session) error {
-	_, err := m.db.ExecContext(ctx, `INSERT INTO sessions(`+cols+`) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+	_, err := m.db.ExecContext(ctx, `INSERT INTO sessions(`+cols+`) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 		ON CONFLICT(id) DO UPDATE SET status=excluded.status, ended_at=excluded.ended_at, used=excluded.used, window=excluded.window, measured=excluded.measured,
-		compactions=excluded.compactions, harness_session=excluded.harness_session, resume_at=excluded.resume_at, exit_reason=excluded.exit_reason, handoff=excluded.handoff`,
+		compactions=excluded.compactions, harness_session=excluded.harness_session, resume_at=excluded.resume_at, exit_reason=excluded.exit_reason,
+		handoff=excluded.handoff, pane_id=excluded.pane_id, workdir=excluded.workdir`,
 		s.ID, s.TaskID, s.ProjectID, s.MemberID, s.Harness, s.Model, s.Status, s.StartedAt, s.EndedAt, s.Used, s.Window, s.Measured, s.Compactions,
-		s.HarnessSession, s.Workdir, s.ResumeAt, s.ExitReason, s.Handoff)
+		s.HarnessSession, s.Workdir, s.ResumeAt, s.ExitReason, s.Handoff, s.PaneID)
 	return err
 }
 
@@ -125,18 +149,17 @@ func (m *Manager) write(ctx context.Context, s Session) error {
 func (m *Manager) Get(ctx context.Context, id string) (Session, error) {
 	s, err := scan(m.db.QueryRowContext(ctx, `SELECT `+cols+` FROM sessions WHERE id=?`, id))
 	if errors.Is(err, sql.ErrNoRows) {
-		return s, fmt.Errorf("session %s not found", id)
+		return s, fmt.Errorf("session %q not found", id)
 	}
 	m.mu.Lock()
-	_, s.Live = m.active[id]
-	if _, ok := m.attached[id]; ok {
-		s.Live, s.Attach = true, AttachCommand(id)
+	if r, ok := m.running[id]; ok {
+		s.Live, s.HerdrState = true, r.state
 	}
 	m.mu.Unlock()
 	return s, err
 }
 
-// List returns sessions; live=true limits to running/paused ones.
+// List returns sessions, newest first.
 func (m *Manager) List(ctx context.Context, projectID, taskID string, live bool) ([]Session, error) {
 	q, args := `SELECT `+cols+` FROM sessions WHERE 1=1`, []any{}
 	if projectID != "" {
@@ -146,7 +169,7 @@ func (m *Manager) List(ctx context.Context, projectID, taskID string, live bool)
 		q, args = q+` AND task_id=?`, append(args, taskID)
 	}
 	if live {
-		q += ` AND status IN ('starting','running','rate_limited','paused')`
+		q += ` AND status IN ('starting','running','blocked','rate_limited','paused')`
 	}
 	rows, err := m.db.QueryContext(ctx, q+` ORDER BY started_at DESC LIMIT 200`, args...)
 	if err != nil {
@@ -161,25 +184,17 @@ func (m *Manager) List(ctx context.Context, projectID, taskID string, live bool)
 		if err != nil {
 			return nil, err
 		}
-		_, s.Live = m.active[s.ID]
-		if _, ok := m.attached[s.ID]; ok {
-			s.Live, s.Attach = true, AttachCommand(s.ID)
+		if r, ok := m.running[s.ID]; ok {
+			s.Live, s.HerdrState = true, r.state
 		}
 		out = append(out, s)
 	}
 	return out, rows.Err()
 }
 
-// Output returns session output after seq; kind "raw" for the terminal view, "structured" for the rest.
-func (m *Manager) Output(ctx context.Context, id string, after int, view string) ([]Line, error) {
-	q := `SELECT seq,ts,kind,text FROM session_output WHERE session_id=? AND seq>?`
-	switch view {
-	case "terminal":
-		q += ` AND kind='raw'`
-	case "structured", "":
-		q += ` AND kind!='raw'`
-	}
-	rows, err := m.db.QueryContext(ctx, q+` ORDER BY seq LIMIT 2000`, id, after)
+// Output returns structured output after seq (FR-66). The terminal view streams from herdr.
+func (m *Manager) Output(ctx context.Context, id string, after int, _ string) ([]Line, error) {
+	rows, err := m.db.QueryContext(ctx, `SELECT seq,ts,kind,text FROM session_output WHERE session_id=? AND seq>? ORDER BY seq LIMIT 2000`, id, after)
 	if err != nil {
 		return nil, err
 	}
@@ -233,7 +248,11 @@ func (m *Manager) Prepare(ctx context.Context, t queue.Task, p projects.Project)
 	if t.ContextNote != "" {
 		fmt.Fprintf(&b, "## Notes from earlier work, answers and feedback\n%s\n\n", strings.TrimSpace(t.ContextNote))
 	}
-	b.WriteString("## How to finish\n- Make the change, with tests, in this working directory. Do not push; Courier handles git.\n- If something is ambiguous, ask with `gbi questions ask --task " + t.ID + " --blocking --title \"…\" --why \"…\"` and stop.\n- End with a short summary of what you did and how you tested it.\n")
+	branch := t.Branch
+	if branch == "" {
+		branch = BranchFor(t)
+	}
+	b.WriteString("## How to finish\n- You are on branch `" + branch + "` in your own worktree. Make the change, with tests, here. Do not push or switch branches; Courier handles git.\n- If something is ambiguous, ask with `gbi questions ask --task " + t.ID + " --blocking --title \"…\" --why \"…\"` and stop.\n- End with a short summary of what you did and how you tested it.\n")
 	return b.String()
 }
 
@@ -275,11 +294,6 @@ func RequirementText(path string, ids []string) map[string]string {
 	return out
 }
 
-// WorktreePath is where a task's isolated workspace lives (FR-64).
-func (m *Manager) WorktreePath(projectID, taskID string) string {
-	return filepath.Join(m.cfg.Dir(), "worktrees", projectID, taskID)
-}
-
 // BranchFor returns the task branch name (ADR-003).
 func BranchFor(t queue.Task) string {
 	slug := projects.Slugify(t.Title)
@@ -289,8 +303,36 @@ func BranchFor(t queue.Task) string {
 	return "t-" + strings.ToLower(strings.TrimPrefix(t.ID, "T-")) + "-" + slug
 }
 
-// Start runs a task with a persona. It returns once the harness has started.
+// TaskDir returns where a task's work lives: the worktree of the member that last worked
+// on it, or the project checkout (Courier pushes and merges by branch name from any
+// checkout of the repository).
+func (m *Manager) TaskDir(projectID, taskID string) string {
+	var dir string
+	_ = m.db.QueryRow(`SELECT workdir FROM sessions WHERE task_id=? AND workdir!='' ORDER BY started_at DESC LIMIT 1`, taskID).Scan(&dir)
+	if dir != "" {
+		if _, err := os.Stat(dir); err == nil {
+			return dir
+		}
+	}
+	if p, err := m.projects.Get(context.Background(), projectID); err == nil {
+		return p.Path
+	}
+	return ""
+}
+
+// WorktreePath is kept for callers that name a task's directory (Courier).
+func (m *Manager) WorktreePath(projectID, taskID string) string { return m.TaskDir(projectID, taskID) }
+
+// TaskFile is the per-task brief in a member's worktree; it is never committed.
+const TaskFile = ".gbi-task.md"
+
+// Start dispatches a task to a member. It returns once the session is recorded; the
+// member's pane, harness and prompt are handled in the background.
 func (m *Manager) Start(ctx context.Context, taskID, memberID string) (Session, error) {
+	h, err := m.herdr()
+	if err != nil {
+		return Session{}, err
+	}
 	t, err := m.queue.Get(ctx, taskID)
 	if err != nil {
 		return Session{}, err
@@ -306,7 +348,7 @@ func (m *Manager) Start(ctx context.Context, taskID, memberID string) (Session, 
 	if err != nil {
 		return Session{}, err
 	}
-	a, ok := harness.Get(mem.Harness)
+	prof, ok := harness.Get(mem.Harness)
 	if !ok {
 		return Session{}, fmt.Errorf("unknown harness %q for %s", mem.Harness, mem.Name)
 	}
@@ -314,66 +356,54 @@ func (m *Manager) Start(ctx context.Context, taskID, memberID string) (Session, 
 	if mem.Harness != "fake" && !hc.Enabled {
 		return Session{}, fmt.Errorf("harness %s is disabled in settings", mem.Harness)
 	}
-
-	// Isolated workspace on the task branch (FR-64).
-	wt := m.WorktreePath(p.ID, t.ID)
 	branch := t.Branch
 	if branch == "" {
 		branch = BranchFor(t)
 	}
-	if _, err := os.Stat(wt); err != nil {
-		if err := os.MkdirAll(filepath.Dir(wt), 0o755); err != nil {
-			return Session{}, err
-		}
-		base := m.git.DefaultBranch(ctx, p.Path)
-		if err := m.git.AddWorktree(ctx, p.Path, wt, branch, base); err != nil {
-			return Session{}, fmt.Errorf("create worktree: %w", err)
-		}
-	}
 	if t.Branch != branch {
 		t, _ = m.queue.Update(ctx, queue.Task{ID: t.ID, Branch: branch})
+		t.Branch = branch
 	}
-
-	// Standards and persona reach the agent through instruction files (FR-53).
+	wt, err := m.prepareWorktree(ctx, p, mem, branch)
+	if err != nil {
+		return Session{}, err
+	}
+	// Standards and persona reach the agent through instruction files (FR-53); the task
+	// itself goes in .gbi-task.md, read on request (long prompts are rejected by herdr on macOS).
 	stds, _ := m.standards.Effective(ctx, p.ID)
 	if _, err := standards.WriteFiles(wt, standards.Render(p.ID, stds, team.Persona(mem))); err != nil {
 		return Session{}, fmt.Errorf("write instruction files: %w", err)
 	}
-
+	prompt := m.Prepare(ctx, t, p)
+	if mem.ConversationID == "" {
+		prompt = m.withNotes(ctx, mem, prompt)
+	}
+	if err := os.WriteFile(filepath.Join(wt, TaskFile), []byte(prompt), 0o644); err != nil {
+		return Session{}, err
+	}
 	id, err := store.NextID(m.db, "S")
 	if err != nil {
 		return Session{}, err
 	}
 	model := firstNonEmpty(mem.Model, hc.Model)
-	s := Session{ID: id, TaskID: t.ID, ProjectID: p.ID, MemberID: mem.ID, Harness: mem.Harness, Model: model, Status: "running", StartedAt: store.Now(), Workdir: wt}
-	spec := harness.Spec{Dir: wt, Prompt: m.Prepare(ctx, t, p), Model: model, Binary: hc.Binary, Flags: hc.Flags, Window: hc.Window,
-		Env: []string{"GBI_PERSONA=" + mem.ID, "GBI_TASK=" + t.ID, "GBI_SESSION=" + id, "GBI_URL=http://" + m.cfg.Listen}}
+	window := harness.EstimateWindow(model, firstPositive(hc.Window, prof.Window))
+	s := Session{ID: id, TaskID: t.ID, ProjectID: p.ID, MemberID: mem.ID, Harness: mem.Harness, Model: model, Status: "starting", StartedAt: store.Now(),
+		Workdir: wt, Window: window, Measured: prof.UsageMeasured, HarnessSession: mem.ConversationID, PaneID: mem.PaneID}
 	if err := m.write(ctx, s); err != nil {
 		return s, err
 	}
-	if m.AttachableAvailable(mem.Harness) {
-		return m.startAttached(ctx, s, t, spec.Prompt, hc.Binary, spec.Env)
-	}
-	runCtx, cancel := context.WithCancel(context.Background())
-	proc, err := harness.Start(runCtx, a, spec)
-	if err != nil {
-		cancel()
-		s.Status, s.EndedAt, s.ExitReason = "failed", store.Now(), err.Error()
-		_ = m.write(ctx, s)
-		_, _ = m.queue.Fail(ctx, t.ID, err.Error())
-		return s, err
-	}
-	act := &active{proc: proc, cancel: cancel}
-	m.mu.Lock()
-	m.active[id] = act
-	m.mu.Unlock()
 	if _, err := m.queue.SetStatus(ctx, t.ID, queue.Running, fmt.Sprintf("session %s started by %s on %s", id, mem.Name, mem.Harness)); err != nil {
 		m.log.Warn("set running", "err", err)
 	}
 	pctx := access.Persona(context.Background(), mem.Name)
-	m.hist.Must(pctx, history.Event{ProjectID: p.ID, Type: "session.started", Subject: id, Summary: fmt.Sprintf("%s started %s (%s)", mem.Name, t.ID, mem.Harness),
+	m.hist.Must(pctx, history.Event{ProjectID: p.ID, Type: "session.started", Subject: id, Summary: fmt.Sprintf("%s started %s (%s, herdr)", mem.Name, t.ID, mem.Harness),
 		Why: "dispatched from queue", Data: history.Data(map[string]any{"task": t.ID, "harness": mem.Harness, "workdir": wt, "branch": branch})})
-	go m.consume(pctx, s, t, act)
+	rctx, cancel := context.WithCancel(pctx)
+	r := &run{s: s, t: t, p: p, mem: mem, prof: prof, cancel: cancel, h: h, state: "starting"}
+	m.mu.Lock()
+	m.running[id] = r
+	m.mu.Unlock()
+	go m.drive(rctx, r)
 	return s, nil
 }
 
@@ -389,8 +419,14 @@ func (m *Manager) pickMember(ctx context.Context, t queue.Task, p projects.Proje
 		if mem.Kind != "ai" {
 			return mem, fmt.Errorf("%s is a human; assign an AI persona to run the task", mem.Name)
 		}
-		if mem.ProjectID != "" && mem.ProjectID != p.ID {
+		if mem.ProjectID == "" {
+			return mem, fmt.Errorf("%s is an archetype; add it to %s's team first", mem.Name, p.ID)
+		}
+		if mem.ProjectID != p.ID {
 			return mem, fmt.Errorf("%s is on %s's team, not %s's (team members are per project)", mem.Name, mem.ProjectID, p.ID)
+		}
+		if m.memberBusy(mem.ID) {
+			return mem, fmt.Errorf("%s is busy with another task (one task at a time)", mem.Name)
 		}
 		return mem, nil
 	}
@@ -398,245 +434,122 @@ func (m *Manager) pickMember(ctx context.Context, t queue.Task, p projects.Proje
 	if err != nil {
 		return team.Member{}, err
 	}
-	busy := map[string]bool{}
-	live, _ := m.List(ctx, "", "", true)
-	for _, s := range live {
-		busy[s.MemberID] = true
-	}
 	for _, c := range cands {
-		if !busy[c.ID] {
+		if c.Harness != "courier" && !m.memberBusy(c.ID) {
 			return c, nil
 		}
 	}
 	if len(cands) > 0 {
-		return team.Member{}, fmt.Errorf("every %s persona is busy", t.Role)
+		return team.Member{}, fmt.Errorf("every %s member on %s is busy", t.Role, p.ID)
 	}
 	return team.Member{}, fmt.Errorf("%s has no AI member with the %s role; add one in the project's Team tab", p.ID, t.Role)
 }
 
-func (m *Manager) appendLine(ctx context.Context, s *Session, act *active, kind, text string) {
-	act.seq++
-	ts := store.Now()
-	_, _ = m.db.ExecContext(ctx, `INSERT INTO session_output(session_id,seq,ts,kind,text) VALUES(?,?,?,?,?)`, s.ID, act.seq, ts, kind, text)
-	m.hist.Publish(history.Event{Type: "session.output", Subject: s.ID, ProjectID: s.ProjectID, TS: ts, Summary: text,
-		Data: history.Data(map[string]any{"seq": act.seq, "kind": kind})})
-}
-
-func (m *Manager) consume(ctx context.Context, s Session, t queue.Task, act *active) {
-	var resultErr bool
-	var resultText string
-	var limited *harness.RateLimit
-	lastSave := time.Now()
-	handoffAsked := false
-	var textBuf strings.Builder
-	for e := range act.proc.Events {
-		switch e.Kind {
-		case harness.KRaw:
-			m.appendLine(ctx, &s, act, "raw", e.Text)
-			continue
-		case harness.KText:
-			m.appendLine(ctx, &s, act, "text", e.Text)
-			if m.cfg.HandoffsEnabledFor(s.ProjectID) {
-				textBuf.WriteString(e.Text)
-				if hb := handoffRe.FindStringSubmatch(textBuf.String()); hb != nil && s.Handoff == "" {
-					s.Handoff = strings.TrimSpace(hb[1])
-				}
-			}
-		case harness.KTool:
-			m.appendLine(ctx, &s, act, "tool", e.Text)
-		case harness.KSystem:
-			m.appendLine(ctx, &s, act, "system", e.Text)
-			if e.SessionID != "" {
-				s.HarnessSession = e.SessionID
-			}
-		case harness.KError:
-			m.appendLine(ctx, &s, act, "error", e.Text)
-		case harness.KCompacted:
-			s.Compactions++
-			m.appendLine(ctx, &s, act, "system", "⟲ "+e.Text)
-			_, _ = m.queue.Bump(ctx, t.ID, "compactions")
-			m.hist.Must(ctx, history.Event{ProjectID: s.ProjectID, Type: "session.compacted", Subject: s.ID,
-				Summary: fmt.Sprintf("Context compacted in %s (%s)", s.ID, t.ID), Why: "harness auto-compaction (MVP default)",
-				Data: history.Data(map[string]any{"task": t.ID, "usedBefore": s.Used})})
-		case harness.KLimit:
-			// Keep a precise reset time from the harness over a guessed one from error text.
-			precise := e.Limit.Kind != "result" && e.Limit.Kind != "stderr"
-			if limited == nil || precise {
-				limited = e.Limit
-			}
-			m.appendLine(ctx, &s, act, "system", "rate limited until "+e.Limit.ResetsAt.Local().Format("15:04"))
-		case harness.KResult:
-			resultErr, resultText = e.IsError, e.Text
-			if e.SessionID != "" {
-				s.HarnessSession = e.SessionID
-			}
-			m.appendLine(ctx, &s, act, "result", firstNonEmpty(e.Text, "turn finished"))
-		}
-		if e.Usage != nil {
-			s.Used, s.Window, s.Measured = e.Usage.Used, e.Usage.Window, e.Usage.Measured
-			// Experimental smart handoff (P9): ask for a briefing at the threshold.
-			if !handoffAsked && m.cfg.HandoffsEnabledFor(s.ProjectID) && e.Usage.Fraction() >= m.cfg.Experimental.HandoffThreshold && m.Hooks.Handoff != nil {
-				handoffAsked = true
-				if msg := m.Hooks.Handoff(ctx, s, t); msg != "" && !act.proc.Send(msg) {
-					m.appendLine(ctx, &s, act, "system", s.Harness+" does not accept input mid-session; it will compact instead of handing off")
-				}
-			}
-			if time.Since(lastSave) > time.Second {
-				_ = m.write(ctx, s)
-				lastSave = time.Now()
-				m.hist.Publish(history.Event{Type: "session.usage", Subject: s.ID, ProjectID: s.ProjectID, Data: history.Data(s)})
-			}
-		}
-	}
-	waitErr := act.proc.Wait()
+func (m *Manager) memberBusy(memberID string) bool {
 	m.mu.Lock()
-	delete(m.active, s.ID)
-	m.mu.Unlock()
-	act.cancel()
-	s.EndedAt = store.Now()
-
-	switch {
-	case act.reason == "cancelled":
-		s.Status, s.ExitReason = "cancelled", "cancelled by "+access.FromContext(ctx).Name
-		_, _ = m.queue.SetStatus(ctx, t.ID, queue.Queued, "session cancelled")
-	case limited != nil:
-		// FR-65: pause and resume automatically when the limit resets.
-		s.Status, s.ResumeAt, s.ExitReason = "rate_limited", limited.ResetsAt.UTC().Format(time.RFC3339), "subscription limit ("+limited.Kind+")"
-		_ = m.write(ctx, s) // record the session first so readers never see a paused task with a running session
-		_, _ = m.queue.SetStatus(ctx, t.ID, queue.Paused, "rate limited until "+limited.ResetsAt.Local().Format("15:04"))
-		m.hist.Must(ctx, history.Event{ProjectID: s.ProjectID, Type: "session.rate_limited", Subject: s.ID, Summary: fmt.Sprintf("%s paused: %s limit", t.ID, s.Harness),
-			Why: "resumes at " + limited.ResetsAt.Local().Format("15:04"), Data: history.Data(map[string]any{"task": t.ID, "resumeAt": s.ResumeAt})})
-	case s.Handoff != "" && waitErr == nil && !resultErr:
-		// Experimental smart handoff (FR-72–FR-74): the next session starts from the briefing.
-		s.Status, s.ExitReason = "done", "handed off"
-		cur, _ := m.queue.Get(ctx, t.ID)
-		cur.ContextNote = strings.TrimSpace(cur.ContextNote + "\n\nHandoff briefing from " + s.ID + ":\n" + s.Handoff)
-		_, _ = m.queue.Update(ctx, cur)
-		_, _ = m.queue.Bump(ctx, t.ID, "handoffs")
-		_ = m.write(ctx, s) // session first: readers never see a re-queued task with a running session
-		_, _ = m.queue.SetStatus(ctx, t.ID, queue.Queued, "handed off at "+fmt.Sprintf("%.0f%%", s.Fraction*100)+"; a fresh session continues from the briefing")
-		m.hist.Must(ctx, history.Event{ProjectID: s.ProjectID, Type: "handoff.written", Subject: s.ID, Summary: fmt.Sprintf("Handoff written for %s (%s)", t.ID, s.ID),
-			Why: "experimental smart handoffs; context reached the threshold", Data: history.Data(map[string]any{"task": t.ID, "briefing": s.Handoff, "usedBefore": s.Used, "missingSections": MissingHandoffSections(s.Handoff)})})
-	case act.reason == "blocked":
-		s.Status, s.ExitReason = "done", "stopped for a blocking question"
-	case waitErr != nil || resultErr:
-		s.Status, s.ExitReason = "failed", firstNonEmpty(resultText, errString(waitErr))
-		_ = m.write(ctx, s)
-		_, _ = m.queue.Fail(ctx, t.ID, "session failed: "+trunc(s.ExitReason, 200))
-		m.hist.Must(ctx, history.Event{ProjectID: s.ProjectID, Type: "session.failed", Subject: s.ID, Summary: fmt.Sprintf("%s failed (%s)", s.ID, t.ID), Why: trunc(s.ExitReason, 300)})
-	default:
-		s.Status, s.ExitReason = "done", "completed"
-		cur, _ := m.queue.Get(ctx, t.ID)
-		if cur.Status == queue.Blocked {
-			s.ExitReason = "stopped for a blocking question"
-			break
+	defer m.mu.Unlock()
+	for _, r := range m.running {
+		if r.mem.ID == memberID {
+			return true
 		}
-		if m.Hooks.Completed != nil {
-			if err := m.Hooks.Completed(ctx, s, cur); err != nil {
-				m.hist.Must(ctx, history.Event{ProjectID: s.ProjectID, Type: "courier.error", Subject: t.ID, Summary: "Courier could not finish " + t.ID, Why: err.Error()})
-				_ = m.write(ctx, s)
-				_, _ = m.queue.SetStatus(ctx, t.ID, queue.Failed, "courier: "+err.Error())
-				break
-			}
-		}
-		_ = m.write(ctx, s) // session first: readers never see a task in review with a running session
-		if cur2, _ := m.queue.Get(ctx, t.ID); cur2.Status == queue.Running {
-			_, _ = m.queue.SetStatus(ctx, t.ID, queue.Review, "session completed: "+trunc(resultText, 160))
-		}
-		m.hist.Must(ctx, history.Event{ProjectID: s.ProjectID, Type: "session.completed", Subject: s.ID, Summary: fmt.Sprintf("%s finished %s", s.MemberID, t.ID), Why: trunc(resultText, 300)})
 	}
-	_ = m.write(ctx, s)
-	m.hist.Publish(history.Event{Type: "session.usage", Subject: s.ID, ProjectID: s.ProjectID, Data: history.Data(s)})
+	return false
 }
 
-// Send passes human input to a live session (FR-61).
+// withNotes adds the member's notes from finished tasks when a new conversation starts (FR-76).
+func (m *Manager) withNotes(ctx context.Context, mem team.Member, prompt string) string {
+	rows, err := m.db.QueryContext(ctx, `SELECT task_id, note FROM member_notes WHERE member_id=? ORDER BY id DESC LIMIT 8`, mem.ID)
+	if err != nil {
+		return prompt
+	}
+	defer rows.Close()
+	var notes []string
+	for rows.Next() {
+		var tid, n string
+		if rows.Scan(&tid, &n) == nil {
+			notes = append(notes, fmt.Sprintf("- %s: %s", tid, n))
+		}
+	}
+	if len(notes) == 0 {
+		return prompt
+	}
+	return prompt + "\n## Your notes from earlier tasks on this project (newest first)\n" + strings.Join(notes, "\n") + "\n"
+}
+
+// AddNote records something a member learned (FR-76).
+func (m *Manager) AddNote(ctx context.Context, memberID, taskID, note string) {
+	note = strings.TrimSpace(note)
+	if note == "" {
+		return
+	}
+	if len(note) > 600 {
+		note = note[:600] + "…"
+	}
+	_, _ = m.db.ExecContext(ctx, `INSERT INTO member_notes(member_id,task_id,note,created_at) VALUES(?,?,?,?)`, memberID, taskID, note, store.Now())
+}
+
+// Send passes human input to a member mid-task (FR-61).
 func (m *Manager) Send(ctx context.Context, id, text string) error {
 	m.mu.Lock()
-	act, ok := m.active[id]
-	_, att := m.attached[id]
+	r, ok := m.running[id]
 	m.mu.Unlock()
-	if att {
-		if err := sendAttached(id, text); err != nil {
-			return err
-		}
-		s, _ := m.Get(ctx, id)
-		m.hist.Must(ctx, history.Event{ProjectID: s.ProjectID, Type: "session.input", Subject: id, Summary: "Input typed into attachable session " + id, Why: trunc(text, 200)})
-		return nil
-	}
 	if !ok {
 		return fmt.Errorf("session %s is not running", id)
 	}
-	if !act.proc.Send(text) {
-		return errors.New("this harness does not accept input mid-session; add it as a task note instead")
+	if _, err := r.h.Submit(ctx, r.paneID(), r.agentName(), r.prof.Kind != "", text); err != nil {
+		return err
+	}
+	m.hist.Must(ctx, history.Event{ProjectID: r.s.ProjectID, Type: "session.input", Subject: id, Summary: "Input sent to " + r.mem.Name + " (" + id + ")", Why: trunc(text, 200)})
+	return nil
+}
+
+// Cancel interrupts a member's current task.
+func (m *Manager) Cancel(ctx context.Context, id string) error {
+	if err := m.stopRun(ctx, id, "cancelled"); err != nil {
+		return err
 	}
 	s, _ := m.Get(ctx, id)
-	m.appendLine(ctx, &s, act, "input", text)
-	m.hist.Must(ctx, history.Event{ProjectID: s.ProjectID, Type: "session.input", Subject: id, Summary: "Input sent to " + id, Why: trunc(text, 200)})
+	m.hist.Must(ctx, history.Event{ProjectID: s.ProjectID, Type: "session.cancelled", Subject: id, Summary: "Cancelled " + id})
 	return nil
 }
 
-// Cancel stops a live session.
-func (m *Manager) Cancel(ctx context.Context, id string) error {
-	return m.stopActive(ctx, id, "cancelled")
-}
-
-// StopForQuestion ends a session whose task is now blocked on a question.
+// StopForQuestion notes that a task's session stopped for a blocking question; the
+// member was told to stop and goes idle, and the session ends then.
 func (m *Manager) StopForQuestion(ctx context.Context, taskID string) {
-	live, _ := m.List(ctx, "", taskID, true)
-	for _, s := range live {
-		_ = m.stopActive(ctx, s.ID, "blocked")
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, r := range m.running {
+		if r.t.ID == taskID {
+			r.reason = "blocked"
+		}
 	}
 }
 
-func (m *Manager) stopActive(ctx context.Context, id, reason string) error {
+func (m *Manager) stopRun(ctx context.Context, id, reason string) error {
 	m.mu.Lock()
-	if ch, ok := m.attached[id]; ok {
-		m.mu.Unlock()
-		ch <- reason
-		return nil
-	}
-	act, ok := m.active[id]
+	r, ok := m.running[id]
 	if ok {
-		act.reason = reason
+		r.reason = reason
 	}
 	m.mu.Unlock()
 	if !ok {
 		return fmt.Errorf("session %s is not running", id)
 	}
-	act.proc.Cancel()
-	if reason == "cancelled" {
-		s, _ := m.Get(ctx, id)
-		m.hist.Must(ctx, history.Event{ProjectID: s.ProjectID, Type: "session.cancelled", Subject: id, Summary: "Cancelled " + id})
+	// Interrupt the agent's turn (Esc for known kinds; the fake member reads /cancel).
+	if r.prof.Kind != "" {
+		_ = r.h.SendKeys(ctx, r.agentTarget(), "esc")
+	} else if p := r.paneID(); p != "" {
+		_ = r.h.Call(ctx, herdr.MethodPaneSendText, map[string]any{"pane_id": p, "text": "/cancel\n"}, nil)
 	}
+	r.cancel()
 	return nil
 }
 
-// LiveCount returns the number of running harness processes.
+// LiveCount returns the number of members working on a task.
 func (m *Manager) LiveCount() int {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	return len(m.active) + len(m.attached)
-}
-
-// Recover marks sessions orphaned by a restart and requeues their tasks (FR-82).
-func (m *Manager) Recover(ctx context.Context) {
-	rows, err := m.db.QueryContext(ctx, `SELECT id FROM sessions WHERE status IN ('starting','running')`)
-	if err != nil {
-		return
-	}
-	var ids []string
-	for rows.Next() {
-		var id string
-		_ = rows.Scan(&id)
-		ids = append(ids, id)
-	}
-	rows.Close()
-	for _, id := range ids {
-		_, _ = m.db.ExecContext(ctx, `UPDATE sessions SET status='failed', ended_at=?, exit_reason='interrupted by restart' WHERE id=?`, store.Now(), id)
-	}
-	if n, _ := m.queue.RecoverInterrupted(ctx); n > 0 {
-		m.hist.Must(ctx, history.Event{Type: "system.recovered", Summary: fmt.Sprintf("Requeued %d interrupted task(s)", n), Why: "go-build-it restarted"})
-	}
+	return len(m.running)
 }
 
 // Dispatcher ----------------------------------------------------------------
@@ -729,17 +642,18 @@ func firstNonEmpty(a ...string) string {
 	return ""
 }
 
-func errString(err error) string {
-	if err == nil {
-		return ""
+func firstPositive(a ...int) int {
+	for _, n := range a {
+		if n > 0 {
+			return n
+		}
 	}
-	return err.Error()
+	return 0
 }
 
 func trunc(s string, n int) string {
-	s = strings.TrimSpace(s)
-	if len(s) > n {
-		return s[:n] + "…"
+	if len(s) <= n {
+		return s
 	}
-	return s
+	return s[:n] + "…"
 }

@@ -200,7 +200,9 @@ function MemberDetail({ id, projectId }: { id: string; projectId: string }) {
           {field('Model', <input value={t.model} onChange={(e) => setT({ ...t, model: e.target.value })} placeholder={data.archetype?.model || 'archetype default'} style={{ width: 130 }} />)}
         </div>
         <div className="small muted" style={{ marginTop: 6 }}>Worktree <span className="mono">{m.worktree || `~/.go-build-it/worktrees/${projectId}/${m.id.split('@')[0]}`}</span> · branch per task · herdr pane <span className="mono">{m.paneId || 'starts with the first task'}</span>
-          {m.conversationId && <> · conversation <span className="mono">{m.conversationId.slice(0, 8)}…</span> ({m.conversationTasks} task{m.conversationTasks === 1 ? '' : 's'})</>}</div>
+          {m.conversationId && <> · conversation <span className="mono">{m.conversationId.slice(0, 8)}…</span> ({m.conversationTasks} task{m.conversationTasks === 1 ? '' : 's'})</>}
+          {m.paneId && <> · <button type="button" className="lnk" onClick={() => run(() => api.members.restart(id, { fresh: false }), 'Restarted: resumes the same conversation next task').then(reload)}>Restart</button>
+            {' · '}<button type="button" className="lnk" onClick={() => run(() => api.members.restart(id, { fresh: true }), 'Next task starts a new conversation').then(reload)}>New conversation</button></>}</div>
       </Card>
       {prop && <><Proposals hunks={prop.hunks} accepted={acc} setAccepted={setAcc} /><div className="row c"><span className="right" /><button type="button" className="btn" onClick={() => setProp(null)}>Discard</button>
         <button type="button" className="btn p" onClick={async () => { setT({ ...t, tuning: await applyHunks(prop.base, prop.hunks, acc) }); setProp(null); }}>Apply {acc.size} accepted</button></div></>}
