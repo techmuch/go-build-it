@@ -6,6 +6,7 @@ import { Shell } from '../shell';
 import { A, AgentChat, Av, Card, Chip, Editor, Empty, Err, Loading, Markdown, Proposals, Seg, Status, Toggle, ago, applyHunks, day, useAction, type Hunk } from '../ui';
 import { EventRow } from './Projects';
 import { usePersonas } from './Artifacts';
+import { clickable } from '../keys';
 
 // Parse the persona Markdown back into instructions + role standards (FR-13).
 function parsePersona(md: string) {
@@ -30,11 +31,11 @@ export function Team({ mid }: { mid?: string }) {
   const { data: harn } = useData<any[]>(() => api.harnesses.list(), []);
   const sel = mid === 'new' ? 'new' : mid || members?.[0]?.id || '';
   const { run } = useAction();
-  return <Shell title="Team" right={<span className="small muted">Teams: {(teams || []).map((t) => t.name).join(' · ') || 'none'} · <a onClick={() => { const n = window.prompt('New team name'); if (n) run(() => api.teams.save({ id: n.toLowerCase().replace(/\W+/g, '-'), name: n }), 'Team created'); }}>+ Team</a></span>}>
+  return <Shell title="Team" right={<span className="small muted">Teams: {(teams || []).map((t) => t.name).join(' · ') || 'none'} · <button type="button" className="lnk" onClick={() => { const n = window.prompt('New team name'); if (n) run(() => api.teams.save({ id: n.toLowerCase().replace(/\W+/g, '-'), name: n }), 'Team created'); }}>+ Team</button></span>}>
     <div className="row">
       <Card style={{ width: 270, padding: '6px 10px' }}>
         <table className="t small"><tbody><tr><th /><th>Member</th><th>Harness</th></tr>
-          {(members || []).map((m) => <tr key={m.id} className={'click ' + (m.id === sel ? 'sel' : '')} onClick={() => navigate('/team/' + m.id)}>
+          {(members || []).map((m) => <tr key={m.id} className={'click ' + (m.id === sel ? 'sel' : '')} {...clickable(() => navigate('/team/' + m.id), { role: 'link' })}>
             <td><Av name={m.name} role={m.kind === 'human' ? 'human' : m.role} /></td><td><b>{m.name}</b><br /><span className="muted">{(roles || []).find((r) => r.id === m.role)?.name || m.role}{m.teamId ? ' · ' + m.teamId : ''}</span></td><td>{m.kind === 'human' ? <span className="muted">human</span> : m.harness}</td></tr>)}</tbody></table>
         {!members?.length && <Empty>No team yet. Add AI personas for each role.</Empty>}
         <div className="row c wrap" style={{ gap: 6, margin: '8px 0' }}><A to="/team/new" className="btn">+ Member</A>
@@ -124,8 +125,8 @@ export function Standards({ sid }: { sid?: string }) {
         <Editor value={body} onChange={setBody} mode={mode} onMode={setMode} toolbarRight={cur ? <><b>{cur.title}</b> · rev {cur.rev} · edited {day(cur.updatedAt)}</> : 'new'} />
         {cur && <div className="grid" style={{ gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 10 }}>
           <Card title="Overrides" style={{ padding: 10 }}>{cur.overrides.map((o: any) => <div key={o.projectId} className="small"><b>{o.projectId}</b>: {o.reason}</div>)}{cur.overrides.length === 0 && <span className="small muted">None</span>}
-            <div><a className="small" onClick={() => { const p = window.prompt('Project id to override for', projects?.[0]?.id || ''); if (!p) return; const reason = window.prompt('Reason (required)'); if (!reason) return; run(() => api.standards.override(cur.id, { project: p, body, reason }), 'Override recorded'); }}>+ Override for a project</a></div></Card>
-          <Card title="Delivered as" style={{ padding: 10 }}><div className="small mono">AGENTS.md · CLAUDE.md · GEMINI.md</div><div className="small muted">Regenerated into every session's worktree (FR-53). {projects?.[0] && <a onClick={() => api.standards.preview(projects[0].id).then((r) => setPreview(r.content))}>preview</a>}</div></Card>
+            <div><button type="button" className="lnk small" onClick={() => { const p = window.prompt('Project id to override for', projects?.[0]?.id || ''); if (!p) return; const reason = window.prompt('Reason (required)'); if (!reason) return; run(() => api.standards.override(cur.id, { project: p, body, reason }), 'Override recorded'); }}>+ Override for a project</button></div></Card>
+          <Card title="Delivered as" style={{ padding: 10 }}><div className="small mono">AGENTS.md · CLAUDE.md · GEMINI.md</div><div className="small muted">Regenerated into every session's worktree (FR-53). {projects?.[0] && <button type="button" className="lnk" onClick={() => api.standards.preview(projects[0].id).then((r) => setPreview(r.content))}>preview</button>}</div></Card>
           <Card title="Compliance" style={{ padding: 10 }}><div className="small">Lens checks every review against this standard (FR-54).</div></Card>
         </div>}
         <div className="row c">{cur && <button type="button" className="btn d" onClick={() => { if (window.confirm('Remove this standard?')) run(() => api.standards.remove(cur.id), 'Removed').then(() => navigate('/standards')); }}>Remove</button>}
@@ -133,7 +134,7 @@ export function Standards({ sid }: { sid?: string }) {
             const sId = cur ? cur.id : title.toLowerCase().replace(/\W+/g, '-');
             run(() => api.standards.save(sId, { title: cur ? cur.title : title, body, why: 'edited in the standards editor' }), 'Saved and regenerated').then((r) => r && navigate('/standards/' + r.id));
           }}>{cur ? `Save rev ${cur.rev + 1} & regenerate` : 'Create standard'}</button></div>
-        {preview && <Card title="Generated instruction file" right={<a onClick={() => setPreview('')}>close</a>}><pre className="mono" style={{ whiteSpace: 'pre-wrap', maxHeight: 360, overflow: 'auto' }}>{preview}</pre></Card>}
+        {preview && <Card title="Generated instruction file" right={<button type="button" className="lnk" onClick={() => setPreview('')}>close</button>}><pre className="mono" style={{ whiteSpace: 'pre-wrap', maxHeight: 360, overflow: 'auto' }}>{preview}</pre></Card>}
       </div> : <Empty>Select a standard.</Empty>}
       {cur && <div style={{ width: 290 }}><AgentChat title="Edit with" personas={personas} persona={persona} setPersona={setPersona}
         send={(m, h) => api.standards.chat(cur.id, { persona, message: m, content: body, history: h })}
@@ -173,7 +174,7 @@ export function History() {
         <div className="small" style={{ marginTop: 6 }}><b>{cmp.verdict}</b></div><div className="xs muted">{cmp.criteria}</div></Card>}
       <Card title="Improvement proposals">
         <div className="col small" style={{ gap: 10 }}>{(props || []).map((p) => <div key={p.id} className="tile"><b>{p.id} · {p.title}</b> <Status s={p.status} /><div className="muted">{p.body}</div><div className="xs muted">Evidence: {p.evidence}</div>
-          <div style={{ marginTop: 6 }}><Chip>by {p.author}</Chip> {p.status === 'open' && <><a onClick={() => run(() => api.proposals.decide(p.id, { decision: 'accepted' }), 'Accepted: task created')}>Accept</a> · <a onClick={() => run(() => api.proposals.decide(p.id, { decision: 'rejected' }), 'Rejected')}>Reject</a></>}</div></div>)}
+          <div style={{ marginTop: 6 }}><Chip>by {p.author}</Chip> {p.status === 'open' && <><button type="button" className="lnk" onClick={() => run(() => api.proposals.decide(p.id, { decision: 'accepted' }), 'Accepted: task created')}>Accept</button> · <button type="button" className="lnk" onClick={() => run(() => api.proposals.decide(p.id, { decision: 'rejected' }), 'Rejected')}>Reject</button></>}</div></div>)}
           {props?.length === 0 && <span className="muted">Agents propose improvements from these metrics with <code>gbi proposals create</code>. Accepted proposals become tasks that go through normal review (NFR-13).</span>}</div>
       </Card>
       </div>
@@ -259,7 +260,7 @@ export function Settings() {
             <div>Current <b>{sys?.version}</b> · channel {cfg.updates?.channel} · <Toggle on={!!cfg.updates?.autoInstall} label="auto install" onChange={(v) => patch({ updates: { ...cfg.updates, autoInstall: v } })} /> auto-install</div>
             <div className="muted">Installs only when no sessions are running · checksum + Ed25519 signature verified (ADR-004)</div>
             <div>{upd?.error ? <span className="muted">{upd.error}</span> : upd?.newer ? <>New: <b>{upd.tag}</b> <button type="button" className="btn sm p" onClick={() => run(() => api.updates.install(), 'Installed; restart to apply')}>Install</button></> : 'Up to date'}</div>
-            {upd?.previous && <div>Previous: {upd.previous} <a onClick={() => run(() => api.updates.rollback(), 'Rolled back; restart to apply')}>Roll back</a></div>}</div></Card>
+            {upd?.previous && <div>Previous: {upd.previous} <button type="button" className="lnk" onClick={() => run(() => api.updates.rollback(), 'Rolled back; restart to apply')}>Roll back</button></div>}</div></Card>
         </div>
       </div>
     </div>

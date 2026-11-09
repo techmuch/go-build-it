@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { api } from '../api.gen';
 import { useData } from '../live';
 import { navigate } from '../router';
 import { ProjectTabs, Shell } from '../shell';
 import { A, Av, Bar, Card, Chip, DictArea, Empty, Err, Loading, Status, ago, day, useAction } from '../ui';
+import { clickable, useDialog } from '../keys';
 
 const STAGES = ['Discovery', 'Requirements', 'Design', 'Implementation', 'Review', 'Released', 'Maintenance', 'Paused', 'Archived'];
 const stageColor = (s: string) => ({ Discovery: 'blue', Requirements: 'blue', Design: 'blue', Implementation: 'acc', Review: 'amb', Released: 'grn', Maintenance: '', Paused: '', Archived: '' } as any)[s] || '';
@@ -36,8 +37,8 @@ export function Catalog() {
       <button type="button" className="btn right" disabled={busy} onClick={() => run(() => api.projects.list({ refresh: true }).then(reload), 'Refreshed git and forge data')}>↻ Refresh</button>
     </div>
     <Err msg={error} />
-    {loading && !data ? <Loading what="projects" /> : ps.length === 0 ? <Empty>{(data || []).length === 0 ? <>No projects yet. <a onClick={() => setImporting(true)}>Import a git repository</a> to start.</> : 'No projects match.'}</Empty> :
-      <div className="pgrid">{ps.map((p) => <ProjectCard key={p.id} p={p} />)}</div>}
+    {loading && !data ? <Loading what="projects" /> : ps.length === 0 ? <Empty>{(data || []).length === 0 ? <>No projects yet. <button type="button" className="lnk" onClick={() => setImporting(true)}>Import a git repository</button> to start.</> : 'No projects match.'}</Empty> :
+      <div className="pgrid" data-navgroup="grid" aria-label="Projects (arrow keys move between cards)">{ps.map((p) => <ProjectCard key={p.id} p={p} />)}</div>}
     {importing && <ImportDialog onClose={() => setImporting(false)} onDone={(id) => { setImporting(false); navigate('/projects/' + id); }} />}
   </Shell>;
 }
@@ -48,7 +49,7 @@ function ProjectCard({ p }: { p: any }) {
   const un = l.unpushed || {};
   const attn = p.needsYou > 0 || un.commits > 0 || un.uncommitted > 0 || l.repo?.ci === 'failing';
   const web = p.websiteUrl || l.repo?.websiteUrl;
-  return <div className={'pcard ' + (attn ? 'attn' : '')} onClick={() => navigate('/projects/' + p.id)} role="link" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') navigate('/projects/' + p.id); }}>
+  return <div className={'pcard ' + (attn ? 'attn' : '')} {...clickable(() => navigate('/projects/' + p.id), { role: 'link' })}>
     <div className="row c"><span className="nm">{p.name}</span><span className="right"><Chip c={stageColor(p.stage)}>{p.stage}</Chip></span></div>
     <div className="small">{p.purpose || <span className="muted">No purpose written yet</span>}</div>
     <div className="small muted">{p.statusLine}{p.milestone ? ` · ${p.milestone}` : ''}</div>
@@ -81,8 +82,10 @@ function ImportDialog({ onClose, onDone }: { onClose: () => void; onDone: (id: s
   const [purpose, setPurpose] = useState('');
   const [stage, setStage] = useState('Discovery');
   const { run, busy } = useAction();
+  const dlg = useRef<HTMLDivElement>(null);
+  useDialog(dlg, onClose);
   return <div className="overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-    <div className="modal" role="dialog" aria-label="Import project">
+    <div className="modal" role="dialog" aria-modal="true" aria-label="Import project" ref={dlg}>
       <h2 style={{ fontSize: 16 }}>Import an existing git repository</h2>
       <div className="form-row"><label>Repository path on this machine</label><input autoFocus value={path} onChange={(e) => setPath(e.target.value)} placeholder="/Users/you/projects/trailmap" /></div>
       <div className="form-row"><label>Project id (optional; defaults to the folder name)</label><input value={id} onChange={(e) => setId(e.target.value)} /></div>
@@ -106,24 +109,24 @@ export function ProjectOverview({ id }: { id: string }) {
   return <Shell title={p.name} crumb={<A to="/">Projects</A>} right={<Chip c={stageColor(p.stage)}>{p.stage}</Chip>} tabs={<ProjectTabs id={id} on="overview" />}>
     <div className="row">
       <div className="col grow">
-        <Card title="Purpose & values" right={<a onClick={() => setEditPurpose(editPurpose === null ? p.purpose : null)}>Edit</a>}>
+        <Card title="Purpose & values" right={<button type="button" className="lnk" onClick={() => setEditPurpose(editPurpose === null ? p.purpose : null)}>Edit</button>}>
           {editPurpose !== null ? <div className="col" style={{ gap: 6 }}><DictArea value={editPurpose} onChange={setEditPurpose} rows={2} />
             <div className="row c"><span className="right" /><button type="button" className="btn p" onClick={() => run(() => api.projects.update(id, { purpose: editPurpose }), 'Saved').then(() => setEditPurpose(null))}>Save</button></div></div>
             : <div style={{ fontSize: 14, marginBottom: 8 }}>{p.purpose || <span className="muted">No purpose yet.</span>}</div>}
           <div className="row c wrap" style={{ gap: 6 }}>{data.values.map((v: any) => <Chip key={v.id} c={v.status === 'proposed' ? 'acc' : ''} title={v.source}>{v.status === 'proposed' ? 'Proposed: ' : ''}{v.text}</Chip>)}
             <A to={`/projects/${id}/artifacts`} className="small">Values & problem ›</A></div>
         </Card>
-        <Card title="Roadmap" right={<span className="small muted">◆ = review gate · click a row for detail · <a onClick={() => setNewM(true)}>+ Milestone</a></span>}>
+        <Card title="Roadmap" right={<span className="small muted">◆ = review gate · click a row for detail · <button type="button" className="lnk" onClick={() => setNewM(true)}>+ Milestone</button></span>}>
           {data.milestones?.length ? <table className="t"><tbody>
             <tr><th style={{ width: '36%' }}>Milestone</th><th>Progress</th><th style={{ width: '24%' }}>Gate</th><th style={{ width: 90 }}>Status</th></tr>
-            {data.milestones.map((m: any) => <tr key={m.id} className="click" onClick={() => navigate('/milestones/' + m.id)}>
+            {data.milestones.map((m: any) => <tr key={m.id} className="click" {...clickable(() => navigate('/milestones/' + m.id), { role: 'link' })}>
               <td><A to={'/milestones/' + m.id}><b>{m.name}</b> ›</A></td>
               <td><Bar pct={m.total ? (100 * m.done) / m.total : m.status === 'done' ? 100 : 0} /><span className="small muted">{m.done} / {m.total} tasks</span></td>
               <td>{m.gateName ? <>◆ {m.gateName} <Status s={m.gateStatus} /></> : <span className="muted">—</span>}</td><td><Status s={m.status} /></td></tr>)}
-          </tbody></table> : <Empty>No roadmap yet. <a onClick={() => setNewM(true)}>Add the first milestone</a>.</Empty>}
+          </tbody></table> : <Empty>No roadmap yet. <button type="button" className="lnk" onClick={() => setNewM(true)}>Add the first milestone</button>.</Empty>}
         </Card>
         <Card title="Running now">
-          {data.sessions?.length ? <table className="t"><tbody>{data.sessions.map((s: any) => <tr key={s.id} className="click" onClick={() => navigate('/sessions/' + s.id)}>
+          {data.sessions?.length ? <table className="t"><tbody>{data.sessions.map((s: any) => <tr key={s.id} className="click" {...clickable(() => navigate('/sessions/' + s.id), { role: 'link' })}>
             <td style={{ width: 30 }}><Av name={s.memberId} role="developer" /></td><td><b>{s.memberId}</b> · {s.harness}<br /><span className="small muted">{s.taskId}</span></td>
             <td style={{ width: 210 }}><Bar pct={s.fraction * 100} warn={70} /><span className="small muted">{Math.round(s.fraction * 100)}% context{s.measured ? '' : ' (est.)'}{s.compactions ? ` · compacted ${s.compactions}×` : ''}</span></td><td><Status s={s.status} /></td></tr>)}</tbody></table>
             : <span className="muted small">Nothing running. Queue tasks and run them, or turn on automatic dispatch in Settings.</span>}
@@ -173,8 +176,10 @@ function MilestoneDialog({ projectId, existing, onClose }: { projectId: string; 
   const [m, setM] = useState<any>(existing || { name: '', scope: '', gateName: '', gateKind: 'tabletop', gateCriteria: [] });
   const [crit, setCrit] = useState((existing?.gateCriteria || []).join('\n'));
   const { run, busy } = useAction();
+  const dlg = useRef<HTMLDivElement>(null);
+  useDialog(dlg, onClose);
   return <div className="overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-    <div className="modal" role="dialog" aria-label="Milestone">
+    <div className="modal" role="dialog" aria-modal="true" aria-label="Milestone" ref={dlg}>
       <h2 style={{ fontSize: 16 }}>{existing ? 'Edit milestone' : 'New milestone'}</h2>
       <div className="form-row"><label>Name</label><input autoFocus value={m.name} onChange={(e) => setM({ ...m, name: e.target.value })} placeholder="M2 · Harness adapters" /></div>
       <div className="form-row"><label>Scope</label><DictArea value={m.scope} onChange={(v) => setM({ ...m, scope: v })} /></div>
@@ -199,7 +204,7 @@ export function MilestoneDetail({ mid }: { mid: string }) {
   return <Shell title={m.name} crumb={<><A to={`/projects/${m.projectId}`}>{m.projectId}</A> / Roadmap</>} right={<Status s={m.status} />} tabs={<ProjectTabs id={m.projectId} on="overview" />}>
     <div className="row">
       <div className="col grow">
-        <Card title="Scope" right={<a onClick={() => setEdit(true)}>Edit</a>}>
+        <Card title="Scope" right={<button type="button" className="lnk" onClick={() => setEdit(true)}>Edit</button>}>
           <div>{m.scope || <span className="muted">No scope written.</span>}</div>
           <div className="row c" style={{ marginTop: 10 }}><div className="grow"><Bar pct={data.tasks.length ? (100 * done) / data.tasks.length : 0} /><span className="small muted">{done} of {data.tasks.length} tasks done</span></div>{m.target && <span className="small muted">target {m.target}</span>}</div>
           {!data.workAllowed && <div className="note" style={{ marginTop: 10 }}>Work here is on hold: {data.blockedBy}.</div>}

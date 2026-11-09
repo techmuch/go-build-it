@@ -104,6 +104,14 @@ export const api = {
     /** Option sets */
     list: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/options`, undefined, query),
   },
+  pins: {
+    /** Pin a comment to a spot on an attachment or mockup */
+    add: (body?: unknown) => call<any>('POST', `/api/pins`, body),
+    /** Comments pinned to spots on attachments and mockups */
+    list: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/pins`, undefined, query),
+    /** Remove a pinned comment */
+    remove: (pid: string, body?: unknown) => call<any>('DELETE', `/api/pins/${encodeURIComponent(pid)}`, body),
+  },
   problem: {
     /** Latest problem definition */
     get: (id: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/projects/${encodeURIComponent(id)}/problem`, undefined, query),

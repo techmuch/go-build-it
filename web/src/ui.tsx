@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode, createContext, us
 import { marked } from 'marked';
 import { api } from './api.gen';
 import { navigate } from './router';
+import { isTyping, useDialog } from './keys';
 
 // ---------- formatting ----------
 export function ago(ts?: string): string {
@@ -113,27 +114,84 @@ export function kindOf(path: string): string {
   return 'text';
 }
 
-export function Viewer({ items, index, onClose, title }: { items: Attachment[]; index: number; onClose: () => void; title?: string }) {
+const TEXT_KINDS = ['json', 'diff', 'log', 'text', 'markdown'];
+const textCache = new Map<string, Promise<string>>();
+function loadText(url: string): Promise<string> {
+  if (!textCache.has(url)) textCache.set(url, fetch(url).then((r) => (r.ok ? r.text() : Promise.reject(new Error(r.statusText)))).catch(() => { textCache.delete(url); return '(could not load)'; }));
+  return textCache.get(url)!;
+}
+
+/** A small live preview of an attachment for the viewer's strip. */
+export function Thumb({ item }: { item: Attachment }) {
+  const [text, setText] = useState(item.body ?? '');
+  useEffect(() => {
+    if (item.body !== undefined) { setText(item.body); return; }
+    if (item.url && TEXT_KINDS.includes(item.kind)) { let live = true; loadText(item.url).then((t) => { if (live) setText(t); }); return () => { live = false; }; }
+  }, [item.url, item.body, item.kind]);
+  const label = <span className="kind">{item.kind === 'markdown' ? 'MD' : item.kind.toUpperCase()}</span>;
+  if (item.kind === 'html' && item.url) {
+    const w = 1280, scale = 136 / w;
+    return <div className="thumb"><iframe title={'Preview of ' + item.name} src={item.url} sandbox="allow-scripts" loading="lazy" tabIndex={-1} aria-hidden="true" style={{ width: w, height: 72 / scale, transform: `scale(${scale})` }} />{label}</div>;
+  }
+  if (item.kind === 'image' && item.url) return <div className="thumb"><img src={item.url} alt="" loading="lazy" />{label}</div>;
+  if (item.kind === 'link') return <div className="thumb link" aria-hidden="true">🔗{label}</div>;
+  let lines = (text || '').split('\n').slice(0, 14);
+  if (item.kind === 'json') { try { lines = JSON.stringify(JSON.parse(text), null, 1).split('\n').slice(0, 14); } catch { /* keep raw */ } }
+  return <div className="thumb txt" aria-hidden="true"><pre>{lines.map((l, k) => <div key={k} className={item.kind === 'diff' ? (l.startsWith('+') ? 'a' : l.startsWith('-') ? 'd' : '') : ''}>{l.slice(0, 60) || ' '}</div>)}</pre>{label}</div>;
+}
+
+type SavedPin = Pin & { id?: number };
+
+/** Full-screen viewer for attachments and mockups (FR-102a, FR-116a). Pins are saved per subject and item (FR-110). */
+export function Viewer({ items, index, onClose, title, projectId }: { items: Attachment[]; index: number; onClose: () => void; title?: string; projectId?: string }) {
   const [i, setI] = useState(index);
   const [size, setSize] = useState<'desktop' | 'tablet' | 'phone'>('desktop');
   const [fit, setFit] = useState(true);
   const [pinMode, setPinMode] = useState(false);
-  const [pins, setPins] = useState<Record<number, Pin[]>>({});
+  const [pins, setPins] = useState<SavedPin[]>([]);
   const [draft, setDraft] = useState('');
   const [text, setText] = useState<string>('');
   const stage = useRef<HTMLDivElement>(null);
+  const root = useRef<HTMLDivElement>(null);
+  const strip = useRef<HTMLDivElement>(null);
   const [stageW, setStageW] = useState(1000);
+  const toast = useToast();
   const it = items[i];
+  const subject = title || 'viewer';
+  const itemKey = it ? it.url || it.name : '';
+  useDialog(root, onClose);
   useEffect(() => {
-    const k = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); if (e.key === 'ArrowRight') setI((x) => Math.min(items.length - 1, x + 1)); if (e.key === 'ArrowLeft') setI((x) => Math.max(0, x - 1)); };
+    // ←/→ step through attachments from anywhere in the viewer, except while typing or inside a segmented control.
+    const k = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.altKey || e.metaKey || e.ctrlKey || isTyping(e.target)) return;
+      if ((e.target as HTMLElement).closest?.('.seg')) return;
+      const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!step) return;
+      e.preventDefault();
+      setI((x) => Math.max(0, Math.min(items.length - 1, x + step)));
+    };
     window.addEventListener('keydown', k); return () => window.removeEventListener('keydown', k);
-  }, [items.length, onClose]);
+  }, [items.length]);
+  useEffect(() => {
+    // Keep the strip's current thumbnail in view (and focused, if the strip has focus).
+    const btn = strip.current?.querySelectorAll<HTMLElement>('button')[i];
+    if (!btn) return;
+    btn.scrollIntoView({ block: 'nearest' });
+    if (strip.current?.contains(document.activeElement) && document.activeElement !== btn) btn.focus();
+  }, [i]);
   useEffect(() => {
     setText('');
     if (!it) return;
     if (it.body !== undefined) { setText(it.body); return; }
-    if (it.url && ['json', 'diff', 'log', 'text', 'markdown'].includes(it.kind)) fetch(it.url).then((r) => r.text()).then(setText).catch(() => setText('(could not load)'));
+    if (it.url && TEXT_KINDS.includes(it.kind)) { let live = true; loadText(it.url).then((t) => { if (live) setText(t); }); return () => { live = false; }; }
   }, [it]);
+  useEffect(() => {
+    if (!itemKey) return;
+    let live = true;
+    setPins([]);
+    api.pins.list({ subject, item: itemKey }).then((ps: any[]) => { if (live) setPins(ps.map((p) => ({ id: p.id, x: p.x, y: p.y, text: p.text, who: p.author }))); }).catch(() => {});
+    return () => { live = false; };
+  }, [subject, itemKey]);
   useEffect(() => {
     const ro = new ResizeObserver(() => setStageW((stage.current?.clientWidth || 1000) - 32));
     if (stage.current) ro.observe(stage.current);
@@ -142,24 +200,33 @@ export function Viewer({ items, index, onClose, title }: { items: Attachment[]; 
   if (!it) return null;
   const w = SIZES[size];
   const scale = fit && it.kind === 'html' ? Math.min(1, stageW / w) : 1;
-  const myPins = pins[i] || [];
+  const placePin = async (x: number, y: number) => {
+    const t = draft.trim() || 'Comment';
+    try {
+      const p = await api.pins.add({ subject, item: itemKey, projectId: projectId || '', x, y, text: t });
+      setPins((ps) => [...ps, { id: p.id, x: p.x, y: p.y, text: p.text, who: p.author }]);
+      setDraft('');
+    } catch (e: any) { toast('Could not save the pin: ' + (e.message || e), true); }
+  };
   const addPin = (e: React.MouseEvent) => {
     const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = ((e.clientX - r.left) / r.width) * 100, y = ((e.clientY - r.top) / r.height) * 100;
-    setPins({ ...pins, [i]: [...myPins, { x, y, text: draft || 'Comment', who: 'you' }] });
-    setDraft('');
+    placePin(((e.clientX - r.left) / r.width) * 100, ((e.clientY - r.top) / r.height) * 100);
   };
+  const removePin = async (p: SavedPin) => {
+    if (!p.id) return;
+    try { await api.pins.remove(String(p.id)); setPins((ps) => ps.filter((x) => x.id !== p.id)); } catch (e: any) { toast(e.message || String(e), true); }
+  };
+  const pinLayer = pinMode && <div className="pinlayer" onClick={addPin} role="button" tabIndex={0} aria-label="Place a pin: click a spot, or press Enter to pin the centre"
+    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); placePin(50, 50); } }} />;
+  const pinMarks = pins.map((p, k) => <div key={p.id ?? k} className="pin" style={{ left: `calc(${p.x}% - 11px)`, top: `calc(${p.y}% - 22px)` }}><span>{k + 1}</span></div>);
   let body: ReactNode;
   if (it.kind === 'html') {
     body = <div style={{ position: 'relative', width: w * scale, height: 820 * scale }}>
       <iframe title={it.name} src={it.url} sandbox="allow-scripts allow-forms" style={{ width: w, height: 820, transform: `scale(${scale})`, transformOrigin: '0 0' }} />
-      {pinMode && <div className="pinlayer" onClick={addPin} />}
-      {myPins.map((p, k) => <div key={k} className="pin" style={{ left: `calc(${p.x}% - 11px)`, top: `calc(${p.y}% - 22px)` }}><span>{k + 1}</span></div>)}
+      {pinLayer}{pinMarks}
     </div>;
   } else if (it.kind === 'image') {
-    body = <div style={{ position: 'relative' }}><img src={it.url} alt={it.name} style={{ maxWidth: fit ? '100%' : 'none', display: 'block' }} />
-      {pinMode && <div className="pinlayer" onClick={addPin} />}
-      {myPins.map((p, k) => <div key={k} className="pin" style={{ left: `calc(${p.x}% - 11px)`, top: `calc(${p.y}% - 22px)` }}><span>{k + 1}</span></div>)}</div>;
+    body = <div style={{ position: 'relative' }}><img src={it.url} alt={it.name} style={{ maxWidth: fit ? '100%' : 'none', display: 'block' }} />{pinLayer}{pinMarks}</div>;
   } else if (it.kind === 'diff') {
     body = <div className="card" style={{ width: '100%', padding: 0 }}><DiffView text={text} /></div>;
   } else if (it.kind === 'markdown') {
@@ -169,28 +236,34 @@ export function Viewer({ items, index, onClose, title }: { items: Attachment[]; 
   } else {
     let pretty = text;
     if (it.kind === 'json') { try { pretty = JSON.stringify(JSON.parse(text), null, 2); } catch { /* keep */ } }
-    body = <pre className="term" style={{ width: '100%', borderRadius: 6, margin: 0 }}>{pretty}</pre>;
+    body = <pre className="term" tabIndex={0} style={{ width: '100%', borderRadius: 6, margin: 0 }}>{pretty}</pre>;
   }
-  return <div className="overlay" role="dialog" aria-label="Viewer" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-    <div className="viewer">
+  return <div className="overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <div className="viewer" ref={root} role="dialog" aria-modal="true" aria-label={'Viewer: ' + it.name}>
       <div className="viewer-h">
-        <b style={{ whiteSpace: 'nowrap' }}>{it.name}</b><span className="small muted" style={{ whiteSpace: 'nowrap' }}>{title ? title + ' · ' : ''}{i + 1} of {items.length}</span>
+        <b style={{ whiteSpace: 'nowrap' }}>{it.name}</b><span className="small muted" style={{ whiteSpace: 'nowrap' }} aria-live="polite">{title ? title + ' · ' : ''}{i + 1} of {items.length}</span>
         {it.kind === 'html' && <Seg value={size} onChange={setSize} options={[['desktop', 'Desktop 1280'], ['tablet', 'Tablet 820'], ['phone', 'Phone 390']]} />}
         {(it.kind === 'html' || it.kind === 'image') && <><Seg value={fit ? 'fit' : '100'} onChange={(v) => setFit(v === 'fit')} options={[['fit', 'Fit'], ['100', '100%']]} />
-          <button type="button" className={'btn sm ' + (pinMode ? 'p' : '')} onClick={() => setPinMode(!pinMode)}>📍 Pin</button></>}
+          <button type="button" aria-pressed={pinMode} className={'btn sm ' + (pinMode ? 'p' : '')} onClick={() => setPinMode(!pinMode)}>📍 Pin</button></>}
         <span className="right" />
+        <span className="small muted" style={{ whiteSpace: 'nowrap' }}><kbd>←</kbd> <kbd>→</kbd> switch</span>
         {it.url && <a className="small" href={it.url} target="_blank" rel="noreferrer" style={{ whiteSpace: 'nowrap' }}>New tab ↗</a>}
-        <button type="button" className="btn" onClick={onClose}>✕ Esc</button>
+        <button type="button" className="btn" onClick={onClose} data-autofocus={items.length < 2 ? '' : undefined}>✕ Esc</button>
       </div>
       <div className="viewer-b">
-        <div className="viewer-strip">{items.map((x, k) => <button type="button" key={k} className={k === i ? 'on' : ''} onClick={() => setI(k)}><div className="muted xs">{x.kind.toUpperCase()}</div>{x.name}</button>)}</div>
+        <div className="viewer-strip" ref={strip} role="listbox" aria-label="Attachments (↑ ↓ to switch)" data-navgroup="">
+          {items.map((x, k) => <button type="button" key={k} role="option" aria-selected={k === i} className={k === i ? 'on' : ''} data-nav="" tabIndex={k === i ? 0 : -1}
+            data-autofocus={k === i && items.length > 1 ? '' : undefined} onClick={() => setI(k)} onFocus={() => setI(k)}>
+            <Thumb item={x} /><span className="nm">{x.name}</span></button>)}
+        </div>
         <div className="viewer-stage" ref={stage}>{body}</div>
-        <div className="viewer-side">
+        <div className="viewer-side" data-submit-scope="">
           <b className="small">Comments on this item</b>
-          {myPins.length === 0 && <span className="muted small">Turn on 📍 Pin and click the item to place a comment.</span>}
-          {myPins.map((p, k) => <div key={k} className="msg small"><span className="chip amb">{k + 1}</span><div className="bub"><b>{p.who}</b>: {p.text}</div></div>)}
+          {pins.length === 0 && <span className="muted small">Turn on 📍 Pin and click the item to place a comment.</span>}
+          {pins.map((p, k) => <div key={p.id ?? k} className="msg small"><span className="chip amb">{k + 1}</span><div className="bub grow"><b>{p.who}</b>: {p.text}</div>
+            {p.id && <button type="button" className="lnk small" aria-label={`Remove pin ${k + 1}`} onClick={() => removePin(p)}>✕</button>}</div>)}
           <DictArea value={draft} onChange={setDraft} placeholder="Comment for the next pin…" rows={2} />
-          <span className="muted xs">Viewers: HTML (live, sandboxed), images (zoom), diffs, JSON and logs (highlighted), Markdown.</span>
+          <span className="muted xs">Write the comment, turn on 📍 Pin, then click the spot. Pins are saved and shown to everyone who opens this item.</span>
         </div>
       </div>
     </div>

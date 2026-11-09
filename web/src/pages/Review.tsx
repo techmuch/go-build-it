@@ -4,6 +4,7 @@ import { useData } from '../live';
 import { navigate, query } from '../router';
 import { Shell, useSystem } from '../shell';
 import { A, Av, Card, Chip, DictArea, Empty, Err, Loading, Seg, Status, Viewer, ago, kindOf, useAction } from '../ui';
+import { clickable } from '../keys';
 
 // v07 · Option set: one large preview at a time + combination tray (FR-120–FR-124, FR-116a)
 export function OptionSets({ oid }: { oid?: string }) {
@@ -66,14 +67,14 @@ function OptionSet({ id, list }: { id: string; list: any[] }) {
       <Card title="Combination tray" style={{ width: 300, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {decided ? <div className="small"><b>Decided {ago(s.decidedAt)}:</b>{s.choice.map((c: any, k: number) => <div key={k}>{c.option}{c.aspect ? ' · ' + c.aspect : ' (whole option)'}</div>)}<p className="muted">{s.reason}</p></div> : <>
           {tray.length === 0 && <span className="small muted">Tick aspects in any option; they collect here so you can mix parts of options.</span>}
-          {tray.map((t, k) => <div key={k} className="tile small" style={{ padding: '6px 10px' }}><b>{t.option}</b> · {t.aspect || 'whole option'}<a style={{ float: 'right' }} onClick={() => toggle(t.option, t.aspect)}>✕</a></div>)}
+          {tray.map((t, k) => <div key={k} className="tile small" style={{ padding: '6px 10px' }}><b>{t.option}</b> · {t.aspect || 'whole option'}<button type="button" className="lnk" style={{ float: 'right' }} onClick={() => toggle(t.option, t.aspect)}>✕</button></div>)}
           <div className="small muted">Why this combination? (recorded and used to refine values)</div>
           <DictArea value={reason} onChange={setReason} rows={4} />
           <input placeholder="Propose a value (optional), e.g. Battery over beauty" value={value} onChange={(e) => setValue(e.target.value)} />
           <button type="button" className="btn p" disabled={busy || !tray.length || !reason.trim()} onClick={() => run(() => api.options.choose(id, { picks: tray, reason, value }), 'Choice recorded; Atlas will combine it')}>Submit choice</button></>}
       </Card>
     </div>
-    {viewer !== null && viewer >= 0 && <Viewer items={items} index={viewer} onClose={() => setViewer(null)} title={s.id} />}
+    {viewer !== null && viewer >= 0 && <Viewer items={items} index={viewer} onClose={() => setViewer(null)} title={s.id} projectId={s.projectId} />}
   </>;
 }
 
@@ -82,7 +83,7 @@ export function Rehearsals({ gid }: { gid?: string }) {
   const { data } = useData<any[]>(() => api.rehearsals.list(), [], (e) => e.type.startsWith('rehearsal'));
   if (gid === 'new') return <NewRehearsal />;
   return <Shell title="Dress rehearsals" right={<A to={`/rehearsals/new`} className="btn p">+ Rehearsal</A>} noPad={!!gid}>
-    {gid ? <Rehearsal id={gid} /> : <Card>{(data || []).map((g) => <div key={g.id} className="list-item" onClick={() => navigate('/rehearsals/' + g.id)}><b>{g.id} · {g.title}</b> <Status s={g.status} /><div className="small muted">{g.projectId} · {g.kind} · {g.steps.length} steps · hosted by {g.host}</div></div>)}{data?.length === 0 && <Empty>No rehearsals yet.</Empty>}</Card>}
+    {gid ? <Rehearsal id={gid} /> : <Card>{(data || []).map((g) => <div key={g.id} className="list-item" {...clickable(() => navigate('/rehearsals/' + g.id), { role: 'link' })}><b>{g.id} · {g.title}</b> <Status s={g.status} /><div className="small muted">{g.projectId} · {g.kind} · {g.steps.length} steps · hosted by {g.host}</div></div>)}{data?.length === 0 && <Empty>No rehearsals yet.</Empty>}</Card>}
   </Shell>;
 }
 
@@ -104,8 +105,8 @@ function Rehearsal({ id }: { id: string }) {
     <div style={{ borderRight: '1px solid var(--line)', background: 'var(--card)', padding: 12, fontSize: 12.5, display: 'flex', flexDirection: 'column', gap: 6 }}>
       <b>{g.title}</b><span className="muted small">{g.projectId} · {g.kind === 'uat' ? 'UAT (working app)' : 'Tabletop (mockups)'} · <Status s={g.status} /></span>
       <b style={{ marginTop: 8 }}>Steps · {g.current + 1} of {g.steps.length}</b>
-      {g.steps.map((s: any, k: number) => <a key={k} onClick={() => run(() => api.rehearsals.advance(id, { step: k }))} style={{ color: 'var(--t)', background: k === g.current ? 'var(--acc-s)' : undefined, padding: 6, borderRadius: 6 }}>
-        {s.status === 'ok' ? '✅' : s.status === 'notes' ? '📝' : k === g.current ? '▶' : '○'} {k + 1}. {s.title}{g.findings.filter((f: any) => f.step === k).length > 0 && <Chip c="amb">{g.findings.filter((f: any) => f.step === k).length}</Chip>}</a>)}
+      {g.steps.map((s: any, k: number) => <button type="button" className="lnk" key={k} onClick={() => run(() => api.rehearsals.advance(id, { step: k }))} style={{ color: 'var(--t)', background: k === g.current ? 'var(--acc-s)' : undefined, padding: 6, borderRadius: 6 }}>
+        {s.status === 'ok' ? '✅' : s.status === 'notes' ? '📝' : k === g.current ? '▶' : '○'} {k + 1}. {s.title}{g.findings.filter((f: any) => f.step === k).length > 0 && <Chip c="amb">{g.findings.filter((f: any) => f.step === k).length}</Chip>}</button>)}
       <span className="muted" style={{ marginTop: 'auto' }}>Hosted by {g.host}<br />Started {ago(g.createdAt)}</span>
     </div>
     <div className="content">
@@ -121,7 +122,7 @@ function Rehearsal({ id }: { id: string }) {
       <b className="small">Findings & team chat · step {g.current + 1}</b>
       <div className="row c small"><Seg value={who} onChange={setWho} options={[['all', 'All'], ['human', 'Humans'], ['persona', 'AI']]} /><span className="muted xs">reviewers: {g.reviewers.join(', ') || '—'}</span></div>
       {fs.map((f: any) => <div key={f.id} className="msg small"><Av s name={f.author} role={f.authorKind === 'human' ? 'human' : 'qa'} /><div className="bub"><b>{f.author}</b>{f.authorKind === 'human' ? '' : ' (AI)'}: {f.text}
-        <div style={{ marginTop: 4 }}>{f.changeRequest ? <A to={`/queue?task=${f.changeRequest}`}>Change request {f.changeRequest}</A> : <><a onClick={() => run(() => api.findings.changeRequest(String(f.id), { now: false }), 'Queued for later')}>Queue for later</a> · <a onClick={() => run(() => api.findings.changeRequest(String(f.id), { now: true }), 'Running now')}>Do it now</a></>}</div></div></div>)}
+        <div style={{ marginTop: 4 }}>{f.changeRequest ? <A to={`/queue?task=${f.changeRequest}`}>Change request {f.changeRequest}</A> : <><button type="button" className="lnk" onClick={() => run(() => api.findings.changeRequest(String(f.id), { now: false }), 'Queued for later')}>Queue for later</button> · <button type="button" className="lnk" onClick={() => run(() => api.findings.changeRequest(String(f.id), { now: true }), 'Running now')}>Do it now</button></>}</div></div></div>)}
       {fs.length === 0 && <span className="muted small">No findings on this step yet.</span>}
       <DictArea value={text} onChange={setText} placeholder="Feedback for this step… (type or dictate)" />
       <button type="button" className="btn p" disabled={busy || !text.trim()} onClick={() => run(() => api.rehearsals.finding(id, { step: g.current, text }), 'Finding recorded').then((r) => r && setText(''))}>Add finding</button>
@@ -131,7 +132,7 @@ function Rehearsal({ id }: { id: string }) {
           <button type="button" className="btn p" disabled={!!pending || !isOwner} onClick={() => run(() => api.rehearsals.decide(id, { decision: 'approve' }), 'Gate approved')}>Approve gate</button></div>}
       </div>
     </div>
-    {viewer && screen && <Viewer items={[{ name: st.title, kind: st.screen.startsWith('http') ? 'html' : kindOf(st.screen), url: screen }]} index={0} onClose={() => setViewer(false)} title={g.id} />}
+    {viewer && screen && <Viewer items={[{ name: st.title, kind: st.screen.startsWith('http') ? 'html' : kindOf(st.screen), url: screen }]} index={0} onClose={() => setViewer(false)} title={g.id} projectId={g.projectId} />}
   </div>;
 }
 
@@ -205,7 +206,7 @@ function ReviewDetail({ id, list }: { id: string; list: any[] }) {
           <div className="tile"><div className="lbl">Standards</div><div className="big">{score(a.standards || [])}</div><div className="small muted">global + project</div></div>
           <div className="tile"><div className="lbl">Feedback</div><div className="big">{score(a.feedback || [])}</div><div className="small muted">addressed</div></div>
         </div>
-        <Card title="Approved mockup vs built" right={<><Seg value={mode} onChange={setMode} options={[['side', 'Side by side'], ['slider', 'Slider']]} /> {items.length > 0 && <a onClick={() => setViewer(0)}>⤢ Full screen</a>}</>}>
+        <Card title="Approved mockup vs built" right={<><Seg value={mode} onChange={setMode} options={[['side', 'Side by side'], ['slider', 'Slider']]} /> {items.length > 0 && <button type="button" className="lnk" onClick={() => setViewer(0)}>⤢ Full screen</button>}</>}>
           {!pair ? <span className="muted small">No mockup or e2e screenshot found. Screens are paired by name from docs/mockups and e2e-screenshots (FR-112).</span> : mode === 'side' ?
             <div className="row"><div className="grow"><div style={{ height: 220, background: 'var(--bg)', borderRadius: 6, overflow: 'hidden' }}>{pair.mockup ? <iframe title="mockup" src={`/raw/${r.projectId}/${pair.mockup}`} sandbox="allow-scripts" style={{ width: '200%', height: 440, border: 0, transform: 'scale(.5)', transformOrigin: '0 0', background: '#fff' }} /> : <Empty>no mockup</Empty>}</div><div className="small muted">Approved mockup · {pair.mockup || '—'}</div></div>
               <div className="grow"><div style={{ height: 220, background: 'var(--bg)', borderRadius: 6, overflow: 'hidden', display: 'grid', placeItems: 'center' }}>{pair.built ? <img src={`/raw/${r.projectId}/${pair.built}`} alt="built" style={{ maxWidth: '100%', maxHeight: 220 }} /> : <Empty>no screenshot</Empty>}</div><div className="small muted">Built · {pair.built || '—'}</div></div></div>
@@ -223,7 +224,7 @@ function ReviewDetail({ id, list }: { id: string; list: any[] }) {
         {a.diffStat && <details><summary className="small muted">Files changed</summary><pre className="mono small">{a.diffStat}</pre></details>}
       </div>
       <div className="col" style={{ width: 300 }}>
-        <Card title="Lens · summary" right={<a onClick={() => run(() => api.reviews.reassess(id), 'Reassessed')}>Re-run</a>}><div className="small">{a.summary || <span className="muted">No summary.</span>}</div>
+        <Card title="Lens · summary" right={<button type="button" className="lnk" onClick={() => run(() => api.reviews.reassess(id), 'Reassessed')}>Re-run</button>}><div className="small">{a.summary || <span className="muted">No summary.</span>}</div>
           <div className="small" style={{ marginTop: 6 }}>Recommends: <b>{a.recommendation === 'changes' ? 'request changes' : 'approve'}</b></div><div className="xs muted">assessed {ago(a.generatedAt)}</div></Card>
         {r.status === 'pending' ? <Card title="Your verdict">
           {(['approve', 'changes', 'reject'] as const).map((v) => <label key={v} className="small" style={{ display: 'block' }}><input type="radio" name="v" checked={verdict === v} onChange={() => setVerdict(v)} /> {v === 'approve' ? 'Approve' : v === 'changes' ? 'Request changes' : 'Reject'}</label>)}
@@ -234,6 +235,6 @@ function ReviewDetail({ id, list }: { id: string; list: any[] }) {
         <Card title="After approval"><div className="small">Courier {a.prUrl ? 'squash-merges the PR' : 'merges the branch'} and removes the worktree. <span className="muted">(no LLM session needed)</span></div></Card>
       </div>
     </div>
-    {viewer !== null && items.length > 0 && <Viewer items={items as any} index={viewer} onClose={() => setViewer(null)} title={r.id} />}
+    {viewer !== null && items.length > 0 && <Viewer items={items as any} index={viewer} onClose={() => setViewer(null)} title={r.id} projectId={r.projectId} />}
   </>;
 }

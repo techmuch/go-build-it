@@ -5,6 +5,7 @@ import { navigate, query } from '../router';
 import { ProjectTabs, Shell, useSystem } from '../shell';
 import { A, Av, Bar, Card, Chip, DictArea, Empty, Err, Loading, Seg, Status, Viewer, ago, clock, kfmt, useAction } from '../ui';
 import { attachmentsFor } from './Artifacts';
+import { clickable, useDialog } from '../keys';
 
 // v04 · Questions dashboard (FR-100–FR-105, FR-102a, FR-107)
 export function Questions({ qid }: { qid?: string }) {
@@ -28,7 +29,7 @@ export function Questions({ qid }: { qid?: string }) {
 }
 
 function QRow({ q, sel }: { q: any; sel: boolean }) {
-  return <div className={'list-item ' + (sel ? 'sel' : '')} onClick={() => navigate('/questions/' + q.id)}>
+  return <div className={'list-item ' + (sel ? 'sel' : '')} {...clickable(() => navigate('/questions/' + q.id), { role: 'link' })}>
     <div className="small muted">{q.projectId} · {q.asker} · {ago(q.createdAt)}</div><b>{q.title}</b>
     <div className="small muted">{q.blocking ? (q.taskId ? `Blocks ${q.taskId}` : 'Blocking') : 'Assumed: ' + q.assumption}{q.attachments?.length ? ` · ${q.attachments.length} attachments` : ''}</div></div>;
 }
@@ -65,7 +66,7 @@ function QuestionDetail({ id }: { id: string }) {
         {q.recommendation && <div className="small muted">Recommendation: {q.recommendation}</div>}
       </Card>}
       <Card title="Attachments" style={{ width: 300 }}>
-        <div className="col small" style={{ gap: 8 }}>{atts.map((a, k) => <a key={k} onClick={() => setViewer(k)}>{a.kind === 'html' ? '🖼' : a.kind === 'diff' ? '±' : '📄'} {a.name} ›</a>)}
+        <div className="col small" style={{ gap: 8 }}>{atts.map((a, k) => <button type="button" className="lnk" key={k} onClick={() => setViewer(k)}>{a.kind === 'html' ? '🖼' : a.kind === 'diff' ? '±' : '📄'} {a.name} ›</button>)}
           {atts.length === 0 && <span className="muted">No attachments.</span>}{atts.length > 0 && <span className="muted">Click to open in the viewer</span>}
           {q.taskId && <A to={'/queue?task=' + q.taskId}>🔗 Task {q.taskId}</A>}{q.sessionId && <A to={'/sessions/' + q.sessionId}>🔗 Session {q.sessionId}</A>}</div>
       </Card>
@@ -77,7 +78,7 @@ function QuestionDetail({ id }: { id: string }) {
         <button type="button" className="btn p" disabled={busy || (!choice && !answer.trim())} onClick={() => run(() => api.questions.answer(q.id, { answer, choice, proposeValue: propose ? (answer || q.options.find((o: any) => o.key === choice)?.title || '') : '' }), q.blocking ? 'Answered: work resumes' : 'Answered').then((r) => r && next())}>
           {q.blocking ? 'Answer & resume work' : 'Answer'}</button></div>
     </Card>
-    {viewer !== null && <Viewer items={atts} index={viewer} onClose={() => setViewer(null)} title={q.id} />}
+    {viewer !== null && <Viewer items={atts} index={viewer} onClose={() => setViewer(null)} title={q.id} projectId={q.projectId} />}
   </>;
 }
 
@@ -94,7 +95,7 @@ export function Sessions({ projectId }: { projectId?: string }) {
     <Err msg={error} />
     <Card style={{ padding: '6px 14px' }}>{ss.length === 0 ? <Empty>{all ? 'No sessions yet.' : 'Nothing running.'} Run a task from the <A to="/queue">queue</A>.</Empty> :
       <table className="t"><tbody><tr><th>Persona</th><th>Project · Task</th><th>Harness</th><th style={{ width: 220 }}>Context</th><th>When full</th><th>State</th><th /></tr>
-        {ss.map((s) => <tr key={s.id} className="click" onClick={() => navigate('/sessions/' + s.id)}>
+        {ss.map((s) => <tr key={s.id} className="click" {...clickable(() => navigate('/sessions/' + s.id), { role: 'link' })}>
           <td><Av s name={s.memberId} role="developer" /> {s.memberId}</td><td>{s.projectId} · {s.taskId}</td><td>{s.harness}</td>
           <td><Bar pct={s.fraction * 100} warn={70} /><span className="small">{kfmt(s.used)} / {kfmt(s.window)} · {Math.round(s.fraction * 100)}%{s.measured ? '' : ' (est.)'}</span></td>
           <td className="small">{hx && (sys?.experimental?.smartHandoffProjects || []).concat([]).some((p: string) => p === s.projectId) ? <Chip c="blue">Handoff at {Math.round((sys?.experimental?.handoffThreshold || .75) * 100)}% · exp.</Chip> : `Auto-compact${s.compactions ? ` · ${s.compactions}× so far` : ''}`}</td>
@@ -177,7 +178,7 @@ export function Queue({ projectId }: { projectId?: string }) {
     <Card style={{ padding: '6px 14px' }}>{ts.length === 0 ? <Empty>No tasks.</Empty> :
       <table className="t"><tbody><tr><th>ID</th><th>Task</th><th>Role · assignee</th><th>Pri</th><th>Depends on</th><th>Status</th><th>Retries · compactions</th><th /></tr>
         {ts.map((t) => <>
-          <tr key={t.id} className={'click ' + (open === t.id ? 'sel' : '')} onClick={() => setOpen(open === t.id ? '' : t.id)}>
+          <tr key={t.id} className={'click ' + (open === t.id ? 'sel' : '')} {...clickable(() => setOpen(open === t.id ? '' : t.id))} aria-expanded={open === t.id}>
             <td className="mono">{t.id}</td><td><b>{t.title}</b><div className="small muted">{t.projectId}{t.milestoneId ? ' · ' + t.milestoneId : ''}{t.blockedBy ? ' · ' + t.blockedBy : ''}</div></td>
             <td className="small">{t.role}{t.assignee ? ' · ' + t.assignee : ''}</td><td>P{t.priority}</td><td className="mono small">{t.deps.join(', ') || '—'}</td>
             <td><Status s={t.status} />{t.ready && t.status === 'queued' && <Chip c="acc">ready</Chip>}</td><td className="small">{t.retries}/{t.maxRetries} · {t.compactions}{t.compactions + t.handoffs >= 2 && <Chip c="amb">split?</Chip>}</td>
@@ -222,8 +223,10 @@ function TaskDialog({ project, projects, onClose }: { project: string; projects:
   const { data: ms } = useData<any[]>(() => (t.project ? api.milestones.list(t.project) : Promise.resolve([])), [t.project]);
   const { run, busy } = useAction();
   const split = (s: string) => s.split(',').map((x) => x.trim()).filter(Boolean);
+  const dlg = useRef<HTMLDivElement>(null);
+  useDialog(dlg, onClose);
   return <div className="overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-    <div className="modal" role="dialog" aria-label="New task">
+    <div className="modal" role="dialog" aria-modal="true" aria-label="New task" ref={dlg}>
       <h2 style={{ fontSize: 16 }}>Queue a task</h2>
       <div className="row"><div className="form-row grow"><label>Project</label><select value={t.project} onChange={(e) => setT({ ...t, project: e.target.value })}>{projects.map((p) => <option key={p.id}>{p.id}</option>)}</select></div>
         <div className="form-row"><label>Role</label><select value={t.role} onChange={(e) => setT({ ...t, role: e.target.value })}>{(roles || []).map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}</select></div>

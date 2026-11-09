@@ -34,7 +34,7 @@ export function Artifacts({ id }: { id: string }) {
         {Object.entries(groups).map(([g, items]) => <div key={g} style={{ marginBottom: 10 }}>
           <div className="muted xs" style={{ textTransform: 'uppercase', margin: '4px 0' }}>{g}</div>
           {items.map((a) => <div key={a.path} className="small" style={{ padding: '2px 0', overflowWrap: 'anywhere' }}>
-            {a.kind === 'html' || a.kind === 'image' ? <a onClick={() => setViewer(visuals.findIndex((v) => v.path === a.path))}>{a.path.split('/').pop()} ⤢</a>
+            {a.kind === 'html' || a.kind === 'image' ? <button type="button" className="lnk" onClick={() => setViewer(visuals.findIndex((v) => v.path === a.path))}>{a.path.split('/').pop()} ⤢</button>
               : <A to={`/projects/${id}/artifacts?path=${encodeURIComponent(a.path)}`}>{a.path === sel ? <b>▸ {a.path.split('/').pop()}</b> : a.path.split('/').pop()}</A>}</div>)}
         </div>)}
         {!list?.length && <span className="muted small">No docs/ folder yet. Create one with the editor.</span>}
@@ -43,14 +43,14 @@ export function Artifacts({ id }: { id: string }) {
       <Card className="grow" title={<span className="mono" style={{ textTransform: 'none' }}>{sel || 'No document'}</span>}
         right={sel && art && <span className="small">Rev {art.rev} {art.revisions?.[0] && <>· {art.revisions[0].author}</>} · <A to={`/projects/${id}/edit?path=${encodeURIComponent(sel)}`} className="btn p sm">✎ Edit</A></span>}>
         {!art ? <Loading /> : <>
-          {rev && <div className="note" style={{ marginBottom: 8 }}>Showing revision {rev}. <a onClick={() => { setRev(''); setRevText(null); }}>Back to current</a></div>}
+          {rev && <div className="note" style={{ marginBottom: 8 }}>Showing revision {rev}. <button type="button" className="lnk" onClick={() => { setRev(''); setRevText(null); }}>Back to current</button></div>}
           {art.kind === 'markdown' ? <Markdown src={revText ?? art.content} /> : <pre className="mono" style={{ whiteSpace: 'pre-wrap' }}>{revText ?? art.content}</pre>}
           <details style={{ marginTop: 14 }}><summary className="small muted">Revision history ({art.revisions?.length || 0})</summary>
-            <table className="t small"><tbody>{(art.revisions || []).map((r: any, k: number) => <tr key={r.hash}><td className="mono">{r.hash}</td><td>Rev {art.revisions.length - k}</td><td>{r.author}</td><td>{r.date}</td><td>{r.subject}</td><td><a onClick={() => showRev(r.hash)}>view</a></td></tr>)}</tbody></table></details>
+            <table className="t small"><tbody>{(art.revisions || []).map((r: any, k: number) => <tr key={r.hash}><td className="mono">{r.hash}</td><td>Rev {art.revisions.length - k}</td><td>{r.author}</td><td>{r.date}</td><td>{r.subject}</td><td><button type="button" className="lnk" onClick={() => showRev(r.hash)}>view</button></td></tr>)}</tbody></table></details>
         </>}
       </Card>
       <div className="col" style={{ width: 300 }}>
-        <Card title={<>Problem definition {prob?.version ? `v${prob.version}` : ''}</>} right={<a onClick={() => setProbEdit(probEdit === null ? prob?.text || '' : null)}>Refine</a>}>
+        <Card title={<>Problem definition {prob?.version ? `v${prob.version}` : ''}</>} right={<button type="button" className="lnk" onClick={() => setProbEdit(probEdit === null ? prob?.text || '' : null)}>Refine</button>}>
           {probEdit !== null ? <div className="col" style={{ gap: 6 }}><DictArea value={probEdit} onChange={setProbEdit} rows={4} />
             <button type="button" className="btn p" onClick={() => run(() => api.problem.refine(id, { text: probEdit, source: 'edited by hand' }), 'Saved new version').then(() => setProbEdit(null))}>Save as new version</button></div>
             : <div className="small">{prob?.text || <span className="muted">Not written yet.</span>}{prob?.source && <div className="muted" style={{ marginTop: 6 }}>From: {prob.source} · {day(prob.createdAt)}</div>}</div>}
@@ -58,7 +58,7 @@ export function Artifacts({ id }: { id: string }) {
         <Card title="Values">
           <div className="col small" style={{ gap: 8 }}>
             {(vals || []).map((v, k) => v.status === 'proposed' ? <div key={v.id} style={{ background: 'var(--acc-s)', padding: '6px 8px', borderRadius: 6 }}><b>Proposed:</b> "{v.text}" <span className="muted">{v.source}</span><br />
-              <a onClick={() => run(() => api.values.set(String(v.id), { status: 'accepted' }), 'Value accepted')}>Accept</a> · <a onClick={() => { const t = window.prompt('Edit value', v.text); if (t) run(() => api.values.set(String(v.id), { status: 'accepted', text: t }), 'Value accepted'); }}>Edit</a> · <a onClick={() => run(() => api.values.set(String(v.id), { status: 'dismissed' }), 'Dismissed')}>Dismiss</a></div>
+              <button type="button" className="lnk" onClick={() => run(() => api.values.set(String(v.id), { status: 'accepted' }), 'Value accepted')}>Accept</button> · <button type="button" className="lnk" onClick={() => { const t = window.prompt('Edit value', v.text); if (t) run(() => api.values.set(String(v.id), { status: 'accepted', text: t }), 'Value accepted'); }}>Edit</button> · <button type="button" className="lnk" onClick={() => run(() => api.values.set(String(v.id), { status: 'dismissed' }), 'Dismissed')}>Dismiss</button></div>
               : <div key={v.id}><b>{k + 1}. {v.text}</b> {v.source && <span className="muted">← {v.source}</span>}</div>)}
             {!vals?.length && <span className="muted">No values yet. They are proposed from your answers and choices.</span>}
             <div className="row c" style={{ gap: 6 }}><input className="grow" placeholder="Add a value…" value={newVal} onChange={(e) => setNewVal(e.target.value)} />
@@ -67,7 +67,7 @@ export function Artifacts({ id }: { id: string }) {
         </Card>
       </div>
     </div>
-    {viewer !== null && viewer >= 0 && <Viewer items={visuals.map((v) => ({ name: v.path, kind: v.kind, url: `/raw/${id}/${v.path}` }))} index={viewer} onClose={() => setViewer(null)} title={id} />}
+    {viewer !== null && viewer >= 0 && <Viewer items={visuals.map((v) => ({ name: v.path, kind: v.kind, url: `/raw/${id}/${v.path}` }))} index={viewer} onClose={() => setViewer(null)} title={id} projectId={id} />}
   </Shell>;
 }
 
