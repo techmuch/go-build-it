@@ -65,15 +65,28 @@ pre.tpl { background:var(--surface); border:1px solid var(--line); border-radius
 </head>
 <body>
 <main>
-  <p class="meta">go-build-it · design exploration · option set OS-0 · Nov 7, 2026 · <b>rev 2 Nov 8</b> · based on <a href="../requirements.html">docs/requirements.md</a></p>
+  <p class="meta">go-build-it · design exploration · option set OS-0 · Nov 7, 2026 · <b>rev 2 Nov 8</b> · <b>rev 3 Nov 8 (Approach A)</b> · based on <a href="../requirements.html">docs/requirements.md</a></p>
   <h1>Three ways go-build-it could look and feel</h1>
   <p class="lede">This page links to static HTML mockups of three different UI approaches. Each has desktop and mobile versions, and every view the requirements call for is drawn in all three. Please review all three and choose what to keep, mixing aspects across approaches if you like.</p>
   <ul class="toc">
     <li><a href="#how">How to review</a></li><li><a href="#approaches">The three approaches</a></li><li><a href="#compare">Side-by-side comparison</a></li>
     <li><a href="#coverage">View coverage</a></li><li><a href="#mobile">Mobile coverage</a></li><li><a href="#questions">Questions for you</a></li>
-    <li><a href="#findings">Requirement gaps found</a></li><li><a href="#feedback">Feedback template</a></li><li><a href="#rev2">What changed in rev 2</a></li>
+    <li><a href="#findings">Requirement gaps found</a></li><li><a href="#feedback">Feedback template</a></li><li><a href="#rev3">What changed in rev 3</a></li><li><a href="#rev2">What changed in rev 2</a></li>
   </ul>
 
+  <h2 id="rev3">What changed in rev 3</h2>
+  <p>Requirements <a href="../requirements.html">rev 3</a> make herdr the only agent backend (<a href="../decisions/ADR-009-herdr-backend.md">ADR-009</a>) and replace global teams with per-project team members made from global persona archetypes (<a href="../decisions/ADR-010-project-team-members.md">ADR-010</a>). Only Approach A, the baseline, was updated:</p>
+  <ul>
+    <li><b>05 Team members at work:</b> herdr state per member, a <i>needs you</i> row for blocked agents, context from the transcript, conversation rotation at 75%.</li>
+    <li><b>05b Live terminal:</b> the herdr pane streamed live; take control and hand back.</li>
+    <li><b>10 Persona archetypes</b> (was Team &amp; personas): the global library, with a change review that applies edits per member or to every member without overrides.</li>
+    <li><b>10b Project team</b> (new): members made from archetypes, tuning with a diff against the archetype, promote back, worktree, pane and conversation per member.</li>
+    <li><b>13 Settings:</b> herdr section, integrations per harness, attachable sessions removed.</li>
+    <li><b>15 herdr setup &amp; doctor</b> (new).</li>
+    <li><b>01, 02, 06:</b> project team and its state on cards and the overview; queue assigns to a role or a specific member.</li>
+    <li><b>Mobile M2, M3, M8, M10:</b> project team, blocked members in the Inbox, Members tab, live terminal with take control.</li>
+    <li>Keyboard conventions for every view: <a href="../user/18-keyboard.md">docs/user/18-keyboard.md</a>.</li>
+  </ul>
   <h2 id="rev2">What changed in rev 2</h2>
   <p>Your review of Approach A drove these changes. Points that apply to every approach were carried into B and C, and the requirements were updated to match (<a href="../requirements.html">rev 2</a>). Each changed view says what changed in its "Look for" note.</p>
   <div class="table-wrap"><table>

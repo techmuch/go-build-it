@@ -123,11 +123,12 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
   <p><b>Best for:</b> a power user running many projects in parallel who wants to see everything at once. <b>Risk:</b> it can feel like a monitoring tool more than a team, and new users may find the density overwhelming.</p>
 </div>
 <div class="rv-intro"><p style="background:#fff8e6;border:1px solid #ecd9a8;border-radius:8px;padding:8px 12px"><b>Rev 2 (from your review):</b> roadmap item detail (02b) · Edit → artifact editor with AI chat and a rich editor (03b) · attachment / mockup viewer (04b) · voice dictation on every answer box · structured/terminal session views and attachable headed sessions (05b) · smart handoffs now <i>experimental</i>, compaction is the MVP default · option set rethought around one large preview (07) · expandable mockups and multi-reviewer findings (08) · work review rebuilt as an assessment, no code diff (09) · persona coach and standards editor with AI chat (10, 11) · history event detail (12b) · Settings layout fixed, git workflow moved to Standards (13).</p></div>
+<p style="background:#e7effc;border:1px solid #b9cdf0;border-radius:8px;padding:8px 12px;margin:8px 0"><b>Rev 3 (herdr backend, per-project teams; ADR-009, ADR-010):</b> every AI team member runs in a herdr pane of the <span class="mono">gbi</span> herdr session · live members with herdr state and a <i>needs you</i> row for blocked agents (05) · live terminal streamed from herdr with take control / hand back (05b) · global <b>persona archetypes</b> replace global teams (10) · each project has its own <b>team</b> made from archetypes, with tuning and drift (10b) · herdr setup and doctor (15) · settings show herdr, integrations and transcript usage (13) · cards and overview show the project team and its state (01, 02) · queue assigns to a role or a specific member (06). Keyboard: every view follows <a class="l" href="../../user/18-keyboard.md">the keyboard conventions</a>.</p>
 <nav class="rv-toc">
   <a href="#v01">01 Catalog</a><a href="#v02">02 Project overview</a><a href="#v02b">02b Roadmap item</a><a href="#v03">03 Artifacts &amp; values</a><a href="#v03b">03b Artifact editor</a><a href="#v04">04 Questions</a><a href="#v04b">04b Viewer</a>
-  <a href="#v05">05 Sessions</a><a href="#v05b">05b Terminal &amp; attach</a><a href="#v06">06 Task queue</a><a href="#v07">07 Option set</a><a href="#v08">08 Dress rehearsal</a>
-  <a href="#v09">09 Work review</a><a href="#v10">10 Team &amp; personas</a><a href="#v11">11 Global standards</a><a href="#v12">12 History &amp; insights</a><a href="#v12b">12b Event detail</a>
-  <a href="#v13">13 Settings</a><a href="#v14">14 Docs</a>
+  <a href="#v05">05 Live members</a><a href="#v05b">05b Live terminal</a><a href="#v06">06 Task queue</a><a href="#v07">07 Option set</a><a href="#v08">08 Dress rehearsal</a>
+  <a href="#v09">09 Work review</a><a href="#v10">10 Archetypes</a><a href="#v10b">10b Project team</a><a href="#v11">11 Global standards</a><a href="#v12">12 History &amp; insights</a><a href="#v12b">12b Event detail</a>
+  <a href="#v13">13 Settings</a><a href="#v14">14 Docs</a><a href="#v15">15 herdr setup</a>
 </nav>
 
 <!-- ============ 01 CATALOG ============ -->
@@ -166,7 +167,8 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
             <div class="small muted">Phase: M1 · Map experience · CI <span style="color:#1f9d55">● passing</span></div>
             <div class="stats"><div><b>—</b>Stable</div><div><b>1</b>Sessions</div><div><b>2</b>PRs</div><div><b>5</b>Issues</div></div>
             <div class="small muted">No stable release yet · Website not published</div>
-            <div class="links"><a class="l">GitHub ↗</a><a class="l">Docs</a><span class="muted">Team: Core</span></div>
+            <div class="small" style="display:flex;align-items:center;gap:4px"><span class="av pm" style="width:20px;height:20px;font-size:9px">Pi</span><span class="av ar" style="width:20px;height:20px;font-size:9px">At</span><span class="av dv" style="width:20px;height:20px;font-size:9px;box-shadow:0 0 0 2px var(--acc)">Tr</span><span class="muted">&nbsp;3 members · <span style="color:var(--acc)">1 working</span> · <span style="color:var(--red)">1 needs you</span></span></div>
+            <div class="links"><a class="l">GitHub ↗</a><a class="l">Docs</a><a class="l">Open in herdr</a></div>
           </div>
           <div class="pcard attn">
             <div class="hd"><span class="nm">go-build-it</span><span class="chip acc">Implementation</span></div>
@@ -233,7 +235,7 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
     </aside>
     <div class="main">
       <div class="topbar"><h1><span class="crumb">Projects /</span> go-build-it</h1><span class="chip acc">Implementation</span><span class="search">Search…  ⌘K</span><span class="who">● Local · david</span></div>
-      <div class="tabs"><span class="on">Overview</span><span>Artifacts</span><span>Queue · 23</span><span>Sessions · 2</span><span>Releases</span><span>History</span><span>Settings</span></div>
+      <div class="tabs"><span class="on">Overview</span><span>Artifacts</span><span>Team</span><span>Queue · 23</span><span>Sessions · 2</span><span>Releases</span><span>History</span><span>Settings</span></div>
       <div class="content">
         <div class="row">
           <div style="flex:1;display:flex;flex-direction:column;gap:14px">
@@ -278,7 +280,13 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
               <h3>Repository</h3>
               <dl class="kv"><dt>Forge</dt><dd>GitHub · gh ✓ authenticated</dd><dt>Remote</dt><dd class="mono">techmuch/go-build-it</dd><dt>Workflow</dt><dd>Branch per task → PR → review → squash</dd><dt>CI</dt><dd><span class="chip grn">passing</span> main · 12m ago</dd><dt>Unpushed</dt><dd>None</dd></dl>
             </div>
-            <div class="card"><h3>Team · Core</h3><div style="display:flex;gap:4px"><span class="av pm">Pi</span><span class="av ar">At</span><span class="av dv">Fg</span><span class="av dv">Sp</span><span class="av qa">Pr</span><span class="av rv">Ln</span><span class="av gt">Co</span><span class="av hu">dv</span></div></div>
+            <div class="card"><h3>Team <a class="l small" style="text-transform:none" href="#v10b">Manage ›</a></h3>
+              <table class="t small"><tr><td><span class="av pm">Pi</span> Pilot</td><td class="muted">PM · from PM archetype</td><td><span class="chip">idle</span></td></tr>
+              <tr><td><span class="av ar">At</span> Atlas</td><td class="muted">Architect · tuned</td><td><span class="chip acc">working</span> T-149 · 31%</td></tr>
+              <tr><td><span class="av dv">Fg</span> Forge</td><td class="muted">Developer</td><td><span class="chip red">blocked</span> needs you</td></tr>
+              <tr><td><span class="av rv">Ln</span> Lens</td><td class="muted">Reviewer · fresh per review</td><td><span class="chip">idle</span></td></tr>
+              <tr><td><span class="av hu">dv</span> david</td><td class="muted">Owner · human</td><td></td></tr></table>
+              <div class="small muted" style="margin-top:6px">herdr workspace <span class="mono">go-build-it</span> in session <span class="mono">gbi</span> · <a class="l">Open in herdr</a></div></div>
           </div>
         </div>
       </div>
@@ -294,7 +302,7 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
     <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a class="on">Projects <span class="badge n">6</span></a><a>Questions <span class="badge">3</span></a><a>Sessions <span class="badge n">4</span></a><a>Queue </a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Team</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Docs</a></aside>
     <div class="main">
       <div class="topbar"><h1><span class="crumb">go-build-it / Roadmap /</span> M2 · Harness adapters &amp; context</h1><span class="chip acc">Active</span><span class="search">Search…</span><span class="who">● Local · david</span></div>
-      <div class="tabs"><span class="on">Overview</span><span>Artifacts</span><span>Queue · 23</span><span>Sessions · 2</span><span>Releases</span><span>History</span></div>
+      <div class="tabs"><span class="on">Overview</span><span>Artifacts</span><span>Team</span><span>Queue · 23</span><span>Sessions · 2</span><span>Releases</span><span>History</span></div>
       <div class="content">
         <div class="row">
           <div style="flex:1;display:flex;flex-direction:column;gap:14px;min-width:0">
@@ -339,7 +347,7 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
     <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a class="on">Projects</a><a>Questions <span class="badge">3</span></a><a>Sessions</a><a>Queue</a><a>Reviews</a><div class="sep">Organization</div><a>Team</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Docs</a></aside>
     <div class="main">
       <div class="topbar"><h1><span class="crumb">Projects / trailmap /</span> Artifacts</h1><span class="search">Search…</span><span class="who">● Local · david</span></div>
-      <div class="tabs"><span>Overview</span><span class="on">Artifacts</span><span>Queue</span><span>Sessions</span><span>Releases</span><span>History</span></div>
+      <div class="tabs"><span>Overview</span><span class="on">Artifacts</span><span>Team</span><span>Queue</span><span>Sessions</span><span>Releases</span><span>History</span></div>
       <div class="content" style="flex-direction:row">
         <div class="card" style="width:200px;padding:10px">
           <h3>Documents</h3>
@@ -521,51 +529,45 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
 
 <!-- ============ 05 SESSIONS & HANDOFFS ============ -->
 <section class="view" id="v05">
-  <header><span class="num">05</span><h2>Live sessions, context monitor &amp; handoff (experimental)</h2><span class="req">FR-60</span><span class="req">FR-65</span><span class="req">FR-70</span><span class="req">FR-71</span><span class="req">FR-72</span><span class="req">FR-73</span><span class="req">FR-74</span><span class="req">NFR-11</span></header>
-  <p class="look"><b>Look for:</b> a table of every running session across projects with context-window usage. <b>Rev 2:</b> the MVP default is the harness's own <b>auto-compaction</b> (logged to history). Smart handoffs are an <b>experimental</b> setting, shown here turned on for go-build-it only. The live output can switch between a structured view and the raw terminal (05b).</p>
-  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/sessions/S-881</span></div>
+  <header><span class="num">05</span><h2>Team members at work (live, from herdr)</h2><span class="req">FR-60</span><span class="req">FR-65</span><span class="req">FR-66</span><span class="req">FR-68</span><span class="req">FR-69</span><span class="req">FR-71</span><span class="req">FR-76</span><span class="req">NFR-11</span></header>
+  <p class="look"><b>Look for:</b> <b>Rev 3:</b> every row is an AI team member running in its own herdr pane. <b>State comes from herdr</b> (working, blocked, done, idle). A <b>blocked</b> member is a <i>needs you</i> row that opens its live terminal: go-build-it never answers an agent's dialog for you. Context is read from the harness transcript and marked measured or estimated. Each member keeps one conversation across tasks and rotates at 75%. The structured view on the right comes from the transcript; <b>Terminal</b> switches to the live herdr stream (05b).</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/sessions</span></div>
   <div class="app">
-    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects</a><a>Questions <span class="badge">3</span></a><a class="on">Sessions <span class="badge n">4</span></a><a>Queue</a><a>Reviews</a><div class="sep">Organization</div><a>Team</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Docs</a></aside>
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">6</span></a><a>Questions <span class="badge">3</span></a><a class="on">Sessions <span class="badge n">4</span></a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Docs</a></aside>
     <div class="main">
-      <div class="topbar"><h1>Sessions</h1><span class="chip">4 running</span><span class="chip amb">1 handoff (exp.)</span><span class="chip">1 rate-limited</span><span class="search">Filter…</span><span class="who">● Local · david</span></div>
+      <div class="topbar"><h1>Team members at work</h1><span class="chip acc">3 working</span><span class="chip red">1 needs you</span><span class="chip">1 rate-limited</span><span class="search">Filter…</span><span class="who">● Local · david</span></div>
       <div class="content">
         <div class="card" style="padding:6px 14px">
           <table class="t">
-            <tr><th>Persona</th><th>Project · Task</th><th>Harness</th><th style="width:200px">Context</th><th>When full</th><th>State</th><th></th></tr>
-            <tr style="background:var(--amb-s)"><td><span class="av dv">Fg</span> Forge</td><td>go-build-it · T-142 stream-json parser</td><td>OpenCode</td><td><div class="bar warn"><i style="width:76%"></i></div><span class="small">152k / 200k · 76%</span></td><td><span class="chip amb">Handoff at 75% · exp.</span></td><td><span class="chip amb">Writing handoff</span></td><td><a class="l">Open</a></td></tr>
-            <tr><td><span class="av ar">At</span> Atlas</td><td>go-build-it · T-149 usage interface</td><td>Claude Code</td><td><div class="bar"><i style="width:31%"></i></div><span class="small">62k / 200k · 31%</span></td><td>Auto-compact · 1× so far</td><td><span class="chip acc">Working</span></td><td><a class="l">Open</a></td></tr>
-            <tr><td><span class="av dv">Sp</span> Spark</td><td>inkwell · T-310 fix RSS date bug</td><td>Antigravity</td><td><div class="bar"><i style="width:18%"></i></div><span class="small">≈180k / 1M · 18% (est.)</span></td><td>Auto-compact</td><td><span class="chip acc">Working</span></td><td><a class="l">Open</a></td></tr>
-            <tr><td><span class="av pm">Pi</span> Pilot</td><td>pantry-pal · T-012 draft roadmap</td><td>Claude Code</td><td><div class="bar"><i style="width:9%"></i></div><span class="small">18k / 200k · 9%</span></td><td>Auto-compact</td><td><span class="chip">Rate-limited · resumes 14:20</span></td><td><a class="l">Open</a></td></tr>
+            <tr><th>Member</th><th>Project · Task</th><th>Harness · model</th><th style="width:190px">Context</th><th>Conversation</th><th>herdr</th><th></th></tr>
+            <tr style="background:var(--red-s)"><td><span class="av dv">Fg</span> Forge <span class="muted small">developer</span></td><td>go-build-it · T-151 OpenCode usage</td><td>Claude Code · sonnet</td><td><div class="bar"><i style="width:4%"></i></div><span class="small">8k / 200k</span></td><td class="small">new · first launch</td><td><span class="chip red">blocked</span><div class="small">"Trust this folder?"</div></td><td><span class="btn p">Open terminal</span></td></tr>
+            <tr><td><span class="av ar">At</span> Atlas <span class="muted small">architect</span></td><td>go-build-it · T-149 usage interface</td><td>Claude Code · opus</td><td><div class="bar"><i style="width:31%"></i></div><span class="small">62k / 200k <span class="chip grn">measured</span></span></td><td class="small">4 tasks · since 09:12<br><span class="muted">rotates at 75%</span></td><td><span class="chip acc">working</span></td><td><a class="l">Open</a></td></tr>
+            <tr style="background:var(--amb-s)"><td><span class="av dv">Tr</span> Trace <span class="muted small">developer</span></td><td>trailmap · T-077 tile storage</td><td>Claude Code · sonnet</td><td><div class="bar warn"><i style="width:76%"></i></div><span class="small">152k / 200k</span></td><td class="small"><b>rotating</b><br><span class="muted">handoff → new conversation</span></td><td><span class="chip acc">working</span></td><td><a class="l">Open</a></td></tr>
+            <tr><td><span class="av dv">Sp</span> Spark <span class="muted small">developer</span></td><td>inkwell · T-310 RSS date bug</td><td>Antigravity · gemini</td><td><div class="bar"><i style="width:18%"></i></div><span class="small">≈180k / 1M <span class="chip amb">est.</span></span></td><td class="small">2 tasks</td><td><span class="chip acc">working</span></td><td><a class="l">Open</a></td></tr>
+            <tr><td><span class="av pm">Pi</span> Pilot <span class="muted small">PM</span></td><td>pantry-pal · T-012 draft roadmap</td><td>Pi · sonnet</td><td><div class="bar"><i style="width:9%"></i></div><span class="small">18k / 200k</span></td><td class="small">1 task</td><td><span class="chip">rate-limited · 14:20</span></td><td><a class="l">Open</a></td></tr>
           </table>
+          <div class="small muted" style="padding:6px 0">All of this is visible in a terminal too: <span class="mono">herdr --session gbi</span> shows one workspace per project, each member's worktree grouped under it, labelled with role, task and context. <a class="l">Copy command</a></div>
         </div>
         <div class="row">
           <div class="card" style="flex:1">
-            <h3>S-881 · live output <span class="small" style="text-transform:none"><span class="seg"><span class="on">Structured</span><span><a href="#v05b" style="color:inherit;text-decoration:none">Terminal</a></span></span> <span class="btn">Send input</span> <span class="btn d">Cancel</span></span></h3>
-            <div class="mono" style="background:#17212b;color:#c9d6df;border-radius:6px;padding:10px;line-height:1.6;height:270px;overflow:hidden">
-              <div><span style="color:#6f8190">13:41:02</span> edit internal/harness/claude/parse.go (+42 −6)</div>
-              <div><span style="color:#6f8190">13:41:30</span> run go test ./internal/harness/... → <span style="color:#5fd39a">ok</span> (31 tests)</div>
-              <div><span style="color:#6f8190">13:42:11</span> read testdata/stream-json/tool_use.jsonl</div>
-              <div><span style="color:#6f8190">13:43:05</span> edit parse.go: handle partial line buffering</div>
-              <div><span style="color:#e2b54a">13:43:40 ⚑ context 75.4% ≥ threshold — go-build-it requested handoff</span></div>
-              <div><span style="color:#6f8190">13:43:41</span> agent: writing handoff using template "developer-v3"</div>
-              <div><span style="color:#6f8190">13:44:20</span> agent: handoff draft complete (1,180 tokens)</div>
-              <div><span style="color:#6f8190">13:44:21</span> Lens (Reviewer) checking handoff completeness…</div>
-              <div style="color:#5fd39a">▌</div>
+            <h3>Atlas · T-149 <span class="small" style="text-transform:none"><span class="seg"><span class="on">Structured</span><span><a href="#v05b" style="color:inherit;text-decoration:none">Terminal</a></span></span> <span class="btn">Send a message</span> <span class="btn">Interrupt</span> <span class="btn">Open in herdr</span></span></h3>
+            <div class="mono" style="background:#17212b;color:#c9d6df;border-radius:6px;padding:10px;line-height:1.6;height:230px;overflow:hidden">
+              <div><span style="color:#6f8190">13:41:02</span> prompt: Read .gbi-task.md in this folder and do what it says.</div>
+              <div><span style="color:#6f8190">13:41:05</span> Read .gbi-task.md · internal/harness/adapter.go</div>
+              <div><span style="color:#6f8190">13:41:30</span> Edit internal/harness/adapter.go (+18 −2)</div>
+              <div><span style="color:#6f8190">13:42:11</span> Bash go test ./internal/harness/... → <span style="color:#5fd39a">ok</span></div>
+              <div><span style="color:#6f8190">13:42:40</span> context 62k / 200k (measured, from transcript)</div>
+              <div style="color:#5fd39a">▌ herdr: working</div>
             </div>
           </div>
-          <div class="card" style="width:430px">
-            <h3>Handoff briefing · draft <span><span class="chip blue" style="text-transform:none">Experimental</span> <span class="chip amb" style="text-transform:none">Reviewer check</span></span></h3>
+          <div class="card" style="width:400px">
+            <h3>Needs you · Forge</h3>
             <div class="small" style="display:flex;flex-direction:column;gap:7px">
-              <div><b>Objective / done when:</b> parser emits typed events for every stream-json line; fixture tests pass for all 9 sample files.</div>
-              <div><b>Completed:</b> text, tool_use, tool_result, usage events. 31 tests green.</div>
-              <div><b>Decisions:</b> buffer partial lines (stdout splits on 64 KB); ignore unknown event types and log them, don't fail.</div>
-              <div><b>Dead ends:</b> <span class="mono">json.Decoder</span> streaming broke on interleaved stderr, so don't retry it.</div>
-              <div><b>Next steps:</b> 1) error event mapping 2) fixture <span class="mono">rate_limit.jsonl</span> 3) wire usage → context monitor.</div>
-              <div><b>Pointers:</b> <span class="mono">internal/harness/claude/parse.go</span>, <span class="mono">testdata/stream-json/</span>, FR-61, ADR-007</div>
-              <div class="muted">Next session: Forge (fresh) + task + FR-61/71 + Go standards + this handoff ≈ 9k tokens</div>
-              <div class="muted" style="border-top:1px solid var(--line);padding-top:6px">Experimental: on for go-build-it only. Other projects let the harness compact. <a class="l" href="#v13">Settings ›</a></div>
+              <div>Forge is <b>blocked</b> in herdr: Claude Code asks whether to trust its new worktree <span class="mono">worktrees/go-build-it/forge</span>. This happens once per member.</div>
+              <div class="muted">go-build-it doesn't answer agent dialogs. Open the terminal, read it and answer, or answer from herdr itself.</div>
+              <div class="row"><span class="btn p">Open terminal</span><span class="btn">Open in herdr</span></div>
+              <div class="muted" style="border-top:1px solid var(--line);padding-top:6px">Fewer prompts: permission mode <b>accept edits</b> and the project allowlist (Settings › Project). Claude's permission hook can turn tool approvals into cards here (optional).</div>
             </div>
-            <div class="row" style="margin-top:10px"><span class="btn">Edit</span><span class="btn">Compare with prior handoffs</span><span class="btn p" style="margin-left:auto">Approve &amp; start next session</span></div>
           </div>
         </div>
       </div>
@@ -574,47 +576,43 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
 </section>
 
 <section class="view" id="v05b">
-  <header><span class="num">05b</span><h2>Session terminal view &amp; attach to a headed session</h2><span class="req">FR-66</span><span class="req">FR-67</span><span class="req">NFR-11</span><span class="req">FR-36</span></header>
-  <p class="look"><b>Look for:</b> the same session in <b>Terminal</b> mode: the harness's raw output, streamed live. For harnesses run as <i>attachable</i> sessions (experimental, FR-67), <b>Attach &amp; take control</b> gives you the real interactive terminal. The agent pauses while you type and gets control back when you detach. This idea comes from terminal agent multiplexers such as Herdr and its web front-ends.</p>
-  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/sessions/S-874/terminal</span></div>
+  <header><span class="num">05b</span><h2>Live terminal: watch or take control (herdr stream)</h2><span class="req">FR-66</span><span class="req">FR-67</span><span class="req">FR-68</span><span class="req">NFR-11</span><span class="req">FR-36</span></header>
+  <p class="look"><b>Look for:</b> <b>Rev 3:</b> the member's real herdr pane, streamed live (herdr <span class="mono">terminal session observe</span>). Several people can watch at once. <b>Take control</b> switches to <span class="mono">terminal session control</span>: your keys, paste and resizes go to the agent, and the history records who took control and for how long. <b>Hand back</b> releases control. Keyboard: when the terminal has focus every key goes to the agent; <kbd>Ctrl</kbd> <kbd>]</kbd> leaves the terminal.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/members/go-build-it/atlas/terminal</span></div>
   <div class="app">
-    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">6</span></a><a>Questions <span class="badge">3</span></a><a class="on">Sessions <span class="badge n">4</span></a><a>Queue </a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Team</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Docs</a></aside>
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">6</span></a><a>Questions <span class="badge">3</span></a><a class="on">Sessions <span class="badge n">4</span></a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Docs</a></aside>
     <div class="main">
-      <div class="topbar"><h1><span class="crumb">Sessions /</span> S-874 · Atlas · T-149</h1><span class="chip acc">Working</span><span class="chip blue">Attachable · exp.</span><span class="search">Filter…</span><span class="who">● Tailnet · david@github</span></div>
+      <div class="topbar"><h1><span class="crumb">go-build-it / Team /</span> Atlas · T-149</h1><span class="chip acc">herdr: working</span><span class="chip">2 watching</span><span class="search">Filter…</span><span class="who">● Tailnet · david@github</span></div>
       <div class="content" style="flex-direction:row">
-        <div class="card" style="width:220px;padding:10px"><h3>Sessions</h3>
+        <div class="card" style="width:220px;padding:10px"><h3>Members</h3>
           <div class="small" style="display:flex;flex-direction:column;gap:8px">
-            <div><span class="av dv" style="width:20px;height:20px;font-size:9px">Fg</span> Forge · S-881<br><span class="muted">OpenCode · headless · 76%</span></div>
-            <div style="background:var(--acc-s);border-radius:6px;padding:6px"><span class="av ar" style="width:20px;height:20px;font-size:9px">At</span> <b>Atlas · S-874</b><br><span class="muted">Claude Code · attachable · 31%</span></div>
-            <div><span class="av dv" style="width:20px;height:20px;font-size:9px">Sp</span> Spark · S-879<br><span class="muted">Antigravity · headless · 18%</span></div>
+            <div><span class="av dv" style="width:20px;height:20px;font-size:9px">Fg</span> Forge · <span style="color:var(--red)">blocked</span><br><span class="muted">go-build-it · first launch</span></div>
+            <div style="background:var(--acc-s);border-radius:6px;padding:6px"><span class="av ar" style="width:20px;height:20px;font-size:9px">At</span> <b>Atlas · working</b><br><span class="muted">go-build-it · T-149 · 31%</span></div>
+            <div><span class="av dv" style="width:20px;height:20px;font-size:9px">Tr</span> Trace · working<br><span class="muted">trailmap · T-077 · 76%</span></div>
           </div>
-          <div class="small muted" style="margin-top:14px;border-top:1px solid var(--line);padding-top:8px"><b>Headless</b>: output only; send input through the app.<br><b>Attachable</b>: runs in a persistent terminal you can join from desktop or phone.</div>
+          <div class="small muted" style="margin-top:14px;border-top:1px solid var(--line);padding-top:8px">Same panes in a terminal: <span class="mono">herdr --session gbi</span>, workspace <b>go-build-it</b>, worktree <b>atlas</b>.</div>
         </div>
         <div style="flex:1;display:flex;flex-direction:column;gap:10px;min-width:0">
-          <div class="row" style="align-items:center"><span class="seg"><span><a href="#v05" style="color:inherit;text-decoration:none">Structured</a></span><span class="on">Terminal</span></span><span class="small muted">120×36 · streaming · 31% context</span><span class="btn" style="margin-left:auto">Copy</span><span class="btn">Search ⌘F</span><span class="btn p">⌨ Attach &amp; take control</span></div>
+          <div class="row" style="align-items:center"><span class="seg"><span><a href="#v05" style="color:inherit;text-decoration:none">Structured</a></span><span class="on">Terminal</span></span><span class="small muted">120×36 · watching (read-only) · stream healthy</span><span class="btn" style="margin-left:auto">Copy</span><span class="btn">Open in herdr</span><span class="btn p">⌨ Take control</span></div>
           <div>
-            <div class="termbar"><span class="tab on">● S-874 claude</span><span class="tab">shell</span><span class="tab">go test -w</span><span style="margin-left:auto">watching · read-only</span></div>
-            <div class="term" style="height:360px"><span class="d">~/src/go-build-it/.worktrees/t-149 (t-149-usage-iface)</span>
-<span class="w">&gt;</span> Implement UsageReporter for each adapter (T-149)
+            <div class="termbar"><span class="tab on">● atlas · claude</span><span style="margin-left:auto">watching · read-only</span></div>
+            <div class="term" style="height:330px"><span class="d">~/.go-build-it/worktrees/go-build-it/atlas (gbi/T-149-usage-iface)</span>
+<span class="w">❯</span> Read .gbi-task.md in this folder and do what it says.
 
-<span class="b">●</span> Reading internal/harness/adapter.go
-<span class="b">●</span> Reading internal/harness/opencode/run.go
-<span class="b">●</span> I'll add a Usage() method returning {used, window, measured bool}.
-   Claude Code reports exact usage; OpenCode needs an estimate (Q-34).
+<span class="b">●</span> Read(.gbi-task.md)
+<span class="b">●</span> Read(internal/harness/adapter.go)
+<span class="b">●</span> I'll add a Usage() method returning {used, window, measured}.
 
-<span class="b">●</span> Edit internal/harness/adapter.go
+<span class="b">●</span> Update(internal/harness/adapter.go)
    <span class="g">+ type Usage struct { Used, Window int; Measured bool }</span>
-   <span class="g">+ Usage(ctx context.Context) (Usage, error)</span>
 
-<span class="b">●</span> Bash go test ./internal/harness/...
+<span class="b">●</span> Bash(go test ./internal/harness/...)
    <span class="g">ok</span>   internal/harness           0.41s
-   <span class="g">ok</span>   internal/harness/claude    0.88s
-   <span class="y">FAIL</span> internal/harness/opencode  stub returns Measured=true
 
-<span class="b">●</span> The OpenCode stub needs Measured=false until Q-34 is answered.
+  ⏵⏵ accept edits on · 31% context
 <span class="g">▌</span></div>
           </div>
-          <div class="card" style="background:#fff8e6;border-color:#ecd9a8;padding:10px 12px"><div class="small"><b>When you attach:</b> Atlas pauses after its current step · your keystrokes go straight to the harness · the history records "david took control 13:58–14:06" · <span class="mono">Ctrl-B d</span> or <b>Detach</b> hands control back, and Atlas gets a short note of what you changed.</div></div>
+          <div class="card" style="background:#fff8e6;border-color:#ecd9a8;padding:10px 12px"><div class="small"><b>When you take control:</b> anyone else controlling is asked to hand over (takeover) · your keystrokes, paste and window size go straight to the pane · the history records "david took control of Atlas 13:58–14:06" · <b>Hand back</b> (or closing the page) releases control. Watching never changes the pane's size.</div></div>
         </div>
       </div>
     </div>
@@ -638,8 +636,8 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
         <div class="card" style="padding:6px 14px">
           <table class="t">
             <tr><th>#</th><th>Pri</th><th>Task</th><th>Project</th><th>Role / persona</th><th>Depends on</th><th>Handoffs</th><th>State</th></tr>
-            <tr><td class="mono">T-142</td><td><span class="chip red">P1</span></td><td>Claude Code adapter: stream-json parser</td><td>go-build-it</td><td>Developer · Forge</td><td class="mono">T-139 ✓</td><td>2</td><td><span class="chip acc">Running</span></td></tr>
-            <tr><td class="mono">T-151</td><td><span class="chip red">P1</span></td><td>OpenCode adapter: usage reporting</td><td>go-build-it</td><td>Developer · —</td><td class="mono">Q-34 ⏸</td><td>0</td><td><span class="chip red">Blocked by question</span></td></tr>
+            <tr><td class="mono">T-142</td><td><span class="chip red">P1</span></td><td>Claude Code adapter: stream-json parser</td><td>go-build-it</td><td>Developer · <b>Forge</b> <span class="muted small">(assigned)</span></td><td class="mono">T-139 ✓</td><td>2</td><td><span class="chip acc">Running</span></td></tr>
+            <tr><td class="mono">T-151</td><td><span class="chip red">P1</span></td><td>OpenCode adapter: usage reporting</td><td>go-build-it</td><td>Developer · <span class="muted">any free member</span></td><td class="mono">Q-34 ⏸</td><td>0</td><td><span class="chip red">Blocked by question</span></td></tr>
             <tr><td class="mono">T-077</td><td><span class="chip red">P1</span></td><td>Tile storage layer</td><td>trailmap</td><td>Developer · —</td><td class="mono">Q-31 ⏸</td><td>0</td><td><span class="chip red">Blocked by question</span></td></tr>
             <tr style="background:var(--amb-s)"><td class="mono">T-118</td><td><span class="chip amb">P2</span></td><td>SQLite migrations + backfill <span class="chip amb">3 handoffs → split?</span></td><td>go-build-it</td><td>Developer · Spark</td><td class="mono">—</td><td><b>3</b></td><td><span class="chip">Ready</span></td></tr>
             <tr><td class="mono">T-310</td><td><span class="chip red">P1</span></td><td>Fix RSS date bug (CI failing)</td><td>inkwell</td><td>Developer · Spark</td><td class="mono">—</td><td>0</td><td><span class="chip acc">Running</span></td></tr>
@@ -796,32 +794,30 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
 
 <!-- ============ 10 TEAM ============ -->
 <section class="view" id="v10">
-  <header><span class="num">10</span><h2>Team &amp; personas</h2><span class="req">FR-10</span><span class="req">FR-11</span><span class="req">FR-12</span><span class="req">FR-13</span><span class="req">FR-25</span><span class="req">FR-26</span><span class="req">FR-92</span></header>
-  <p class="look"><b>Look for:</b> teams and their members on the left. Selecting an AI persona opens its definition in a <b>rich Markdown editor</b> (not a plain text box) in the middle. <b>Rev 2:</b> a third column holds a <b>persona coach</b>: an agent that interviews you and proposes changes to the definition. You can also edit it yourself.</p>
-  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/team/core/forge</span></div>
+  <header><span class="num">10</span><h2>Persona archetypes (global)</h2><span class="req">FR-12</span><span class="req">FR-12b</span><span class="req">FR-12c</span><span class="req">FR-13</span><span class="req">FR-25</span><span class="req">FR-26</span></header>
+  <p class="look"><b>Look for:</b> <b>Rev 3:</b> global teams are gone. This library holds <b>archetypes</b>: reusable definitions (role, base instructions, default harness and model, role standards) that projects turn into team members (10b). The definition opens in the rich editor with the persona coach. When you change an archetype, the <b>change review</b> lists every member made from it. You apply it per member, or to all members that haven't overridden the changed parts, and their tuning is kept.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/archetypes/developer</span></div>
   <div class="app">
-    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">6</span></a><a>Questions <span class="badge">3</span></a><a>Sessions <span class="badge n">4</span></a><a>Queue </a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a class="on">Team</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Docs</a></aside>
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">6</span></a><a>Questions <span class="badge">3</span></a><a>Sessions <span class="badge n">4</span></a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a class="on">Archetypes</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Docs</a></aside>
     <div class="main">
-      <div class="topbar"><h1>Team</h1><span class="muted small">Teams: <b>Core</b> ▾ (4 projects) · Web-small (2 projects)</span><span class="search">Search…</span><span class="who">● Local · david</span></div>
+      <div class="topbar"><h1>Persona archetypes</h1><span class="muted small">Templates for project team members</span><span class="search">Search…</span><span class="who">● Local · david</span></div>
       <div class="content" style="flex-direction:row">
-        <div class="card" style="width:260px;padding:6px 10px">
+        <div class="card" style="width:250px;padding:6px 10px">
           <table class="t small">
-            <tr><th></th><th>Member</th><th>Harness</th></tr>
-            <tr><td><span class="av pm">Pi</span></td><td><b>Pilot</b><br><span class="muted">PM</span></td><td>Claude Code</td></tr>
-            <tr><td><span class="av ar">At</span></td><td><b>Atlas</b><br><span class="muted">Architect</span></td><td>Claude Code</td></tr>
-            <tr style="background:var(--acc-s)"><td><span class="av dv">Fg</span></td><td><b>Forge</b><br><span class="muted">Developer</span></td><td>OpenCode</td></tr>
-            <tr><td><span class="av dv">Sp</span></td><td><b>Spark</b><br><span class="muted">Developer</span></td><td>Antigravity</td></tr>
-            <tr><td><span class="av qa">Pr</span></td><td><b>Probe</b><br><span class="muted">QA</span></td><td>Antigravity</td></tr>
-            <tr><td><span class="av rv">Ln</span></td><td><b>Lens</b><br><span class="muted">Reviewer</span></td><td>Claude Code</td></tr>
-            <tr><td><span class="av gt">Co</span></td><td><b>Courier</b><br><span class="muted">Git / Release</span></td><td>Built-in</td></tr>
-            <tr><td><span class="av hu">dv</span></td><td><b>david</b><br><span class="muted">Owner · human</span></td><td class="muted">Tailscale</td></tr>
+            <tr><th></th><th>Archetype</th><th>Used by</th></tr>
+            <tr><td><span class="av pm">PM</span></td><td><b>Project Manager</b><br><span class="muted">Claude Code · opus</span></td><td>5</td></tr>
+            <tr><td><span class="av ar">Ar</span></td><td><b>Architect</b><br><span class="muted">Claude Code · opus</span></td><td>4</td></tr>
+            <tr style="background:var(--acc-s)"><td><span class="av dv">Dv</span></td><td><b>Developer</b><br><span class="muted">Claude Code · sonnet</span></td><td>9</td></tr>
+            <tr><td><span class="av qa">QA</span></td><td><b>QA</b><br><span class="muted">Antigravity · gemini</span></td><td>3</td></tr>
+            <tr><td><span class="av rv">Rv</span></td><td><b>Reviewer (Lens)</b><br><span class="muted">fresh per review</span></td><td>6</td></tr>
+            <tr><td><span class="av gt">Co</span></td><td><b>Git / Release</b><br><span class="muted">built-in Courier</span></td><td>6</td></tr>
           </table>
-          <div class="row" style="margin:8px 0;flex-wrap:wrap;gap:6px"><span class="btn">+ AI persona</span><span class="btn">+ Human</span><span class="btn">+ Role</span></div>
+          <div class="row" style="margin:8px 0;flex-wrap:wrap;gap:6px"><span class="btn">+ Archetype</span><span class="btn">+ Role</span></div>
         </div>
         <div style="flex:1;display:flex;flex-direction:column;gap:10px;min-width:0">
-          <div class="card" style="padding:10px 14px"><div class="row" style="align-items:center;flex-wrap:wrap;gap:10px;font-size:12.5px"><span class="av dv">Fg</span><b style="font-size:14px">Forge</b><span>Role <b>Developer ▾</b></span><span>Harness <b>OpenCode ▾</b> <span class="chip grn">headless ✓</span></span><span>Model <b>claude-sonnet-5-5 ▾</b></span><span>Context <b>auto-compact</b></span></div></div>
+          <div class="card" style="padding:10px 14px"><div class="row" style="align-items:center;flex-wrap:wrap;gap:10px;font-size:12.5px"><span class="av dv">Dv</span><b style="font-size:14px">Developer</b><span>Role <b>Developer ▾</b></span><span>Default harness <b>Claude Code ▾</b></span><span>Default model <b>sonnet ▾</b></span><span class="muted">9 members in 5 projects</span></div></div>
           <div style="display:flex;flex-direction:column;flex:1">
-            <div class="edtool"><span class="seg"><span>WYSIWYG</span><span class="on">Markdown</span><span>Split</span></span><i class="s"></i><b>H2</b><b>B</b><b>• List</b><b>Snippet ▾</b><span style="margin-left:auto" class="mono">personas/forge.md · rev 5</span></div>
+            <div class="edtool"><span class="seg"><span>WYSIWYG</span><span class="on">Markdown</span><span>Split</span></span><i class="s"></i><b>H2</b><b>B</b><b>• List</b><span style="margin-left:auto" class="mono">archetypes/developer.md · rev 7</span></div>
             <div class="code" style="flex:1"><div class="ln">1
 2
 3
@@ -830,32 +826,83 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
 6
 7
 8
-9
-10
-11
-12
-13</div><div class="src"><span class="h"># Forge · Developer</span>
+9</div><div class="src"><span class="h"># Developer</span>
 <span class="h">## How you work</span>
 - <span class="k">One task</span> at a time; tests first.
 - Ask a <span class="k">blocking question</span> if unclear.
-<span class="del">- Never run git push.</span><span class="ins">- No remote git commands; Courier owns git.</span><span class="ins">- Stdlib first; ask before adding a dep.</span>
-<span class="h">## Role standards</span> <span class="c">(+ global)</span>
-- TDD · ≤ 400 LOC per task
+- No remote git commands; Courier owns git.
+<span class="ins">- Stdlib first; ask before adding a dependency.</span>
 <span class="h">## Hand back when</span>
 - tests pass and done-when is met, or
 - stuck 3 attempts on one problem</div></div>
           </div>
-          <div class="row" style="align-items:center"><span class="small muted">2 proposed changes from the coach · Accept all · Review</span><span class="btn d" style="margin-left:auto">Remove</span><span class="btn p">Save rev 6</span></div>
+          <div class="row" style="align-items:center"><span class="small muted">Saving rev 8 opens the change review</span><span class="btn p" style="margin-left:auto">Save rev 8</span></div>
         </div>
-        <div class="card" style="width:270px;display:flex;flex-direction:column">
-          <h3>Persona coach</h3>
-          <div class="chat" style="flex:1">
-            <div class="msg"><span class="av ar">At</span><div class="bub">Forge asked 4 questions about dependencies this week. Should Forge have a default rule for them?</div></div>
-            <div class="msg me"><span class="av hu">dv</span><div class="bub">Yes, stdlib first. Ask before adding anything.</div></div>
-            <div class="msg"><span class="av ar">At</span><div class="bub">Added line 7. I also made the git rule cover all remote-changing commands, not only push. Both are highlighted.</div></div>
+        <div class="card" style="width:300px;display:flex;flex-direction:column;gap:8px">
+          <h3>Change review · rev 8</h3>
+          <div class="small">Adds line 6. Affects <b>9 members</b>:</div>
+          <table class="t small">
+            <tr><td>Forge · go-build-it</td><td><span class="chip grn">no override</span></td><td><a class="l">Apply</a></td></tr>
+            <tr><td>Trace · trailmap</td><td><span class="chip grn">no override</span></td><td><a class="l">Apply</a></td></tr>
+            <tr><td>Spark · inkwell</td><td><span class="chip amb">overrides "How you work"</span></td><td><a class="l">Review</a></td></tr>
+            <tr><td colspan="3" class="muted">+ 6 more without overrides</td></tr>
+          </table>
+          <span class="btn p">Apply to 8 members without overrides</span>
+          <div class="small muted">Spark's own wording stays until you review it. Nothing is pushed silently (FR-12b).</div>
+          <h3 style="margin-top:8px">Persona coach</h3>
+          <div class="chat"><div class="msg"><span class="av ar">At</span><div class="bub">3 projects tuned Developer to ask before new dependencies. Promote that to the archetype?</div></div></div>
+          <div class="compose"><span class="in">Describe how a Developer should behave…</span><span class="mic">🎙</span></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="v10b">
+  <header><span class="num">10b</span><h2>Project team: members made from archetypes</h2><span class="req">FR-10</span><span class="req">FR-11</span><span class="req">FR-12a</span><span class="req">FR-12c</span><span class="req">FR-12d</span><span class="req">FR-12e</span><span class="req">FR-64</span></header>
+  <p class="look"><b>Look for:</b> a project's own team, under the project's <b>Team</b> tab. Each AI member comes from an archetype and can be <b>tuned</b> for this project: extra instructions, harness, model, name. The diff against the archetype is always visible, and good tuning can be <b>promoted</b> back. Each member is bound to one harness and model, one conversation, one worktree and one herdr pane. Humans are global people with a role here.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/projects/go-build-it/team/forge</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a class="on">Projects <span class="badge n">6</span></a><a>Questions <span class="badge">3</span></a><a>Sessions <span class="badge n">4</span></a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Docs</a></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">Projects / go-build-it /</span> Team</h1><span class="search">Search…</span><span class="who">● Local · david</span></div>
+      <div class="tabs"><span>Overview</span><span>Artifacts</span><span class="on">Team</span><span>Queue</span><span>Sessions</span><span>Releases</span><span>History</span><span>Settings</span></div>
+      <div class="content" style="flex-direction:row">
+        <div class="card" style="width:330px;padding:6px 10px">
+          <table class="t small">
+            <tr><th>Member</th><th>From</th><th>herdr</th></tr>
+            <tr><td><span class="av pm">Pi</span> <b>Pilot</b></td><td>Project Manager</td><td><span class="chip">idle</span></td></tr>
+            <tr><td><span class="av ar">At</span> <b>Atlas</b></td><td>Architect · <span class="chip amb">tuned</span></td><td><span class="chip acc">working</span></td></tr>
+            <tr style="background:var(--acc-s)"><td><span class="av dv">Fg</span> <b>Forge</b></td><td>Developer · <span class="chip amb">tuned</span></td><td><span class="chip red">blocked</span></td></tr>
+            <tr><td><span class="av dv">Fx</span> <b>Flux</b></td><td>Developer</td><td><span class="chip">idle</span></td></tr>
+            <tr><td><span class="av rv">Ln</span> <b>Lens</b></td><td>Reviewer</td><td class="muted">per review</td></tr>
+            <tr><td><span class="av hu">dv</span> <b>david</b></td><td class="muted">human · Owner</td><td></td></tr>
+            <tr><td><span class="av hu">mr</span> <b>maria</b></td><td class="muted">human · Reviewer</td><td></td></tr>
+          </table>
+          <div class="row" style="margin:8px 0;flex-wrap:wrap;gap:6px"><span class="btn p">+ Member from archetype</span><span class="btn">+ Human</span></div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:10px;min-width:0">
+          <div class="card" style="padding:10px 14px"><div class="row" style="align-items:center;flex-wrap:wrap;gap:10px;font-size:12.5px"><span class="av dv">Fg</span><b style="font-size:14px">Forge</b><span>from <a class="l" href="#v10">Developer rev 7</a> <span class="chip amb">rev 8 available</span></span><span>Harness <b>Claude Code ▾</b></span><span>Model <b>sonnet ▾</b> <span class="muted">(archetype default)</span></span></div>
+            <div class="small muted" style="margin-top:6px">Worktree <span class="mono">~/.go-build-it/worktrees/go-build-it/forge</span> · branch per task · herdr pane <span class="mono">go-build-it › forge</span> · conversation <span class="mono">b672…9952</span> (3 tasks, 41%) · <a class="l">Rotate now</a></div></div>
+          <div style="display:flex;flex-direction:column;flex:1">
+            <div class="edtool"><span class="seg"><span>Tuning only</span><span class="on">Effective (archetype + tuning)</span></span><i class="s"></i><b>Diff vs archetype</b><span style="margin-left:auto" class="mono">tuning · rev 2</span></div>
+            <div class="code" style="flex:1"><div class="ln">1
+2
+3
+4
+5
+6
+7
+8</div><div class="src"><span class="h"># Forge · Developer on go-build-it</span>
+<span class="c">(from archetype)</span> One task at a time; tests first.
+<span class="c">(from archetype)</span> No remote git commands; Courier owns git.
+<span class="ins">+ Go only: use the stdlib http router, no frameworks.</span>
+<span class="ins">+ Every API route needs a CLI test (FR-30).</span>
+<span class="ins">+ Ask before adding a dependency.</span>   <span class="chip blue">also proposed in 2 other projects</span>
+<span class="h">## Project standards</span> <span class="c">(+ global, + archetype)</span>
+- docs/standards/go.md</div></div>
           </div>
-          <div class="small muted" style="margin:6px 0">Try: <span class="chip">Interview me</span> <span class="chip">Check vs standards</span> <span class="chip">Learn from history</span></div>
-          <div class="compose"><span class="in">Describe how Forge should behave…</span><span class="mic">🎙</span></div>
+          <div class="row" style="align-items:center"><span class="small muted">Instruction file is generated in the member's worktree (AGENTS.md / CLAUDE.md)</span><span class="btn" style="margin-left:auto">Promote line 6 to archetype</span><span class="btn">Apply archetype rev 8</span><span class="btn p">Save tuning</span></div>
         </div>
       </div>
     </div>
@@ -978,22 +1025,24 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
 
 <!-- ============ 13 SETTINGS ============ -->
 <section class="view" id="v13">
-  <header><span class="num">13</span><h2>Settings: harnesses, access, forge connections, experimental, updates</h2><span class="req">FR-05</span><span class="req">FR-06</span><span class="req">FR-15</span><span class="req">FR-19</span><span class="req">FR-20</span><span class="req">FR-63</span><span class="req">FR-67</span><span class="req">FR-72</span><span class="req">FR-90</span></header>
-  <p class="look"><b>Look for:</b> <b>Rev 2:</b> the harness table used to overflow its card and ran behind the Access panel. That's fixed with a full-width layout and a section list. The default git workflow moved to <b>Standards → Git workflow</b>; Settings only keeps forge connections. A new <b>Experimental</b> section holds smart handoffs and attachable sessions, both off by default.</p>
+  <header><span class="num">13</span><h2>Settings: herdr, harnesses, access, forge connections, experimental, updates</h2><span class="req">FR-05</span><span class="req">FR-06</span><span class="req">FR-15</span><span class="req">FR-19</span><span class="req">FR-20</span><span class="req">FR-63</span><span class="req">FR-67</span><span class="req">FR-72</span><span class="req">FR-90</span></header>
+  <p class="look"><b>Look for:</b> <b>Rev 2:</b> the harness table used to overflow its card and ran behind the Access panel. That's fixed with a full-width layout and a section list. The default git workflow moved to <b>Standards → Git workflow</b>; Settings only keeps forge connections. <b>Rev 3:</b> a <b>herdr</b> section shows the supervised <span class="mono">gbi</span> session, the herdr version against the supported range, and the integration for each harness. The harness table now shows herdr kind, integration and where usage comes from (the transcript). Attachable sessions are gone: every member runs in herdr.</p>
   <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/settings</span></div>
   <div class="app">
     <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">6</span></a><a>Questions <span class="badge">3</span></a><a>Sessions <span class="badge n">4</span></a><a>Queue </a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Team</a><a>Standards</a><a>History</a><div class="sep">System</div><a class="on">Settings</a><a>Docs</a></aside>
     <div class="main">
       <div class="topbar"><h1>Settings</h1><span class="muted small mono">~/.go-build-it/config.toml</span><span class="search">Search settings…</span><span class="who">● Local · david</span></div>
       <div class="content" style="flex-direction:row">
-        <div class="card" style="width:180px;padding:10px;align-self:flex-start"><div class="small" style="display:flex;flex-direction:column;gap:7px"><b>▸ Agent harnesses</b><span>Access &amp; identity</span><span>Forge connections</span><span>Experimental</span><span>Updates</span><span>Storage &amp; data</span><span>Appearance</span><span class="muted" style="margin-top:6px;border-top:1px solid var(--line);padding-top:6px">Git workflow → <a class="l" href="#v11">Standards</a></span></div></div>
+        <div class="card" style="width:180px;padding:10px;align-self:flex-start"><div class="small" style="display:flex;flex-direction:column;gap:7px"><b>▸ herdr</b><span>Agent harnesses</span><span>Access &amp; identity</span><span>Forge connections</span><span>Experimental</span><span>Updates</span><span>Storage &amp; data</span><span>Appearance</span><span class="muted" style="margin-top:6px;border-top:1px solid var(--line);padding-top:6px">Git workflow → <a class="l" href="#v11">Standards</a></span></div></div>
         <div style="flex:1;display:flex;flex-direction:column;gap:14px;min-width:0">
+          <div class="card"><h3>herdr <a class="l small" style="text-transform:none" href="#v15">Run doctor</a></h3>
+            <div class="small" style="display:flex;flex-wrap:wrap;gap:14px"><div><b>herdr 0.9.5</b> <span class="chip grn">in range ≥ 0.9.2</span></div><div>Session <span class="mono">gbi</span> <span class="chip grn">running · supervised</span></div><div>Socket <span class="mono">~/.config/herdr/sessions/gbi/herdr.sock</span></div><div>API methods <span class="chip grn">all required present</span></div><div>Open it: <span class="mono">herdr --session gbi</span></div></div></div>
           <div class="card"><h3>Agent harnesses <a class="l small" style="text-transform:none">Re-detect</a></h3>
-            <table class="t"><tr><th>Harness</th><th>Binary</th><th>Headless</th><th>Context usage</th><th>Subscription</th></tr>
-              <tr><td><b>Claude Code</b></td><td class="mono">/opt/homebrew/bin/claude</td><td><span class="chip grn">✓ stream-json</span></td><td><span class="chip grn">✓ reported</span></td><td>Anthropic</td></tr>
-              <tr><td><b>OpenCode</b></td><td class="mono">~/.local/bin/opencode</td><td><span class="chip grn">✓ run / serve</span></td><td><span class="chip amb">≈ estimated</span></td><td>multi-provider</td></tr>
-              <tr><td><b>Antigravity</b></td><td class="mono">/Applications/Antigravity.app</td><td><span class="chip amb">? unverified (Q2)</span></td><td><span class="chip amb">? unknown</span></td><td>Google</td></tr>
-              <tr><td class="muted">Pi-agent</td><td class="muted">not found</td><td>—</td><td>—</td><td>—</td></tr></table>
+            <table class="t"><tr><th>Harness</th><th>herdr kind</th><th>herdr integration</th><th>Context usage</th><th>Subscription</th></tr>
+              <tr><td><b>Claude Code</b></td><td class="mono">claude</td><td><span class="chip amb">v7 · update to v11</span> <a class="l">Update</a></td><td><span class="chip grn">✓ measured (transcript)</span></td><td>Anthropic</td></tr>
+              <tr><td><b>OpenCode</b></td><td class="mono">opencode</td><td><span class="chip grn">v13 ✓</span></td><td><span class="chip amb">≈ estimated</span></td><td>multi-provider</td></tr>
+              <tr><td><b>Antigravity</b></td><td class="mono">agy</td><td><span class="chip amb">v1 · update to v4</span> <a class="l">Update</a></td><td><span class="chip amb">≈ estimated</span></td><td>Google</td></tr>
+              <tr><td><b>Pi</b></td><td class="mono">pi</td><td><span class="chip amb">v8 · update to v9</span> <a class="l">Update</a></td><td><span class="chip grn">✓ measured</span></td><td>multi-provider</td></tr></table>
             <div class="small" style="margin-top:8px">When context fills: <b>harness auto-compaction</b> (MVP default) · Rate limits: <b>pause &amp; auto-resume</b></div></div>
           <div class="grid" style="grid-template-columns:1fr 1fr">
             <div class="card"><h3>Access &amp; identity</h3>
@@ -1007,10 +1056,10 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
             <div class="card" style="border-color:#b9cdf0"><h3>Experimental <span class="chip blue" style="text-transform:none">off by default</span></h3>
               <div class="small" style="display:flex;flex-direction:column;gap:10px">
                 <div><span class="toggle"></span> <b>Smart handoffs</b> (FR-72–74) · threshold 75%<br><span class="muted">Replace compaction with a curated briefing and a fresh session. Enabled for: <b>go-build-it</b> only ▾</span></div>
-                <div><span class="toggle off"></span> <b>Attachable (headed) sessions</b> (FR-67)<br><span class="muted">Run harnesses in a persistent terminal you can attach to.</span></div>
+                <div class="muted">Members keep one conversation until context reaches the threshold, then rotate with a handoff (Q8).</div>
               </div></div>
             <div class="card"><h3>Updates</h3>
-              <div class="small" style="display:flex;flex-direction:column;gap:6px"><div>Current <b>2026.11.07.1</b> · stable · <span class="toggle"></span> auto-install</div><div class="muted">Installs only when no sessions are running · signature verified</div><div>Previous: 2026.11.05.2 <a class="l">Roll back</a></div></div></div>
+              <div class="small" style="display:flex;flex-direction:column;gap:6px"><div>Current <b>2026.11.07.1</b> · stable · <span class="toggle"></span> auto-install</div><div class="muted">Installs any time: herdr keeps agents running while go-build-it restarts · signature verified</div><div>Previous: 2026.11.05.2 <a class="l">Roll back</a></div></div></div>
           </div>
         </div>
       </div>
@@ -1036,6 +1085,32 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
           <div class="shot" style="height:200px">📷 Screenshot · Sessions → handoff panel (auto-captured)</div>
           <p class="small"><b>CLI:</b> <span class="mono">gbi sessions handoff S-881 --approve</span></p></div>
         <div class="card" style="width:260px"><h3>Search results · "handoff"</h3><div class="small" style="display:flex;flex-direction:column;gap:6px"><span><b>Smart handoffs</b> · Concepts</span><span>Handoff templates · Settings</span><span>UAT step 9 · Approve a handoff</span><span>gbi sessions handoff · CLI</span></div></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="v15">
+  <header><span class="num">15</span><h2>herdr setup &amp; doctor</h2><span class="req">FR-07</span><span class="req">FR-08</span><span class="req">NFR-32</span><span class="req">NFR-01</span></header>
+  <p class="look"><b>Look for:</b> the first-run check (also <span class="mono">gbi doctor</span>). go-build-it needs herdr: it shows what's missing and offers the fix, one step at a time. go-build-it supervises its own herdr session <span class="mono">gbi</span>; your default herdr session is never touched. On Windows, anything herdr's beta doesn't support yet is marked <i>unavailable</i>.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/settings/herdr</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">6</span></a><a>Questions <span class="badge">3</span></a><a>Sessions <span class="badge n">4</span></a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>History</a><div class="sep">System</div><a class="on">Settings</a><a>Docs</a></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">Settings /</span> herdr setup</h1><span class="chip amb">2 to fix</span><span class="who">● Local · david</span></div>
+      <div class="content">
+        <div class="card"><h3>Checks <a class="l small" style="text-transform:none">Run again</a></h3>
+          <table class="t">
+            <tr><td>✅</td><td><b>herdr installed</b></td><td class="mono">/opt/homebrew/bin/herdr · 0.9.5</td><td class="muted">supported ≥ 0.9.2</td><td></td></tr>
+            <tr><td>✅</td><td><b>gbi session running</b></td><td class="mono">herdr --session gbi server</td><td class="muted">supervised by go-build-it · restarts if it stops</td><td></td></tr>
+            <tr><td>✅</td><td><b>API compatible</b></td><td>agent.start, agent.prompt, events.subscribe, worktree.open, terminal session …</td><td class="muted">checked with ping</td><td></td></tr>
+            <tr><td>⚠️</td><td><b>Claude Code integration</b></td><td>v7 installed, v11 current</td><td class="muted">needed for the conversation ID after restarts</td><td><span class="btn p">Update</span></td></tr>
+            <tr><td>⚠️</td><td><b>Antigravity integration</b></td><td>v1 installed, v4 current</td><td class="muted"></td><td><span class="btn p">Update</span></td></tr>
+            <tr><td>✅</td><td><b>Login service</b></td><td class="mono">dev.gobuildit.gbi (launchd)</td><td class="muted">starts go-build-it and its herdr session at login</td><td></td></tr>
+          </table>
+          <div class="small muted" style="margin-top:8px">Missing herdr? <span class="mono">brew install herdr</span> (macOS) · <span class="mono">curl -fsSL https://herdr.dev/install.sh | sh</span> (Linux) · PowerShell installer on Windows (beta).</div>
+        </div>
+        <div class="card"><h3>See it in a terminal</h3><div class="small">Run <span class="mono">herdr --session gbi</span>: one workspace per project, each member's worktree grouped under it, labelled with role, current task and context. Detach with <span class="mono">ctrl+b q</span>; the agents keep running.</div></div>
       </div>
     </div>
   </div></div></div>
