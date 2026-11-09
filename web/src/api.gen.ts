@@ -58,6 +58,14 @@ export const api = {
     /** Detected harnesses and capabilities */
     list: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/harnesses`, undefined, query),
   },
+  herdr: {
+    /** Check herdr, the gbi session, API compatibility, integrations and the login service */
+    doctor: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/herdr/doctor`, undefined, query),
+    /** Run a doctor fix (start-session, install-integration:<target>) */
+    fix: (body?: unknown) => call<any>('POST', `/api/herdr/fix`, body),
+    /** The supervised gbi herdr session (FR-07) */
+    status: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/herdr`, undefined, query),
+  },
   history: {
     /** Event detail with related events */
     get: (eid: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/history/${encodeURIComponent(eid)}`, undefined, query),

@@ -14,6 +14,7 @@ import (
 	"github.com/techmuch/go-build-it/internal/config"
 	"github.com/techmuch/go-build-it/internal/courier"
 	"github.com/techmuch/go-build-it/internal/gitx"
+	"github.com/techmuch/go-build-it/internal/herdr"
 	"github.com/techmuch/go-build-it/internal/history"
 	"github.com/techmuch/go-build-it/internal/options"
 	"github.com/techmuch/go-build-it/internal/pins"
@@ -53,6 +54,7 @@ type App struct {
 	Pins       *pins.Service
 	Agent      *agent.Caller
 	Updater    *update.Updater
+	Herdr      *herdr.Supervisor
 }
 
 // New opens the database and connects all services.
@@ -84,6 +86,7 @@ func Wire(cfg *config.Config, db *sql.DB, version string, log *slog.Logger) *App
 	a.Pins = pins.New(db, a.Hist)
 	a.Agent = agent.New(cfg, a.Team)
 	a.Updater = update.New(cfg.Updates.Repo, version)
+	a.Herdr = herdr.NewSupervisor(cfg.Herdr.Binary, cfg.Herdr.Session, cfg.Herdr.ConfigHome, log)
 
 	// Review gates hold back work in later milestones until approved (FR-115).
 	a.Queue.GateOpen = a.gateOpen
@@ -250,6 +253,13 @@ Keep it under 800 words. Then end your turn.`
 
 // Start runs background loops: recovery, push guarantee, auto-update checks.
 func (a *App) Start(ctx context.Context) {
+	// The agent backend: adopt or start the gbi herdr session, then keep it up (FR-07, FR-08).
+	go func() {
+		if _, err := a.Herdr.Ensure(ctx); err != nil {
+			a.Log.Warn("herdr session not available; agents cannot run until it is", "err", err)
+		}
+		a.Herdr.Run(ctx)
+	}()
 	a.Sessions.Recover(ctx)
 	if a.Cfg.AutoDispatch {
 		a.Sessions.SetAuto(true)

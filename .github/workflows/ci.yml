@@ -2,9 +2,16 @@ name: ci
 on:
   push:
   pull_request:
+  schedule:
+    - cron: "17 6 * * 1" # weekly: run against the latest herdr too (P11-07, NFR-32)
+env:
+  # Must equal herdr.TestedMax (internal/herdr/supervisor.go); TestCIPinMatchesTestedMax checks it.
+  HERDR_VERSION: "0.9.5"
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      GBI_REQUIRE_HERDR: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -15,12 +22,54 @@ jobs:
           node-version: 22
       - run: cd web && npm ci && npm run build && touch dist/.keep
       - run: git config --global user.email ci@example.com && git config --global user.name ci
+      - name: install herdr ${{ env.HERDR_VERSION }} (the only agent backend, ADR-009)
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL --retry 3 -o "$HOME/.local/bin/herdr" "https://github.com/herdrdev/herdr/releases/download/v${HERDR_VERSION}/herdr-linux-x86_64"
+          chmod +x "$HOME/.local/bin/herdr"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/herdr" --version
       - run: make test
       - name: cross-compile
         run: |
           for p in darwin/arm64 linux/amd64 windows/amd64; do
             GOOS=${p%/*} GOARCH=${p#*/} CGO_ENABLED=0 go build -o /tmp/gbi-${p%/*}-${p#*/} ./cmd/gbi
           done
+
+  # P11-07: the herdr-backed packages on macOS, the primary platform.
+  macos:
+    runs-on: macos-latest
+    env:
+      GBI_REQUIRE_HERDR: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - run: git config --global user.email ci@example.com && git config --global user.name ci
+      - name: install herdr ${{ env.HERDR_VERSION }}
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL --retry 3 -o "$HOME/.local/bin/herdr" "https://github.com/herdrdev/herdr/releases/download/v${HERDR_VERSION}/herdr-macos-aarch64"
+          chmod +x "$HOME/.local/bin/herdr"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/herdr" --version
+      - run: go test ./...
+
+  # Weekly: the latest herdr release, so upstream changes show up before users hit them.
+  herdr-latest:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    env:
+      GBI_REQUIRE_HERDR: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - run: git config --global user.email ci@example.com && git config --global user.name ci
+      - run: curl -fsSL https://herdr.dev/install.sh | sh && echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - run: herdr --version && go test ./internal/herdr/... ./internal/fakemember/...
 
   # P9-05: install go-build-it as a systemd user service and check it answers.
   linux-service:
@@ -61,6 +110,18 @@ jobs:
       - run: git config --global user.email ci@example.com
       - run: git config --global user.name ci
       - run: go test ./...
+      # Windows support follows herdr's beta (Q9): run the live herdr tests for information.
+      - name: herdr live tests (informational, Windows beta)
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $dir = "$env:RUNNER_TEMP\herdr"
+          New-Item -ItemType Directory -Force $dir | Out-Null
+          Invoke-WebRequest "https://github.com/herdrdev/herdr/releases/download/v$env:HERDR_VERSION/herdr-windows-x86_64.zip" -OutFile "$dir\herdr.zip"
+          Expand-Archive "$dir\herdr.zip" -DestinationPath $dir -Force
+          $env:PATH = "$dir;$env:PATH"
+          herdr --version
+          go test ./internal/herdr/ -run 'TestLiveSession|TestWatcher' -v
       - run: go build -o "$env:RUNNER_TEMP\gbi.exe" ./cmd/gbi
       - name: install, check, uninstall the service
         shell: pwsh

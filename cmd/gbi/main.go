@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/techmuch/go-build-it/internal/fakemember"
 	"io/fs"
 	"log/slog"
 	"net"
@@ -193,9 +194,11 @@ func serviceCmd(args []string) error {
 
 func devCmd(args []string) error {
 	if len(args) == 0 {
-		return errors.New("usage: gbi dev gen-client|fake-agent|sign|openapi")
+		return errors.New("usage: gbi dev gen-client|fake-agent|fake-member|sign|openapi")
 	}
 	switch args[0] {
+	case "fake-member":
+		return fakemember.Run(args[1:], os.Stdin, os.Stdout)
 	case "gen-client":
 		out := "web/src/api.gen.ts"
 		if len(args) > 1 {

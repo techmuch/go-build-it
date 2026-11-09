@@ -5,7 +5,7 @@ import { Catalog, MilestoneDetail, ProjectHistory, ProjectOverview, ProjectRelea
 import { ArtifactEditor, Artifacts } from './pages/Artifacts';
 import { Queue, Questions, SessionDetail, Sessions } from './pages/Work';
 import { OptionSets, Rehearsals, Reviews } from './pages/Review';
-import { Docs, EventDetail, History, Settings, Standards, Team } from './pages/Org';
+import { Docs, EventDetail, HerdrSetup, History, Settings, Standards, Team } from './pages/Org';
 import { MobileApp } from './mobile/Mobile';
 
 type R = [string, (p: Record<string, string>) => JSX.Element];
@@ -38,6 +38,7 @@ const routes: R[] = [
   ['/history', () => <History />],
   ['/history/:eid', (p) => <EventDetail eid={p.eid} />],
   ['/settings', () => <Settings />],
+  ['/settings/herdr', () => <HerdrSetup />],
   ['/docs', () => <Docs />],
   ['/docs/:slug', (p) => <Docs slug={p.slug} />],
 ];

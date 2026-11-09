@@ -378,13 +378,13 @@ Doctor shows herdr version, session and integration status, and fixes outdated i
 CI is green on macOS, Linux and Windows with a pinned herdr
 </li></ul>
 <div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
-<tr><td><strong>P11-01</strong> herdr client: socket/named-pipe NDJSON transport, types generated from herdr api schema, ping capability check, supported version range</td><td>M</td><td>NFR-32, FR-07</td><td>—</td><td>P10-04</td></tr>
-<tr><td><strong>P11-02</strong> Supervise herdr server --session gbi: start, health, restart, stop</td><td>M</td><td>FR-07</td><td>—</td><td>P11-01</td></tr>
-<tr><td><strong>P11-03</strong> Doctor and onboarding: herdr install and version, integration status, install or update integrations</td><td>M</td><td>FR-07</td><td>A-v15, A-v13</td><td>P11-01, P10-07</td></tr>
-<tr><td><strong>P11-04</strong> Login service brings up go-build-it and the gbi session; go-build-it restarts and updates leave agents running</td><td>S</td><td>FR-08, FR-02, FR-06</td><td>—</td><td>P11-02</td></tr>
-<tr><td><strong>P11-05</strong> Event subscription and snapshot reconciler with events_lost recovery</td><td>M</td><td>NFR-11, FR-68</td><td>—</td><td>P11-01</td></tr>
-<tr><td><strong>P11-06</strong> Fake harness in herdr: reports state with pane.report_agent and writes a transcript</td><td>M</td><td>FR-61</td><td>—</td><td>P11-01</td></tr>
-<tr><td><strong>P11-07</strong> CI installs a pinned herdr on macOS, Linux and Windows; weekly job against latest herdr</td><td>M</td><td>NFR-32, NFR-01</td><td>—</td><td>P11-06</td></tr>
+<tr><td><strong>P11-01</strong> herdr client: socket/named-pipe NDJSON transport, types generated from herdr api schema, ping capability check, supported version range ✅</td><td>M</td><td>NFR-32, FR-07</td><td>—</td><td>P10-04</td></tr>
+<tr><td><strong>P11-02</strong> Supervise herdr server --session gbi: start, health, restart, stop ✅</td><td>M</td><td>FR-07</td><td>—</td><td>P11-01</td></tr>
+<tr><td><strong>P11-03</strong> Doctor and onboarding: herdr install and version, integration status, install or update integrations ✅</td><td>M</td><td>FR-07</td><td>A-v15, A-v13</td><td>P11-01, P10-07</td></tr>
+<tr><td><strong>P11-04</strong> Login service brings up go-build-it and the gbi session; go-build-it restarts and updates leave agents running ✅</td><td>S</td><td>FR-08, FR-02, FR-06</td><td>—</td><td>P11-02</td></tr>
+<tr><td><strong>P11-05</strong> Event subscription and snapshot reconciler with events_lost recovery ✅</td><td>M</td><td>NFR-11, FR-68</td><td>—</td><td>P11-01</td></tr>
+<tr><td><strong>P11-06</strong> Fake harness in herdr: reports state with pane.report_agent and writes a transcript ✅</td><td>M</td><td>FR-61</td><td>—</td><td>P11-01</td></tr>
+<tr><td><strong>P11-07</strong> CI installs a pinned herdr on macOS, Linux and Windows; weekly job against latest herdr ✅</td><td>M</td><td>NFR-32, NFR-01</td><td>—</td><td>P11-06</td></tr>
 </tbody></table></div>
 <h3 id="p12-per-project-teams-from-archetypes">P12 · Per-project teams from archetypes</h3>
 <p><strong>Goal:</strong> Replace global teams and personas with global persona archetypes and per-project team members that can be tuned, compared with their archetype, and promoted back.</p>

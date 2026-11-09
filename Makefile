@@ -20,6 +20,7 @@ gen:
 
 vet:
 	go vet ./...
+	go run ./internal/herdr/gen -check
 	cd web && npx tsc --noEmit -p .
 
 test: vet
