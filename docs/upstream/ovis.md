@@ -1,5 +1,14 @@
 # Ovis review log
 
+## 2026-11-09 · `d763e83` → `e1f57f7` (first run of the weekly review job)
+
+| Commit | What changed | Effect on go-build-it |
+|---|---|---|
+| `77e95b8` | Over SSH, a remote PC now offers the herdr sessions already running there instead of quietly starting a second one. | None. Remote machines are out of scope (requirements §15). It confirms the pattern go-build-it already uses: adopt a running session before starting one (the supervisor's `Ensure`). |
+| `c09b717` | Lists Letta Code's commands and skills in the chat's `/` menu. | None. go-build-it has no Letta profile. |
+
+No follow-up is needed.
+
 ## 2026-11-08 · `d763e83` · 0.5.1 (baseline)
 
 Ovis is a Bun and React web client for herdr. It's useful to go-build-it as a reference, and as a warning about what not to build.

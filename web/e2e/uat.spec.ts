@@ -121,6 +121,22 @@ test.describe('desktop · owner', () => {
     await shot(page, 'team');
   });
 
+  test('10c a member waiting for you: answer in the live terminal', async ({ page, request }) => {
+    await page.goto('/questions');
+    await expect(page.getByText('Members waiting for you')).toBeVisible();
+    await page.getByText(/is waiting for you \(T-/).first().click();
+    await expect(page).toHaveURL(/view=terminal/);
+    await expect(page.locator('.xterm-rows')).toContainText('Allow edit', { timeout: 20000 });
+    await page.getByRole('button', { name: '⌨ Take control' }).click();
+    await expect(page.locator('.live-term').getByText('you have control')).toBeVisible({ timeout: 15000 });
+    await page.locator('.xterm-helper-textarea').focus();
+    await page.keyboard.type('y');
+    await page.keyboard.press('Enter');
+    await expect.poll(async () => (await (await request.get('/api/sessions?live=true')).json()).filter((s: any) => s.status === 'blocked').length, { timeout: 30000 }).toBe(0);
+    await shot(page, 'member-waiting');
+    await page.getByRole('button', { name: 'Hand back' }).click();
+  });
+
   test('11 standards with agent chat', async ({ page }) => {
     await page.goto('/standards/git-workflow');
     await expect(page.getByText('Edit with')).toBeVisible();

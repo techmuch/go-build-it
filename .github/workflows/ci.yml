@@ -25,7 +25,7 @@ jobs:
       - name: install herdr ${{ env.HERDR_VERSION }} (the only agent backend, ADR-009)
         run: |
           mkdir -p "$HOME/.local/bin"
-          curl -fsSL --retry 3 -o "$HOME/.local/bin/herdr" "https://github.com/herdrdev/herdr/releases/download/v${HERDR_VERSION}/herdr-linux-x86_64"
+          curl -fsSL --retry 6 --retry-all-errors --retry-delay 5 -o "$HOME/.local/bin/herdr" "https://github.com/herdrdev/herdr/releases/download/v${HERDR_VERSION}/herdr-linux-x86_64"
           chmod +x "$HOME/.local/bin/herdr"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           "$HOME/.local/bin/herdr" --version
@@ -50,7 +50,7 @@ jobs:
       - name: install herdr ${{ env.HERDR_VERSION }}
         run: |
           mkdir -p "$HOME/.local/bin"
-          curl -fsSL --retry 3 -o "$HOME/.local/bin/herdr" "https://github.com/herdrdev/herdr/releases/download/v${HERDR_VERSION}/herdr-macos-aarch64"
+          curl -fsSL --retry 6 --retry-all-errors --retry-delay 5 -o "$HOME/.local/bin/herdr" "https://github.com/herdrdev/herdr/releases/download/v${HERDR_VERSION}/herdr-macos-aarch64"
           chmod +x "$HOME/.local/bin/herdr"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           "$HOME/.local/bin/herdr" --version
@@ -121,7 +121,7 @@ jobs:
           Expand-Archive "$dir\herdr.zip" -DestinationPath $dir -Force
           $env:PATH = "$dir;$env:PATH"
           herdr --version
-          go test ./internal/herdr/ -run 'TestLiveSession|TestWatcher' -v
+          go test ./internal/herdr/ ./internal/fakemember/ -v
       - run: go build -o "$env:RUNNER_TEMP\gbi.exe" ./cmd/gbi
       - name: install, check, uninstall the service
         shell: pwsh

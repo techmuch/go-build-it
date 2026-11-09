@@ -142,4 +142,12 @@ gbi tasks add --project ledgerly --title "Categorize transactions" --role develo
 gbi tasks add --project trailmap --title "Draft offline storage ADR" --role architect --priority 1 >/dev/null
 GBI_PERSONA=lens@ledgerly gbi proposals create --title "Shorter developer briefs" --body "Trim task context notes to bullets." --evidence "Tasks with notes over 2k tokens had 18% more rework (demo data)." >/dev/null
 
+# A member waiting for you in its terminal (FR-68): it asks permission before an edit.
+T3=$(gbi tasks add --project trailmap --title "Guarded storage migration" --description "FAKE:block" --role developer --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')
+gbi tasks run "$T3" >/dev/null
+for _ in $(seq 1 100); do
+  gbi sessions list --live --json | python3 -c 'import json,sys; sys.exit(0 if any(s["status"]=="blocked" for s in json.load(sys.stdin)) else 1)' && break
+  sleep 0.2
+done
+
 echo "demo ready at $GBI_URL (server pid $(cat "$GBI_HOME/server.pid"))"

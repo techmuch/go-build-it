@@ -34,7 +34,7 @@ test.describe('keyboard · desktop', () => {
     await page.keyboard.press('g');
     await page.keyboard.press('q');
     await expect(page).toHaveURL(/\/questions$/);
-    const items = page.locator('.list-item');
+    const items = page.locator('.list-item').filter({ hasNotText: 'is waiting for you' }); // question rows
     await expect(items.first()).toBeVisible();
     await items.first().focus();
     await page.keyboard.press('ArrowDown');
@@ -59,8 +59,8 @@ test.describe('keyboard · desktop', () => {
 
   test('single-key shortcuts are ignored while typing', async ({ page }) => {
     await page.goto('/questions');
-    await page.locator('.list-item').first().click();
-    const box = page.locator('textarea').first();
+    await page.locator('.list-item').filter({ hasNotText: 'is waiting for you' }).first().click();
+    const box = page.locator('.dict textarea').first();
     await box.click();
     await page.keyboard.type('g q ? /');
     await expect(box).toHaveValue('g q ? /');

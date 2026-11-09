@@ -1,0 +1,23 @@
+name: upstream-review
+# Weekly herdr / Ovis upstream review (NFR-31, P15-03): opens or updates an issue.
+on:
+  schedule:
+    - cron: "41 7 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: install the latest herdr
+        run: curl -fsSL https://herdr.dev/install.sh | sh && echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: review upstream changes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: scripts/upstream_check.sh

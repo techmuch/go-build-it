@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -234,7 +236,7 @@ func (m *Manager) ensureAgent(ctx context.Context, h *herdr.Client, p projects.P
 		}
 	} else {
 		bin := firstNonEmpty(hc.Binary, m.GbiBin)
-		cmd := fmt.Sprintf("GBI_FAKE_TRANSCRIPTS=%s GBI_URL=%s %s %s\n", shq(harness.FakeTranscriptDir()), shq("http://"+m.cfg.Listen), shq(bin), strings.Join(shqAll(args), " "))
+		cmd := ShellCommand(map[string]string{"GBI_FAKE_TRANSCRIPTS": harness.FakeTranscriptDir(), "GBI_URL": "http://" + m.cfg.Listen}, bin, args)
 		if err := h.Call(ctx, herdr.MethodPaneSendText, map[string]any{"pane_id": pane, "text": cmd}, nil); err != nil {
 			return out, err
 		}
@@ -293,6 +295,37 @@ func waitAgent(ctx context.Context, h *herdr.Client, pane string, prof harness.P
 }
 
 func shq(s string) string { return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'" }
+
+// ShellCommand is a line typed into a pane's shell that runs bin with args and env:
+// POSIX shells on macOS and Linux, PowerShell on Windows (herdr's default there).
+func ShellCommand(env map[string]string, bin string, args []string) string {
+	keys := make([]string, 0, len(env))
+	for k := range env {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	if runtime.GOOS == "windows" {
+		ps := func(s string) string { return "'" + strings.ReplaceAll(s, "'", "''") + "'" }
+		var b strings.Builder
+		for _, k := range keys {
+			fmt.Fprintf(&b, "$env:%s=%s; ", k, ps(env[k]))
+		}
+		b.WriteString("& " + ps(bin))
+		for _, a := range args {
+			b.WriteString(" " + ps(a))
+		}
+		return b.String() + "\r\n"
+	}
+	var b strings.Builder
+	for _, k := range keys {
+		fmt.Fprintf(&b, "%s=%s ", k, shq(env[k]))
+	}
+	b.WriteString(shq(bin))
+	for _, a := range args {
+		b.WriteString(" " + shq(a))
+	}
+	return b.String() + "\n"
+}
 
 func shqAll(a []string) []string {
 	out := make([]string, len(a))

@@ -1,6 +1,6 @@
 # go-build-it
 
-go-build-it manages long-running software projects with a team of AI personas and humans. It is one Go binary with an embedded React UI (desktop and mobile), a CLI with the same operations, and an MCP server. Agent harnesses (Claude Code, OpenCode, Antigravity, Pi) run headlessly in isolated git worktrees.
+go-build-it manages long-running software projects with a team of AI personas and humans. It is one Go binary with an embedded React UI (desktop and mobile), a CLI with the same operations, and an MCP server. Every AI team member runs as a long-running agent harness (Claude Code, Antigravity, Pi, OpenCode) in its own pane of a supervised [herdr](https://herdr.dev) session and its own git worktree. Open `herdr --session gbi` to see everything go-build-it is doing. Teams are per project, made from global persona archetypes (ADR-009, ADR-010).
 
 - Requirements: [docs/requirements.md](docs/requirements.md)
 - Delivery plan and tracker: [docs/tracker/](docs/tracker/index.html)

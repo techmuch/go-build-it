@@ -1,37 +1,71 @@
 section: Using go-build-it
-reqs: FR-60, FR-61, FR-62, FR-64, FR-65, FR-66, FR-67, FR-70, FR-71, FR-72, FR-73, FR-74
-# Sessions, context and handoffs
+reqs: FR-60, FR-61, FR-62, FR-64, FR-65, FR-66, FR-67, FR-68, FR-69, FR-70, FR-71, FR-72, FR-73, FR-74, FR-76
+# Team members at work: sessions, terminals and conversations
 
-A **session** is one headless run of a harness on a task. Each runs in its own git worktree on the task branch.
+Every AI team member runs as a long-running harness (Claude Code, Antigravity, Pi or OpenCode) in its own pane of the `gbi` herdr session. It works in its own git worktree, `~/.go-build-it/worktrees/<project>/members/<name>`, and each task gets a fresh branch there.
 
-The agent starts from a prepared context:
-- the task
+A **session** is one member working on one task. go-build-it writes the task to `.gbi-task.md` in the member's worktree and asks the member to read it. The task brief contains:
+- the task itself
 - the requirements in scope
 - the project's values and problem definition
-- notes from earlier sessions, answers and review feedback
+- notes from earlier work, answers and review feedback
 
-It does not get the whole project history.
+It does not contain the whole project history.
 
-![Sessions](screenshots/sessions.png)
+![Team members at work](screenshots/sessions.png)
 
-**Context usage** is shown live. Claude Code reports it exactly ("measured"); OpenCode, Antigravity and Pi are estimated.
+## Status comes from herdr
 
-**When context fills,** the harness compacts on its own. This is the default, and each compaction is logged in history.
+herdr reports each member as working, blocked, done or idle.
 
-**Smart handoffs** are experimental (Settings → Experimental). At the threshold, the agent writes a briefing:
-- objective and definition of done
-- current state
-- decisions and why
+**Blocked members.** A **blocked** member is waiting for you. Examples are its first-run "trust this folder" prompt, or a permission dialog. It appears:
+- at the top of the Sessions page
+- in the Questions dashboard
+- in the mobile Inbox
+
+go-build-it never answers an agent's dialog for you. Open the live terminal and answer it there, or answer in herdr itself.
+
+**Fewer prompts.** Members run in accept-edits mode, which removes most prompts.
+
+## Live terminal
+
+Open a session and choose **Terminal** to watch the member's pane live. Several people can watch at once, and watching never resizes the pane.
+- **Take control** sends your keys, paste and window size to the agent.
+- **Hand back** releases control.
+- <kbd>Ctrl</kbd> <kbd>]</kbd> leaves the terminal.
+
+Taking control and handing back are recorded in History. On a phone, the terminal has a key bar for Esc, Tab, Ctrl-C, the arrows and Enter.
+
+**Open in herdr** focuses the member's pane and copies `herdr --session gbi`, so the same pane is open when you attach from a terminal. There, each project is a workspace, and each member's worktree is grouped under it. Each pane is labelled with the member's name and role, its current task, its context use and how many tasks are in its conversation.
+
+![Live terminal](screenshots/session-terminal.png)
+
+The **Structured** view lists what the member did, read from its transcript: your prompt, the files it read and edited, the commands it ran and its messages.
+
+## Context and conversations
+
+Context usage is read from the harness's transcript:
+- **Measured:** Claude Code, Antigravity and Pi.
+- **Unavailable:** OpenCode, which keeps its sessions in a database.
+
+A member keeps **one conversation across tasks** until its context reaches the threshold (75% by default). It then **rotates**: the next task starts a new conversation from the task brief plus the member's notes from earlier tasks (Q8). Lens, the reviewer, starts a fresh conversation for every review.
+
+You can restart a member from its Team page. **Restart** resumes the same conversation; **New conversation** starts afresh.
+
+**Compaction.** If the harness compacts on its own, the compaction is logged in History.
+
+**Smart handoffs** are experimental (Settings → Experimental). At the threshold, the member writes a briefing with:
+- the objective and definition of done
+- the current state
+- decisions made and why
 - dead ends to avoid
 - next steps
 - pointers to files and artifacts
 
-A fresh session then continues from that briefing. History → *Handoffs vs compaction* shows whether they are ready to become the default (ADR-007).
+The task then continues in a new conversation that starts from that briefing (ADR-007).
 
-**Rate limits:** when a subscription limit is hit, the task pauses and resumes automatically when the limit resets.
+**Rate limits.** When a subscription limit is hit, the task pauses, and it resumes automatically when the limit resets.
 
-**Structured and terminal views:** open a session to switch between the two. Claude Code sessions also accept typed input.
+## Restarts
 
-![Terminal view](screenshots/session-terminal.png)
-
-**Attachable sessions** are experimental and need tmux (ADR-008). The harness runs interactively, and you take control with `tmux attach -t gbi-S-…`.
+herdr owns the harness processes, so restarting or updating go-build-it does not stop your members. When go-build-it comes back, it reattaches to members that are still working. If herdr itself restarts, it restores each pane and resumes its conversation, and go-build-it finds the members again.

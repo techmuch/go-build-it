@@ -6,8 +6,8 @@ go-build-it runs every agent in [herdr](https://github.com/herdrdev/herdr). [Ovi
 
 | Project | Last reviewed | Version | Notes |
 |---|---|---|---|
-| herdr | `ee5bfb5` (2026-10-29) | 0.9.5 | [herdr.md](herdr.md) |
-| Ovis | `d763e83` (2026-11-09) | 0.5.1 | [ovis.md](ovis.md) |
+| herdr | `ee5bfb5` (2026-10-29; re-checked 2026-11-09, no relevant changes) | 0.9.5 | [herdr.md](herdr.md) |
+| Ovis | `e1f57f7` (2026-11-09) | 0.5.1 | [ovis.md](ovis.md) |
 
 ## How to review
 
@@ -19,4 +19,4 @@ go-build-it runs every agent in [herdr](https://github.com/herdrdev/herdr). [Ovi
 4. Add a dated entry to the project's file: what changed, whether it affects go-build-it, and the follow-up (issue or PR).
 5. Update the table above.
 
-The weekly scheduled review (P15-03) follows these same steps and opens an issue or PR.
+The weekly job, `.github/workflows/upstream.yml` running `scripts/upstream_check.sh`, does steps 1–3 every Monday. It opens or updates an issue labelled `upstream-review` when something relevant changed. Steps 4–5 are done when that issue is handled. To run it by hand: `DRY_RUN=1 scripts/upstream_check.sh`.

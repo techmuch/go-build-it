@@ -51,6 +51,15 @@ The strip on the left shows a thumbnail of every attachment on the item: a live 
 
 **Pinned comments.** Write the comment, turn on **📍 Pin**, then click the spot on the mockup or image. From the keyboard, <kbd>Tab</kbd> to the pin layer and press <kbd>Enter</kbd> to pin the centre. Pins are saved, shown to everyone who opens the same item, recorded in History, and can be removed with ✕. The CLI equivalents are `gbi pins list`, `gbi pins add` and `gbi pins remove`.
 
+## Live terminal
+
+| Keys | What it does |
+|---|---|
+| Every key | With control taken, goes to the agent in its herdr pane. |
+| <kbd>Ctrl</kbd> <kbd>]</kbd> | Leave the terminal so page shortcuts work again. |
+
+While you are only watching, the terminal is read-only and page shortcuts keep working.
+
 ## Mobile
 
 The mobile UI is built for touch, but it follows the same rules with a Bluetooth keyboard: <kbd>Tab</kbd> reaches every control, <kbd>Enter</kbd> opens cards and list rows, and <kbd>↑</kbd> <kbd>↓</kbd> move through lists.

@@ -161,8 +161,7 @@ window.TRACKER = {
     "Rev 3 mockups (desktop, mobile, herdr layout) reviewed"
    ],
    "gateApproved": "2026-11-08",
-   "gateApprovedBy": "david (owner)",
-   "gateEvidence": "Requirements rev 3 and ADR-009/010 merged (#4); spike passed end to end (ADR-009 findings); Q8–Q10 decided by owner; rev 3 mockups desktop 05/05b/10/10b/13/15 + 01/02/06 and mobile M2/M3/M8/M10; layout spec and upstream baseline written."
+   "gateApprovedBy": "david (owner)"
   },
   {
    "id": "P11",
@@ -176,8 +175,7 @@ window.TRACKER = {
     "CI is green on macOS, Linux and Windows with a pinned herdr"
    ],
    "gateApproved": "2026-11-08",
-   "gateApprovedBy": "david (owner)",
-   "gateEvidence": "herdr client generated from the vendored schema (gen -check in make vet); supervisor adopts/starts a detached gbi session and restarts it; doctor + fixes (API, CLI, Settings → herdr setup); watcher with snapshot reconciliation; fake member runs in herdr; live tests pass against an isolated herdr; CI installs pinned herdr on Linux and macOS (required) and Windows (informational, beta), weekly latest-herdr job."
+   "gateApprovedBy": "david (owner)"
   },
   {
    "id": "P12",
@@ -191,8 +189,7 @@ window.TRACKER = {
     "Each member's instruction file is generated in its worktree"
    ],
    "gateApproved": "2026-11-09",
-   "gateApprovedBy": "david (owner)",
-   "gateEvidence": "Archetypes with revisions and starter archetypes; per-project members (forge@project) made from archetypes; tuning, effective persona, diff, change review with per-member and bulk apply (Q10), promote; humans per project; starter team on import; Archetypes library and project Team tab (A-v10, A-v10b), team on card/overview/mobile; task assignment to a specific member. Team unit tests, app suite and 28 e2e tests pass."
+   "gateApprovedBy": "david (owner)"
   },
   {
    "id": "P13",
@@ -207,8 +204,7 @@ window.TRACKER = {
     "No tmux or stream-json code remains"
    ],
    "gateApproved": "2026-11-09",
-   "gateApprovedBy": "david (owner)",
-   "gateEvidence": "Members run as long-lived harnesses in herdr panes, one worktree each: profiles for Claude Code, Antigravity, Pi, OpenCode; transcript readers (Claude, Antigravity, Pi) with measured usage; dispatch through .gbi-task.md and Submit/WaitSettled; blocked → needs-you (inbox, card); rate limits; conversation continuity and rotation at 75% with member notes (Q8); reattach after restart; herdr labels and workspace summary; helper conversations for chat/Lens in herdr; tmux, attachable flag and headless stream-json removed. Real run: Claude Code and Antigravity finished end to end; Pi ran mechanically end to end but its configured local model returned empty output (paid OpenRouter models not used without asking). Go suite, 3 new member tests and 28 e2e tests pass."
+   "gateApprovedBy": "david (owner)"
   },
   {
    "id": "P14",
@@ -222,8 +218,7 @@ window.TRACKER = {
     "Every herdr state change, rotation and takeover is in the history"
    ],
    "gateApproved": "2026-11-09",
-   "gateApprovedBy": "david (owner)",
-   "gateEvidence": "Live terminal of any member over WebSocket from herdr terminal session observe/control with ack-based flow control (1 MiB budget) and takeover; xterm.js on desktop and phone (key bar); live members view with herdr state and blocked rows first; blocked members in the Questions dashboard and mobile Inbox; Open in herdr (focus + copy); takeover, release, blocked and unblocked in History. TestMemberTerminalStream passes against herdr; UAT drives watch → take control → hand back in the browser."
+   "gateApprovedBy": "david (owner)"
   },
   {
    "id": "P15",
@@ -3029,7 +3024,7 @@ window.TRACKER = {
     "P14-04",
     "P12-06"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3050,7 +3045,7 @@ window.TRACKER = {
     "P15-01",
     "P11-06"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3082,7 +3077,7 @@ window.TRACKER = {
    "deps": [
     "P11-07"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": [
     "Q9"
@@ -3100,7 +3095,7 @@ window.TRACKER = {
    "deps": [
     "P15-02"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   }

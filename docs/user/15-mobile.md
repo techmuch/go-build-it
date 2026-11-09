@@ -8,7 +8,8 @@ Open `/m/` on your phone, over your tailnet. The mobile UI puts the common tasks
 - reviews
 - rehearsal steps
 - option sets
-- sessions, with a terminal view and a key bar
+- team members at work: the live herdr terminal of any member, with take control and a key bar (Esc, Tab, Ctrl-C, arrows, Enter)
+- members waiting for you, in the inbox
 
 Add it to your home screen to install it.
 

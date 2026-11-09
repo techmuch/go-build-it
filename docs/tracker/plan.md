@@ -387,11 +387,11 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 
 | Task | Size | Requirements | Approach A views | Depends on |
 |---|---|---|---|---|
-| **P15-01** User docs rewrite: install, team, sessions, settings, mobile and CLI for herdr and archetypes | M | FR-130 | A-v14 | P14-04, P12-06 |
-| **P15-02** UAT scripts for the herdr flow per role; regenerate screenshots | L | FR-132, FR-133, FR-131 | A-v14 | P15-01, P11-06 |
+| **P15-01** User docs rewrite: install, team, sessions, settings, mobile and CLI for herdr and archetypes ✅ | M | FR-130 | A-v14 | P14-04, P12-06 |
+| **P15-02** UAT scripts for the herdr flow per role; regenerate screenshots ✅ | L | FR-132, FR-133, FR-131 | A-v14 | P15-01, P11-06 |
 | **P15-03** Weekly upstream review job for herdr and Ovis that opens an issue or PR | S | NFR-31 | — | P10-10 |
-| **P15-04** Windows at herdr's support level · waits on Q9 | M | NFR-01 | — | P11-07 |
-| **P15-05** Rev 3 close-out: retire obsolete tests and text, mockup change log, coverage check | S | FR-01 | — | P15-02 |
+| **P15-04** Windows at herdr's support level ✅ · waits on Q9 | M | NFR-01 | — | P11-07 |
+| **P15-05** Rev 3 close-out: retire obsolete tests and text, mockup change log, coverage check ✅ | S | FR-01 | — | P15-02 |
 
 ## 5. Open questions schedule
 
