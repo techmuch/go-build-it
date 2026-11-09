@@ -2187,7 +2187,7 @@ window.TRACKER = {
    "deps": [
     "P10-02"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "Spike notes appended to ADR-009; throwaway code not merged.",
    "q": []
   },

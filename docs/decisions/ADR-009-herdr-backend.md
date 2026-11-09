@@ -64,3 +64,33 @@ Ovis also showed what not to copy. It answers harness permission prompts by pars
 - **tmux plus Claude hooks.** No status model, no Windows support, and text-only control.
 - **Keeping headless `stream-json` alongside herdr.** Two execution paths, two usage models and two test suites. It also leaves "open herdr and see everything" only half true.
 - **Embedding a PTY in go-build-it (`creack/pty` and ConPTY).** Agents would die whenever go-build-it restarts, and go-build-it would re-implement what herdr already does.
+
+## Spike findings (P10-04, 2026-11-08, herdr 0.9.5, Claude Code 2.1.319)
+
+Run in an isolated session (`herdr --session gbispike server`), then deleted.
+
+- **Session isolation needs an explicit socket.**
+  - `herdr server` ignores `HERDR_SESSION`. With the default server already running, a `workspace create` sent while `HERDR_SESSION` was set landed in the user's **default** session. It was closed immediately.
+  - go-build-it must therefore start the server with `herdr --session gbi server`, and talk only to that session's socket (`~/.config/herdr/sessions/gbi/herdr.sock`, via `HERDR_SOCKET_PATH`).
+  - Before any write, it must check that `status server` answers on that socket. It must never fall back to the default session.
+- **Starting an agent.**
+  - `agent start --kind claude --pane … -- --permission-mode acceptEdits` returned `agent_not_ready`, because Claude was `blocked` on its first-run "trust this folder" dialog.
+  - That's correct herdr behaviour (FR-68). Each member worktree needs this trust once. go-build-it shows it as a one-time "needs you" item linked to the live terminal, and does not answer it itself.
+  - After the trust was given, the agent reached `idle` within about 3 s.
+- **Session ID.** `agent get` exposed `agent_session = {source: herdr:claude, kind: id, value: <uuid>}` even with the outdated v7 integration. go-build-it still asks for the current version.
+- **Dispatch.**
+  - go-build-it wrote `.gbi-task.md`, then sent `agent prompt atlas "Read .gbi-task.md in this folder and do what it says." --wait --until idle --until done --until blocked`.
+  - The call returned after 8 s with `idle` and `completion_seq: 4`, and the file the task asked for existed.
+- **Transcript and usage.**
+  - The transcript is at `~/.claude/projects/<cwd with every non-alphanumeric character replaced by "-">/<session id>.jsonl`.
+  - `assistant` rows carry `message.usage`. Context used is `input_tokens + cache_creation_input_tokens + cache_read_input_tokens` of the latest assistant row: 42,545 tokens here, a measured value.
+  - Tool calls appear as `tool_use` content items (`Read`, `Write`), which give the structured view.
+- **Terminal stream.**
+  - `terminal session observe <pane> --cols --rows` prints NDJSON `terminal.frame` records `{seq, full, width, height, encoding, bytes(base64 ANSI)}`. The first frame is a full repaint of about 4.3 KB.
+  - `terminal session control` reads `terminal.input {text|bytes}`, `terminal.resize {cols, rows}`, `terminal.scroll`, `terminal.mouse` and `terminal.release`. Source: `src/client/terminal_sessions.rs`.
+  - There is no acknowledgement-based flow control, and herdr drops an observer that makes no progress for 30 s. go-build-it's WebSocket bridge must drain promptly and apply its own browser-side flow control.
+- **Labels.**
+  - `pane report-metadata --source gbi --title … --display-agent … --token k=v` showed up in `pane get` as `title`, `display_agent` and `tokens`.
+  - `workspace report-metadata --token` takes the same form.
+
+Result: the direction holds. No change to the decision.
