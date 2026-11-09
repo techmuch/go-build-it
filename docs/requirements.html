@@ -82,7 +82,7 @@ td:first-child { white-space: nowrap; }
 </ol></nav>
 <main>
 <h1>go-build-it — Requirements</h1>
-<p class="meta">Status: Draft · Last updated: 2026-11-09 (rev. 4: in-app change log and guided updates, FR-06a–FR-06e, see [ADR-011](decisions/ADR-011-changelog-guided-updates.md). Rev. 3: herdr as the only agent backend; per-project team members from global archetypes, see [ADR-009](decisions/ADR-009-herdr-backend.md) and [ADR-010](decisions/ADR-010-project-team-members.md))</p>
+<p class="meta">Status: Draft · Last updated: 2026-11-09 (rev. 5: a doctor that proves gbi can start herdr and a harness and explains failures to people and AI agents, FR-07a–FR-07e; install by giving an AI agent the GitHub URL, FR-02a–FR-02b; lessons, a practice project, harness control and design rationale, FR-134–FR-139; see [ADR-012](decisions/ADR-012-doctor-and-learning.md). Rev. 4: in-app change log and guided updates, FR-06a–FR-06e, see [ADR-011](decisions/ADR-011-changelog-guided-updates.md). Rev. 3: herdr as the only agent backend; per-project team members from global archetypes, see [ADR-009](decisions/ADR-009-herdr-backend.md) and [ADR-010](decisions/ADR-010-project-team-members.md))</p>
 <h2 id="1-overview">1. Overview</h2>
 <p>go-build-it is a Go application with an embedded React frontend that manages long-running software project development. It is installed globally on a machine and provides a web UI and a CLI. A team of AI personas and humans works through it to take projects from problem definition to released software. The app coordinates external agent harnesses such as Claude Code, Antigravity and OpenCode. Every harness runs interactively inside [herdr](https://herdr.dev), a terminal workspace manager for coding agents, in a herdr session that go-build-it owns. Opening that session in any terminal shows everything go-build-it is doing, organized by project and team member.</p>
 <h3 id="conventions">Conventions</h3>
@@ -132,9 +132,64 @@ It <span class="kw kw-SHALL">SHALL</span> check that herdr's integration for eac
 It <span class="kw kw-SHALL">SHALL</span> check herdr's advertised API methods at connect time and report a clear error when a required method is missing.
 </li></ul>
 </li><li>
+<strong class="rid" id="FR-07a">FR-07a</strong>: go-build-it <span class="kw kw-SHALL">SHALL</span> provide a <strong>doctor</strong> (<code>gbi doctor</code>, and <strong>Settings → herdr setup</strong> in the UI) that runs inside the <code>gbi</code> binary itself. It <span class="kw kw-SHALL">SHALL</span> work when <code>gbi serve</code> is not running, because a broken server is one of the things it diagnoses.
+</li><li>
+<strong class="rid" id="FR-07b">FR-07b</strong>: The doctor <span class="kw kw-SHALL">SHALL</span> run its checks in tiers. Each tier runs only if the tiers before it passed:
+<ol><li>
+<strong>static</strong>: the herdr checks of FR-07, the login service, and each enabled harness's binary found on the PATH the login service uses (FR-02).
+</li><li>
+<strong>live</strong>: go-build-it starts the gbi herdr session if it is not running, opens a throwaway <code>doctor</code> tab in it, runs a command there and reads its output back, checks that each enabled harness's binary is found <em>inside the pane</em>, then closes the tab.
+</li><li>
+<strong>harness</strong>: for each enabled harness (or the one named), the doctor starts the harness in a throwaway pane and waits until herdr reports it ready. A harness that stops at a sign-in, trust or first-run screen, exits, or does not start within the time limit fails the check, and the doctor shows the last lines of the screen. No prompt is sent, so this uses no tokens.
+</li><li>
+<strong>prompt</strong>: the doctor sends one short prompt and waits for the reply, which proves sign-in and quota end to end. It uses a few tokens, so it <span class="kw kw-SHALL">SHALL</span> run only when asked for (<code>--prompt</code>, or a button labeled with that cost). It <span class="kw kw-SHALL">SHALL</span> never run automatically.
+</li></ol>
+</li></ul>
+<p>  The static and live tiers run by default. Throwaway tabs and panes <span class="kw kw-SHALL">SHALL</span> be closed afterwards, and the doctor <span class="kw kw-SHALL">SHALL</span> never touch the user's default herdr session.</p>
+<ul><li>
+<strong class="rid" id="FR-07c">FR-07c</strong>: Every doctor result <span class="kw kw-SHALL">SHALL</span> serve both a person and an AI agent. It <span class="kw kw-SHALL">SHALL</span> carry:
+<ul><li>
+a stable <code>id</code> (e.g. <code>harness.not_on_pane_path</code>)
+</li><li>
+a status: ok, warn, fail or skipped
+</li><li>
+what was checked, in plain words
+</li><li>
+<strong>evidence</strong>: the command run, its exit code, and the last lines of its output or of the pane
+</li><li>
+a <strong>fix</strong>, which is one of two kinds. An <em>automatic</em> fix is one the doctor can apply itself (<code>gbi doctor --fix</code>). A <em>human</em> fix (signing in to a harness, sudo, approving a package install) says exactly what the person must do, written so an AI agent can pass it on word for word.
+</li><li>
+a link to the troubleshooting section of the user docs for that <code>id</code>
+</li></ul>
+</li><li>
+<strong class="rid" id="FR-07d">FR-07d</strong>: <code>gbi doctor --json</code> <span class="kw kw-SHALL">SHALL</span> print the results as JSON. It <span class="kw kw-SHALL">SHALL</span> exit 0 when nothing failed, 1 when every failure has an automatic fix, and 2 when a failure needs a human. <code>gbi doctor --fix</code> <span class="kw kw-SHALL">SHALL</span> apply the automatic fixes and run the checks again. <code>gbi doctor --report</code> <span class="kw kw-SHALL">SHALL</span> write one Markdown file to paste into an AI chat or an issue. The file holds the versions, the platform, the configuration with secrets removed, and every result with its evidence.
+</li><li>
+<strong class="rid" id="FR-07e">FR-07e</strong>: The user docs <span class="kw kw-SHALL">SHALL</span> have a troubleshooting page with one section per doctor <code>id</code>: what it means, how to fix it, and how to confirm the fix.
+</li><li>
 <strong class="rid" id="FR-08">FR-08</strong>: The background service (FR-02) <span class="kw kw-SHALL">SHALL</span> ensure both go-build-it and its herdr session are running at login. Stopping or updating go-build-it <span class="kw kw-SHALLNOT">SHALL NOT</span> stop running harnesses, because herdr owns them.
 </li><li>
 <strong class="rid" id="FR-02">FR-02</strong>: The application <span class="kw kw-SHALL">SHALL</span> be installable globally on a machine and <span class="kw kw-SHOULD">SHOULD</span> run as a background service (launchd on macOS, systemd on Linux, a Windows service on Windows).
+</li><li>
+<strong class="rid" id="FR-02a">FR-02a</strong>: An AI coding agent <span class="kw kw-SHALL">SHALL</span> be able to install go-build-it given only the GitHub repository URL. The README <span class="kw kw-SHALL">SHALL</span> contain an <strong>Install with an AI agent</strong> section that the agent can follow step by step:
+<ol><li>
+detect the platform
+</li><li>
+install herdr
+</li><li>
+download the release for the platform and verify its checksum and signature against the public key printed in the README
+</li><li>
+put <code>gbi</code> on the PATH without sudo
+</li><li>
+find which harnesses are installed, and ask the person which to use when none is
+</li><li>
+run <code>gbi doctor --json --fix</code> until nothing is left to fix, passing every human fix to the person word for word
+</li><li>
+install the login service, run the harness tier, and open the UI
+</li></ol>
+</li></ul>
+<p>  The section <span class="kw kw-SHALL">SHALL</span> also state the rules: never touch the person's default herdr session, never send a prompt or start paid work without asking, never use sudo without asking. While no release is published, the section <span class="kw kw-SHALL">SHALL</span> say so and give the build-from-source steps instead.</p>
+<ul><li>
+<strong class="rid" id="FR-02b">FR-02b</strong>: The repository <span class="kw kw-SHALL">SHALL</span> include <code>scripts/install.sh</code> (macOS and Linux) and <code>scripts/install.ps1</code> (Windows) that perform steps 3–4 of FR-02a in one command. Each <span class="kw kw-SHALL">SHALL</span> accept a version and an install directory, and <span class="kw kw-SHALL">SHALL</span> refuse to install a download whose checksum does not match. It <span class="kw kw-SHALL">SHALL</span> also refuse one whose signature fails when it can verify the signature, and say so when it cannot. An <code>AGENTS.md</code> at the repository root <span class="kw kw-SHALL">SHALL</span> point AI agents to the README section.
 </li><li>
 <strong class="rid" id="NFR-01">NFR-01</strong>: macOS <span class="kw kw-SHALL">SHALL</span> be the initial target platform. Linux and Windows <span class="kw kw-SHALL">SHALL</span> be supported later. Code <span class="kw kw-SHALLNOT">SHALL NOT</span> assume macOS-only paths, shells or tools without a cross-platform abstraction. Platform support <span class="kw kw-SHALL">SHALL</span> follow herdr's: a platform where herdr is in beta (currently Windows) is supported at the same level.
 </li><li>
@@ -604,6 +659,43 @@ time per task
 </li><li>
 <strong class="rid" id="FR-133">FR-133</strong>: The UAT walkthrough <span class="kw kw-SHOULD">SHOULD</span> be written as automated end-to-end scripts (e.g. Playwright) that both verify the features and regenerate the documentation screenshots, so screenshots stay current.
 </li></ul>
+<h3 id="12-1-learning-go-build-it">12.1 Learning go-build-it</h3>
+<ul><li>
+<strong class="rid" id="FR-134">FR-134</strong>: go-build-it <span class="kw kw-SHALL">SHALL</span> have a <strong>Learn</strong> area (desktop <code>g l</code>, and on the phone under More) with a series of short lessons that together cover every feature. Each lesson <span class="kw kw-SHALL">SHALL</span> have:
+<ul><li>
+a goal and an estimated time of 5–10 minutes
+</li><li>
+numbered steps
+</li><li>
+one to three <strong>Pro tip</strong> callouts
+</li><li>
+links to the how-to pages it builds on
+</li></ul>
+</li></ul>
+<p>  A lesson <span class="kw kw-SHALL">SHALL</span> open as a coach panel docked beside the app, so the user follows the steps in the real UI. A step's <strong>Show me</strong> button <span class="kw kw-SHALL">SHALL</span> go to the right view and highlight the control it names.</p>
+<ul><li>
+<strong class="rid" id="FR-135">FR-135</strong>: Lessons <span class="kw kw-SHALL">SHALL</span> know when a step is done. A step is checked off from go-build-it's own history events (e.g. a task created in the practice project after the lesson started) or from the user visiting a view. The user <span class="kw kw-MAY">MAY</span> also tick it off. Progress <span class="kw kw-SHALL">SHALL</span> be kept per user, so a lesson can be left and resumed. Lessons and progress <span class="kw kw-SHALL">SHALL</span> also be available from the CLI (<code>gbi learn …</code>).
+</li><li>
+<strong class="rid" id="FR-136">FR-136</strong>: Lessons <span class="kw kw-SHALL">SHALL</span> run in a <strong>practice project</strong> by default. It is created on request with its own small git repository under <code>~/.go-build-it/practice/</code> and a starter team whose AI members use the scripted fake harness, so practice uses no AI subscription and never touches the user's real repositories. It <span class="kw kw-SHALL">SHALL</span> be clearly labeled as practice everywhere it appears, and the user <span class="kw kw-SHALL">SHALL</span> be able to reset or remove it. The last lesson <span class="kw kw-SHALL">SHALL</span> show how to move to a real project.
+</li><li>
+<strong class="rid" id="FR-137">FR-137</strong>: A lesson and a cookbook page <span class="kw kw-SHALL">SHALL</span> teach controlling go-build-it <strong>from the user's AI harness</strong>, with Claude Code as the main example and notes for Antigravity, Pi and OpenCode:
+<ul><li>
+the two ways to connect: running <code>gbi</code> commands, and the MCP server (<code>gbi mcp</code>), and how to choose between them
+</li><li>
+examples that each show what the user asks the harness, the <code>gbi</code> commands the harness runs, and what then appears in the UI. Terminal output <span class="kw kw-SHALL">SHALL</span> be shown as text transcripts, and UI results as screenshots.
+</li><li>
+<code>gbi agent guide</code>, which prints a guide for AI agents (the workflow, the commands, and the rules such as asking before starting paid work) that the user can install as a harness skill or <code>AGENTS.md</code>
+</li></ul>
+</li><li>
+<strong class="rid" id="FR-138">FR-138</strong>: The docs <span class="kw kw-SHALL">SHALL</span> include <strong>How go-build-it thinks</strong>, short explanation pages on why it is designed the way it is: herdr as the only backend, persona archetypes and project members, one worktree per member, gates and phases, questions instead of guesses, the history as an audit trail, and one route table for UI, CLI, API and MCP. Each page <span class="kw kw-SHALL">SHALL</span> link the ADRs behind it.
+</li><li>
+<strong class="rid" id="FR-139">FR-139</strong>: The lessons <span class="kw kw-SHALL">SHALL</span> be tested so they stay current:
+<ul><li>
+Every <code>gbi</code> example in the lessons and the cookbook <span class="kw kw-SHALL">SHALL</span> be run against a demo instance by an automated test, which fails when an example fails.
+</li><li>
+Each lesson's steps <span class="kw kw-SHALL">SHALL</span> be completed and checked off by an end-to-end test in the practice project, which also regenerates the lesson screenshots.
+</li></ul>
+</li></ul>
 <h2 id="13-security-posture">13. Security posture</h2>
 <ul><li>
 <strong class="rid" id="NFR-20">NFR-20</strong>: Agents <span class="kw kw-MAY">MAY</span> run arbitrary code on the development machine. Container or VM sandboxing is explicitly <strong>not</strong> required.
@@ -622,6 +714,8 @@ time per task
 <tr><td>Q8</td><td>~~Conversation rotation policy (FR-76)?~~ <strong>Answered 2026-11-08:</strong> keep one conversation per member across tasks until context reaches the handoff threshold (75%), then rotate, starting from a handoff plus the member's notes. Lens starts a fresh conversation for every review. See ADR-010.</td></tr>
 <tr><td>Q9</td><td>~~Windows support level?~~ <strong>Answered 2026-11-08:</strong> ship Windows at herdr's beta level, with herdr in the Windows CI job. A herdr capability missing on Windows is shown as unavailable there. See ADR-009.</td></tr>
 <tr><td>Q10</td><td>~~Archetype change propagation (FR-12b)?~~ <strong>Answered 2026-11-08:</strong> a proposal per affected member, plus one action to apply the change to every member that has not overridden the changed fields. See ADR-010.</td></tr>
+<tr><td>Q11</td><td>~~Should the doctor's prompt tier (FR-07b) ever run on its own?~~ <strong>Answered 2026-11-09:</strong> no. It runs only when asked for, because it uses tokens. See ADR-012.</td></tr>
+<tr><td>Q12</td><td>~~Should lessons use a sandbox or a real project?~~ <strong>Answered 2026-11-09:</strong> a practice project with the scripted fake harness by default (FR-136); the last lesson moves to a real project. Claude Code is the main harness example (FR-137). See ADR-012.</td></tr>
 </tbody></table></div>
 <h2 id="15-out-of-scope-for-now">15. Out of scope (for now)</h2>
 <ul><li>

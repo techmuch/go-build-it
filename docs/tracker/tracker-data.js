@@ -250,6 +250,32 @@ window.TRACKER = {
    "gateApproved": "2026-11-09",
    "gateApprovedBy": "david (owner)",
    "gateEvidence": "Desktop sidebar version and mobile More version open the change log (g v too), with the installed version marked. Check lists every newer release's notes and the sidebar shows 'update ready'. scripts/update_e2e.sh ran Update now from 2026.01.01.1 to 2026.12.31.1 against a fake signed release while a demo member was blocked in herdr: all eight steps were seen running and done, the server restarted in place (same PID) and finished the restart and reconnect steps, the blocked member S-3 was still live afterwards, the previous binary was kept, and update.completed was recorded. Go tests cover a tampered download, the wrong key, the wrong version and missing SHA256SUMS: each fails before Install with the binary untouched and Try again offered. Interrupted and wrong-version restarts and the rollback job are covered too. UAT 29/29 still passes."
+  },
+  {
+   "id": "P17",
+   "name": "Doctor & AI-agent install",
+   "mvp": false,
+   "goal": "Prove that gbi can start herdr and each harness inside it, explain every failure to a person or an AI agent with evidence and a fix, and let an AI agent install gbi from the GitHub URL alone.",
+   "gate": "Doctor UAT",
+   "gateCriteria": [
+    "gbi doctor runs with no server; static and live tiers open and close a real pane in the gbi session",
+    "The harness tier starts the scripted harness in herdr and reports a blocked or missing harness with evidence and a human fix",
+    "--json exit codes 0/1/2, --fix and --report behave as specified; every result id has a troubleshooting section",
+    "install.sh installs from a fake signed release, refuses a tampered one, and the installed gbi passes the doctor"
+   ]
+  },
+  {
+   "id": "P18",
+   "name": "Learn: lessons, practice project, harness control",
+   "mvp": false,
+   "goal": "Teach every feature through short lessons with pro tips, run in a practice project that costs nothing, show how to drive gbi from your AI harness, and explain why gbi is designed the way it is.",
+   "gate": "Learn UAT",
+   "gateCriteria": [
+    "Every lesson can be completed in the practice project and each step checks itself off",
+    "The coach panel's Show me goes to the right view and highlights the control; progress survives a reload",
+    "Every $ gbi example in the lessons and cookbook runs against a demo instance",
+    "How go-build-it thinks covers herdr, archetypes, worktrees, gates, questions, history and the route table, each linking its ADRs"
+   ]
   }
  ],
  "tasks": [
@@ -3328,6 +3354,439 @@ window.TRACKER = {
    "status": "done",
    "done": "",
    "q": []
+  },
+  {
+   "id": "P17-01",
+   "phase": "P17",
+   "title": "Requirements rev 5 (FR-02a–b, FR-07a–e, FR-134–139), ADR-012, mockups 17–20 and M13, plan and tracker",
+   "reqs": [
+    "FR-02a",
+    "FR-02b",
+    "FR-07a",
+    "FR-07b",
+    "FR-07c",
+    "FR-07d",
+    "FR-07e",
+    "FR-134",
+    "FR-135",
+    "FR-136",
+    "FR-137",
+    "FR-138",
+    "FR-139"
+   ],
+   "views": [
+    "A-v17",
+    "A-v18",
+    "A-v19",
+    "A-v20",
+    "A-M13"
+   ],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "docs/requirements.md rev 5; docs/decisions/ADR-012-doctor-and-learning.md; desktop views 17–20, mobile M13",
+   "q": [
+    "Q11",
+    "Q12"
+   ]
+  },
+  {
+   "id": "P17-02",
+   "phase": "P17",
+   "title": "internal/doctor: result contract (stable ids, evidence, auto/human fixes, docs link) and the static tier, incl. harnesses on the login service PATH",
+   "reqs": [
+    "FR-07a",
+    "FR-07c",
+    "FR-07"
+   ],
+   "views": [
+    "A-v17"
+   ],
+   "size": "M",
+   "deps": [
+    "P17-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P17-03",
+   "phase": "P17",
+   "title": "Live tier: start the gbi session, open a throwaway doctor tab, echo round trip, harness binaries inside the pane, close",
+   "reqs": [
+    "FR-07b",
+    "FR-08"
+   ],
+   "views": [
+    "A-v17"
+   ],
+   "size": "M",
+   "deps": [
+    "P17-02"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P17-04",
+   "phase": "P17",
+   "title": "Harness tier (start, wait for ready, blocked/exited/timeout with screen evidence) and opt-in prompt tier; tested with the scripted harness in a real herdr",
+   "reqs": [
+    "FR-07b",
+    "FR-60"
+   ],
+   "views": [
+    "A-v17"
+   ],
+   "size": "M",
+   "deps": [
+    "P17-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": [
+    "Q11"
+   ]
+  },
+  {
+   "id": "P17-05",
+   "phase": "P17",
+   "title": "gbi doctor in-process: --json with exit codes 0/1/2, --fix, --report with secrets removed, --tier, --harness, --prompt",
+   "reqs": [
+    "FR-07d",
+    "FR-32"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P17-04"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P17-06",
+   "phase": "P17",
+   "title": "API (GET /api/doctor, POST /api/doctor/fix) and Settings → herdr setup UI: tiers, evidence, human fixes, Test harnesses, test prompt, Copy report",
+   "reqs": [
+    "FR-07a",
+    "FR-07c",
+    "FR-30"
+   ],
+   "views": [
+    "A-v17",
+    "A-v15"
+   ],
+   "size": "M",
+   "deps": [
+    "P17-05"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P17-07",
+   "phase": "P17",
+   "title": "Troubleshooting page with one section per doctor id, and a test that every id has one",
+   "reqs": [
+    "FR-07e",
+    "FR-130"
+   ],
+   "views": [
+    "A-v14"
+   ],
+   "size": "S",
+   "deps": [
+    "P17-02"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P17-08",
+   "phase": "P17",
+   "title": "scripts/install.sh and install.ps1: version and directory, checksum and Ed25519 signature checks; AGENTS.md; test that the README, scripts and binary carry the same public key",
+   "reqs": [
+    "FR-02b",
+    "FR-06"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P17-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P17-09",
+   "phase": "P17",
+   "title": "README: Install with an AI agent (numbered steps, rules, build from source while no release exists)",
+   "reqs": [
+    "FR-02a"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P17-08",
+    "P17-05"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P17-10",
+   "phase": "P17",
+   "title": "Install e2e: install.sh against a fake signed release (and a tampered one), then the installed gbi passes the doctor against an isolated herdr; in CI",
+   "reqs": [
+    "FR-02a",
+    "FR-02b",
+    "FR-07b"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P17-08",
+    "P17-05"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P18-01",
+   "phase": "P18",
+   "title": "Lesson format in docs/learn (front matter, steps with check/show lines, Pro tips), parser and tests; API and CLI gbi learn list|get|start|done",
+   "reqs": [
+    "FR-134",
+    "FR-135",
+    "FR-30"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P17-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P18-02",
+   "phase": "P18",
+   "title": "Progress per user (learn_progress): steps checked from history events in the practice project, visits and ticks",
+   "reqs": [
+    "FR-135",
+    "NFR-10"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P18-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P18-03",
+   "phase": "P18",
+   "title": "Practice project: gbi learn practice [--reset|--remove], seeded repo under ~/.go-build-it/practice, starter team on the scripted harness, practice label",
+   "reqs": [
+    "FR-136"
+   ],
+   "views": [
+    "A-v18"
+   ],
+   "size": "M",
+   "deps": [
+    "P18-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P18-04",
+   "phase": "P18",
+   "title": "Learn page (g l): lessons with progress, practice project card, How go-build-it thinks",
+   "reqs": [
+    "FR-134",
+    "FR-138"
+   ],
+   "views": [
+    "A-v18"
+   ],
+   "size": "M",
+   "deps": [
+    "P18-02",
+    "P18-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P18-05",
+   "phase": "P18",
+   "title": "Coach panel docked in the shell: current step, live check-off, Show me navigation and highlight, Pro tips, Esc to hide",
+   "reqs": [
+    "FR-134",
+    "FR-135"
+   ],
+   "views": [
+    "A-v19"
+   ],
+   "size": "M",
+   "deps": [
+    "P18-04"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P18-06",
+   "phase": "P18",
+   "title": "Mobile Learn screen (M13) and Learn on More",
+   "reqs": [
+    "FR-134",
+    "FR-35"
+   ],
+   "views": [
+    "A-M13",
+    "A-M9"
+   ],
+   "size": "S",
+   "deps": [
+    "P18-04"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P18-07",
+   "phase": "P18",
+   "title": "Lessons 0–10 covering every feature, with Pro tips",
+   "reqs": [
+    "FR-134",
+    "FR-132"
+   ],
+   "views": [
+    "A-v18",
+    "A-v19"
+   ],
+   "size": "L",
+   "deps": [
+    "P18-05"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P18-08",
+   "phase": "P18",
+   "title": "Drive gbi from your AI harness: lesson, cookbook page (Claude Code first; Antigravity, Pi, OpenCode notes) and gbi agent guide",
+   "reqs": [
+    "FR-137",
+    "FR-33"
+   ],
+   "views": [
+    "A-v20"
+   ],
+   "size": "M",
+   "deps": [
+    "P18-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P18-09",
+   "phase": "P18",
+   "title": "How go-build-it thinks: explanation pages linking the ADRs",
+   "reqs": [
+    "FR-138"
+   ],
+   "views": [
+    "A-v18"
+   ],
+   "size": "S",
+   "deps": [
+    "P17-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P18-10",
+   "phase": "P18",
+   "title": "scripts/docs_examples.sh runs every $ gbi example in the lessons and cookbook against a demo instance",
+   "reqs": [
+    "FR-139"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P18-07",
+    "P18-08"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P18-11",
+   "phase": "P18",
+   "title": "web/e2e/learn.spec.ts completes every lesson in the practice project and regenerates the lesson screenshots",
+   "reqs": [
+    "FR-139",
+    "FR-133",
+    "FR-131"
+   ],
+   "views": [
+    "A-v18",
+    "A-v19",
+    "A-M13"
+   ],
+   "size": "M",
+   "deps": [
+    "P18-07"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P18-12",
+   "phase": "P18",
+   "title": "Docs and release notes: keyboard (g l), CLI page, README tests, CHANGELOG Unreleased; keyboard test",
+   "reqs": [
+    "FR-130",
+    "FR-06a"
+   ],
+   "views": [
+    "A-v14"
+   ],
+   "size": "S",
+   "deps": [
+    "P18-11",
+    "P17-10"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
   }
  ],
  "requirements": {
@@ -3339,12 +3798,40 @@ window.TRACKER = {
    "text": "go-build-it SHALL require herdr and SHALL use it as its only agent backend:",
    "section": "3. Platform, installation and runtime"
   },
+  "FR-07a": {
+   "text": "go-build-it SHALL provide a doctor (gbi doctor, and Settings → herdr setup in the UI) that runs inside the gbi binary itself.",
+   "section": "3. Platform, installation and runtime"
+  },
+  "FR-07b": {
+   "text": "The doctor SHALL run its checks in tiers.",
+   "section": "3. Platform, installation and runtime"
+  },
+  "FR-07c": {
+   "text": "Every doctor result SHALL serve both a person and an AI agent.",
+   "section": "3. Platform, installation and runtime"
+  },
+  "FR-07d": {
+   "text": "gbi doctor --json SHALL print the results as JSON.",
+   "section": "3. Platform, installation and runtime"
+  },
+  "FR-07e": {
+   "text": "The user docs SHALL have a troubleshooting page with one section per doctor id:",
+   "section": "3. Platform, installation and runtime"
+  },
   "FR-08": {
    "text": "The background service (FR-02) SHALL ensure both go-build-it and its herdr session are running at login.",
    "section": "3. Platform, installation and runtime"
   },
   "FR-02": {
    "text": "The application SHALL be installable globally on a machine and SHOULD run as a background service (launchd on macOS, systemd on Linux, a Windows service on Windows).",
+   "section": "3. Platform, installation and runtime"
+  },
+  "FR-02a": {
+   "text": "An AI coding agent SHALL be able to install go-build-it given only the GitHub repository URL.",
+   "section": "3. Platform, installation and runtime"
+  },
+  "FR-02b": {
+   "text": "The repository SHALL include scripts/install.sh (macOS and Linux) and scripts/install.ps1 (Windows) that perform steps 3–4 of FR-02a in one command.",
    "section": "3. Platform, installation and runtime"
   },
   "NFR-01": {
@@ -3783,6 +4270,30 @@ window.TRACKER = {
    "text": "The UAT walkthrough SHOULD be written as automated end-to-end scripts (e.g.",
    "section": "12. Built-in documentation"
   },
+  "FR-134": {
+   "text": "go-build-it SHALL have a Learn area (desktop g l, and on the phone under More) with a series of short lessons that together cover every feature.",
+   "section": "12.1 Learning go-build-it"
+  },
+  "FR-135": {
+   "text": "Lessons SHALL know when a step is done.",
+   "section": "12.1 Learning go-build-it"
+  },
+  "FR-136": {
+   "text": "Lessons SHALL run in a practice project by default.",
+   "section": "12.1 Learning go-build-it"
+  },
+  "FR-137": {
+   "text": "A lesson and a cookbook page SHALL teach controlling go-build-it from the user's AI harness, with Claude Code as the main example and notes for Antigravity, Pi and OpenCode:",
+   "section": "12.1 Learning go-build-it"
+  },
+  "FR-138": {
+   "text": "The docs SHALL include How go-build-it thinks, short explanation pages on why it is designed the way it is:",
+   "section": "12.1 Learning go-build-it"
+  },
+  "FR-139": {
+   "text": "The lessons SHALL be tested so they stay current:",
+   "section": "12.1 Learning go-build-it"
+  },
   "NFR-20": {
    "text": "Agents MAY run arbitrary code on the development machine.",
    "section": "13. Security posture"
@@ -3802,6 +4313,8 @@ window.TRACKER = {
   "Q7": "How should attachable (headed) sessions work? Answered (rev 3): every session runs in herdr; see ADR-009.",
   "Q8": "Conversation rotation policy (FR-76)? Answered 2026-11-08: keep one conversation per member across tasks until context reaches the handoff threshold (75%), then rotate, starting from a handoff plus the member's notes. Lens starts a fresh conversation for every review. See ADR-010.",
   "Q9": "Windows support level? Answered 2026-11-08: ship Windows at herdr's beta level, with herdr in the Windows CI job. A herdr capability missing on Windows is shown as unavailable there. See ADR-009.",
-  "Q10": "Archetype change propagation (FR-12b)? Answered 2026-11-08: a proposal per affected member, plus one action to apply the change to every member that has not overridden the changed fields. See ADR-010."
+  "Q10": "Archetype change propagation (FR-12b)? Answered 2026-11-08: a proposal per affected member, plus one action to apply the change to every member that has not overridden the changed fields. See ADR-010.",
+  "Q11": "Should the doctor's prompt tier (FR-07b) ever run on its own? Answered 2026-11-09: no. It runs only when asked for, because it uses tokens. See ADR-012.",
+  "Q12": "Should lessons use a sandbox or a real project? Answered 2026-11-09: a practice project with the scripted fake harness by default (FR-136); the last lesson moves to a real project. Claude Code is the main harness example (FR-137). See ADR-012."
  }
 };

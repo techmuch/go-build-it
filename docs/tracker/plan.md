@@ -1,6 +1,6 @@
 # go-build-it — Phased delivery plan
 
-Status: Draft · 2026-11-09 · Based on [requirements rev 3](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
+Status: Draft · 2026-11-09 · Based on [requirements rev 5](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
 
 ## 1. How this plan is built
 
@@ -10,6 +10,8 @@ Status: Draft · 2026-11-09 · Based on [requirements rev 3](../requirements.md)
 - **The MVP is the desktop app at the end of P5.** Mobile (P6), observability UI (P7), docs/UAT/auto-update (P8) and experimental features (P9) follow.
 - **Simple path first.** Harness compaction is the MVP default; smart handoffs and attachable headed sessions are experimental (P9), as decided in rev 2.
 - **Rev 3 (P10–P15): herdr and per-project teams.** P0–P9 delivered rev 2. Rev 3 makes [herdr](https://herdr.dev) the only agent backend ([ADR-009](../decisions/ADR-009-herdr-backend.md)) and replaces global teams with per-project team members made from global persona archetypes ([ADR-010](../decisions/ADR-010-project-team-members.md)). It starts with a spike and redesigned mockups (P10), then builds the runtime (P11), teams (P12), members on herdr (P13), the live terminal and UI (P14), and docs, UAT and the upstream watch (P15). Rev 3 phases are not MVP-flagged: the MVP shipped with P5.
+- **Rev 4 (P16): change log and guided updates** ([ADR-011](../decisions/ADR-011-changelog-guided-updates.md)).
+- **Rev 5 (P17–P18): doctor, AI-agent install and Learn** ([ADR-012](../decisions/ADR-012-doctor-and-learning.md)). P17 makes the doctor prove that gbi can start herdr and a harness, and explain failures to a person or an AI agent; it adds the install that works from the GitHub URL alone. P18 adds lessons with a coach panel and a practice project, driving gbi from your AI harness, and *How go-build-it thinks*.
 - **Dogfooding from P4.** Once Courier can branch, PR, merge and release (end of P4), go-build-it manages its own remaining phases, and this tracker's data is imported into it.
 - **Sizes, not dates.** S ≈ up to a day of agent work, M ≈ 2–4 days, L ≈ 1–2 weeks. Progress is weighted S=1, M=3, L=8. Dates are set once the P0 spike shows real throughput.
 
@@ -34,6 +36,8 @@ Status: Draft · 2026-11-09 · Based on [requirements rev 3](../requirements.md)
 | P14 | Live terminal & UI |  | 8 | 21 | ◆ Watch & steer UAT |
 | P15 | Rev 3 docs, UAT & upstream watch |  | 5 | 16 | ◆ Rev 3 UAT |
 | P16 | Change log & guided updates |  | 11 | 19 | ◆ Update UAT |
+| P17 | Doctor & AI-agent install |  | 10 | 22 | ◆ Doctor UAT |
+| P18 | Learn: lessons, practice project, harness control |  | 12 | 33 | ◆ Learn UAT |
 
 ## 3. Critical path
 
@@ -417,6 +421,54 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 | **P16-09** Mobile change log screen from the version on More ✅ | S | FR-06b, FR-35 | A-M12, A-M9 | P16-08 |
 | **P16-10** End-to-end update test against a fake signed release with a real restart (scripts/update_e2e.sh, web/e2e/update.spec.ts) ✅ | M | FR-06d, FR-132 | A-v16 | P16-05, P16-08 |
 | **P16-11** Docs: settings and updates page, keyboard (g v), CLI, README release steps; keyboard test ✅ | S | FR-130, FR-06a | A-v14 | P16-08 |
+
+### P17 · Doctor & AI-agent install
+
+**Goal:** Prove that gbi can start herdr and each harness inside it, explain every failure to a person or an AI agent with evidence and a fix, and let an AI agent install gbi from the GitHub URL alone.
+
+**◆ Gate: Doctor UAT.** Passes when:
+- gbi doctor runs with no server; static and live tiers open and close a real pane in the gbi session
+- The harness tier starts the scripted harness in herdr and reports a blocked or missing harness with evidence and a human fix
+- --json exit codes 0/1/2, --fix and --report behave as specified; every result id has a troubleshooting section
+- install.sh installs from a fake signed release, refuses a tampered one, and the installed gbi passes the doctor
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P17-01** Requirements rev 5 (FR-02a–b, FR-07a–e, FR-134–139), ADR-012, mockups 17–20 and M13, plan and tracker ✅ · waits on Q11, Q12 | S | FR-02a, FR-02b, FR-07a, FR-07b, FR-07c, FR-07d, FR-07e, FR-134, FR-135, FR-136, FR-137, FR-138, FR-139 | A-v17, A-v18, A-v19, A-v20, A-M13 | — |
+| **P17-02** internal/doctor: result contract (stable ids, evidence, auto/human fixes, docs link) and the static tier, incl. harnesses on the login service PATH | M | FR-07a, FR-07c, FR-07 | A-v17 | P17-01 |
+| **P17-03** Live tier: start the gbi session, open a throwaway doctor tab, echo round trip, harness binaries inside the pane, close | M | FR-07b, FR-08 | A-v17 | P17-02 |
+| **P17-04** Harness tier (start, wait for ready, blocked/exited/timeout with screen evidence) and opt-in prompt tier; tested with the scripted harness in a real herdr · waits on Q11 | M | FR-07b, FR-60 | A-v17 | P17-03 |
+| **P17-05** gbi doctor in-process: --json with exit codes 0/1/2, --fix, --report with secrets removed, --tier, --harness, --prompt | S | FR-07d, FR-32 | — | P17-04 |
+| **P17-06** API (GET /api/doctor, POST /api/doctor/fix) and Settings → herdr setup UI: tiers, evidence, human fixes, Test harnesses, test prompt, Copy report | M | FR-07a, FR-07c, FR-30 | A-v17, A-v15 | P17-05 |
+| **P17-07** Troubleshooting page with one section per doctor id, and a test that every id has one | S | FR-07e, FR-130 | A-v14 | P17-02 |
+| **P17-08** scripts/install.sh and install.ps1: version and directory, checksum and Ed25519 signature checks; AGENTS.md; test that the README, scripts and binary carry the same public key | M | FR-02b, FR-06 | — | P17-01 |
+| **P17-09** README: Install with an AI agent (numbered steps, rules, build from source while no release exists) | S | FR-02a | — | P17-08, P17-05 |
+| **P17-10** Install e2e: install.sh against a fake signed release (and a tampered one), then the installed gbi passes the doctor against an isolated herdr; in CI | M | FR-02a, FR-02b, FR-07b | — | P17-08, P17-05 |
+
+### P18 · Learn: lessons, practice project, harness control
+
+**Goal:** Teach every feature through short lessons with pro tips, run in a practice project that costs nothing, show how to drive gbi from your AI harness, and explain why gbi is designed the way it is.
+
+**◆ Gate: Learn UAT.** Passes when:
+- Every lesson can be completed in the practice project and each step checks itself off
+- The coach panel's Show me goes to the right view and highlights the control; progress survives a reload
+- Every $ gbi example in the lessons and cookbook runs against a demo instance
+- How go-build-it thinks covers herdr, archetypes, worktrees, gates, questions, history and the route table, each linking its ADRs
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P18-01** Lesson format in docs/learn (front matter, steps with check/show lines, Pro tips), parser and tests; API and CLI gbi learn list|get|start|done | M | FR-134, FR-135, FR-30 | — | P17-01 |
+| **P18-02** Progress per user (learn_progress): steps checked from history events in the practice project, visits and ticks | M | FR-135, NFR-10 | — | P18-01 |
+| **P18-03** Practice project: gbi learn practice [--reset|--remove], seeded repo under ~/.go-build-it/practice, starter team on the scripted harness, practice label | M | FR-136 | A-v18 | P18-01 |
+| **P18-04** Learn page (g l): lessons with progress, practice project card, How go-build-it thinks | M | FR-134, FR-138 | A-v18 | P18-02, P18-03 |
+| **P18-05** Coach panel docked in the shell: current step, live check-off, Show me navigation and highlight, Pro tips, Esc to hide | M | FR-134, FR-135 | A-v19 | P18-04 |
+| **P18-06** Mobile Learn screen (M13) and Learn on More | S | FR-134, FR-35 | A-M13, A-M9 | P18-04 |
+| **P18-07** Lessons 0–10 covering every feature, with Pro tips | L | FR-134, FR-132 | A-v18, A-v19 | P18-05 |
+| **P18-08** Drive gbi from your AI harness: lesson, cookbook page (Claude Code first; Antigravity, Pi, OpenCode notes) and gbi agent guide | M | FR-137, FR-33 | A-v20 | P18-01 |
+| **P18-09** How go-build-it thinks: explanation pages linking the ADRs | S | FR-138 | A-v18 | P17-01 |
+| **P18-10** scripts/docs_examples.sh runs every $ gbi example in the lessons and cookbook against a demo instance | S | FR-139 | — | P18-07, P18-08 |
+| **P18-11** web/e2e/learn.spec.ts completes every lesson in the practice project and regenerates the lesson screenshots | M | FR-139, FR-133, FR-131 | A-v18, A-v19, A-M13 | P18-07 |
+| **P18-12** Docs and release notes: keyboard (g l), CLI page, README tests, CHANGELOG Unreleased; keyboard test | S | FR-130, FR-06a | A-v14 | P18-11, P17-10 |
 
 ## 5. Open questions schedule
 
