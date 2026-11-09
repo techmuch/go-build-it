@@ -33,9 +33,13 @@ run: build
 	./bin/gbi serve
 
 # Cross-compile signed release assets into release/ (ADR-004).
-#   VERSION=YYYY.MM.DD.N make release
+#   gbi dev changelog release YYYY.MM.DD.N   (dates the Unreleased entry; commit it)
+#   VERSION=YYYY.MM.DD.N make release        (refuses a version with no change log entry)
+#   gh release create YYYY.MM.DD.N release/gbi_* release/SHA256SUMS* --notes-file release/NOTES.md
 release: web
+	@[ "$(VERSION)" != dev ] || { echo "set VERSION=YYYY.MM.DD.N"; exit 1; }
 	mkdir -p release
+	go run ./cmd/gbi dev changelog notes $(VERSION) > release/NOTES.md
 	@for p in $(PLATFORMS); do \
 		os=$${p%/*}; arch=$${p#*/}; ext=""; [ $$os = windows ] && ext=".exe"; \
 		echo "building $$os/$$arch"; \

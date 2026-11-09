@@ -12,6 +12,8 @@ gbi reviews verdict R-3 --verdict approve
 gbi members list ledgerly
 gbi members restart forge@ledgerly --fresh
 gbi herdr doctor
+gbi changelog
+gbi updates install && gbi updates job
 ```
 
 **Identity.** When an agent runs `gbi` inside its own worktree (`…/worktrees/<project>/members/<name>`), the command is attributed to that member automatically. Elsewhere, set `GBI_PERSONA`.

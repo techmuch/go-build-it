@@ -246,7 +246,10 @@ window.TRACKER = {
     "Check for updates lists every newer release's change log entry",
     "Update now runs all eight steps through a real restart against a signed test release, and the restarted server finishes the job",
     "A failed verification leaves the running version untouched and offers Try again; history records every update"
-   ]
+   ],
+   "gateApproved": "2026-11-09",
+   "gateApprovedBy": "david (owner)",
+   "gateEvidence": "Desktop sidebar version and mobile More version open the change log (g v too), with the installed version marked. Check lists every newer release's notes and the sidebar shows 'update ready'. scripts/update_e2e.sh ran Update now from 2026.01.01.1 to 2026.12.31.1 against a fake signed release while a demo member was blocked in herdr: all eight steps were seen running and done, the server restarted in place (same PID) and finished the restart and reconnect steps, the blocked member S-3 was still live afterwards, the previous binary was kept, and update.completed was recorded. Go tests cover a tampered download, the wrong key, the wrong version and missing SHA256SUMS: each fails before Install with the binary untouched and Try again offered. Interrupted and wrong-version restarts and the rollback job are covered too. UAT 29/29 still passes."
   }
  ],
  "tasks": [
@@ -3151,7 +3154,7 @@ window.TRACKER = {
    "deps": [
     "P16-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3169,7 +3172,7 @@ window.TRACKER = {
    "deps": [
     "P16-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3188,7 +3191,7 @@ window.TRACKER = {
    "deps": [
     "P16-03"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3206,7 +3209,7 @@ window.TRACKER = {
    "deps": [
     "P16-04"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3223,7 +3226,7 @@ window.TRACKER = {
    "deps": [
     "P16-04"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3241,7 +3244,7 @@ window.TRACKER = {
    "deps": [
     "P16-04"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3263,7 +3266,7 @@ window.TRACKER = {
    "deps": [
     "P16-07"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3283,7 +3286,7 @@ window.TRACKER = {
    "deps": [
     "P16-08"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3303,7 +3306,7 @@ window.TRACKER = {
     "P16-05",
     "P16-08"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3322,7 +3325,7 @@ window.TRACKER = {
    "deps": [
     "P16-08"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   }

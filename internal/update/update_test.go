@@ -46,7 +46,8 @@ func TestSwapAndRollback(t *testing.T) {
 	exe := filepath.Join(dir, "gbi")
 	os.WriteFile(exe, []byte("old"), 0o755)
 	u := &Updater{Exe: exe, Current: "2026.11.01.1"}
-	if err := u.swap([]byte("new"), "2026.11.08.1"); err != nil {
+	os.WriteFile(exe+".new", []byte("new"), 0o755)
+	if err := u.install(exe + ".new"); err != nil {
 		t.Fatal(err)
 	}
 	if b, _ := os.ReadFile(exe); string(b) != "new" {

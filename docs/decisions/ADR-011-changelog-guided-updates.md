@@ -39,7 +39,7 @@ go-build-it could already check for, verify, install and roll back releases (ADR
 10. **Testing.**
     - `update.PublicKey` is a variable that can be set at build time (`-ldflags -X`). A test build trusts a test key, but a release binary cannot be told to trust another key without rebuilding it.
     - `updates.api` in the config points the updater at a fake release server.
-    - `scripts/update_e2e.sh` builds an old and a new binary, signs the new one with a throwaway key, serves a fake GitHub API, and runs `web/e2e/update.spec.ts` through a real restart.
+    - `scripts/update_e2e.sh` builds an old and a new binary, signs the new one with a throwaway key, and serves a fake GitHub API. It seeds the demo, which leaves a member blocked in herdr, and runs `web/e2e/update.spec.ts` through a real restart. It then checks that the same process is still running, now on the new version, that the previous binary was kept, that the blocked member is still live, and that `update.completed` is in the history.
 
 ## Consequences
 

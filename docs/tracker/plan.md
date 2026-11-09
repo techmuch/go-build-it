@@ -407,16 +407,16 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 | Task | Size | Requirements | Approach A views | Depends on |
 |---|---|---|---|---|
 | **P16-01** Requirements rev 4 (FR-06a–e), ADR-011, mockups 16 and M12, plan and tracker ✅ | S | FR-06a, FR-06b, FR-06c, FR-06d, FR-06e | A-v16, A-M12, A-v13, A-v01 | — |
-| **P16-02** CHANGELOG.md embedded in the binary, parser and validity test; release tooling (gbi dev changelog release|notes) and make release check | S | FR-06a, FR-05 | — | P16-01 |
-| **P16-03** Update check lists every newer stable release with its notes and when it ran | S | FR-06c | A-v16 | P16-01 |
-| **P16-04** Update job: eight named steps, download progress, binary self-test, saved to disk; Try again and Roll back | M | FR-06d, FR-06 | A-v16 | P16-03 |
-| **P16-05** Restart in place (exec on macOS/Linux, spawn on Windows), port retry, restarted server finishes restart and reconnect steps | M | FR-06d, FR-08, NFR-01 | — | P16-04 |
-| **P16-06** Automatic updater uses the same job; history events for start, completion, failure and rollback | S | FR-06e, NFR-10 | — | P16-04 |
-| **P16-07** API and CLI: changelog, updates check/install/job/rollback; regenerate the TS client | S | FR-30, FR-31, FR-06d | — | P16-04 |
-| **P16-08** Desktop change log page from the sidebar version (g v), check, Update now with live steps through the restart | M | FR-06b, FR-06c, FR-06d | A-v16, A-v01, A-v13 | P16-07 |
-| **P16-09** Mobile change log screen from the version on More | S | FR-06b, FR-35 | A-M12, A-M9 | P16-08 |
-| **P16-10** End-to-end update test against a fake signed release with a real restart (scripts/update_e2e.sh, web/e2e/update.spec.ts) | M | FR-06d, FR-132 | A-v16 | P16-05, P16-08 |
-| **P16-11** Docs: settings and updates page, keyboard (g v), CLI, README release steps; keyboard test | S | FR-130, FR-06a | A-v14 | P16-08 |
+| **P16-02** CHANGELOG.md embedded in the binary, parser and validity test; release tooling (gbi dev changelog release|notes) and make release check ✅ | S | FR-06a, FR-05 | — | P16-01 |
+| **P16-03** Update check lists every newer stable release with its notes and when it ran ✅ | S | FR-06c | A-v16 | P16-01 |
+| **P16-04** Update job: eight named steps, download progress, binary self-test, saved to disk; Try again and Roll back ✅ | M | FR-06d, FR-06 | A-v16 | P16-03 |
+| **P16-05** Restart in place (exec on macOS/Linux, spawn on Windows), port retry, restarted server finishes restart and reconnect steps ✅ | M | FR-06d, FR-08, NFR-01 | — | P16-04 |
+| **P16-06** Automatic updater uses the same job; history events for start, completion, failure and rollback ✅ | S | FR-06e, NFR-10 | — | P16-04 |
+| **P16-07** API and CLI: changelog, updates check/install/job/rollback; regenerate the TS client ✅ | S | FR-30, FR-31, FR-06d | — | P16-04 |
+| **P16-08** Desktop change log page from the sidebar version (g v), check, Update now with live steps through the restart ✅ | M | FR-06b, FR-06c, FR-06d | A-v16, A-v01, A-v13 | P16-07 |
+| **P16-09** Mobile change log screen from the version on More ✅ | S | FR-06b, FR-35 | A-M12, A-M9 | P16-08 |
+| **P16-10** End-to-end update test against a fake signed release with a real restart (scripts/update_e2e.sh, web/e2e/update.spec.ts) ✅ | M | FR-06d, FR-132 | A-v16 | P16-05, P16-08 |
+| **P16-11** Docs: settings and updates page, keyboard (g v), CLI, README release steps; keyboard test ✅ | S | FR-130, FR-06a | A-v14 | P16-08 |
 
 ## 5. Open questions schedule
 

@@ -213,3 +213,24 @@ table.t tr.sel td { background: var(--acc-s); }
 .live-term .m-keys button { flex: 1; min-width: 44px; text-align: center; background: #2b3a47; color: #dfe7ee; border: 0; border-radius: 5px; padding: 8px 0; font: 600 11px ui-monospace, Menlo, monospace; cursor: pointer; }
 .live-term .termbar { display: flex; gap: 8px; align-items: center; }
 .xterm-box .xterm { height: 100%; }
+
+/* Change log & guided updates (FR-06a–e) */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.usteplist { list-style: none; margin: 8px 0 0; padding: 0; }
+.ustep { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+.ustep:last-child { border-bottom: 0; }
+.ustep .ui { width: 20px; text-align: center; flex: none; } .ustep .ut { flex: 1; min-width: 0; overflow-wrap: anywhere; } .ustep .uz { font-size: 11.5px; white-space: nowrap; }
+.ustep.running { background: var(--acc-s); margin: 0 -8px; padding: 7px 8px; border-radius: 6px; }
+.ustep.pending, .ustep.skipped { color: var(--m); }
+.ustep.failed b { color: var(--red); }
+.bar.thin { display: block; height: 4px; margin-top: 4px; }
+.ujob { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+.ujob h4 { margin: 0 0 6px; font-size: 13.5px; display: flex; gap: 8px; align-items: center; }
+.clog .centry { padding: 4px 0 10px; border-bottom: 1px solid var(--line); }
+.clog .centry:last-child { border-bottom: 0; }
+.clog .centry h3 { margin: 8px 0 2px; font-size: 15px; display: flex; gap: 8px; align-items: center; text-transform: none; letter-spacing: 0; color: var(--t); }
+.clog .centry h3 + * h3, .clog .centry .md h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--m); margin: 8px 0 2px; }
+.clog .centry.installed { box-shadow: inset 3px 0 0 var(--grn); padding-left: 10px; }
+.side .foot .ver { color: inherit; background: none; border: 0; padding: 0; font: inherit; text-decoration: underline dotted; cursor: pointer; }
+.side .foot .upd { color: var(--acc); font-weight: 600; }
+@media (max-width: 900px) { .changelog-grid { grid-template-columns: 1fr !important; } }

@@ -45,6 +45,8 @@ type Updates struct {
 	Channel     string `toml:"channel" json:"channel"`
 	Repo        string `toml:"repo" json:"repo"`
 	AutoInstall bool   `toml:"auto_install" json:"autoInstall"`
+	// API overrides the GitHub API base URL (tests and the update e2e use a fake release server).
+	API string `toml:"api,omitempty" json:"api,omitempty"`
 }
 
 // Config is the full application configuration.

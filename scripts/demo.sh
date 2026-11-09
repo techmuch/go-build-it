@@ -24,6 +24,7 @@ binary = "$GBI"
 [herdr]
 session = "gbi"
 config_home = "$GBI_HOME/h"
+${GBI_EXTRA_CONFIG:-}
 EOF
 
 "$GBI" serve > "$GBI_HOME/server.log" 2>&1 &
