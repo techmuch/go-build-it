@@ -4,9 +4,12 @@ package app
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log/slog"
+	"path/filepath"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/techmuch/go-build-it/internal/access"
@@ -54,7 +57,11 @@ type App struct {
 	Pins       *pins.Service
 	Agent      *agent.Caller
 	Updater    *update.Updater
+	Updates    *update.Jobs // update and rollback jobs with their steps (FR-06d)
 	Herdr      *herdr.Supervisor
+
+	herdrReady chan struct{} // closed once the first herdr Ensure has returned
+	lastCheck  atomic.Pointer[update.Release]
 }
 
 // New opens the database and connects all services.
@@ -88,6 +95,16 @@ func Wire(cfg *config.Config, db *sql.DB, version string, log *slog.Logger) *App
 	a.Agent = agent.New(cfg, a.Team, a.Sessions.Ask)
 	a.Sessions.SetHerdr(a.Herdr.C)
 	a.Updater = update.New(cfg.Updates.Repo, version)
+	if cfg.Updates.API != "" {
+		a.Updater.API = strings.TrimRight(cfg.Updates.API, "/")
+	}
+	jobFile := ""
+	if cfg.Dir() != "" {
+		jobFile = filepath.Join(cfg.Dir(), "update", "job.json")
+	}
+	a.Updates = update.NewJobs(a.Updater, jobFile)
+	a.Updates.OnEvent = a.updateEvent
+	a.herdrReady = make(chan struct{})
 
 	// Review gates hold back work in later milestones until approved (FR-115).
 	a.Queue.GateOpen = a.gateOpen
@@ -255,9 +272,12 @@ func (a *App) Start(ctx context.Context) {
 		if _, err := a.Herdr.Ensure(ctx); err != nil {
 			a.Log.Warn("herdr session not available; agents cannot run until it is", "err", err)
 		}
+		close(a.herdrReady)
 		a.Herdr.Run(ctx)
 	}()
 	a.Sessions.Recover(ctx)
+	// Finish an update that restarted into this version: restart and reconnect steps (ADR-011).
+	go a.Updates.Resume(ctx, a.Version, a.reconnect)
 	if a.Cfg.AutoDispatch {
 		a.Sessions.SetAuto(true)
 	}
@@ -279,29 +299,76 @@ func (a *App) Start(ctx context.Context) {
 }
 
 func (a *App) updateLoop(ctx context.Context) {
-	t := time.NewTicker(6 * time.Hour)
+	if a.Version == "dev" {
+		return // development builds are updated by hand from the change log
+	}
+	t := time.NewTimer(time.Minute)
 	defer t.Stop()
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case <-t.C:
-			if !a.Cfg.Updates.AutoInstall || a.Version == "dev" {
-				continue
-			}
-			rel, err := a.Updater.Check(ctx)
-			if err != nil || !rel.Newer {
-				continue
-			}
-			if a.Sessions.LiveCount() > 0 {
-				continue // install only when idle (FR-06)
-			}
-			sys := access.Persona(ctx, "go-build-it")
-			if _, err := a.Updater.Install(ctx); err != nil {
-				a.Hist.Must(sys, history.Event{Type: "update.failed", Subject: rel.Tag, Summary: "Update to " + rel.Tag + " failed", Why: err.Error()})
-				continue
-			}
-			a.Hist.Must(sys, history.Event{Type: "update.installed", Subject: rel.Tag, Summary: "Installed " + rel.Tag, Why: "auto-update; restart to apply"})
 		}
+		t.Reset(6 * time.Hour)
+		rel, err := a.checkUpdates(ctx)
+		if err != nil || !rel.Newer || !a.Cfg.Updates.AutoInstall || a.Updates.Busy() {
+			continue
+		}
+		if a.Sessions.LiveCount() > 0 {
+			continue // the automatic updater never restarts in the middle of someone's work (ADR-011)
+		}
+		if _, err := a.Updates.Start("auto", "go-build-it"); err != nil {
+			a.Log.Warn("automatic update did not start", "err", err)
+		}
+	}
+}
+
+// checkUpdates checks for a newer release and remembers the result for the sidebar.
+func (a *App) checkUpdates(ctx context.Context) (update.Release, error) {
+	rel, err := a.Updater.Check(ctx)
+	if err == nil {
+		a.lastCheck.Store(&rel)
+	}
+	return rel, err
+}
+
+// reconnect is the last update step, run by the restarted go-build-it: wait for the gbi
+// herdr session and report the members that kept working (FR-06d, FR-08).
+func (a *App) reconnect(ctx context.Context) (string, error) {
+	select {
+	case <-a.herdrReady:
+	case <-ctx.Done():
+		return "", errors.New("timed out waiting for the herdr session")
+	}
+	pctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	if _, err := a.Herdr.C.Ping(pctx); err != nil {
+		return "", fmt.Errorf("herdr session %s is not answering: %w", a.Herdr.C.Session, err)
+	}
+	n := a.Sessions.LiveCount()
+	return fmt.Sprintf("herdr session %s · %d %s still working", a.Herdr.C.Session, n, map[bool]string{true: "member", false: "members"}[n == 1]), nil
+}
+
+// updateEvent records update milestones in the history (FR-06e, NFR-10).
+func (a *App) updateEvent(kind string, j update.Job) {
+	ctx := access.Persona(context.Background(), firstNonEmpty(j.Actor, "go-build-it"))
+	data := history.Data(map[string]any{"job": j.ID, "kind": j.Kind, "trigger": j.Trigger, "from": j.From, "to": j.To, "steps": j.Steps})
+	to := firstNonEmpty(j.To, "the latest release")
+	switch kind {
+	case "started":
+		if j.Kind == "rollback" {
+			a.Hist.Must(ctx, history.Event{Type: "update.rollback.started", Subject: j.ID, Summary: "Rolling back from " + j.From + " to " + to, Why: j.Trigger, Data: data})
+		} else {
+			a.Hist.Must(ctx, history.Event{Type: "update.started", Subject: j.ID, Summary: "Updating from " + j.From, Why: j.Trigger, Data: data})
+		}
+	case "restarting":
+		a.Hist.Must(ctx, history.Event{Type: "update.installed", Subject: j.ID, Summary: "Installed " + to + "; restarting", Why: j.Trigger, Data: data})
+	case "completed":
+		a.Hist.Must(ctx, history.Event{Type: "update.completed", Subject: j.ID, Summary: "Updated from " + j.From + " to " + to, Why: j.Trigger, Data: data})
+	case "rolledback":
+		a.Hist.Must(ctx, history.Event{Type: "update.rollback", Subject: j.ID, Summary: "Rolled back from " + j.From + " to " + to, Why: j.Trigger, Data: data})
+	case "failed":
+		a.Hist.Must(ctx, history.Event{Type: "update.failed", Subject: j.ID, Summary: "Update to " + to + " failed", Why: j.Error, Data: data})
 	}
 }

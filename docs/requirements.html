@@ -82,7 +82,7 @@ td:first-child { white-space: nowrap; }
 </ol></nav>
 <main>
 <h1>go-build-it — Requirements</h1>
-<p class="meta">Status: Draft · Last updated: 2026-11-08 (rev. 3: herdr as the only agent backend; per-project team members from global archetypes. See [ADR-009](decisions/ADR-009-herdr-backend.md) and [ADR-010](decisions/ADR-010-project-team-members.md))</p>
+<p class="meta">Status: Draft · Last updated: 2026-11-09 (rev. 4: in-app change log and guided updates, FR-06a–FR-06e, see [ADR-011](decisions/ADR-011-changelog-guided-updates.md). Rev. 3: herdr as the only agent backend; per-project team members from global archetypes, see [ADR-009](decisions/ADR-009-herdr-backend.md) and [ADR-010](decisions/ADR-010-project-team-members.md))</p>
 <h2 id="1-overview">1. Overview</h2>
 <p>go-build-it is a Go application with an embedded React frontend that manages long-running software project development. It is installed globally on a machine and provides a web UI and a CLI. A team of AI personas and humans works through it to take projects from problem definition to released software. The app coordinates external agent harnesses such as Claude Code, Antigravity and OpenCode. Every harness runs interactively inside [herdr](https://herdr.dev), a terminal workspace manager for coding agents, in a herdr session that go-build-it owns. Opening that session in any terminal shows everything go-build-it is doing, organized by project and team member.</p>
 <h3 id="conventions">Conventions</h3>
@@ -163,6 +163,35 @@ The previous version <span class="kw kw-SHALL">SHALL</span> be kept so the user 
 </li><li>
 The user <span class="kw kw-SHALL">SHALL</span> be able to turn automatic updates off.
 </li></ul>
+</li><li>
+<strong class="rid" id="FR-06a">FR-06a</strong>: go-build-it <span class="kw kw-SHALL">SHALL</span> keep a change log of its own releases in <code>CHANGELOG.md</code> at the root of its repository. The change log has one entry per CalVer version (FR-05) with its release date and its changes grouped as Added, Changed, Fixed and Removed, plus an Unreleased entry for work not yet released. The change log <span class="kw kw-SHALL">SHALL</span> be embedded in the binary. Each GitHub release's notes <span class="kw kw-SHALL">SHALL</span> come from its change log entry, and a release <span class="kw kw-SHALLNOT">SHALL NOT</span> be built without one.
+</li><li>
+<strong class="rid" id="FR-06b">FR-06b</strong>: Clicking the version number <span class="kw kw-SHALL">SHALL</span> open the change log, in the desktop sidebar and on the mobile More screen. The change log <span class="kw kw-SHALL">SHALL</span> list entries newest first and mark the installed version. Development builds show the Unreleased entry as the installed one.
+</li><li>
+<strong class="rid" id="FR-06c">FR-06c</strong>: The change log <span class="kw kw-SHALL">SHALL</span> offer <strong>Check for updates</strong>. The result <span class="kw kw-SHALL">SHALL</span> show the installed version, the latest release, and when the check ran. When the latest release is newer, the result <span class="kw kw-SHALL">SHALL</span> also list the change log entries of every release between the two, so the user can see what the update brings. When no release can be found, the result <span class="kw kw-SHALL">SHALL</span> say why (e.g. offline, or no release published yet).
+</li><li>
+<strong class="rid" id="FR-06d">FR-06d</strong>: When a newer release is available, the change log <span class="kw kw-SHALL">SHALL</span> offer <strong>Update now</strong>. The update <span class="kw kw-SHALL">SHALL</span> run as named steps, and each step <span class="kw kw-SHALL">SHALL</span> be shown as pending, running, done (with how long it took) or failed (with the reason). The steps are:
+<ol><li>
+find the release
+</li><li>
+download it, with progress
+</li><li>
+verify the signature
+</li><li>
+verify the checksum
+</li><li>
+test that the new binary runs and reports the expected version
+</li><li>
+install it, keeping the current version for rollback
+</li><li>
+restart go-build-it
+</li><li>
+reconnect to the gbi herdr session and the members' running work
+</li></ol>
+</li></ul>
+<p>  Progress <span class="kw kw-SHALL">SHALL</span> survive the restart: the restarted go-build-it <span class="kw kw-SHALL">SHALL</span> complete the remaining steps, and the change log <span class="kw kw-SHALL">SHALL</span> show them finishing. A step that fails before the install step <span class="kw kw-SHALL">SHALL</span> leave the running version untouched and offer <strong>Try again</strong>. A failure after it <span class="kw kw-SHALL">SHALL</span> offer <strong>Roll back</strong>. The CLI <span class="kw kw-SHALL">SHALL</span> offer the same (FR-30).</p>
+<ul><li>
+<strong class="rid" id="FR-06e">FR-06e</strong>: Updates installed by the automatic updater (FR-06) <span class="kw kw-SHALL">SHALL</span> run the same steps and <span class="kw kw-SHALL">SHALL</span> be visible in the change log in the same way. Every update, whether it succeeds, fails or is rolled back, <span class="kw kw-SHALL">SHALL</span> be recorded in the history (NFR-10).
 </li></ul>
 <h2 id="4-users-team-and-roles">4. Users, team and roles</h2>
 <h3 id="4-1-team-members">4.1 Team members</h3>
@@ -588,7 +617,7 @@ time per task
 <tr><td>Q3</td><td>When smart handoffs graduate from experimental, what is the default context threshold, and should it be configurable per harness or model? What evidence (rework rate, handoff quality vs. compaction) decides that they are ready?</td></tr>
 <tr><td>Q4</td><td>Can multiple humans collaborate on the same projects (e.g. different Tailscale users with different roles), or is it single-user with optional reviewers?</td></tr>
 <tr><td>Q5</td><td>What is the exact default git workflow (branch naming, PR/MR requirements, merge strategy)?</td></tr>
-<tr><td>Q6</td><td>What is the mechanism and channel for auto-updates (GitHub Releases, Homebrew tap, etc.)?</td></tr>
+<tr><td>Q6</td><td>~~What is the mechanism and channel for auto-updates?~~ <strong>Answered:</strong> GitHub Releases with signed checksums (ADR-004). Rev 4 adds the in-app change log and guided updates with step progress (ADR-011).</td></tr>
 <tr><td>Q7</td><td>~~How should attachable (headed) sessions work?~~ <strong>Answered (rev 3):</strong> every session runs in herdr; see ADR-009.</td></tr>
 <tr><td>Q8</td><td>~~Conversation rotation policy (FR-76)?~~ <strong>Answered 2026-11-08:</strong> keep one conversation per member across tasks until context reaches the handoff threshold (75%), then rotate, starting from a handoff plus the member's notes. Lens starts a fresh conversation for every review. See ADR-010.</td></tr>
 <tr><td>Q9</td><td>~~Windows support level?~~ <strong>Answered 2026-11-08:</strong> ship Windows at herdr's beta level, with herdr in the Windows CI job. A herdr capability missing on Windows is shown as unavailable there. See ADR-009.</td></tr>

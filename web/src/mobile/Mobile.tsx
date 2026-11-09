@@ -1,5 +1,6 @@
 // Mobile web UI (FR-35): Approach A mobile, screens M1–M11.
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { ChangelogList, UpdatePanel } from '../pages/Changelog';
 import { api } from '../api.gen';
 import { useData, useLive } from '../live';
 import { match, navigate, usePath } from '../router';
@@ -221,7 +222,8 @@ function More() {
   const { data: page } = useData<any>(() => (doc ? api.docs.get(doc) : Promise.resolve(null)), [doc]);
   const setTheme = (t: string) => { document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('gbi-theme', t); } catch { /* ignore */ } };
   if (page) return <Screen title={page.title} back="back"><Markdown src={page.body.replace(/\]\(screenshots\//g, '](/docs-assets/screenshots/')} /></Screen>;
-  return <Screen title="More" sub={`v${sys?.version || ''}`} tab="more">
+  const upd = sys?.update?.updating ? ' · updating…' : sys?.update?.newer ? ` · update ready: ${sys.update.latest}` : '';
+  return <Screen title="More" sub={<button type="button" className="lnk m-sub" style={{ color: 'inherit', padding: 0 }} onClick={() => navigate('/m/changelog')} data-testid="version-link">v{sys?.version || ''}{upd} ›</button>} tab="more">
     <div className="m-flush">
       {[['👥 Team & personas', '/team'], ['📐 Global standards', '/standards'], ['☰ Task queue', '/queue'], ['🕘 History & insights', '/history'], ['⚙ Settings', '/settings'], ['🖥 Desktop UI', '/']].map(([l, to]) => <a key={to} className="m-li" href={to}><span>{l}</span><span className="muted">›</span></a>)}
       <div className="m-label">Docs</div>{(docs || []).map((d) => <div key={d.slug} className="m-li" {...clickable(() => setDoc(d.slug))}><span>📖 {d.title}</span><span className="muted">›</span></div>)}
@@ -231,13 +233,23 @@ function More() {
   </Screen>;
 }
 
+// M12 · Change log & update (FR-06b–FR-06d), opened from the version on More.
+function ChangelogScreen() {
+  const sys = useSystem();
+  const [check, setCheck] = useState<any>(undefined);
+  return <Screen title="Change log" sub={sys ? `v${sys.version} installed` : ''} back="/m/more" tab="more">
+    <div className="m-card"><UpdatePanel onCheck={setCheck} /></div>
+    <div className="m-card"><ChangelogList check={check} /></div>
+  </Screen>;
+}
+
 export function MobileApp() {
   const path = usePath();
   useGlobalKeys();
   const routes: [string, (p: any) => JSX.Element][] = [
     ['/m', () => <Home />], ['/m/projects/:id', (p) => <ProjectStatus id={p.id} />], ['/m/inbox', () => <Inbox />], ['/m/q/:id', (p) => <Answer id={p.id} />],
     ['/m/review/:id', (p) => <ReviewScreen id={p.id} />], ['/m/rehearsal/:id', (p) => <RehearsalStep id={p.id} />], ['/m/options/:id', (p) => <OptionScreen id={p.id} />],
-    ['/m/sessions', () => <SessionsScreen />], ['/m/sessions/:sid', (p) => <Terminal sid={p.sid} />], ['/m/more', () => <More />],
+    ['/m/sessions', () => <SessionsScreen />], ['/m/sessions/:sid', (p) => <Terminal sid={p.sid} />], ['/m/more', () => <More />], ['/m/changelog', () => <ChangelogScreen />],
   ];
   for (const [pat, r] of routes) { const m = match(pat, path.replace(/\/$/, '') || '/m'); if (m) return <div className="m-root">{r(m)}</div>; }
   return <div className="m-root"><Home /></div>;

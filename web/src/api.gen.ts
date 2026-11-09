@@ -26,6 +26,10 @@ export const api = {
     /** Save an artifact as a new revision (Courier commits it) */
     save: (id: string, path: string, body?: unknown) => call<any>('PUT', `/api/projects/${encodeURIComponent(id)}/artifacts/${encodeURI(path)}`, body),
   },
+  changelog: {
+    /** go-build-it's change log, newest first, with the installed version */
+    list: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/changelog`, undefined, query),
+  },
   diff: {
     /** Apply accepted hunks to a document */
     apply: (body?: unknown) => call<any>('POST', `/api/diff/apply`, body),
@@ -291,11 +295,13 @@ export const api = {
     update: (tid: string, body?: unknown) => call<any>('PATCH', `/api/tasks/${encodeURIComponent(tid)}`, body),
   },
   updates: {
-    /** Check for a newer release */
+    /** Check for a newer release and list every newer release's notes */
     check: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/updates`, undefined, query),
-    /** Install the newer release when idle */
+    /** Update to the latest release now; follow it with `updates job` */
     install: (body?: unknown) => call<any>('POST', `/api/updates/install`, body),
-    /** Roll back to the previous version */
+    /** The running or last update, with its steps */
+    job: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/updates/job`, undefined, query),
+    /** Restore the previous version and restart */
     rollback: (body?: unknown) => call<any>('POST', `/api/updates/rollback`, body),
   },
   values: {

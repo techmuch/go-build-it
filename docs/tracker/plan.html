@@ -111,6 +111,7 @@ td:first-child { white-space: nowrap; }
 <tr><td>P13</td><td>Team members on herdr</td><td></td><td>13</td><td>39</td><td>◆ Member demo</td></tr>
 <tr><td>P14</td><td>Live terminal &amp; UI</td><td></td><td>8</td><td>21</td><td>◆ Watch &amp; steer UAT</td></tr>
 <tr><td>P15</td><td>Rev 3 docs, UAT &amp; upstream watch</td><td></td><td>5</td><td>16</td><td>◆ Rev 3 UAT</td></tr>
+<tr><td>P16</td><td>Change log &amp; guided updates</td><td></td><td>11</td><td>19</td><td>◆ Update UAT</td></tr>
 </tbody></table></div>
 <h2 id="3-critical-path">3. Critical path</h2>
 <ul><li>
@@ -470,6 +471,31 @@ Windows support level decided (Q9) and documented
 <tr><td><strong>P15-03</strong> Weekly upstream review job for herdr and Ovis that opens an issue or PR ✅</td><td>S</td><td>NFR-31</td><td>—</td><td>P10-10</td></tr>
 <tr><td><strong>P15-04</strong> Windows at herdr's support level ✅ · waits on Q9</td><td>M</td><td>NFR-01</td><td>—</td><td>P11-07</td></tr>
 <tr><td><strong>P15-05</strong> Rev 3 close-out: retire obsolete tests and text, mockup change log, coverage check ✅</td><td>S</td><td>FR-01</td><td>—</td><td>P15-02</td></tr>
+</tbody></table></div>
+<h3 id="p16-change-log-guided-updates">P16 · Change log &amp; guided updates</h3>
+<p><strong>Goal:</strong> Keep go-build-it's change log in the repo and in the app, open it from the version number, check for updates there, and update with one button that shows each step completing, across the restart.</p>
+<p><strong>◆ Gate: Update UAT.</strong> Passes when:</p>
+<ul><li>
+Clicking the version (desktop and mobile) opens the change log with the installed version marked
+</li><li>
+Check for updates lists every newer release's change log entry
+</li><li>
+Update now runs all eight steps through a real restart against a signed test release, and the restarted server finishes the job
+</li><li>
+A failed verification leaves the running version untouched and offers Try again; history records every update
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P16-01</strong> Requirements rev 4 (FR-06a–e), ADR-011, mockups 16 and M12, plan and tracker ✅</td><td>S</td><td>FR-06a, FR-06b, FR-06c, FR-06d, FR-06e</td><td>A-v16, A-M12, A-v13, A-v01</td><td>—</td></tr>
+<tr><td><strong>P16-02</strong> CHANGELOG.md embedded in the binary, parser and validity test; release tooling (gbi dev changelog release</td><td>notes) and make release check ✅</td><td>S</td><td>FR-06a, FR-05</td><td>—</td><td>P16-01</td></tr>
+<tr><td><strong>P16-03</strong> Update check lists every newer stable release with its notes and when it ran ✅</td><td>S</td><td>FR-06c</td><td>A-v16</td><td>P16-01</td></tr>
+<tr><td><strong>P16-04</strong> Update job: eight named steps, download progress, binary self-test, saved to disk; Try again and Roll back ✅</td><td>M</td><td>FR-06d, FR-06</td><td>A-v16</td><td>P16-03</td></tr>
+<tr><td><strong>P16-05</strong> Restart in place (exec on macOS/Linux, spawn on Windows), port retry, restarted server finishes restart and reconnect steps ✅</td><td>M</td><td>FR-06d, FR-08, NFR-01</td><td>—</td><td>P16-04</td></tr>
+<tr><td><strong>P16-06</strong> Automatic updater uses the same job; history events for start, completion, failure and rollback ✅</td><td>S</td><td>FR-06e, NFR-10</td><td>—</td><td>P16-04</td></tr>
+<tr><td><strong>P16-07</strong> API and CLI: changelog, updates check/install/job/rollback; regenerate the TS client ✅</td><td>S</td><td>FR-30, FR-31, FR-06d</td><td>—</td><td>P16-04</td></tr>
+<tr><td><strong>P16-08</strong> Desktop change log page from the sidebar version (g v), check, Update now with live steps through the restart ✅</td><td>M</td><td>FR-06b, FR-06c, FR-06d</td><td>A-v16, A-v01, A-v13</td><td>P16-07</td></tr>
+<tr><td><strong>P16-09</strong> Mobile change log screen from the version on More ✅</td><td>S</td><td>FR-06b, FR-35</td><td>A-M12, A-M9</td><td>P16-08</td></tr>
+<tr><td><strong>P16-10</strong> End-to-end update test against a fake signed release with a real restart (scripts/update_e2e.sh, web/e2e/update.spec.ts) ✅</td><td>M</td><td>FR-06d, FR-132</td><td>A-v16</td><td>P16-05, P16-08</td></tr>
+<tr><td><strong>P16-11</strong> Docs: settings and updates page, keyboard (g v), CLI, README release steps; keyboard test ✅</td><td>S</td><td>FR-130, FR-06a</td><td>A-v14</td><td>P16-08</td></tr>
 </tbody></table></div>
 <h2 id="5-open-questions-schedule">5. Open questions schedule</h2>
 <div class="table-wrap"><table><thead><tr><th>Question</th><th>Answer before</th><th>Why</th></tr></thead><tbody>

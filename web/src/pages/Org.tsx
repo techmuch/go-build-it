@@ -160,7 +160,6 @@ export function Settings() {
   const { data: cfg, reload } = useData<any>(() => api.settings.get(), [], (e) => e.type.startsWith('settings'));
   const { data: harn } = useData<any[]>(() => api.harnesses.list(), []);
   const { data: ts, reload: rts } = useData<any>(() => api.tailscale.status(), []);
-  const { data: upd } = useData<any>(() => api.updates.check(), []);
   const { data: sys } = useData<any>(() => api.system.info(), []);
   const { run, busy } = useAction();
   if (!cfg) return <Shell title="Settings"><Loading /></Shell>;
@@ -200,9 +199,9 @@ export function Settings() {
               <div className="muted">Ask for a curated briefing at the threshold instead of compacting. Projects (blank = all): <input defaultValue={(exp.smartHandoffProjects || []).join(', ')} onBlur={(e) => patch({ experimental: { ...exp, smartHandoffProjects: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) } })} style={{ width: 160 }} /></div></div></div></Card>
           <Card title={<span id="updates">Updates</span>}><div className="col small" style={{ gap: 6 }}>
             <div>Current <b>{sys?.version}</b> · channel {cfg.updates?.channel} · <Toggle on={!!cfg.updates?.autoInstall} label="auto install" onChange={(v) => patch({ updates: { ...cfg.updates, autoInstall: v } })} /> auto-install</div>
-            <div className="muted">Installs only when no sessions are running · checksum + Ed25519 signature verified (ADR-004)</div>
-            <div>{upd?.error ? <span className="muted">{upd.error}</span> : upd?.newer ? <>New: <b>{upd.tag}</b> <button type="button" className="btn sm p" onClick={() => run(() => api.updates.install(), 'Installed; restart to apply')}>Install</button></> : 'Up to date'}</div>
-            {upd?.previous && <div>Previous: {upd.previous} <button type="button" className="lnk" onClick={() => run(() => api.updates.rollback(), 'Rolled back; restart to apply')}>Roll back</button></div>}</div></Card>
+            <div className="muted">Automatic updates wait until no member is working; a manual update can run any time, because herdr keeps members running while go-build-it restarts. Checksum and Ed25519 signature are verified (ADR-004, ADR-011).</div>
+            <div>{sys?.update?.updating ? <b>Updating…</b> : sys?.update?.newer ? <>Update ready: <b>{sys.update.latest}</b></> : sys?.update?.latest ? 'Up to date' : null}</div>
+            <div><A to="/changelog">Change log &amp; update now ›</A> <span className="muted">(<kbd>g</kbd> <kbd>v</kbd>)</span></div></div></Card>
         </div>
       </div>
     </div>

@@ -8,6 +8,7 @@ import { OptionSets, Rehearsals, Reviews } from './pages/Review';
 import { Docs, EventDetail, HerdrSetup, History, Settings, Standards } from './pages/Org';
 import { Archetypes, ProjectTeam } from './pages/Team';
 import { MobileApp } from './mobile/Mobile';
+import { Changelog } from './pages/Changelog';
 
 type R = [string, (p: Record<string, string>) => JSX.Element];
 const routes: R[] = [
@@ -43,6 +44,7 @@ const routes: R[] = [
   ['/history/:eid', (p) => <EventDetail eid={p.eid} />],
   ['/settings', () => <Settings />],
   ['/settings/herdr', () => <HerdrSetup />],
+  ['/changelog', () => <Changelog />],
   ['/docs', () => <Docs />],
   ['/docs/:slug', (p) => <Docs slug={p.slug} />],
 ];

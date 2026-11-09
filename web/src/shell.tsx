@@ -5,12 +5,12 @@ import { navigate, usePath } from './router';
 import { A } from './ui';
 import { GOTO, clickable, useDialog, useGlobalKeys, useShortcuts } from './keys';
 
-export type SystemInfo = { version: string; actor: { name: string; kind: string; origin: string; login?: string }; owner: string; liveSessions: number; autoDispatch: boolean; experimental: any; dataDir: string; listen: string };
+export type SystemInfo = { version: string; actor: { name: string; kind: string; origin: string; login?: string }; owner: string; liveSessions: number; autoDispatch: boolean; experimental: any; dataDir: string; listen: string; update?: { updating: boolean; latest?: string; newer?: boolean; checkedAt?: string } };
 const SysCtx = createContext<SystemInfo | undefined>(undefined);
 export function useSystem() { return useContext(SysCtx); }
 
 export function SystemProvider({ children }: { children: ReactNode }) {
-  const { data } = useData<SystemInfo>(() => api.system.info(), [], (e) => e.type.startsWith('session') || e.type.startsWith('settings') || e.type.startsWith('dispatcher'));
+  const { data } = useData<SystemInfo>(() => api.system.info(), [], (e) => e.type.startsWith('session') || e.type.startsWith('settings') || e.type.startsWith('dispatcher') || e.type.startsWith('update'));
   return <SysCtx.Provider value={data}>{children}</SysCtx.Provider>;
 }
 
@@ -55,7 +55,7 @@ export function Shell({ title, crumb, right, tabs, children, noPad }: { title: R
       {NAV.map(link)}
       <div className="sep">Organization</div>{ORG.map(link)}
       <div className="sep">System</div>{SYS.map(link)}
-      <div className="foot">{sys ? <>v{sys.version}<br />{sys.liveSessions} live · dispatch {sys.autoDispatch ? 'auto' : 'manual'}<br /><a href="/m/" style={{ color: 'inherit' }}>Mobile UI ↗</a></> : '…'}</div>
+      <div className="foot">{sys ? <><VersionLink sys={sys} /><br />{sys.liveSessions} live · dispatch {sys.autoDispatch ? 'auto' : 'manual'}<br /><a href="/m/" style={{ color: 'inherit' }}>Mobile UI ↗</a></> : '…'}</div>
     </aside>
     <div className="main" id="main" tabIndex={-1}>
       <div className="topbar"><h1>{crumb && <span className="crumb">{crumb} / </span>}{title}</h1>{right}
@@ -67,6 +67,13 @@ export function Shell({ title, crumb, right, tabs, children, noPad }: { title: R
     {pal && <Palette onClose={() => setPal(false)} />}
     {help && <KeysHelp onClose={() => setHelp(false)} />}
   </div>;
+}
+
+// The version opens the change log (FR-06b); it says when an update is ready or running.
+function VersionLink({ sys }: { sys: SystemInfo }) {
+  const u = sys.update;
+  const label = u?.updating ? 'updating…' : u?.newer ? `update ready: ${u.latest}` : '';
+  return <><button type="button" className="ver" onClick={() => navigate('/changelog')} aria-keyshortcuts="g v" title="Change log and updates (g v)" data-testid="version-link">v{sys.version}</button>{label && <> · <span className="upd">{label}</span></>}</>;
 }
 
 export function ProjectTabs({ id, on }: { id: string; on: string }) {

@@ -1,6 +1,6 @@
 # go-build-it — Requirements
 
-Status: Draft · Last updated: 2026-11-08 (rev. 3: herdr as the only agent backend; per-project team members from global archetypes. See [ADR-009](decisions/ADR-009-herdr-backend.md) and [ADR-010](decisions/ADR-010-project-team-members.md))
+Status: Draft · Last updated: 2026-11-09 (rev. 4: in-app change log and guided updates, FR-06a–FR-06e, see [ADR-011](decisions/ADR-011-changelog-guided-updates.md). Rev. 3: herdr as the only agent backend; per-project team members from global archetypes, see [ADR-009](decisions/ADR-009-herdr-backend.md) and [ADR-010](decisions/ADR-010-project-team-members.md))
 
 ## 1. Overview
 
@@ -61,6 +61,21 @@ go-build-it is a Go application with an embedded React frontend that manages lon
   - Because herdr owns the harness processes (FR-08), an update MAY be applied while AI team members are working; go-build-it SHALL reconnect to the gbi herdr session after restarting. Updating herdr itself is left to herdr's own updater or package manager, and go-build-it SHALL warn when herdr falls outside the supported range.
   - The previous version SHALL be kept so the user can roll back.
   - The user SHALL be able to turn automatic updates off.
+- **FR-06a**: go-build-it SHALL keep a change log of its own releases in `CHANGELOG.md` at the root of its repository. The change log has one entry per CalVer version (FR-05) with its release date and its changes grouped as Added, Changed, Fixed and Removed, plus an Unreleased entry for work not yet released. The change log SHALL be embedded in the binary. Each GitHub release's notes SHALL come from its change log entry, and a release SHALL NOT be built without one.
+- **FR-06b**: Clicking the version number SHALL open the change log, in the desktop sidebar and on the mobile More screen. The change log SHALL list entries newest first and mark the installed version. Development builds show the Unreleased entry as the installed one.
+- **FR-06c**: The change log SHALL offer **Check for updates**. The result SHALL show the installed version, the latest release, and when the check ran. When the latest release is newer, the result SHALL also list the change log entries of every release between the two, so the user can see what the update brings. When no release can be found, the result SHALL say why (e.g. offline, or no release published yet).
+- **FR-06d**: When a newer release is available, the change log SHALL offer **Update now**. The update SHALL run as named steps, and each step SHALL be shown as pending, running, done (with how long it took) or failed (with the reason). The steps are:
+  1. find the release
+  2. download it, with progress
+  3. verify the signature
+  4. verify the checksum
+  5. test that the new binary runs and reports the expected version
+  6. install it, keeping the current version for rollback
+  7. restart go-build-it
+  8. reconnect to the gbi herdr session and the members' running work
+
+  Progress SHALL survive the restart: the restarted go-build-it SHALL complete the remaining steps, and the change log SHALL show them finishing. A step that fails before the install step SHALL leave the running version untouched and offer **Try again**. A failure after it SHALL offer **Roll back**. The CLI SHALL offer the same (FR-30).
+- **FR-06e**: Updates installed by the automatic updater (FR-06) SHALL run the same steps and SHALL be visible in the change log in the same way. Every update, whether it succeeds, fails or is rolled back, SHALL be recorded in the history (NFR-10).
 
 ## 4. Users, team and roles
 
@@ -324,7 +339,7 @@ By default, an AI team member's conversation relies on the harness's built-in au
 | Q3 | When smart handoffs graduate from experimental, what is the default context threshold, and should it be configurable per harness or model? What evidence (rework rate, handoff quality vs. compaction) decides that they are ready? |
 | Q4 | Can multiple humans collaborate on the same projects (e.g. different Tailscale users with different roles), or is it single-user with optional reviewers? |
 | Q5 | What is the exact default git workflow (branch naming, PR/MR requirements, merge strategy)? |
-| Q6 | What is the mechanism and channel for auto-updates (GitHub Releases, Homebrew tap, etc.)? |
+| Q6 | ~~What is the mechanism and channel for auto-updates?~~ **Answered:** GitHub Releases with signed checksums (ADR-004). Rev 4 adds the in-app change log and guided updates with step progress (ADR-011). |
 | Q7 | ~~How should attachable (headed) sessions work?~~ **Answered (rev 3):** every session runs in herdr; see ADR-009. |
 | Q8 | ~~Conversation rotation policy (FR-76)?~~ **Answered 2026-11-08:** keep one conversation per member across tasks until context reaches the handoff threshold (75%), then rotate, starting from a handoff plus the member's notes. Lens starts a fresh conversation for every review. See ADR-010. |
 | Q9 | ~~Windows support level?~~ **Answered 2026-11-08:** ship Windows at herdr's beta level, with herdr in the Windows CI job. A herdr capability missing on Windows is shown as unavailable there. See ADR-009. |

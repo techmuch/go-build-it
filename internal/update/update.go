@@ -16,24 +16,37 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
 )
 
 // PublicKey verifies SHA256SUMS.sig. The private key lives outside the repo in
-// ~/.go-build-it/release-signing.key and is used by `gbi dev sign`.
-const PublicKey = "eJ3eKk81oKaKZlNaLjafw1j1GO+Uueyt51jNMCchih4="
+// ~/.go-build-it/release-signing.key and is used by `gbi dev sign`. It is a variable only
+// so a test build can trust a throwaway key (-ldflags "-X …/update.PublicKey=…", ADR-011);
+// nothing changes it at run time.
+var PublicKey = "eJ3eKk81oKaKZlNaLjafw1j1GO+Uueyt51jNMCchih4="
 
 // Release is the latest release on the channel.
 type Release struct {
-	Tag       string `json:"tag"`
-	Current   string `json:"current"`
-	Newer     bool   `json:"newer"`
-	AssetName string `json:"assetName"`
-	URL       string `json:"url"`
-	Notes     string `json:"notes"`
-	Previous  string `json:"previous"` // version available for rollback
+	Tag       string      `json:"tag"`
+	Current   string      `json:"current"`
+	Newer     bool        `json:"newer"`
+	AssetName string      `json:"assetName"`
+	URL       string      `json:"url"`
+	Notes     string      `json:"notes"`
+	Previous  string      `json:"previous"`  // version available for rollback
+	Releases  []NewerNote `json:"releases"`  // every release newer than Current, newest first (FR-06c)
+	CheckedAt time.Time   `json:"checkedAt"` // when this check ran
+}
+
+// NewerNote is one release newer than the running version, with its change log entry.
+type NewerNote struct {
+	Tag   string `json:"tag"`
+	Date  string `json:"date"`
+	Notes string `json:"notes"`
+	URL   string `json:"url"`
 }
 
 // Updater talks to GitHub Releases.
@@ -41,6 +54,7 @@ type Updater struct {
 	Repo    string
 	Current string
 	Exe     string
+	Key     string // public key that release signatures must verify against
 	Client  *http.Client
 	API     string // override for tests
 }
@@ -48,7 +62,10 @@ type Updater struct {
 // New returns an updater for the running executable.
 func New(repo, current string) *Updater {
 	exe, _ := os.Executable()
-	return &Updater{Repo: repo, Current: current, Exe: exe, Client: &http.Client{Timeout: 60 * time.Second}, API: "https://api.github.com"}
+	if real, err := filepath.EvalSymlinks(exe); err == nil {
+		exe = real // replace the binary, not a symlink to it
+	}
+	return &Updater{Repo: repo, Current: current, Exe: exe, Key: PublicKey, Client: &http.Client{Timeout: 10 * time.Minute}, API: "https://api.github.com"}
 }
 
 // AssetName is the release asset for this platform.
@@ -61,39 +78,61 @@ func AssetName() string {
 }
 
 type ghRelease struct {
-	TagName string `json:"tag_name"`
-	Body    string `json:"body"`
-	Assets  []struct {
+	TagName     string    `json:"tag_name"`
+	Body        string    `json:"body"`
+	Draft       bool      `json:"draft"`
+	Prerelease  bool      `json:"prerelease"`
+	PublishedAt time.Time `json:"published_at"`
+	HTMLURL     string    `json:"html_url"`
+	Assets      []struct {
 		Name string `json:"name"`
 		URL  string `json:"browser_download_url"`
 	} `json:"assets"`
 }
 
-func (u *Updater) latest(ctx context.Context) (ghRelease, error) {
-	var r ghRelease
-	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, u.API+"/repos/"+u.Repo+"/releases/latest", nil)
+// releases lists the stable, published releases, newest version first.
+func (u *Updater) releases(ctx context.Context) ([]ghRelease, error) {
+	cctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+	req, _ := http.NewRequestWithContext(cctx, http.MethodGet, u.API+"/repos/"+u.Repo+"/releases?per_page=50", nil)
 	req.Header.Set("Accept", "application/vnd.github+json")
 	resp, err := u.Client.Do(req)
 	if err != nil {
-		return r, err
+		return nil, fmt.Errorf("could not reach GitHub: %w", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusNotFound {
-		return r, errors.New("no releases published yet")
+		return nil, errors.New("no releases published yet")
 	}
 	if resp.StatusCode != http.StatusOK {
-		return r, fmt.Errorf("releases API: %s", resp.Status)
+		return nil, fmt.Errorf("releases API: %s", resp.Status)
 	}
-	return r, json.NewDecoder(resp.Body).Decode(&r)
+	var all []ghRelease
+	if err := json.NewDecoder(resp.Body).Decode(&all); err != nil {
+		return nil, err
+	}
+	var out []ghRelease
+	for _, r := range all {
+		if !r.Draft && !r.Prerelease && r.TagName != "" {
+			out = append(out, r)
+		}
+	}
+	if len(out) == 0 {
+		return nil, errors.New("no releases published yet")
+	}
+	sort.SliceStable(out, func(i, j int) bool { return Newer(out[i].TagName, out[j].TagName) })
+	return out, nil
 }
 
-// Check returns the latest release and whether it is newer than the running version.
+// Check returns the latest release, whether it is newer than the running version, and
+// every release in between with its notes (FR-06c).
 func (u *Updater) Check(ctx context.Context) (Release, error) {
-	rel := Release{Current: u.Current, AssetName: AssetName(), Previous: u.previousVersion()}
-	r, err := u.latest(ctx)
+	rel := Release{Current: u.Current, AssetName: AssetName(), Previous: u.previousVersion(), Releases: []NewerNote{}, CheckedAt: time.Now().UTC()}
+	all, err := u.releases(ctx)
 	if err != nil {
 		return rel, err
 	}
+	r := all[0]
 	rel.Tag, rel.Notes = r.TagName, r.Body
 	rel.Newer = u.Current == "dev" || Newer(r.TagName, u.Current)
 	for _, a := range r.Assets {
@@ -101,8 +140,24 @@ func (u *Updater) Check(ctx context.Context) (Release, error) {
 			rel.URL = a.URL
 		}
 	}
+	for _, x := range all {
+		if u.Current != "dev" && !Newer(x.TagName, u.Current) {
+			break
+		}
+		date := ""
+		if !x.PublishedAt.IsZero() {
+			date = x.PublishedAt.Format("2006-01-02")
+		}
+		rel.Releases = append(rel.Releases, NewerNote{Tag: x.TagName, Date: date, Notes: x.Body, URL: x.HTMLURL})
+		if u.Current == "dev" && len(rel.Releases) == 1 {
+			break // a development build is told about the latest release only
+		}
+	}
 	return rel, nil
 }
+
+// SameVersion reports whether two version strings name the same release ("v" prefix ignored).
+func SameVersion(a, b string) bool { return strings.TrimPrefix(a, "v") == strings.TrimPrefix(b, "v") }
 
 // Newer compares CalVer strings YYYY.MM.DD.N.
 func Newer(a, b string) bool {
@@ -117,7 +172,9 @@ func Newer(a, b string) bool {
 	return len(pa) > len(pb)
 }
 
-func (u *Updater) download(ctx context.Context, url string) ([]byte, error) {
+// download fetches url. progress, when set, is called with bytes read and the total
+// (-1 when the server does not say).
+func (u *Updater) download(ctx context.Context, url string, progress func(done, total int64)) ([]byte, error) {
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	resp, err := u.Client.Do(req)
 	if err != nil {
@@ -127,11 +184,37 @@ func (u *Updater) download(ctx context.Context, url string) ([]byte, error) {
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("download %s: %s", url, resp.Status)
 	}
-	return io.ReadAll(io.LimitReader(resp.Body, 512<<20))
+	var r io.Reader = io.LimitReader(resp.Body, 512<<20)
+	if progress != nil {
+		r = &countingReader{r: r, total: resp.ContentLength, fn: progress}
+	}
+	return io.ReadAll(r)
+}
+
+type countingReader struct {
+	r     io.Reader
+	n     int64
+	total int64
+	fn    func(done, total int64)
+}
+
+func (c *countingReader) Read(p []byte) (int, error) {
+	n, err := c.r.Read(p)
+	c.n += int64(n)
+	c.fn(c.n, c.total)
+	return n, err
 }
 
 // Verify checks the asset against SHA256SUMS and SHA256SUMS against its Ed25519 signature.
 func Verify(asset []byte, name string, sums, sig []byte, pubB64 string) error {
+	if err := VerifySignature(sums, sig, pubB64); err != nil {
+		return err
+	}
+	return VerifyChecksum(asset, name, sums)
+}
+
+// VerifySignature checks SHA256SUMS against its Ed25519 signature.
+func VerifySignature(sums, sig []byte, pubB64 string) error {
 	pub, err := base64.StdEncoding.DecodeString(pubB64)
 	if err != nil || len(pub) != ed25519.PublicKeySize {
 		return errors.New("bad public key")
@@ -141,8 +224,13 @@ func Verify(asset []byte, name string, sums, sig []byte, pubB64 string) error {
 		return fmt.Errorf("decode signature: %w", err)
 	}
 	if !ed25519.Verify(ed25519.PublicKey(pub), sums, rawSig) {
-		return errors.New("signature verification failed")
+		return errors.New("signature verification failed: SHA256SUMS was not signed by the go-build-it release key")
 	}
+	return nil
+}
+
+// VerifyChecksum checks the asset's SHA-256 against its line in SHA256SUMS.
+func VerifyChecksum(asset []byte, name string, sums []byte) error {
 	h := sha256.Sum256(asset)
 	want := ""
 	sc := bufio.NewScanner(strings.NewReader(string(sums)))
@@ -156,7 +244,7 @@ func Verify(asset []byte, name string, sums, sig []byte, pubB64 string) error {
 		return fmt.Errorf("%s is not listed in SHA256SUMS", name)
 	}
 	if want != hex.EncodeToString(h[:]) {
-		return errors.New("checksum mismatch")
+		return errors.New("checksum mismatch: the download does not match SHA256SUMS")
 	}
 	return nil
 }
@@ -181,43 +269,10 @@ func Sign(files []string, privB64 string) (sums, sig []byte, err error) {
 	return sums, sig, nil
 }
 
-// Install downloads, verifies and swaps in the new binary, keeping the old one for rollback.
-// Callers must only call it when no sessions are running (FR-06).
-func (u *Updater) Install(ctx context.Context) (Release, error) {
-	rel, err := u.Check(ctx)
-	if err != nil {
-		return rel, err
-	}
-	if !rel.Newer {
-		return rel, errors.New("already up to date")
-	}
-	if rel.URL == "" {
-		return rel, fmt.Errorf("release %s has no asset %s", rel.Tag, rel.AssetName)
-	}
-	base := rel.URL[:strings.LastIndex(rel.URL, "/")+1]
-	asset, err := u.download(ctx, rel.URL)
-	if err != nil {
-		return rel, err
-	}
-	sums, err := u.download(ctx, base+"SHA256SUMS")
-	if err != nil {
-		return rel, err
-	}
-	sig, err := u.download(ctx, base+"SHA256SUMS.sig")
-	if err != nil {
-		return rel, err
-	}
-	if err := Verify(asset, rel.AssetName, sums, sig, PublicKey); err != nil {
-		return rel, err
-	}
-	return rel, u.swap(asset, rel.Tag)
-}
-
-func (u *Updater) swap(asset []byte, tag string) error {
-	next, prev := u.Exe+".new", u.Exe+".prev"
-	if err := os.WriteFile(next, asset, 0o755); err != nil {
-		return err
-	}
+// install moves the tested binary at next into place, keeping the running one as .prev
+// with its version, for rollback (FR-06).
+func (u *Updater) install(next string) error {
+	prev := u.Exe + ".prev"
 	_ = os.Remove(prev)
 	if err := os.Rename(u.Exe, prev); err != nil {
 		return err

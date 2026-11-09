@@ -21,10 +21,15 @@ make build                  # web UI + binary → bin/gbi
 make test                                                   # go vet, tsc, Go tests (incl. end-to-end workflow with a scripted agent)
 GBI_HOME=$(mktemp -d) PORT=7431 scripts/demo.sh             # seed a demo via the CLI (no AI subscription used)
 cd web && GBI_E2E_URL=http://127.0.0.1:7431 npx playwright test   # UAT walkthrough, regenerates docs screenshots
+scripts/update_e2e.sh                                       # change log + Update now through a real restart, against a fake signed release
 ```
 
 ## Release
 
+Every release has an entry in [CHANGELOG.md](CHANGELOG.md), which the app shows when you click its version (FR-06a). Add changes under `## [Unreleased]` as you go, then:
+
 ```
-VERSION=2026.11.08.1 make release   # cross-compiled, SHA256SUMS signed with Ed25519 (ADR-004)
+gbi dev changelog release 2026.11.10.1      # dates the Unreleased entry; commit it
+VERSION=2026.11.10.1 make release           # refuses a version without an entry; cross-compiles, signs SHA256SUMS (ADR-004)
+gh release create 2026.11.10.1 release/gbi_* release/SHA256SUMS release/SHA256SUMS.sig --notes-file release/NOTES.md
 ```

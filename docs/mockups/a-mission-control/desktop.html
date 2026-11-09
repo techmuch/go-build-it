@@ -107,11 +107,17 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
 .chk { display:flex; flex-direction:column; gap:5px; font-size:12.5px; }
 .mm { position:relative; background:linear-gradient(135deg,#cfe3d4,#b8d4c0); border-radius:16px; overflow:hidden; border:6px solid #1d1f22; }
 .lg { display:flex; flex-direction:column; gap:0; font-size:12.5px; } .lg div { display:flex; gap:8px; padding:6px 0; border-bottom:1px solid var(--line); } .lg div:last-child { border-bottom:0; }
+.ustep { display:flex; gap:10px; align-items:flex-start; padding:7px 0; border-bottom:1px solid var(--line); font-size:12.5px; } .ustep:last-child { border-bottom:0; }
+.ustep .ui { width:20px; text-align:center; } .ustep .ut { flex:1; } .ustep .uz { font-size:11.5px; white-space:nowrap; }
+.ustep.run { background:var(--acc-s); margin:0 -10px; padding:7px 10px; border-radius:6px; } .ustep.pend { color:var(--m); }
+.bar { height:6px; background:var(--line); border-radius:3px; overflow:hidden; margin-top:4px; } .bar i { display:block; height:100%; background:var(--acc); }
+.clog h4 { margin:12px 0 4px; font-size:13.5px; } .clog h5 { margin:6px 0 2px; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--m); } .clog ul { margin:0 0 4px 18px; padding:0; font-size:12.5px; }
+.foot a.ver { color:inherit; text-decoration:underline dotted; cursor:pointer; }
 </style>
 </head>
 <body class="mock">
 <div class="rv-bar">
-  <span class="rv-title">Approach A: Mission Control <small>Desktop · 14 views + 7 detail views · rev 2</small></span>
+  <span class="rv-title">Approach A: Mission Control <small>Desktop · 16 views + 9 detail views · rev 4</small></span>
   <a href="../index.html">← Overview &amp; review guide</a>
   <a href="mobile.html">Approach A mobile →</a>
   <span class="rv-spacer"></span>
@@ -124,11 +130,12 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
 </div>
 <div class="rv-intro"><p style="background:#fff8e6;border:1px solid #ecd9a8;border-radius:8px;padding:8px 12px"><b>Rev 2 (from your review):</b> roadmap item detail (02b) · Edit → artifact editor with AI chat and a rich editor (03b) · attachment / mockup viewer (04b) · voice dictation on every answer box · structured/terminal session views and attachable headed sessions (05b) · smart handoffs now <i>experimental</i>, compaction is the MVP default · option set rethought around one large preview (07) · expandable mockups and multi-reviewer findings (08) · work review rebuilt as an assessment, no code diff (09) · persona coach and standards editor with AI chat (10, 11) · history event detail (12b) · Settings layout fixed, git workflow moved to Standards (13).</p></div>
 <p style="background:#e7effc;border:1px solid #b9cdf0;border-radius:8px;padding:8px 12px;margin:8px 0"><b>Rev 3 (herdr backend, per-project teams; ADR-009, ADR-010):</b> every AI team member runs in a herdr pane of the <span class="mono">gbi</span> herdr session · live members with herdr state and a <i>needs you</i> row for blocked agents (05) · live terminal streamed from herdr with take control / hand back (05b) · global <b>persona archetypes</b> replace global teams (10) · each project has its own <b>team</b> made from archetypes, with tuning and drift (10b) · herdr setup and doctor (15) · settings show herdr, integrations and transcript usage (13) · cards and overview show the project team and its state (01, 02) · queue assigns to a role or a specific member (06). Keyboard: every view follows <a class="l" href="../../user/18-keyboard.md">the keyboard conventions</a>.</p>
+<p style="background:#e5f6ec;border:1px solid #a8dbbd;border-radius:8px;padding:8px 12px;margin:8px 0"><b>Rev 4 (change log &amp; guided updates; ADR-011):</b> the sidebar version opens the <b>change log</b> (16) · <b>Check again</b> lists every newer release · <b>Update now</b> shows eight steps completing, across the restart · Settings → Updates links to it (13).</p>
 <nav class="rv-toc">
   <a href="#v01">01 Catalog</a><a href="#v02">02 Project overview</a><a href="#v02b">02b Roadmap item</a><a href="#v03">03 Artifacts &amp; values</a><a href="#v03b">03b Artifact editor</a><a href="#v04">04 Questions</a><a href="#v04b">04b Viewer</a>
   <a href="#v05">05 Live members</a><a href="#v05b">05b Live terminal</a><a href="#v06">06 Task queue</a><a href="#v07">07 Option set</a><a href="#v08">08 Dress rehearsal</a>
   <a href="#v09">09 Work review</a><a href="#v10">10 Archetypes</a><a href="#v10b">10b Project team</a><a href="#v11">11 Global standards</a><a href="#v12">12 History &amp; insights</a><a href="#v12b">12b Event detail</a>
-  <a href="#v13">13 Settings</a><a href="#v14">14 Docs</a><a href="#v15">15 herdr setup</a>
+  <a href="#v13">13 Settings</a><a href="#v14">14 Docs</a><a href="#v15">15 herdr setup</a><a href="#v16">16 Change log &amp; update</a>
 </nav>
 
 <!-- ============ 01 CATALOG ============ -->
@@ -148,7 +155,7 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
       <a href="#v10">Team</a><a href="#v11">Standards</a><a href="#v12">History</a>
       <div class="sep">System</div>
       <a href="#v13">Settings</a><a href="#v14">Docs</a>
-      <div class="foot">v2026.11.07.1 · up to date<br>Claude Code ● Antigravity ● OpenCode ●</div>
+      <div class="foot"><a class="ver" href="#v16">v2026.11.07.1</a> · up to date<br>Claude Code ● Antigravity ● OpenCode ●</div>
     </aside>
     <div class="main">
       <div class="topbar"><h1>Projects</h1><span class="search">Search projects, tasks, docs…  ⌘K</span><span class="who">● Tailnet · david@github</span></div>
@@ -1025,7 +1032,7 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
 
 <!-- ============ 13 SETTINGS ============ -->
 <section class="view" id="v13">
-  <header><span class="num">13</span><h2>Settings: herdr, harnesses, access, forge connections, experimental, updates</h2><span class="req">FR-05</span><span class="req">FR-06</span><span class="req">FR-15</span><span class="req">FR-19</span><span class="req">FR-20</span><span class="req">FR-63</span><span class="req">FR-67</span><span class="req">FR-72</span><span class="req">FR-90</span></header>
+  <header><span class="num">13</span><h2>Settings: herdr, harnesses, access, forge connections, experimental, updates</h2><span class="req">FR-05</span><span class="req">FR-06</span><span class="req">FR-06b</span><span class="req">FR-15</span><span class="req">FR-19</span><span class="req">FR-20</span><span class="req">FR-63</span><span class="req">FR-67</span><span class="req">FR-72</span><span class="req">FR-90</span></header>
   <p class="look"><b>Look for:</b> <b>Rev 2:</b> the harness table used to overflow its card and ran behind the Access panel. That's fixed with a full-width layout and a section list. The default git workflow moved to <b>Standards → Git workflow</b>; Settings only keeps forge connections. <b>Rev 3:</b> a <b>herdr</b> section shows the supervised <span class="mono">gbi</span> session, the herdr version against the supported range, and the integration for each harness. The harness table now shows herdr kind, integration and where usage comes from (the transcript). Attachable sessions are gone: every member runs in herdr.</p>
   <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/settings</span></div>
   <div class="app">
@@ -1059,7 +1066,7 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
                 <div class="muted">Members keep one conversation until context reaches the threshold, then rotate with a handoff (Q8).</div>
               </div></div>
             <div class="card"><h3>Updates</h3>
-              <div class="small" style="display:flex;flex-direction:column;gap:6px"><div>Current <b>2026.11.07.1</b> · stable · <span class="toggle"></span> auto-install</div><div class="muted">Installs any time: herdr keeps agents running while go-build-it restarts · signature verified</div><div>Previous: 2026.11.05.2 <a class="l">Roll back</a></div></div></div>
+              <div class="small" style="display:flex;flex-direction:column;gap:6px"><div>Current <b>2026.11.07.1</b> · stable · <span class="toggle"></span> auto-install</div><div class="muted">Installs any time: herdr keeps agents running while go-build-it restarts · signature verified</div><div>Previous: 2026.11.05.2 <a class="l">Roll back</a></div><div><a class="l" href="#v16">Change log &amp; update now ›</a></div></div></div>
           </div>
         </div>
       </div>
@@ -1114,6 +1121,89 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
       </div>
     </div>
   </div></div></div>
+</section>
+
+<!-- ============ 16 CHANGE LOG & UPDATES ============ -->
+<section class="view" id="v16">
+  <header><span class="num">16</span><h2>Change log &amp; guided update</h2><span class="req">FR-06</span><span class="req">FR-06a</span><span class="req">FR-06b</span><span class="req">FR-06c</span><span class="req">FR-06d</span><span class="req">FR-06e</span></header>
+  <p class="look"><b>Look for:</b> <b>Rev 4:</b> click the version number at the bottom of the sidebar (or press <kbd>g</kbd> <kbd>v</kbd>) to open the change log. It is the same <span class="mono">CHANGELOG.md</span> the releases are made from, newest first, with the installed version marked. <b>Check again</b> lists every release newer than yours, so you can read what an update brings before you take it. <b>Update now</b> runs the update as eight named steps. Each shows pending, running (the download shows bytes and %), done with how long it took, or failed with the reason and <b>Try again</b>. The page keeps polling while go-build-it restarts, and the restarted server finishes the last two steps. Members keep working in herdr the whole time. Keyboard: <kbd>Tab</kbd> reaches Check again, Update now and Roll back, and the step list is announced as it changes (<span class="mono">aria-live</span>).</p>
+  <p class="small muted" style="margin:6px 0">a. Update available: the check lists the newer releases</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/changelog</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">6</span></a><a>Questions <span class="badge">3</span></a><a>Sessions <span class="badge n">4</span></a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Docs</a><div class="foot"><a class="ver">v2026.11.07.1</a> · <b style="color:#7fd6c8">update ready</b><br>2 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1>Change log</h1><span class="muted small">v2026.11.07.1 installed</span><span class="search">Search, run a command…  ⌘K</span><span class="who">● Local · david</span></div>
+      <div class="content" style="flex-direction:row;align-items:flex-start">
+        <div class="card" style="flex:1;min-width:0"><h3>What changed <span class="muted small" style="text-transform:none">from CHANGELOG.md · newest first</span></h3><div class="clog">
+  <h4>2026.11.09.1 <span class="chip blue">new</span> <span class="muted small">Nov 9</span></h4>
+  <h5>Added</h5><ul><li>Change log in the app: click the version number</li><li>Update now with step-by-step progress across the restart</li></ul>
+  <h5>Fixed</h5><ul><li>Live terminal keeps its size after a takeover</li></ul>
+  <h4>2026.11.08.2 <span class="chip blue">new</span> <span class="muted small">Nov 8</span></h4>
+  <h5>Changed</h5><ul><li>Archetype changes list the members they affect</li></ul>
+  <h4>2026.11.07.1 <span class="chip grn">installed</span> <span class="muted small">Nov 7</span></h4>
+  <h5>Added</h5><ul><li>herdr is the only agent backend; every member runs in the gbi session</li><li>Per-project teams made from persona archetypes</li></ul>
+  <h4 class="muted">2026.11.05.2 <span class="muted small">Nov 5</span></h4><div class="small muted">… older entries</div>
+</div></div>
+        <div class="card" style="width:330px"><h3>Updates</h3>
+          <div class="small" style="display:flex;flex-direction:column;gap:7px">
+            <div>Installed <b>2026.11.07.1</b> · stable</div>
+            <div>Latest <b>2026.11.09.1</b> <span class="chip blue">2 releases newer</span></div>
+            <div class="muted">Checked just now · <a class="l">Check again</a></div>
+            <div style="background:var(--acc-s);border-radius:6px;padding:8px">2 members are working. They keep running in herdr while go-build-it restarts.</div>
+            <div class="row"><span class="btn p">⬆ Update now to 2026.11.09.1</span></div>
+            <div class="muted">Previous: 2026.11.05.2 · <a class="l">Roll back</a> · <span class="toggle"></span> auto-install</div>
+          </div></div>
+      </div>
+    </div>
+  </div></div></div>
+
+  <p class="small muted" style="margin:14px 0 6px">b. Updating: steps complete one by one</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/changelog</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">6</span></a><a>Questions <span class="badge">3</span></a><a>Sessions <span class="badge n">4</span></a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Docs</a><div class="foot"><a class="ver">v2026.11.07.1</a> · <b style="color:#7fd6c8">update ready</b><br>2 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1>Change log</h1><span class="chip amb">Updating to 2026.11.09.1</span><span class="search">Search, run a command…  ⌘K</span><span class="who">● Local · david</span></div>
+      <div class="content" style="flex-direction:row;align-items:flex-start">
+        <div class="card" style="flex:1;min-width:0"><h3>What changed</h3><div class="clog">
+  <h4>2026.11.09.1 <span class="chip blue">new</span> <span class="muted small">Nov 9</span></h4>
+  <h5>Added</h5><ul><li>Change log in the app: click the version number</li><li>Update now with step-by-step progress across the restart</li></ul>
+  <h5>Fixed</h5><ul><li>Live terminal keeps its size after a takeover</li></ul>
+  <h4>2026.11.08.2 <span class="chip blue">new</span> <span class="muted small">Nov 8</span></h4>
+  <h5>Changed</h5><ul><li>Archetype changes list the members they affect</li></ul>
+  <h4>2026.11.07.1 <span class="chip grn">installed</span> <span class="muted small">Nov 7</span></h4>
+  <h5>Added</h5><ul><li>herdr is the only agent backend; every member runs in the gbi session</li><li>Per-project teams made from persona archetypes</li></ul>
+  <h4 class="muted">2026.11.05.2 <span class="muted small">Nov 5</span></h4><div class="small muted">… older entries</div>
+</div></div>
+        <div class="card" style="width:360px"><h3>Updating to 2026.11.09.1 <span class="muted small" style="text-transform:none">step 2 of 8</span></h3>
+          <div class="bar" style="margin:0 0 8px"><i style="width:19%"></i></div><div class="ustep "><span class="ui">✅</span><span class="ut"><b>Find the release</b><br><span class="muted">2026.11.09.1 · gbi_darwin_arm64</span></span><span class="uz muted">0.4s</span></div><div class="ustep run"><span class="ui">⏳</span><span class="ut"><b>Download</b><br><span class="muted">9.4 of 14.2 MB · 66%<div class='bar'><i style='width:66%'></i></div></span></span><span class="uz muted">3.1s</span></div><div class="ustep pend"><span class="ui">○</span><span class="ut"><b>Verify the signature</b><br><span class="muted">Ed25519 over SHA256SUMS</span></span><span class="uz muted"></span></div><div class="ustep pend"><span class="ui">○</span><span class="ut"><b>Verify the checksum</b><br><span class="muted">SHA-256 of gbi_darwin_arm64</span></span><span class="uz muted"></span></div><div class="ustep pend"><span class="ui">○</span><span class="ut"><b>Test the new binary</b><br><span class="muted">runs it and expects 2026.11.09.1</span></span><span class="uz muted"></span></div><div class="ustep pend"><span class="ui">○</span><span class="ut"><b>Install</b><br><span class="muted">keeps 2026.11.07.1 for rollback</span></span><span class="uz muted"></span></div><div class="ustep pend"><span class="ui">○</span><span class="ut"><b>Restart go-build-it</b><br><span class="muted">the page reconnects by itself</span></span><span class="uz muted"></span></div><div class="ustep pend"><span class="ui">○</span><span class="ut"><b>Reconnect</b><br><span class="muted">gbi herdr session and running members</span></span><span class="uz muted"></span></div>
+          <div class="small muted" style="margin-top:8px">You can leave this page; the update keeps going. Its progress is in the history.</div></div>
+      </div>
+    </div>
+  </div></div></div>
+
+  <p class="small muted" style="margin:14px 0 6px">c. After the restart: every step done, the new version is installed</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/changelog</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">6</span></a><a>Questions <span class="badge">3</span></a><a>Sessions <span class="badge n">4</span></a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Docs</a><div class="foot"><a class="ver">v2026.11.09.1</a> · up to date<br>2 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1>Change log</h1><span class="chip grn">Updated</span><span class="search">Search, run a command…  ⌘K</span><span class="who">● Local · david</span></div>
+      <div class="content" style="flex-direction:row;align-items:flex-start">
+        <div class="card" style="flex:1;min-width:0"><h3>What changed</h3><div class="clog">
+  <h4>2026.11.09.1 <span class="chip grn">installed</span> <span class="muted small">Nov 9</span></h4>
+  <h5>Added</h5><ul><li>Change log in the app: click the version number</li><li>Update now with step-by-step progress across the restart</li></ul>
+  <h5>Fixed</h5><ul><li>Live terminal keeps its size after a takeover</li></ul>
+  <h4>2026.11.08.2  <span class="muted small">Nov 8</span></h4>
+  <h5>Changed</h5><ul><li>Archetype changes list the members they affect</li></ul>
+  <h4>2026.11.07.1 <span class="muted small">Nov 7</span></h4>
+  <h5>Added</h5><ul><li>herdr is the only agent backend; every member runs in the gbi session</li><li>Per-project teams made from persona archetypes</li></ul>
+  <h4 class="muted">2026.11.05.2 <span class="muted small">Nov 5</span></h4><div class="small muted">… older entries</div>
+</div></div>
+        <div class="card" style="width:360px;border-color:#9fd8b8"><h3>✅ Updated to 2026.11.09.1 <span class="muted small" style="text-transform:none">in 7.7s</span></h3><div class="ustep "><span class="ui">✅</span><span class="ut"><b>Find the release</b><br><span class="muted">2026.11.09.1 · gbi_darwin_arm64</span></span><span class="uz muted">0.4s</span></div><div class="ustep "><span class="ui">✅</span><span class="ut"><b>Download</b><br><span class="muted">14.2 MB</span></span><span class="uz muted">4.6s</span></div><div class="ustep "><span class="ui">✅</span><span class="ut"><b>Verify the signature</b><br><span class="muted">Ed25519 over SHA256SUMS ✓</span></span><span class="uz muted">0.0s</span></div><div class="ustep "><span class="ui">✅</span><span class="ut"><b>Verify the checksum</b><br><span class="muted">SHA-256 matches</span></span><span class="uz muted">0.1s</span></div><div class="ustep "><span class="ui">✅</span><span class="ut"><b>Test the new binary</b><br><span class="muted">printed 2026.11.09.1</span></span><span class="uz muted">0.2s</span></div><div class="ustep "><span class="ui">✅</span><span class="ut"><b>Install</b><br><span class="muted">2026.11.07.1 kept for rollback</span></span><span class="uz muted">0.0s</span></div><div class="ustep "><span class="ui">✅</span><span class="ut"><b>Restart go-build-it</b><br><span class="muted">back in 1.8s</span></span><span class="uz muted">1.8s</span></div><div class="ustep "><span class="ui">✅</span><span class="ut"><b>Reconnect</b><br><span class="muted">herdr session gbi · 2 members still working</span></span><span class="uz muted">0.6s</span></div>
+          <div class="small" style="margin-top:8px">2026.11.07.1 is kept. <a class="l">Roll back</a> · <a class="l" href="#v12b">See in history</a></div></div>
+      </div>
+    </div>
+  </div></div></div>
+
 </section>
 
 <p class="rv-foot">Approach A · Mission Control · static mockup. Data is illustrative. <a href="../index.html">Back to overview</a></p>

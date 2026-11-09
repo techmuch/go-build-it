@@ -16,6 +16,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -87,27 +88,67 @@ func serve(args []string) error {
 	if n, _ := a.Standards.SeedFromDir(ctx, filepath.Join(cfg.Dir(), "standards")); n > 0 {
 		log.Info("seeded standards", "count", n)
 	}
+	// After an update installs, the job asks to restart: shut down cleanly, then replace
+	// this process with the new binary (FR-06d, ADR-011).
+	restart := make(chan struct{})
+	var restartOnce sync.Once
+	a.Updates.Restart = func() { restartOnce.Do(func() { close(restart) }) }
 	a.Start(ctx)
-	srv := &http.Server{Addr: cfg.Listen, Handler: Handler(a), ReadHeaderTimeout: 10 * time.Second}
+	// Request contexts derive from base, so a restart can end live streams (SSE, terminals)
+	// at once instead of waiting for them.
+	base, endStreams := context.WithCancel(context.Background())
+	defer endStreams()
+	srv := &http.Server{Addr: cfg.Listen, Handler: Handler(a), ReadHeaderTimeout: 10 * time.Second, BaseContext: func(net.Listener) context.Context { return base }}
 	host, _, _ := net.SplitHostPort(cfg.Listen)
 	if ip := net.ParseIP(host); ip == nil || !ip.IsLoopback() {
 		if !cfg.AllowExternal {
 			log.Warn("listening on a non-loopback address; external requests will be refused (ADR-005)", "listen", cfg.Listen)
 		}
 	}
+	// The process this one replaced may still hold the port for a moment (Windows restarts).
+	ln, err := listenRetry(cfg.Listen, 15*time.Second)
+	if err != nil {
+		return err
+	}
 	errc := make(chan error, 1)
-	go func() { errc <- srv.ListenAndServe() }()
+	go func() { errc <- srv.Serve(ln) }()
 	log.Info("go-build-it running", "version", version, "url", "http://"+cfg.Listen, "data", cfg.Dir())
 	select {
 	case <-ctx.Done():
 		sctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		return srv.Shutdown(sctx)
+	case <-restart:
+		log.Info("restarting into the updated binary", "exe", a.Updater.Exe)
+		endStreams()
+		sctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		if srv.Shutdown(sctx) != nil {
+			_ = srv.Close() // live streams (SSE, terminals) do not end by themselves
+		}
+		cancel()
+		stop()
+		_ = a.DB.Close()
+		if err := update.Exec(a.Updater.Exe, os.Args[1:]); err != nil {
+			return fmt.Errorf("restart into %s: %w", a.Updater.Exe, err)
+		}
+		return nil
 	case err := <-errc:
 		if errors.Is(err, http.ErrServerClosed) {
 			return nil
 		}
 		return err
+	}
+}
+
+// listenRetry binds addr, retrying while it is in use for up to wait.
+func listenRetry(addr string, wait time.Duration) (net.Listener, error) {
+	deadline := time.Now().Add(wait)
+	for {
+		ln, err := net.Listen("tcp", addr)
+		if err == nil || time.Now().After(deadline) {
+			return ln, err
+		}
+		time.Sleep(250 * time.Millisecond)
 	}
 }
 
@@ -210,6 +251,43 @@ func devCmd(args []string) error {
 		return fakeAgent(args[1:])
 	case "fake-tui":
 		return fakeTUI()
+	case "changelog":
+		// gbi dev changelog release VERSION · notes VERSION · check (FR-06a, ADR-011)
+		path := "CHANGELOG.md"
+		if len(args) < 2 {
+			return errors.New("usage: gbi dev changelog release|notes VERSION, or gbi dev changelog check")
+		}
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("run this from the go-build-it repository: %w", err)
+		}
+		entries := update.ParseChangelog(b)
+		switch args[1] {
+		case "check":
+			if errs := update.CheckChangelog(entries); len(errs) > 0 {
+				return errors.New(strings.Join(errs, "; "))
+			}
+			fmt.Printf("CHANGELOG.md ok: %d entries\n", len(entries))
+			return nil
+		case "notes", "release":
+			if len(args) < 3 {
+				return fmt.Errorf("usage: gbi dev changelog %s VERSION", args[1])
+			}
+			if args[1] == "release" {
+				if err := update.ReleaseChangelog(path, args[2], time.Now()); err != nil {
+					return err
+				}
+				fmt.Printf("CHANGELOG.md: Unreleased is now %s. Commit it, then: VERSION=%s make release\n", args[2], args[2])
+				return nil
+			}
+			n, err := update.Notes(entries, args[2])
+			if err != nil {
+				return err
+			}
+			fmt.Println(n)
+			return nil
+		}
+		return fmt.Errorf("unknown changelog command %q", args[1])
 	case "sign":
 		key := os.Getenv("GBI_SIGNING_KEY")
 		if key == "" {

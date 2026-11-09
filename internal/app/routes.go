@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	gobuildit "github.com/techmuch/go-build-it"
 	"github.com/techmuch/go-build-it/docs"
 	"github.com/techmuch/go-build-it/internal/access"
 	"github.com/techmuch/go-build-it/internal/agent"
@@ -32,6 +33,7 @@ import (
 	"github.com/techmuch/go-build-it/internal/standards"
 	"github.com/techmuch/go-build-it/internal/tailscale"
 	"github.com/techmuch/go-build-it/internal/team"
+	"github.com/techmuch/go-build-it/internal/update"
 )
 
 func r(method, path, name, cli, summary string, h func(*api.Ctx) (any, error), flags ...api.Flag) api.Route {
@@ -292,20 +294,33 @@ func (a *App) Routes() []api.Route {
 			}
 			return p, nil
 		}),
-		r("GET", "/api/updates", "updates.check", "updates check", "Check for a newer release", func(c *api.Ctx) (any, error) {
-			rel, err := a.Updater.Check(c.R.Context())
+		r("GET", "/api/changelog", "changelog.list", "changelog", "go-build-it's change log, newest first, with the installed version", func(c *api.Ctx) (any, error) {
+			return map[string]any{"current": a.Version, "entries": update.ParseChangelog(gobuildit.Changelog)}, nil
+		}),
+		r("GET", "/api/updates", "updates.check", "updates check", "Check for a newer release and list every newer release's notes", func(c *api.Ctx) (any, error) {
+			rel, err := a.checkUpdates(c.R.Context())
 			if err != nil {
-				return map[string]any{"current": a.Version, "error": err.Error(), "previous": rel.Previous}, nil
+				return map[string]any{"current": a.Version, "error": err.Error(), "previous": rel.Previous, "checkedAt": rel.CheckedAt, "releases": []any{}}, nil
 			}
 			return rel, nil
 		}),
-		r("POST", "/api/updates/install", "updates.install", "updates install", "Install the newer release when idle", a.updateInstall),
-		r("POST", "/api/updates/rollback", "updates.rollback", "updates rollback", "Roll back to the previous version", func(c *api.Ctx) (any, error) {
-			v, err := a.Updater.Rollback()
-			if err == nil {
-				a.Hist.Must(c.R.Context(), history.Event{Type: "update.rollback", Subject: v, Summary: "Rolled back to " + v, Why: "requested"})
+		r("POST", "/api/updates/install", "updates.install", "updates install", "Update to the latest release now; follow it with `updates job`", a.updateInstall),
+		r("GET", "/api/updates/job", "updates.job", "updates job", "The running or last update, with its steps", func(c *api.Ctx) (any, error) {
+			j, ok := a.Updates.Current()
+			if !ok {
+				return map[string]any{"job": nil}, nil
 			}
-			return map[string]string{"restored": v}, err
+			return map[string]any{"job": j}, nil
+		}),
+		r("POST", "/api/updates/rollback", "updates.rollback", "updates rollback", "Restore the previous version and restart", func(c *api.Ctx) (any, error) {
+			j, err := a.Updates.StartRollback(c.Actor.Name)
+			if errors.Is(err, update.ErrBusy) {
+				return nil, api.Conflict("%s", err.Error())
+			}
+			if err != nil {
+				return nil, bad(err)
+			}
+			return map[string]any{"job": j}, nil
 		}),
 	)
 	return rs
@@ -322,7 +337,18 @@ func (a *App) systemInfo(c *api.Ctx) (any, error) {
 		"version": a.Version, "actor": c.Actor, "listen": a.Cfg.Listen, "dataDir": a.Cfg.Dir(),
 		"liveSessions": len(live), "autoDispatch": a.Sessions.Auto(), "owner": a.Cfg.DefaultUser,
 		"experimental": a.Cfg.Experimental, "isOwner": a.Cfg.IsOwner(c.Actor.Name, c.Actor.Login), "member": a.memberFor(c.R.Context(), c.Actor),
+		"update": a.updateSummary(),
 	}, nil
+}
+
+// updateSummary is what the sidebar shows next to the version (FR-06b): the last check's
+// result and whether an update is running. It never calls GitHub itself.
+func (a *App) updateSummary() map[string]any {
+	out := map[string]any{"updating": a.Updates.Busy()}
+	if r := a.lastCheck.Load(); r != nil {
+		out["latest"], out["newer"], out["checkedAt"] = r.Tag, r.Newer && !update.SameVersion(r.Tag, a.Version), r.CheckedAt
+	}
+	return out
 }
 
 // memberFor maps a Tailscale login or local name to a team member (P9-08).
@@ -1676,16 +1702,17 @@ func (a *App) proposalDecide(c *api.Ctx) (any, error) {
 	return map[string]any{"proposal": p, "task": task}, nil
 }
 
+// updateInstall starts an update job (FR-06d). herdr keeps members running while
+// go-build-it restarts, so a manual update does not wait for them (ADR-011).
 func (a *App) updateInstall(c *api.Ctx) (any, error) {
-	if a.Sessions.LiveCount() > 0 {
-		return nil, api.Conflict("sessions are running; the update installs when idle")
+	j, err := a.Updates.Start("manual", c.Actor.Name)
+	if errors.Is(err, update.ErrBusy) {
+		return nil, api.Conflict("%s", err.Error())
 	}
-	rel, err := a.Updater.Install(c.R.Context())
 	if err != nil {
 		return nil, bad(err)
 	}
-	a.Hist.Must(c.R.Context(), history.Event{Type: "update.installed", Subject: rel.Tag, Summary: "Installed " + rel.Tag, Why: "requested; restart to apply"})
-	return rel, nil
+	return map[string]any{"job": j}, nil
 }
 
 func firstNonEmpty(a ...string) string {

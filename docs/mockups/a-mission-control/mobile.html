@@ -46,7 +46,7 @@ textarea.ta { width:100%; min-height:64px; border:1px solid var(--line); border-
 </head>
 <body class="mock">
 <div class="rv-bar">
-  <span class="rv-title">Approach A: Mission Control <small>Mobile · 11 screens · rev 2</small></span>
+  <span class="rv-title">Approach A: Mission Control <small>Mobile · 12 screens · rev 4</small></span>
   <a href="../index.html">← Overview &amp; review guide</a>
   <a href="desktop.html">Approach A desktop</a>
   <span class="rv-spacer"></span>
@@ -190,9 +190,9 @@ textarea.ta { width:100%; min-height:64px; border:1px solid var(--line); border-
 
   
 <!-- M9 -->
-  <div class="phone-wrap"><h3>M9 · More</h3><p class="look">The desktop-first areas (team, standards, history, settings, docs) open read-only on mobile, with light actions such as pausing a project or rolling back an update.</p>
+  <div class="phone-wrap"><h3>M9 · More</h3><p class="look">The desktop-first areas (team, standards, history, settings, docs) open read-only on mobile, with light actions such as pausing a project or rolling back an update. <b>Rev 4:</b> tap the version to open the change log (M12).</p>
   <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
-    <div class="hdr"><h1>More</h1><div class="sub">v2026.11.07.1 · up to date</div></div>
+    <div class="hdr"><h1>More</h1><div class="sub"><u style="text-decoration-style:dotted">v2026.11.07.1</u> · <b style="color:#7fd6c8">update ready ›</b></div></div>
     <div class="body" style="padding:0;gap:0">
       <div class="li"><span>👥 Team &amp; personas</span><span class="muted">8 ›</span></div>
       <div class="li"><span>📐 Global standards</span><span class="muted">9 ›</span></div>
@@ -244,6 +244,17 @@ textarea.ta { width:100%; min-height:64px; border:1px solid var(--line); border-
       <div class="seg" style="background:#1d2024;border-color:#333"><span class="on">Desktop</span><span>Tablet</span><span>Phone</span></div>
       <div style="display:flex;gap:8px;font-size:12px;color:#ddd;align-items:center"><span class="pin" style="position:static;transform:rotate(-45deg)"><span>1</span></span><span>you: explain "est." on hover</span><span style="margin-left:auto">💬 2 · 🎙</span></div>
     </div>
+  </div></div>
+
+  <!-- M12 -->
+  <div class="phone-wrap"><h3>M12 · Change log &amp; update</h3><p class="look">Covers FR-06a–FR-06e. <b>Rev 4:</b> opened by tapping the version on More. <b>Check again</b> lists the newer releases. <b>Update now</b> shows each step as it completes, and the screen keeps polling through the restart. Below the steps is the change log, newest first, with the installed version marked.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div class="hdr"><h1>‹ Change log</h1><div class="sub">v2026.11.07.1 installed · updating to 2026.11.09.1</div></div>
+    <div class="body" style="overflow:hidden">
+      <div class="c small"><h4>Updating · step 5 of 8</h4><div class="bar" style="margin-bottom:6px"><i style="width:56%"></i></div><div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)"><span style="width:18px;text-align:center">✅</span><span style="flex:1"><b>Find the release</b><br><span class="muted">2026.11.09.1</span></span><span class="muted">0.4s</span></div><div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)"><span style="width:18px;text-align:center">✅</span><span style="flex:1"><b>Download</b><br><span class="muted">14.2 MB</span></span><span class="muted">4.6s</span></div><div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)"><span style="width:18px;text-align:center">✅</span><span style="flex:1"><b>Verify signature</b><br><span class="muted">Ed25519 ✓</span></span><span class="muted">0.0s</span></div><div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)"><span style="width:18px;text-align:center">✅</span><span style="flex:1"><b>Verify checksum</b><br><span class="muted">SHA-256 ✓</span></span><span class="muted">0.1s</span></div><div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);background:var(--acc-s)"><span style="width:18px;text-align:center">⏳</span><span style="flex:1"><b>Test the new binary</b><br><span class="muted">running it…</span></span><span class="muted"></span></div><div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);color:var(--m)"><span style="width:18px;text-align:center">○</span><span style="flex:1"><b>Install</b><br><span class="muted">keeps 2026.11.07.1</span></span><span class="muted"></span></div><div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);color:var(--m)"><span style="width:18px;text-align:center">○</span><span style="flex:1"><b>Restart</b><br><span class="muted">page reconnects</span></span><span class="muted"></span></div><div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);color:var(--m);border-bottom:0"><span style="width:18px;text-align:center">○</span><span style="flex:1"><b>Reconnect</b><br><span class="muted">herdr + members</span></span><span class="muted"></span></div></div>
+      <div class="c small"><h4>What's new</h4><b>2026.11.09.1</b> <span class="chip blue">new</span><div class="muted">Added: change log in the app · Update now with progress</div><div style="margin-top:6px"><b>2026.11.08.2</b> <span class="chip blue">new</span></div><div class="muted">Changed: archetype changes list affected members</div><div style="margin-top:6px"><b>2026.11.07.1</b> <span class="chip grn">installed</span></div></div>
+    </div>
+    <div class="tabbar"><span><b>▦</b>Projects</span><span><b>✉</b>Inbox<span class="dot">5</span></span><span><b>◉</b>Members</span><span class="on"><b>⋯</b>More</span></div>
   </div></div>
 
   </div>
