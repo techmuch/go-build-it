@@ -263,6 +263,11 @@ func (s *Service) Refresh(ctx context.Context, p Project) Live {
 		if ri.WebsiteURL != "" && p.WebsiteURL == "" {
 			_, _ = s.db.ExecContext(ctx, `UPDATE projects SET website_url=? WHERE id=?`, ri.WebsiteURL, p.ID)
 		}
+		// The forge's published "Latest" release wins over local tags, so the
+		// card matches what the repository page shows.
+		if ri.LatestTag != "" {
+			l.Release = s.git.ReleaseAt(ctx, p.Path, ri.LatestTag)
+		}
 		if l.Release != nil {
 			l.Repo.ReleaseURL = ri.RepoURL + "/releases/tag/" + l.Release.Tag
 		}
