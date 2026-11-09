@@ -174,12 +174,12 @@ export function Settings() {
         <span className="muted" style={{ borderTop: '1px solid var(--line)', paddingTop: 6 }}>Git workflow → <A to="/standards/git-workflow">Standards</A></span></div></Card>
       <div className="col grow">
         <Card title={<span id="harnesses">Agent harnesses</span>} right={<span className="small muted">detected on this machine</span>}>
-          <table className="t"><tbody><tr><th>Harness</th><th>Binary</th><th>Headless</th><th>Context usage</th><th>Verified</th><th>Enabled</th></tr>
+          <table className="t"><tbody><tr><th>Harness</th><th>Binary</th><th>herdr kind</th><th>Context usage</th><th>Verified in herdr</th><th>Enabled</th></tr>
             {(harn || []).map((h) => <tr key={h.name}><td><b>{h.name}</b><div className="small muted">{h.version}</div></td><td className="mono">{h.path || <span className="muted">{h.binary} (not found)</span>}</td>
-              <td>{h.installed ? <Chip c="grn">✓ {h.headless}</Chip> : '—'}</td><td><Chip c={h.usageReported === 'measured' ? 'grn' : 'amb'}>{h.usageReported === 'measured' ? '✓ measured' : '≈ estimated'}</Chip></td>
-              <td>{h.verified ? <Chip c="grn">ADR-002</Chip> : <Chip c="amb">unverified</Chip>}</td>
+              <td>{h.installed ? <Chip c="grn">✓ {h.kind}</Chip> : '—'}</td><td><Chip c={h.usageReported === 'measured' ? 'grn' : 'amb'}>{h.usageReported === 'measured' ? '✓ measured (transcript)' : 'unavailable'}</Chip></td>
+              <td>{h.verified ? <Chip c="grn">ADR-009</Chip> : <Chip c="amb">unverified</Chip>}</td>
               <td><Toggle on={h.enabled} label={h.name} onChange={(v) => patch({ harnesses: { ...cfg.harnesses, [h.name]: { ...cfg.harnesses[h.name], enabled: v } } })} /></td></tr>)}</tbody></table>
-          <div className="small" style={{ marginTop: 8 }}>When context fills: <b>harness auto-compaction</b> (MVP default, logged to history) · Rate limits: <b>pause & auto-resume</b></div>
+          <div className="small" style={{ marginTop: 8 }}>Every member runs in herdr. A member keeps its conversation until context reaches the threshold, then rotates (Q8) · compactions are logged · rate limits: <b>pause & auto-resume</b></div>
         </Card>
         <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
           <Card title={<span id="access">Access & identity</span>}><div className="col small" style={{ gap: 8 }}>
@@ -197,8 +197,7 @@ export function Settings() {
             <div className="row c">Max concurrent sessions <input type="number" min={1} max={10} defaultValue={cfg.maxConcurrent} style={{ width: 60 }} onBlur={(e) => patch({ maxConcurrent: +e.target.value })} /></div></div></Card>
           <Card title={<span id="experimental">Experimental <Chip c="blue">off by default</Chip></span>} style={{ borderColor: 'var(--blue)' }}><div className="col small" style={{ gap: 10 }}>
             <div><Toggle on={!!exp.smartHandoffs} label="smart handoffs" onChange={(v) => patch({ experimental: { ...exp, smartHandoffs: v } })} /> <b>Smart handoffs</b> (FR-72–74) · threshold <input type="number" min={50} max={95} defaultValue={Math.round((exp.handoffThreshold || .75) * 100)} style={{ width: 54 }} onBlur={(e) => patch({ experimental: { ...exp, handoffThreshold: +e.target.value / 100 } })} />%
-              <div className="muted">Ask for a curated briefing at the threshold instead of compacting. Projects (blank = all): <input defaultValue={(exp.smartHandoffProjects || []).join(', ')} onBlur={(e) => patch({ experimental: { ...exp, smartHandoffProjects: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) } })} style={{ width: 160 }} /></div></div>
-            <div><Toggle on={!!exp.attachableSessions} label="attachable sessions" onChange={(v) => patch({ experimental: { ...exp, attachableSessions: v } })} /> <b>Attachable (headed) sessions</b> (FR-67)<div className="muted">Run harnesses in a persistent terminal you can attach to (Q7).</div></div></div></Card>
+              <div className="muted">Ask for a curated briefing at the threshold instead of compacting. Projects (blank = all): <input defaultValue={(exp.smartHandoffProjects || []).join(', ')} onBlur={(e) => patch({ experimental: { ...exp, smartHandoffProjects: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) } })} style={{ width: 160 }} /></div></div></div></Card>
           <Card title={<span id="updates">Updates</span>}><div className="col small" style={{ gap: 6 }}>
             <div>Current <b>{sys?.version}</b> · channel {cfg.updates?.channel} · <Toggle on={!!cfg.updates?.autoInstall} label="auto install" onChange={(v) => patch({ updates: { ...cfg.updates, autoInstall: v } })} /> auto-install</div>
             <div className="muted">Installs only when no sessions are running · checksum + Ed25519 signature verified (ADR-004)</div>

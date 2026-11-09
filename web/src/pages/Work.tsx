@@ -117,7 +117,7 @@ export function SessionDetail({ sid }: { sid: string }) {
   useLive((e) => {
     if (e.type === 'session.output' && e.subject === sid) {
       const kind = e.data?.kind;
-      if ((view === 'terminal') === (kind === 'raw')) setLines((l) => [...l, { seq: e.data.seq, ts: e.ts, kind, text: e.summary }]);
+      if (view === 'structured') setLines((l) => [...l, { seq: e.data.seq, ts: e.ts, kind, text: e.summary }]);
     }
   });
   useEffect(() => { box.current?.scrollTo(0, box.current.scrollHeight); }, [lines]);
@@ -131,23 +131,18 @@ export function SessionDetail({ sid }: { sid: string }) {
     </div>
     <div style={{ width: '100%' }}><Bar pct={s.fraction * 100} warn={70} /></div>
     <div>
-      <div className="termbar"><span>● {s.id} {s.harness}</span><span className="right">{view === 'terminal' ? 'raw harness output · read-only' : 'structured events'}{s.live ? ' · live' : ''}</span></div>
+      <div className="termbar"><span>● {s.id} {s.harness}</span><span className="right">{view === 'terminal' ? 'herdr pane' : 'structured events from the transcript'}{s.live ? ' · live' : ''}</span></div>
       <div ref={box} className={view === 'terminal' ? 'term' : 'out'} style={{ height: 460, borderRadius: '0 0 6px 6px' }}>
         {lines.length === 0 && <span className="muted">No output yet.</span>}
-        {view === 'terminal' ? lines.map((l) => <div key={l.seq}>{l.text}</div>) :
+        {view === 'terminal' ? <div className="muted">The live terminal streams from herdr. Open <code>herdr --session gbi</code> to watch {s.memberId}.</div> :
           lines.map((l) => <div key={l.seq} className={'k-' + l.kind}><span className="ts">{clock(l.ts)} </span>{l.kind === 'tool' ? '● ' : l.kind === 'input' ? '> ' : ''}{l.text}</div>)}
       </div>
     </div>
-    {s.live ? <div className="row c"><div className="grow"><DictArea value={input} onChange={setInput} rows={2} placeholder="Send input to the agent (Claude Code accepts input mid-session)" /></div>
+    {s.live ? <div className="row c"><div className="grow"><DictArea value={input} onChange={setInput} rows={2} placeholder="Send a message to the member (typed into its herdr pane)" /></div>
       <button type="button" className="btn p" disabled={!input} onClick={() => run(() => api.sessions.send(sid, { text: input }), 'Sent').then((r) => r && setInput(''))}>Send input</button></div>
       : <div className="small muted">Ended {ago(s.endedAt)}: {s.exitReason}{s.resumeAt && s.status === 'rate_limited' ? ` · resumes automatically at ${clock(s.resumeAt)}` : ''}</div>}
     {s.handoff && <Card title={<>Handoff briefing <Chip c="blue">Experimental</Chip></>}><pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{s.handoff}</pre></Card>}
-    {s.attach ? <Card title={<>Attachable session <Chip c="blue">Experimental</Chip></>}>
-      <div className="small">This session runs the harness interactively in tmux. To take control from any terminal on this machine (or over SSH):</div>
-      <pre className="term" style={{ borderRadius: 6, margin: '8px 0' }}>{s.attach}</pre>
-      <div className="row c"><span className="small muted">Detach with Ctrl-B d. Typing above sends keys to the same screen.</span><span className="right" />
-        <button type="button" className="btn p" onClick={() => run(() => api.sessions.finish(sid), 'Finished: Courier is committing and opening the review')}>Finish session</button></div></Card>
-      : <div className="note small"><b>Attachable (headed) sessions</b> are experimental (FR-67): enable them in <A to="/settings">Settings → Experimental</A> to run harnesses in tmux, where you can attach and take control.</div>}
+    <div className="note small">{s.memberId} runs in herdr{s.paneId ? <> (pane <span className="mono">{s.paneId}</span>)</> : null}. To watch or take control from a terminal: <code>herdr --session gbi</code>.{s.status === 'blocked' && <> <b>It is waiting for you</b>: answer in its terminal.</>}</div>
   </Shell>;
 }
 

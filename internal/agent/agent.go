@@ -1,30 +1,32 @@
-// Package agent makes one-shot calls to a persona's harness for conversational work:
-// the artifact editor chat (FR-45a), the persona coach (FR-13), standards editing
-// (FR-51) and Lens's assessment narrative (FR-112).
+// Package agent makes one-shot calls to a persona for conversational work: the artifact
+// editor chat (FR-45a), the persona coach (FR-13), standards editing (FR-51) and Lens's
+// assessment narrative (FR-112). Each call is a short-lived conversation in herdr
+// (sessions.Manager.Ask, FR-60): there is no headless harness path.
 package agent
 
 import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/techmuch/go-build-it/internal/config"
-	"github.com/techmuch/go-build-it/internal/harness"
 	"github.com/techmuch/go-build-it/internal/team"
 )
+
+// Asker runs one turn as a member and returns the answer.
+type Asker func(ctx context.Context, m team.Member, prompt string) (string, error)
 
 // Caller runs prompt-only agent turns.
 type Caller struct {
 	cfg  *config.Config
 	team *team.Service
+	ask  Asker
 }
 
-// New returns a Caller.
-func New(cfg *config.Config, t *team.Service) *Caller { return &Caller{cfg: cfg, team: t} }
+// New returns a Caller that asks through ask.
+func New(cfg *config.Config, t *team.Service, ask Asker) *Caller { return &Caller{cfg: cfg, team: t, ask: ask} }
 
 // Reply is an agent's answer, optionally with a revised document.
 type Reply struct {
@@ -34,7 +36,7 @@ type Reply struct {
 	Hunks    []Hunk `json:"hunks,omitempty"`
 }
 
-// Ask runs one turn as the given persona in an empty scratch directory and returns its text.
+// Ask runs one turn as the given member (or archetype) and returns its text.
 func (c *Caller) Ask(ctx context.Context, memberID, prompt string) (string, error) {
 	m, err := c.team.Member(ctx, memberID)
 	if err != nil {
@@ -43,49 +45,13 @@ func (c *Caller) Ask(ctx context.Context, memberID, prompt string) (string, erro
 	if m.Kind != "ai" {
 		return "", fmt.Errorf("%s is not an AI persona", m.Name)
 	}
-	a, ok := harness.Get(m.Harness)
-	if !ok {
-		return "", fmt.Errorf("unknown harness %q", m.Harness)
+	if m.Harness == "courier" {
+		return "", errors.New("Courier is built in and does not chat; pick another persona")
 	}
-	dir, err := os.MkdirTemp("", "gbi-chat-")
-	if err != nil {
-		return "", err
+	if c.ask == nil {
+		return "", errors.New("agent calls are not connected")
 	}
-	defer os.RemoveAll(dir)
-	hc := c.cfg.Harnesses[m.Harness]
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
-	defer cancel()
-	spec := harness.Spec{Dir: dir, Prompt: prompt, Model: firstNonEmpty(m.Model, hc.Model), Binary: hc.Binary, Window: hc.Window,
-		SystemPrompt: "You are " + m.Name + ", the " + m.Role + " on this team. " + strings.TrimSpace(m.Instructions)}
-	if m.Harness == "fake" {
-		spec.Flags = []string{"--chat"}
-	}
-	p, err := harness.Start(ctx, a, spec)
-	if err != nil {
-		return "", err
-	}
-	var text, result strings.Builder
-	var isErr bool
-	for e := range p.Events {
-		switch e.Kind {
-		case harness.KText:
-			text.WriteString(e.Text)
-		case harness.KResult:
-			result.WriteString(e.Text)
-			isErr = e.IsError
-		}
-	}
-	if err := p.Wait(); err != nil && text.Len() == 0 && result.Len() == 0 {
-		return "", fmt.Errorf("%s: %w", m.Harness, err)
-	}
-	out := strings.TrimSpace(result.String())
-	if out == "" {
-		out = strings.TrimSpace(text.String())
-	}
-	if isErr {
-		return "", errors.New(out)
-	}
-	return out, nil
+	return c.ask(ctx, m, prompt)
 }
 
 var docRe = regexp.MustCompile(`(?s)<<<DOC\s*\n(.*?)\n?DOC>>>`)

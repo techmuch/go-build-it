@@ -23,12 +23,12 @@ type Harness struct {
 	Window int `toml:"window" json:"window"`
 }
 
-// Experimental feature flags (rev 2: handoffs and attachable sessions are experimental).
+// Experimental feature flags. Smart handoffs are experimental (rev 2); attachable sessions
+// were removed in rev 3: every member runs in herdr (ADR-009).
 type Experimental struct {
 	SmartHandoffs        bool     `toml:"smart_handoffs" json:"smartHandoffs"`
 	SmartHandoffProjects []string `toml:"smart_handoff_projects" json:"smartHandoffProjects"`
 	HandoffThreshold     float64  `toml:"handoff_threshold" json:"handoffThreshold"`
-	AttachableSessions   bool     `toml:"attachable_sessions" json:"attachableSessions"`
 }
 
 // Herdr configures the agent backend (FR-07, ADR-009).

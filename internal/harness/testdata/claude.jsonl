@@ -1,0 +1,6 @@
+{"type":"user","message":{"role":"user","content":"Read .gbi-task.md in this folder and do what it says."},"sessionId":"s1"}
+{"type":"assistant","message":{"role":"assistant","model":"claude-opus-5-5","content":[{"type":"tool_use","name":"Read","input":{"file_path":".gbi-task.md"}}],"usage":{"input_tokens":2,"cache_creation_input_tokens":15379,"cache_read_input_tokens":26758,"output_tokens":124}}}
+{"type":"assistant","message":{"role":"assistant","model":"claude-opus-5-5","content":[{"type":"tool_use","name":"Write","input":{"file_path":"hello.txt","content":"ok"}}],"usage":{"input_tokens":2,"cache_creation_input_tokens":159,"cache_read_input_tokens":42137,"output_tokens":144}}}
+{"type":"system","subtype":"compact_boundary"}
+{"type":"assistant","isApiErrorMessage":true,"message":{"role":"assistant","content":[{"type":"text","text":"You've hit your usage limit · resets 3pm"}]}}
+{"type":"assistant","message":{"role":"assistant","model":"claude-opus-5-5","content":[{"type":"text","text":"DONE"}],"usage":{"input_tokens":2,"cache_creation_input_tokens":247,"cache_read_input_tokens":42296,"output_tokens":5}}}

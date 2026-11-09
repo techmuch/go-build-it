@@ -342,19 +342,19 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 
 | Task | Size | Requirements | Approach A views | Depends on |
 |---|---|---|---|---|
-| **P13-01** Harness profiles: Claude Code, Antigravity, Pi, OpenCode (kind, launch and resume args, transcript reader, limit signals) | L | FR-61, FR-62, FR-63 | — | P11-01 |
-| **P13-02** Member pane lifecycle: workspace per project, member worktree opened grouped, agent start, name, release | M | FR-12d, FR-64, FR-67 | — | P12-01, P11-02 |
-| **P13-03** Dispatch: write .gbi-task.md, agent prompt --wait, hand completion to Courier and Lens | M | FR-60, FR-70 | — | P13-02, P12-08 |
-| **P13-04** Transcript readers: structured events, messages and usage (measured or estimated) per harness | L | FR-66, FR-71, NFR-10 | — | P13-01 |
-| **P13-05** Status mapping: herdr state drives session and task state; blocked becomes a needs-you item | M | FR-68 | — | P11-05, P13-02 |
-| **P13-06** Rate and usage limit detection with pause and auto-resume | S | FR-65 | — | P13-04 |
-| **P13-07** Conversation continuity and rotation per policy; smart handoff starts the new conversation · waits on Q8 | M | FR-69, FR-76, FR-72, FR-73, FR-74 | — | P13-04, P10-05 |
-| **P13-08** Reconnect after herdr or machine restart by conversation ID; queue resumes | M | FR-69, FR-82 | — | P13-05 |
-| **P13-09** herdr labels: pane metadata (name, role, task, context %), workspace summaries, notifications for gates and questions | S | FR-67 | — | P13-02, P10-09 |
-| **P13-10** Permission prompts: permission modes, per-project allowlists, optional Claude permission hook as structured approval | M | FR-68 | — | P13-05 |
-| **P13-11** Lens reviews run in a fresh conversation per review | S | FR-54, FR-112 | — | P13-03 |
-| **P13-12** Interrupt, cancel and restart a member through herdr | S | FR-61 | — | P13-02 |
-| **P13-13** Remove tmux mode, attachable_sessions flag and the headless stream-json path | S | FR-60 | — | P13-03, P13-04 |
+| **P13-01** Harness profiles: Claude Code, Antigravity, Pi, OpenCode (kind, launch and resume args, transcript reader, limit signals) ✅ | L | FR-61, FR-62, FR-63 | — | P11-01 |
+| **P13-02** Member pane lifecycle: workspace per project, member worktree opened grouped, agent start, name, release ✅ | M | FR-12d, FR-64, FR-67 | — | P12-01, P11-02 |
+| **P13-03** Dispatch: write .gbi-task.md, agent prompt --wait, hand completion to Courier and Lens ✅ | M | FR-60, FR-70 | — | P13-02, P12-08 |
+| **P13-04** Transcript readers: structured events, messages and usage (measured or estimated) per harness ✅ | L | FR-66, FR-71, NFR-10 | — | P13-01 |
+| **P13-05** Status mapping: herdr state drives session and task state; blocked becomes a needs-you item ✅ | M | FR-68 | — | P11-05, P13-02 |
+| **P13-06** Rate and usage limit detection with pause and auto-resume ✅ | S | FR-65 | — | P13-04 |
+| **P13-07** Conversation continuity and rotation per policy; smart handoff starts the new conversation ✅ · waits on Q8 | M | FR-69, FR-76, FR-72, FR-73, FR-74 | — | P13-04, P10-05 |
+| **P13-08** Reconnect after herdr or machine restart by conversation ID; queue resumes ✅ | M | FR-69, FR-82 | — | P13-05 |
+| **P13-09** herdr labels: pane metadata (name, role, task, context %), workspace summaries, notifications for gates and questions ✅ | S | FR-67 | — | P13-02, P10-09 |
+| **P13-10** Permission prompts: permission modes, per-project allowlists, optional Claude permission hook as structured approval ✅ | M | FR-68 | — | P13-05 |
+| **P13-11** Lens reviews run in a fresh conversation per review ✅ | S | FR-54, FR-112 | — | P13-03 |
+| **P13-12** Interrupt, cancel and restart a member through herdr ✅ | S | FR-61 | — | P13-02 |
+| **P13-13** Remove tmux mode, attachable_sessions flag and the headless stream-json path ✅ | S | FR-60 | — | P13-03, P13-04 |
 
 ### P14 · Live terminal & UI
 

@@ -70,6 +70,7 @@ func New(cfg *config.Config, version string, log *slog.Logger) (*App, error) {
 func Wire(cfg *config.Config, db *sql.DB, version string, log *slog.Logger) *App {
 	a := &App{Version: version, Cfg: cfg, DB: db, Log: log}
 	a.Hist = history.New(db)
+	a.Herdr = herdr.NewSupervisor(cfg.Herdr.Binary, cfg.Herdr.Session, cfg.Herdr.ConfigHome, log)
 	a.Git = gitx.New()
 	a.Forge = gitx.NewForge()
 	a.Projects = projects.New(db, a.Hist, a.Git, a.Forge)
@@ -77,16 +78,16 @@ func Wire(cfg *config.Config, db *sql.DB, version string, log *slog.Logger) *App
 	a.Standards = standards.New(db, a.Hist)
 	a.Queue = queue.New(db, a.Hist)
 	a.Sessions = sessions.New(db, a.Hist, cfg, a.Projects, a.Queue, a.Team, a.Standards, a.Git, log)
-	a.Courier = courier.New(a.Git, a.Forge, a.Hist, a.Projects, a.Queue, a.Standards, a.Sessions.WorktreePath)
+	a.Courier = courier.New(a.Git, a.Forge, a.Hist, a.Projects, a.Queue, a.Standards, a.Sessions.TaskDir)
 	a.Questions = questions.New(db, a.Hist, a.Queue)
 	a.Reviews = reviews.New(db, a.Hist, a.Queue, a.Projects, a.Standards)
 	a.Rehearsals = rehearsals.New(db, a.Hist, a.Queue, a.Projects)
 	a.Options = options.New(db, a.Hist)
 	a.Proposals = proposals.New(db, a.Hist)
 	a.Pins = pins.New(db, a.Hist)
-	a.Agent = agent.New(cfg, a.Team)
+	a.Agent = agent.New(cfg, a.Team, a.Sessions.Ask)
+	a.Sessions.SetHerdr(a.Herdr.C)
 	a.Updater = update.New(cfg.Updates.Repo, version)
-	a.Herdr = herdr.NewSupervisor(cfg.Herdr.Binary, cfg.Herdr.Session, cfg.Herdr.ConfigHome, log)
 
 	// Review gates hold back work in later milestones until approved (FR-115).
 	a.Queue.GateOpen = a.gateOpen
@@ -235,7 +236,7 @@ func (a *App) handoffRequest(ctx context.Context, s sessions.Session, t queue.Ta
 
 // releaseNotes asks the PM persona to turn commit subjects into release notes.
 func (a *App) releaseNotes(ctx context.Context, projectID, tag string, subjects []string) (string, error) {
-	pm := a.defaultPersona(ctx, "pm")
+	pm := a.defaultPersona(ctx, projectID, "pm")
 	if pm == "" {
 		return "", fmt.Errorf("no PM persona")
 	}

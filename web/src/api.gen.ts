@@ -105,6 +105,8 @@ export const api = {
     promote: (mid: string, body?: unknown) => call<any>('POST', `/api/members/${encodeURIComponent(mid)}/promote`, body),
     /** Remove a member */
     remove: (mid: string, body?: unknown) => call<any>('DELETE', `/api/members/${encodeURIComponent(mid)}`, body),
+    /** Stop the member's harness in herdr; --fresh starts a new conversation next task */
+    restart: (mid: string, body?: unknown) => call<any>('POST', `/api/members/${encodeURIComponent(mid)}/restart`, body),
     /** Give a project with no AI members the starter team */
     starter: (id: string, body?: unknown) => call<any>('POST', `/api/projects/${encodeURIComponent(id)}/members/starter`, body),
     /** Tune a member for its project */
@@ -223,13 +225,11 @@ export const api = {
   sessions: {
     /** Cancel a live session */
     cancel: (sid: string, body?: unknown) => call<any>('POST', `/api/sessions/${encodeURIComponent(sid)}/cancel`, body),
-    /** Finish an attachable session (Courier then commits and opens the review) */
-    finish: (sid: string, body?: unknown) => call<any>('POST', `/api/sessions/${encodeURIComponent(sid)}/finish`, body),
     /** Session detail */
     get: (sid: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/sessions/${encodeURIComponent(sid)}`, undefined, query),
     /** Sessions */
     list: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/sessions`, undefined, query),
-    /** Session output (structured or terminal) */
+    /** Structured session output read from the transcript (the terminal streams from herdr) */
     output: (sid: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/sessions/${encodeURIComponent(sid)}/output`, undefined, query),
     /** Send input to a live session */
     send: (sid: string, body?: unknown) => call<any>('POST', `/api/sessions/${encodeURIComponent(sid)}/input`, body),
