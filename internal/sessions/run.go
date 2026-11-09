@@ -325,8 +325,17 @@ func (m *Manager) appendLine(ctx context.Context, r *run, kind, text string) {
 		Data: history.Data(map[string]any{"seq": r.seq, "kind": kind})})
 }
 
+// release frees the member before the task's final status is written, so the member can
+// take its next task the moment this one reaches review.
+func (m *Manager) release(r *run) {
+	m.mu.Lock()
+	delete(m.running, r.s.ID)
+	m.mu.Unlock()
+}
+
 func (m *Manager) fail(ctx context.Context, r *run, why string) {
 	ctx = context.WithoutCancel(ctx)
+	m.release(r)
 	r.s.Status, r.s.EndedAt, r.s.ExitReason = "failed", store.Now(), why
 	_ = m.write(ctx, r.s) // session first: readers never see a failed task with a running session
 	_, _ = m.queue.Fail(ctx, r.t.ID, "session failed: "+trunc(why, 200))
@@ -336,6 +345,7 @@ func (m *Manager) fail(ctx context.Context, r *run, why string) {
 
 func (m *Manager) finishCancelled(ctx context.Context, r *run) {
 	ctx = context.WithoutCancel(ctx)
+	m.release(r)
 	m.mu.Lock()
 	reason := r.reason
 	m.mu.Unlock()
@@ -355,6 +365,8 @@ func (m *Manager) finishCancelled(ctx context.Context, r *run) {
 // handoff, or completion (Courier commits, pushes and opens the review).
 func (m *Manager) finish(ctx context.Context, r *run, limited *harness.RateLimit, resultErr bool, resultText string) {
 	ctx = context.WithoutCancel(ctx)
+	// The member is released just before each final task status: after Courier has finished
+	// with its worktree, before the task can be seen as done.
 	r.s.EndedAt = store.Now()
 	t := r.t
 	mem, _ := m.team.Member(ctx, r.mem.ID)
@@ -369,6 +381,7 @@ func (m *Manager) finish(ctx context.Context, r *run, limited *harness.RateLimit
 		// FR-65: pause and resume automatically when the limit resets.
 		r.s.Status, r.s.ResumeAt, r.s.ExitReason = "rate_limited", limited.ResetsAt.UTC().Format(time.RFC3339), "subscription limit ("+limited.Kind+")"
 		_ = m.write(ctx, r.s)
+		m.release(r)
 		_, _ = m.queue.SetStatus(ctx, t.ID, queue.Paused, "rate limited until "+limited.ResetsAt.Local().Format("15:04"))
 		m.hist.Must(ctx, history.Event{ProjectID: r.s.ProjectID, Type: "session.rate_limited", Subject: r.s.ID, Summary: fmt.Sprintf("%s paused: %s limit", t.ID, r.s.Harness),
 			Why: "resumes at " + limited.ResetsAt.Local().Format("15:04"), Data: history.Data(map[string]any{"task": t.ID, "resumeAt": r.s.ResumeAt})})
@@ -377,6 +390,7 @@ func (m *Manager) finish(ctx context.Context, r *run, limited *harness.RateLimit
 	case reason == "blocked":
 		r.s.Status, r.s.ExitReason = "done", "stopped for a blocking question"
 		_ = m.write(ctx, r.s)
+		m.release(r)
 	case r.s.Handoff != "":
 		// Smart handoff (experimental): the member moves to a new conversation that starts from the briefing.
 		r.s.Status, r.s.ExitReason = "done", "handed off"
@@ -386,6 +400,7 @@ func (m *Manager) finish(ctx context.Context, r *run, limited *harness.RateLimit
 		_, _ = m.queue.Update(ctx, cur)
 		_, _ = m.queue.Bump(ctx, t.ID, "handoffs")
 		m.rotate(ctx, mem, r, "handed off at "+fmt.Sprintf("%.0f%%", r.s.Fraction*100))
+		m.release(r)
 		_, _ = m.queue.SetStatus(ctx, t.ID, queue.Queued, "handed off at "+fmt.Sprintf("%.0f%%", r.s.Fraction*100)+"; a fresh conversation continues from the briefing")
 		m.hist.Must(ctx, history.Event{ProjectID: r.s.ProjectID, Type: "handoff.written", Subject: r.s.ID, Summary: fmt.Sprintf("Handoff written for %s (%s)", t.ID, r.s.ID),
 			Why: "experimental smart handoffs; context reached the threshold", Data: history.Data(map[string]any{"task": t.ID, "briefing": r.s.Handoff, "usedBefore": r.s.Used, "missingSections": MissingHandoffSections(r.s.Handoff)})})
@@ -395,6 +410,7 @@ func (m *Manager) finish(ctx context.Context, r *run, limited *harness.RateLimit
 		if cur.Status == queue.Blocked {
 			r.s.ExitReason = "stopped for a blocking question"
 			_ = m.write(ctx, r.s)
+			m.release(r)
 			return
 		}
 		_ = os.Remove(filepath.Join(r.s.Workdir, TaskFile))
@@ -409,11 +425,13 @@ func (m *Manager) finish(ctx context.Context, r *run, limited *harness.RateLimit
 			if err := m.Hooks.Completed(ctx, r.s, cur); err != nil {
 				m.hist.Must(ctx, history.Event{ProjectID: r.s.ProjectID, Type: "courier.error", Subject: t.ID, Summary: "Courier could not finish " + t.ID, Why: err.Error()})
 				_ = m.write(ctx, r.s)
+				m.release(r)
 				_, _ = m.queue.SetStatus(ctx, t.ID, queue.Failed, "courier: "+err.Error())
 				return
 			}
 		}
 		_ = m.write(ctx, r.s)
+		m.release(r)
 		if cur2, _ := m.queue.Get(ctx, t.ID); cur2.Status == queue.Running {
 			_, _ = m.queue.SetStatus(ctx, t.ID, queue.Review, "session completed: "+trunc(resultText, 160))
 		}
