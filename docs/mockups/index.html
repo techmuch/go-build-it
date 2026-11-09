@@ -65,13 +65,21 @@ pre.tpl { background:var(--surface); border:1px solid var(--line); border-radius
 </head>
 <body>
 <main>
-  <p class="meta">go-build-it · design exploration · option set OS-0 · Nov 7, 2026 · <b>rev 2 Nov 8</b> · <b>rev 3 Nov 8 (Approach A)</b> · based on <a href="../requirements.html">docs/requirements.md</a></p>
+  <p class="meta">go-build-it · design exploration · option set OS-0 · Nov 7, 2026 · <b>rev 2 Nov 8</b> · <b>rev 3 Nov 8 (Approach A)</b> · <b>rev 4 Nov 9 (Approach A)</b> · based on <a href="../requirements.html">docs/requirements.md</a></p>
   <h1>Three ways go-build-it could look and feel</h1>
   <p class="lede">This page links to static HTML mockups of three different UI approaches. Each has desktop and mobile versions, and every view the requirements call for is drawn in all three. Please review all three and choose what to keep, mixing aspects across approaches if you like.</p>
   <ul class="toc">
     <li><a href="#how">How to review</a></li><li><a href="#approaches">The three approaches</a></li><li><a href="#compare">Side-by-side comparison</a></li>
     <li><a href="#coverage">View coverage</a></li><li><a href="#mobile">Mobile coverage</a></li><li><a href="#questions">Questions for you</a></li>
-    <li><a href="#findings">Requirement gaps found</a></li><li><a href="#feedback">Feedback template</a></li><li><a href="#rev3">What changed in rev 3</a></li><li><a href="#rev2">What changed in rev 2</a></li>
+    <li><a href="#findings">Requirement gaps found</a></li><li><a href="#feedback">Feedback template</a></li><li><a href="#rev4">What changed in rev 4</a></li><li><a href="#rev3">What changed in rev 3</a></li><li><a href="#rev2">What changed in rev 2</a></li>
+  </ul>
+
+  <h2 id="rev4">What changed in rev 4</h2>
+  <p>Requirements <a href="../requirements.html">rev 4</a> add an in-app change log and guided updates (FR-06a–FR-06e, <a href="../decisions/ADR-011-changelog-guided-updates.md">ADR-011</a>). Approach A only:</p>
+  <ul>
+    <li><b>16 Change log &amp; guided update</b> (new): the sidebar version opens the change log. <b>Check again</b> lists every newer release; <b>Update now</b> shows eight steps completing across the restart (three states: available, updating, done).</li>
+    <li><b>01:</b> the sidebar version is a link. <b>13 Settings → Updates:</b> links to the change log.</li>
+    <li><b>Mobile M9, M12</b> (new): tap the version on More to open the change log and update with progress.</li>
   </ul>
 
   <h2 id="rev3">What changed in rev 3</h2>
@@ -176,6 +184,7 @@ pre.tpl { background:var(--surface); border:1px solid var(--line); border-radius
     <tr><td class="n">12</td><td>History &amp; insights</td><td class="req">NFR-10–14</td><td><a href="a-mission-control/desktop.html#v12">Event log</a> ＋ <a href="a-mission-control/desktop.html#v12b">event detail</a></td><td><a href="b-team-room/desktop.html#v12">Journal &amp; retro</a></td><td><a href="c-roadmap-canvas/desktop.html#v12">Swimlanes</a></td></tr>
     <tr><td class="n">13</td><td>Settings: harnesses, access, forges, experimental, updates</td><td class="req">FR-05–06, FR-15–20, FR-63, FR-90–91</td><td><a href="a-mission-control/desktop.html#v13">Settings</a></td><td><a href="b-team-room/desktop.html#v13">Plain-language</a></td><td><a href="c-roadmap-canvas/desktop.html#v13">System map</a></td></tr>
     <tr><td class="n">14</td><td>Embedded docs</td><td class="req">FR-30, FR-130–133</td><td><a href="a-mission-control/desktop.html#v14">Docs page</a></td><td><a href="b-team-room/desktop.html#v14">Help drawer</a></td><td><a href="c-roadmap-canvas/desktop.html#v14">⌘K palette</a></td></tr>
+    <tr><td class="n">16</td><td>Change log &amp; guided update <i>(rev 4)</i></td><td class="req">FR-06a–06e</td><td><a href="a-mission-control/desktop.html#v16">Change log + steps</a></td><td>—</td><td>—</td></tr>
   </table></div>
   <p class="meta">Shown throughout rather than as separate views: access identity badge (FR-15–17) in every header; live updates (FR-36); desktop/mobile split (FR-34–35); release and website links (FR-41, FR-44); rate-limit pauses (FR-65).</p>
 
@@ -192,6 +201,7 @@ pre.tpl { background:var(--surface); border:1px solid var(--line); border-radius
     <tr><td>M8 Sessions &amp; handoff</td><td class="req">FR-65, FR-71–74</td><td>Context bars · compaction · terminal</td><td>Energy bars · letter (exp.) · terminal peek</td><td>Relay strips · ⟲ compaction</td></tr>
     <tr><td>M10 Terminal &amp; attach <i>(new)</i></td><td class="req">FR-66–67</td><td>Terminal + key bar</td><td>in M8</td><td>in M8</td></tr>
     <tr><td>M11 Attachment viewer <i>(new)</i></td><td class="req">FR-102a, FR-116a</td><td>Full screen + pins</td><td>⤢ on previews</td><td>⤢ on previews</td></tr>
+    <tr><td>M12 Change log &amp; update <i>(rev 4)</i></td><td class="req">FR-06a–06e</td><td>Steps + change log</td><td>—</td><td>—</td></tr>
     <tr><td>M9 Everything else</td><td class="req">team, standards, history, settings, docs</td><td>"More" list (read-only)</td><td>"More" list</td><td>⌘ palette</td></tr>
   </table></div>
   <p class="meta">Creating and editing personas, standards and settings is treated as a desktop task. On mobile they're read-only apart from light actions. Tell me if you disagree.</p>

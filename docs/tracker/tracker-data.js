@@ -234,6 +234,19 @@ window.TRACKER = {
    "gateApproved": "2026-11-09",
    "gateApprovedBy": "david (owner)",
    "gateEvidence": "User docs, README and mockups updated for rev 3; UAT (29 tests) drives the herdr flow per role including answering a waiting member in the live terminal, screenshots regenerated; weekly upstream-review workflow ran on GitHub (run 42585354081, no relevant changes) after the first review was recorded in docs/upstream; Windows supported at herdr's beta level (PowerShell pane commands, informational CI)."
+  },
+  {
+   "id": "P16",
+   "name": "Change log & guided updates",
+   "mvp": false,
+   "goal": "Keep go-build-it's change log in the repo and in the app, open it from the version number, check for updates there, and update with one button that shows each step completing, across the restart.",
+   "gate": "Update UAT",
+   "gateCriteria": [
+    "Clicking the version (desktop and mobile) opens the change log with the installed version marked",
+    "Check for updates lists every newer release's change log entry",
+    "Update now runs all eight steps through a real restart against a signed test release, and the restarted server finishes the job",
+    "A failed verification leaves the running version untouched and offers Try again; history records every update"
+   ]
   }
  ],
  "tasks": [
@@ -3101,6 +3114,217 @@ window.TRACKER = {
    "status": "done",
    "done": "",
    "q": []
+  },
+  {
+   "id": "P16-01",
+   "phase": "P16",
+   "title": "Requirements rev 4 (FR-06a–e), ADR-011, mockups 16 and M12, plan and tracker",
+   "reqs": [
+    "FR-06a",
+    "FR-06b",
+    "FR-06c",
+    "FR-06d",
+    "FR-06e"
+   ],
+   "views": [
+    "A-v16",
+    "A-M12",
+    "A-v13",
+    "A-v01"
+   ],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "docs/requirements.md rev 4; docs/decisions/ADR-011-changelog-guided-updates.md; desktop view 16, mobile M12",
+   "q": []
+  },
+  {
+   "id": "P16-02",
+   "phase": "P16",
+   "title": "CHANGELOG.md embedded in the binary, parser and validity test; release tooling (gbi dev changelog release|notes) and make release check",
+   "reqs": [
+    "FR-06a",
+    "FR-05"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P16-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P16-03",
+   "phase": "P16",
+   "title": "Update check lists every newer stable release with its notes and when it ran",
+   "reqs": [
+    "FR-06c"
+   ],
+   "views": [
+    "A-v16"
+   ],
+   "size": "S",
+   "deps": [
+    "P16-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P16-04",
+   "phase": "P16",
+   "title": "Update job: eight named steps, download progress, binary self-test, saved to disk; Try again and Roll back",
+   "reqs": [
+    "FR-06d",
+    "FR-06"
+   ],
+   "views": [
+    "A-v16"
+   ],
+   "size": "M",
+   "deps": [
+    "P16-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P16-05",
+   "phase": "P16",
+   "title": "Restart in place (exec on macOS/Linux, spawn on Windows), port retry, restarted server finishes restart and reconnect steps",
+   "reqs": [
+    "FR-06d",
+    "FR-08",
+    "NFR-01"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P16-04"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P16-06",
+   "phase": "P16",
+   "title": "Automatic updater uses the same job; history events for start, completion, failure and rollback",
+   "reqs": [
+    "FR-06e",
+    "NFR-10"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P16-04"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P16-07",
+   "phase": "P16",
+   "title": "API and CLI: changelog, updates check/install/job/rollback; regenerate the TS client",
+   "reqs": [
+    "FR-30",
+    "FR-31",
+    "FR-06d"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P16-04"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P16-08",
+   "phase": "P16",
+   "title": "Desktop change log page from the sidebar version (g v), check, Update now with live steps through the restart",
+   "reqs": [
+    "FR-06b",
+    "FR-06c",
+    "FR-06d"
+   ],
+   "views": [
+    "A-v16",
+    "A-v01",
+    "A-v13"
+   ],
+   "size": "M",
+   "deps": [
+    "P16-07"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P16-09",
+   "phase": "P16",
+   "title": "Mobile change log screen from the version on More",
+   "reqs": [
+    "FR-06b",
+    "FR-35"
+   ],
+   "views": [
+    "A-M12",
+    "A-M9"
+   ],
+   "size": "S",
+   "deps": [
+    "P16-08"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P16-10",
+   "phase": "P16",
+   "title": "End-to-end update test against a fake signed release with a real restart (scripts/update_e2e.sh, web/e2e/update.spec.ts)",
+   "reqs": [
+    "FR-06d",
+    "FR-132"
+   ],
+   "views": [
+    "A-v16"
+   ],
+   "size": "M",
+   "deps": [
+    "P16-05",
+    "P16-08"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P16-11",
+   "phase": "P16",
+   "title": "Docs: settings and updates page, keyboard (g v), CLI, README release steps; keyboard test",
+   "reqs": [
+    "FR-130",
+    "FR-06a"
+   ],
+   "views": [
+    "A-v14"
+   ],
+   "size": "S",
+   "deps": [
+    "P16-08"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
   }
  ],
  "requirements": {
@@ -3138,6 +3362,26 @@ window.TRACKER = {
   },
   "FR-06": {
    "text": "The application SHALL be able to install new releases automatically:",
+   "section": "3. Platform, installation and runtime"
+  },
+  "FR-06a": {
+   "text": "go-build-it SHALL keep a change log of its own releases in CHANGELOG.md at the root of its repository.",
+   "section": "3. Platform, installation and runtime"
+  },
+  "FR-06b": {
+   "text": "Clicking the version number SHALL open the change log, in the desktop sidebar and on the mobile More screen.",
+   "section": "3. Platform, installation and runtime"
+  },
+  "FR-06c": {
+   "text": "The change log SHALL offer Check for updates.",
+   "section": "3. Platform, installation and runtime"
+  },
+  "FR-06d": {
+   "text": "When a newer release is available, the change log SHALL offer Update now.",
+   "section": "3. Platform, installation and runtime"
+  },
+  "FR-06e": {
+   "text": "Updates installed by the automatic updater (FR-06) SHALL run the same steps and SHALL be visible in the change log in the same way.",
    "section": "3. Platform, installation and runtime"
   },
   "FR-10": {
@@ -3551,7 +3795,7 @@ window.TRACKER = {
   "Q3": "When smart handoffs graduate from experimental, what is the default context threshold, and should it be configurable per harness or model? What evidence (rework rate, handoff quality vs. compaction) decides that they are ready?",
   "Q4": "Can multiple humans collaborate on the same projects (e.g. different Tailscale users with different roles), or is it single-user with optional reviewers?",
   "Q5": "What is the exact default git workflow (branch naming, PR/MR requirements, merge strategy)?",
-  "Q6": "What is the mechanism and channel for auto-updates (GitHub Releases, Homebrew tap, etc.)?",
+  "Q6": "What is the mechanism and channel for auto-updates? Answered: GitHub Releases with signed checksums (ADR-004). Rev 4 adds the in-app change log and guided updates with step progress (ADR-011).",
   "Q7": "How should attachable (headed) sessions work? Answered (rev 3): every session runs in herdr; see ADR-009.",
   "Q8": "Conversation rotation policy (FR-76)? Answered 2026-11-08: keep one conversation per member across tasks until context reaches the handoff threshold (75%), then rotate, starting from a handoff plus the member's notes. Lens starts a fresh conversation for every review. See ADR-010.",
   "Q9": "Windows support level? Answered 2026-11-08: ship Windows at herdr's beta level, with herdr in the Windows CI job. A herdr capability missing on Windows is shown as unavailable there. See ADR-009.",

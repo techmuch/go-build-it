@@ -33,6 +33,7 @@ Status: Draft · 2026-11-09 · Based on [requirements rev 3](../requirements.md)
 | P13 | Team members on herdr |  | 13 | 39 | ◆ Member demo |
 | P14 | Live terminal & UI |  | 8 | 21 | ◆ Watch & steer UAT |
 | P15 | Rev 3 docs, UAT & upstream watch |  | 5 | 16 | ◆ Rev 3 UAT |
+| P16 | Change log & guided updates |  | 11 | 19 | ◆ Update UAT |
 
 ## 3. Critical path
 
@@ -392,6 +393,30 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 | **P15-03** Weekly upstream review job for herdr and Ovis that opens an issue or PR ✅ | S | NFR-31 | — | P10-10 |
 | **P15-04** Windows at herdr's support level ✅ · waits on Q9 | M | NFR-01 | — | P11-07 |
 | **P15-05** Rev 3 close-out: retire obsolete tests and text, mockup change log, coverage check ✅ | S | FR-01 | — | P15-02 |
+
+### P16 · Change log & guided updates
+
+**Goal:** Keep go-build-it's change log in the repo and in the app, open it from the version number, check for updates there, and update with one button that shows each step completing, across the restart.
+
+**◆ Gate: Update UAT.** Passes when:
+- Clicking the version (desktop and mobile) opens the change log with the installed version marked
+- Check for updates lists every newer release's change log entry
+- Update now runs all eight steps through a real restart against a signed test release, and the restarted server finishes the job
+- A failed verification leaves the running version untouched and offers Try again; history records every update
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P16-01** Requirements rev 4 (FR-06a–e), ADR-011, mockups 16 and M12, plan and tracker ✅ | S | FR-06a, FR-06b, FR-06c, FR-06d, FR-06e | A-v16, A-M12, A-v13, A-v01 | — |
+| **P16-02** CHANGELOG.md embedded in the binary, parser and validity test; release tooling (gbi dev changelog release|notes) and make release check | S | FR-06a, FR-05 | — | P16-01 |
+| **P16-03** Update check lists every newer stable release with its notes and when it ran | S | FR-06c | A-v16 | P16-01 |
+| **P16-04** Update job: eight named steps, download progress, binary self-test, saved to disk; Try again and Roll back | M | FR-06d, FR-06 | A-v16 | P16-03 |
+| **P16-05** Restart in place (exec on macOS/Linux, spawn on Windows), port retry, restarted server finishes restart and reconnect steps | M | FR-06d, FR-08, NFR-01 | — | P16-04 |
+| **P16-06** Automatic updater uses the same job; history events for start, completion, failure and rollback | S | FR-06e, NFR-10 | — | P16-04 |
+| **P16-07** API and CLI: changelog, updates check/install/job/rollback; regenerate the TS client | S | FR-30, FR-31, FR-06d | — | P16-04 |
+| **P16-08** Desktop change log page from the sidebar version (g v), check, Update now with live steps through the restart | M | FR-06b, FR-06c, FR-06d | A-v16, A-v01, A-v13 | P16-07 |
+| **P16-09** Mobile change log screen from the version on More | S | FR-06b, FR-35 | A-M12, A-M9 | P16-08 |
+| **P16-10** End-to-end update test against a fake signed release with a real restart (scripts/update_e2e.sh, web/e2e/update.spec.ts) | M | FR-06d, FR-132 | A-v16 | P16-05, P16-08 |
+| **P16-11** Docs: settings and updates page, keyboard (g v), CLI, README release steps; keyboard test | S | FR-130, FR-06a | A-v14 | P16-08 |
 
 ## 5. Open questions schedule
 
