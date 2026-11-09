@@ -230,7 +230,10 @@ window.TRACKER = {
     "UAT scripts for every role pass on the herdr flow and regenerate screenshots",
     "The first scheduled upstream review has run and recorded its findings",
     "Windows support level decided (Q9) and documented"
-   ]
+   ],
+   "gateApproved": "2026-11-09",
+   "gateApprovedBy": "david (owner)",
+   "gateEvidence": "User docs, README and mockups updated for rev 3; UAT (29 tests) drives the herdr flow per role including answering a waiting member in the live terminal, screenshots regenerated; weekly upstream-review workflow ran on GitHub (run 42585354081, no relevant changes) after the first review was recorded in docs/upstream; Windows supported at herdr's beta level (PowerShell pane commands, informational CI)."
   }
  ],
  "tasks": [
@@ -3061,7 +3064,7 @@ window.TRACKER = {
    "deps": [
     "P10-10"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
