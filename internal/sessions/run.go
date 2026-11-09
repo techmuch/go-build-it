@@ -399,6 +399,12 @@ func (m *Manager) finish(ctx context.Context, r *run, limited *harness.RateLimit
 		}
 		_ = os.Remove(filepath.Join(r.s.Workdir, TaskFile))
 		m.AddNote(ctx, mem.ID, t.ID, t.Title+": "+resultText)
+		// Q8: keep the conversation across tasks until context reaches the threshold, then rotate.
+		// Done before the task reaches review, so a next task never finds the old process.
+		if th := m.rotationThreshold(); r.s.Fraction >= th {
+			m.rotate(ctx, mem, r, fmt.Sprintf("context at %.0f%% (threshold %.0f%%)", r.s.Fraction*100, th*100))
+			tasks = 0
+		}
 		if m.Hooks.Completed != nil {
 			if err := m.Hooks.Completed(ctx, r.s, cur); err != nil {
 				m.hist.Must(ctx, history.Event{ProjectID: r.s.ProjectID, Type: "courier.error", Subject: t.ID, Summary: "Courier could not finish " + t.ID, Why: err.Error()})
@@ -412,10 +418,6 @@ func (m *Manager) finish(ctx context.Context, r *run, limited *harness.RateLimit
 			_, _ = m.queue.SetStatus(ctx, t.ID, queue.Review, "session completed: "+trunc(resultText, 160))
 		}
 		m.hist.Must(ctx, history.Event{ProjectID: r.s.ProjectID, Type: "session.completed", Subject: r.s.ID, Summary: fmt.Sprintf("%s finished %s", mem.Name, t.ID), Why: trunc(resultText, 300)})
-		// Q8: keep the conversation across tasks until context reaches the threshold, then rotate.
-		if th := m.rotationThreshold(); r.s.Fraction >= th {
-			m.rotate(ctx, mem, r, fmt.Sprintf("context at %.0f%% (threshold %.0f%%)", r.s.Fraction*100, th*100))
-		}
 	}
 	m.hist.Publish(history.Event{Type: "session.usage", Subject: r.s.ID, ProjectID: r.s.ProjectID, Data: history.Data(r.s)})
 }
@@ -438,6 +440,7 @@ func (m *Manager) rotate(ctx context.Context, mem team.Member, r *run, why strin
 	} else if r.pane != "" {
 		_ = r.h.Call(ctx, herdr.MethodPaneSendText, map[string]any{"pane_id": r.pane, "text": "/exit\n"}, nil)
 	}
+	waitGone(ctx, r.h, r.pane, 15*time.Second) // the next task must launch a new process, not find the old one
 	m.hist.Must(ctx, history.Event{ProjectID: r.s.ProjectID, Type: "member.rotated", Subject: mem.ID, Summary: mem.Name + " starts a new conversation next task",
 		Why: why, Data: history.Data(map[string]any{"previousConversation": old, "used": r.s.Used})})
 }
@@ -538,10 +541,32 @@ func (m *Manager) RestartMember(ctx context.Context, memberID string, fresh bool
 	if fresh {
 		conv, tasks, started = "", 0, ""
 	}
+	if mem.PaneID != "" {
+		waitGone(ctx, h, mem.PaneID, 15*time.Second)
+	}
 	if err := m.team.SetRuntime(ctx, mem.ID, mem.Worktree, mem.PaneID, conv, tasks, started); err != nil {
 		return err
 	}
 	m.hist.Must(ctx, history.Event{ProjectID: mem.ProjectID, Type: "member.restarted", Subject: mem.ID,
 		Summary: fmt.Sprintf("Restarted %s (%s conversation next task)", mem.Name, map[bool]string{true: "new", false: "same"}[fresh])})
 	return nil
+}
+
+// waitGone waits until no agent occupies the pane (its harness exited and herdr released it).
+func waitGone(ctx context.Context, h *herdr.Client, pane string, d time.Duration) {
+	if pane == "" {
+		return
+	}
+	deadline := time.Now().Add(d)
+	for time.Now().Before(deadline) {
+		a, err := h.Agent(ctx, pane)
+		if err != nil || a.Agent == nil || *a.Agent == "" {
+			return
+		}
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(200 * time.Millisecond):
+		}
+	}
 }
