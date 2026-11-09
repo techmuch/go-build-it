@@ -262,7 +262,10 @@ window.TRACKER = {
     "The harness tier starts the scripted harness in herdr and reports a blocked or missing harness with evidence and a human fix",
     "--json exit codes 0/1/2, --fix and --report behave as specified; every result id has a troubleshooting section",
     "install.sh installs from a fake signed release, refuses a tampered one, and the installed gbi passes the doctor"
-   ]
+   ],
+   "gateApproved": "2026-11-09",
+   "gateApprovedBy": "david (owner)",
+   "gateEvidence": "gbi doctor runs without the server; tiers tested against a real isolated herdr with the scripted harness (all tiers pass, blocked sign-in → human fix with screen evidence, harness missing inside panes → automatic set-binary fix); exit codes 0/1/2, --fix and --report; scripts/install_e2e.sh: tampered and wrong-key releases refused, missing release → exit 3, installed gbi passes every doctor tier; troubleshooting section per check id (test)"
   },
   {
    "id": "P18",
@@ -275,7 +278,10 @@ window.TRACKER = {
     "The coach panel's Show me goes to the right view and highlights the control; progress survives a reload",
     "Every $ gbi example in the lessons and cookbook runs against a demo instance",
     "How go-build-it thinks covers herdr, archetypes, worktrees, gates, questions, history and the route table, each linking its ADRs"
-   ]
+   ],
+   "gateApproved": "2026-11-09",
+   "gateApprovedBy": "david (owner)",
+   "gateEvidence": "scripts/learn_e2e.sh: 16 gbi examples from lessons and cookbook run against a demo; web/e2e/learn.spec.ts completes all 11 lessons in the practice project with each step checked off (history events, visits, ticks), Show me highlights, progress survives reload, Esc/g l, phone Learn; How go-build-it thinks: 7 pages linking ADRs; UAT + keyboard 29/29 and update e2e still pass"
   }
  ],
  "tasks": [
@@ -3484,7 +3490,7 @@ window.TRACKER = {
    "deps": [
     "P17-05"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3574,7 +3580,7 @@ window.TRACKER = {
    "deps": [
     "P17-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3591,7 +3597,7 @@ window.TRACKER = {
    "deps": [
     "P18-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3609,7 +3615,7 @@ window.TRACKER = {
    "deps": [
     "P18-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3629,7 +3635,7 @@ window.TRACKER = {
     "P18-02",
     "P18-03"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3648,7 +3654,7 @@ window.TRACKER = {
    "deps": [
     "P18-04"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3668,7 +3674,7 @@ window.TRACKER = {
    "deps": [
     "P18-04"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3688,7 +3694,7 @@ window.TRACKER = {
    "deps": [
     "P18-05"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3707,7 +3713,7 @@ window.TRACKER = {
    "deps": [
     "P18-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3725,7 +3731,7 @@ window.TRACKER = {
    "deps": [
     "P17-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3742,7 +3748,7 @@ window.TRACKER = {
     "P18-07",
     "P18-08"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3764,7 +3770,7 @@ window.TRACKER = {
    "deps": [
     "P18-07"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3784,7 +3790,7 @@ window.TRACKER = {
     "P18-11",
     "P17-10"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   }

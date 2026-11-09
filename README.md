@@ -74,7 +74,7 @@ GBI_HOME=$(mktemp -d) PORT=7431 scripts/demo.sh             # seed a demo via th
 cd web && GBI_E2E_URL=http://127.0.0.1:7431 npx playwright test   # UAT walkthrough, regenerates docs screenshots
 scripts/update_e2e.sh                                       # change log + Update now through a real restart, against a fake signed release
 scripts/install_e2e.sh                                      # install.sh against fake signed, tampered and missing releases; then gbi doctor, every tier
-scripts/docs_examples.sh                                    # run every `$ gbi` example in the lessons and the AI-harness cookbook against a demo
+scripts/learn_e2e.sh                                        # every `$ gbi` example in the lessons and cookbook, then every lesson completed in the practice project
 ```
 
 ## Release

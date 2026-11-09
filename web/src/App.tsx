@@ -9,6 +9,8 @@ import { Docs, EventDetail, HerdrSetup, History, Settings, Standards } from './p
 import { Archetypes, ProjectTeam } from './pages/Team';
 import { MobileApp } from './mobile/Mobile';
 import { Changelog } from './pages/Changelog';
+import { Learn, LessonPage } from './pages/Learn';
+import { LearnProvider } from './learn';
 
 type R = [string, (p: Record<string, string>) => JSX.Element];
 const routes: R[] = [
@@ -45,6 +47,8 @@ const routes: R[] = [
   ['/settings', () => <Settings />],
   ['/settings/herdr', () => <HerdrSetup />],
   ['/changelog', () => <Changelog />],
+  ['/learn', () => <Learn />],
+  ['/learn/:slug', (p) => <LessonPage slug={p.slug} />],
   ['/docs', () => <Docs />],
   ['/docs/:slug', (p) => <Docs slug={p.slug} />],
 ];
@@ -54,5 +58,5 @@ export function App() {
   let el: JSX.Element | null = null;
   if (path === '/m' || path.startsWith('/m/') || path.startsWith('/m?')) el = <MobileApp />;
   else for (const [pat, render] of routes) { const m = match(pat, path); if (m) { el = render(m); break; } }
-  return <ToastProvider><SystemProvider>{el || <div className="empty">Page not found. <a href="/">Projects</a></div>}</SystemProvider></ToastProvider>;
+  return <ToastProvider><SystemProvider><LearnProvider>{el || <div className="empty">Page not found. <a href="/">Projects</a></div>}</LearnProvider></SystemProvider></ToastProvider>;
 }

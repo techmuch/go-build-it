@@ -20,6 +20,7 @@ import (
 	"github.com/techmuch/go-build-it/internal/agent"
 	"github.com/techmuch/go-build-it/internal/api"
 	"github.com/techmuch/go-build-it/internal/doctor"
+	"github.com/techmuch/go-build-it/internal/learn"
 	"github.com/techmuch/go-build-it/internal/harness"
 	"github.com/techmuch/go-build-it/internal/herdr"
 	"github.com/techmuch/go-build-it/internal/history"
@@ -324,6 +325,7 @@ func (a *App) Routes() []api.Route {
 			return map[string]any{"job": j}, nil
 		}),
 	)
+	add(a.learnRoutes()...)
 	return rs
 }
 
@@ -791,6 +793,13 @@ func (a *App) doctorRun(c *api.Ctx) (any, error) {
 	a.doctorMu.Lock()
 	defer a.doctorMu.Unlock()
 	rep := a.Doctor.Run(c.R.Context(), a.doctorOptions(c))
+	ev := history.Event{Type: "doctor.run", Summary: "Ran the doctor: " + rep.Summary}
+	for _, t := range rep.Tiers {
+		if t.Tier == doctor.HarnessTier && t.Ran { // started the harnesses (Learn lesson 0 waits for this)
+			ev = history.Event{Type: "doctor.harness", Summary: "Started the harnesses in herdr: " + rep.Summary}
+		}
+	}
+	a.Hist.Must(c.R.Context(), ev)
 	return map[string]any{"report": rep, "status": a.Herdr.Status(), "installHint": herdr.InstallHint()}, nil
 }
 
@@ -1232,6 +1241,10 @@ func (a *App) memberAdd(c *api.Ctx) (any, error) {
 		m, err = a.Team.AddHuman(c.R.Context(), c.Param("id"), b.Name, b.Login, b.Role)
 	} else {
 		m, err = a.Team.AddFromArchetype(c.R.Context(), c.Param("id"), b.Archetype, b.Name)
+		if err == nil && m.ProjectID == learn.PracticeID { // practice uses no subscription (FR-136)
+			fake := "fake"
+			m, err = a.Team.Tune(c.R.Context(), m.ID, team.Tuning{Harness: &fake})
+		}
 	}
 	if err != nil {
 		return nil, bad(err)

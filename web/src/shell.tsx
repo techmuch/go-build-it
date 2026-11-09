@@ -4,6 +4,7 @@ import { useConnected, useData } from './live';
 import { navigate, usePath } from './router';
 import { A } from './ui';
 import { GOTO, clickable, useDialog, useGlobalKeys, useShortcuts } from './keys';
+import { Coach, useLearn } from './learn';
 
 export type SystemInfo = { version: string; actor: { name: string; kind: string; origin: string; login?: string }; owner: string; liveSessions: number; autoDispatch: boolean; experimental: any; dataDir: string; listen: string; update?: { updating: boolean; latest?: string; newer?: boolean; checkedAt?: string } };
 const SysCtx = createContext<SystemInfo | undefined>(undefined);
@@ -25,7 +26,7 @@ function Identity() {
 
 const NAV: [string, string, string?][] = [['Projects', '/'], ['Questions', '/questions', 'q'], ['Sessions', '/sessions', 's'], ['Queue', '/queue'], ['Reviews', '/reviews', 'r'], ['Options', '/options', 'o'], ['Rehearsals', '/rehearsals', 'g']];
 const ORG: [string, string][] = [['Archetypes', '/archetypes'], ['Standards', '/standards'], ['History', '/history']];
-const SYS: [string, string][] = [['Settings', '/settings'], ['Docs', '/docs']];
+const SYS: [string, string][] = [['Settings', '/settings'], ['Learn', '/learn'], ['Docs', '/docs']];
 
 export function Shell({ title, crumb, right, tabs, children, noPad }: { title: ReactNode; crumb?: ReactNode; right?: ReactNode; tabs?: ReactNode; children: ReactNode; noPad?: boolean }) {
   const path = usePath();
@@ -33,7 +34,8 @@ export function Shell({ title, crumb, right, tabs, children, noPad }: { title: R
   const [pal, setPal] = useState(false);
   const [help, setHelp] = useState(false);
   useGlobalKeys();
-  useShortcuts({ search: () => setPal(true), help: () => setHelp(true), go: navigate });
+  const learn = useLearn();
+  useShortcuts({ search: () => setPal(true), help: () => setHelp(true), go: (to) => { if (to === '/learn' && learn.active && learn.hidden && path !== '/learn') { learn.hide(false); return; } navigate(to); } });
   const { data: inbox } = useData<any[]>(() => api.inbox.list(), [], (e) => /^(question|review|rehearsal|options|value|task)\./.test(e.type));
   const count = (k: string) => (inbox || []).filter((i) => i.kind === ({ q: 'question', r: 'review', o: 'options', g: 'gate' } as any)[k]).length;
   const blocking = (inbox || []).filter((i) => i.blocking).length;
@@ -48,7 +50,7 @@ export function Shell({ title, crumb, right, tabs, children, noPad }: { title: R
     else if (badge && badge !== 's') { const n = count(badge); if (n) b = <span className={'badge ' + (badge === 'q' && blocking ? '' : 'n')}>{n}</span>; }
     return <A key={to} to={to} className={on(to) ? 'on' : ''}>{label}{b}</A>;
   };
-  return <div className="app">
+  return <div className={'app' + (learn.active && !learn.hidden ? ' coached' : '')}>
     <a className="skip" href="#main" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>Skip to content</a>
     <aside className="side" aria-label="Main navigation">
       <div className="brand"><b>gb</b>go-build-it</div>
@@ -64,6 +66,7 @@ export function Shell({ title, crumb, right, tabs, children, noPad }: { title: R
       {tabs}
       {noPad ? children : <div className="content">{children}</div>}
     </div>
+    <Coach />
     {pal && <Palette onClose={() => setPal(false)} />}
     {help && <KeysHelp onClose={() => setHelp(false)} />}
   </div>;
@@ -78,7 +81,8 @@ function VersionLink({ sys }: { sys: SystemInfo }) {
 
 export function ProjectTabs({ id, on }: { id: string; on: string }) {
   const t: [string, string][] = [['overview', 'Overview'], ['artifacts', 'Artifacts'], ['team', 'Team'], ['queue', 'Queue'], ['sessions', 'Sessions'], ['releases', 'Releases'], ['history', 'History'], ['settings', 'Settings']];
-  return <nav className="tabs">{t.map(([k, l]) => <A key={k} to={k === 'overview' ? `/projects/${id}` : `/projects/${id}/${k}`} className={on === k ? 'on' : ''}>{l}</A>)}</nav>;
+  return <nav className="tabs">{t.map(([k, l]) => <A key={k} to={k === 'overview' ? `/projects/${id}` : `/projects/${id}/${k}`} className={on === k ? 'on' : ''}>{l}</A>)}
+    {id === 'practice' && <span className="chip amb" style={{ marginLeft: 'auto', alignSelf: 'center' }} title="The Learn lessons' practice project: its members are scripted, so no AI subscription is used">practice · scripted</span>}</nav>;
 }
 
 // Keyboard shortcuts overview (press ?). Matches docs/user/18-keyboard.md.

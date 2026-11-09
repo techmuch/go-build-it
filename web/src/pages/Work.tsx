@@ -173,8 +173,8 @@ export function Queue({ projectId }: { projectId?: string }) {
       {!projectId && <select value={project} onChange={(e) => navigate('/queue' + (e.target.value ? '?project=' + e.target.value : ''))} aria-label="Project"><option value="">All projects</option>{(projects || []).map((p) => <option key={p.id} value={p.id}>{p.id}</option>)}</select>}
       <Seg value={status} onChange={setStatus} options={[['', 'All'], ['queued', 'Queued'], ['running', 'Running'], ['blocked', 'Blocked'], ['review', 'Review'], ['done', 'Done'], ['failed', 'Failed']]} />
       <span className="small muted">Concurrency: {disp?.live ?? 0} / {disp?.maxConcurrent ?? '?'} · dispatch {disp?.auto ? 'automatic' : 'manual'}</span>
-      <span className="right" /><button type="button" className="btn" onClick={() => run(() => api.dispatcher.tick(), 'Dispatched ready tasks')}>▶ Dispatch ready</button>
-      <button type="button" className="btn p" onClick={() => setAdding(true)}>+ Task</button>
+      <span className="right" /><button type="button" className="btn" data-tour="dispatch" onClick={() => run(() => api.dispatcher.tick(), 'Dispatched ready tasks')}>▶ Dispatch ready</button>
+      <button type="button" className="btn p" onClick={() => setAdding(true)} data-tour="add-task">+ Task</button>
     </div>
     {split && split.length > 0 && <div className="note">Pilot suggests splitting: {split.map((t: any) => <b key={t.id}>{t.id} ({t.compactions} compactions, {t.handoffs} handoffs) </b>)} — they repeatedly ran out of context (FR-75).</div>}
     <Err msg={error} />
@@ -185,7 +185,7 @@ export function Queue({ projectId }: { projectId?: string }) {
             <td className="mono">{t.id}</td><td><b>{t.title}</b><div className="small muted">{t.projectId}{t.milestoneId ? ' · ' + t.milestoneId : ''}{t.blockedBy ? ' · ' + t.blockedBy : ''}</div></td>
             <td className="small">{t.role}{t.assignee ? ' · ' + t.assignee : ''}</td><td>P{t.priority}</td><td className="mono small">{t.deps.join(', ') || '—'}</td>
             <td><Status s={t.status} />{t.ready && t.status === 'queued' && <Chip c="acc">ready</Chip>}</td><td className="small">{t.retries}/{t.maxRetries} · {t.compactions}{t.compactions + t.handoffs >= 2 && <Chip c="amb">split?</Chip>}</td>
-            <td onClick={(e) => e.stopPropagation()}>{(t.status === 'queued' || t.status === 'failed') && <button type="button" className="btn sm" onClick={() => run(() => api.tasks.run(t.id, {}), 'Session started')}>Run</button>}</td></tr>
+            <td onClick={(e) => e.stopPropagation()}>{(t.status === 'queued' || t.status === 'failed') && <button type="button" className="btn sm" data-tour="run-task" onClick={() => run(() => api.tasks.run(t.id, {}), 'Session started')}>Run</button>}</td></tr>
           {open === t.id && <tr key={t.id + 'd'}><td colSpan={8}><TaskDetail id={t.id} /></td></tr>}
         </>)}</tbody></table>}
     </Card>

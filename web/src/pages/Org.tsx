@@ -265,6 +265,10 @@ export function Docs({ slug }: { slug?: string }) {
   const sections: Record<string, any[]> = {};
   (pages || []).forEach((p) => { (sections[p.section || 'Other'] ||= []).push(p); });
   const body = (page?.body || '').replace(/\]\(screenshots\//g, '](/docs-assets/screenshots/');
+  useEffect(() => { // links such as /docs/troubleshooting#harness.starts (FR-07e)
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    if (page && id) window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ block: 'start' }), 50);
+  }, [page]);
   return <Shell title="Docs" right={<input placeholder="Search docs…" value={q} onChange={(e) => setQ(e.target.value)} style={{ width: 220 }} />}>
     <div className="row">
       <Card title="Contents" style={{ width: 230, padding: 10 }}>{Object.entries(sections).map(([s, ps]) => <div key={s} style={{ marginBottom: 8 }}><div className="muted xs" style={{ textTransform: 'uppercase' }}>{s}</div>

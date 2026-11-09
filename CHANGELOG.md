@@ -8,6 +8,18 @@ To release, run `gbi dev changelog release YYYY.MM.DD.N`, then `VERSION=YYYY.MM.
 
 ### Added
 
+- **Doctor tiers** (FR-07a–FR-07e). The doctor now proves the stack works:
+  - **static:** herdr, its API, your harnesses and the login service's PATH
+  - **live:** it opens a throwaway pane in the `gbi` session, runs a command, and finds each harness *inside* the pane
+  - **harness:** it starts each harness in herdr
+  - **prompt:** one test prompt, only when asked
+  Every result has evidence and a fix, automatic or for a person. `gbi doctor` runs without the server; `--json` (exit codes 0/1/2), `--fix` and `--report` serve AI agents.
+- **Install with an AI agent** (FR-02a, FR-02b): give your coding agent the GitHub URL. The README walks it through the install. `scripts/install.sh` and `install.ps1` check the checksum and signature before installing, and `AGENTS.md` points agents to the right place.
+- **Learn** (FR-134–FR-136): eleven lessons with Pro tips, in a coach panel beside the app with **Show me**. Steps tick themselves off from the history. The lessons run in a practice project with scripted members, so they cost nothing. Desktop `g l`, and More → Learn on the phone.
+- **Drive gbi from your AI harness** (FR-137): a lesson and a cookbook, with `gbi agent guide` to install as a skill.
+- **How go-build-it thinks** (FR-138): seven pages on why it is designed this way, each linking its decisions.
+- Troubleshooting page with a section for every doctor check. Doctor results link to it.
+
 - Change log in the app: click the version number in the sidebar or on mobile's More screen, or press `g` `v` (FR-06a, FR-06b).
 - Check for updates from the change log. It lists the change log entry of every release newer than yours (FR-06c).
 - **Update now**, with eight named steps that show their progress across the restart: find, download, verify the signature, verify the checksum, test the new binary, install, restart, reconnect (FR-06d).

@@ -435,15 +435,15 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 | Task | Size | Requirements | Approach A views | Depends on |
 |---|---|---|---|---|
 | **P17-01** Requirements rev 5 (FR-02a–b, FR-07a–e, FR-134–139), ADR-012, mockups 17–20 and M13, plan and tracker ✅ · waits on Q11, Q12 | S | FR-02a, FR-02b, FR-07a, FR-07b, FR-07c, FR-07d, FR-07e, FR-134, FR-135, FR-136, FR-137, FR-138, FR-139 | A-v17, A-v18, A-v19, A-v20, A-M13 | — |
-| **P17-02** internal/doctor: result contract (stable ids, evidence, auto/human fixes, docs link) and the static tier, incl. harnesses on the login service PATH | M | FR-07a, FR-07c, FR-07 | A-v17 | P17-01 |
-| **P17-03** Live tier: start the gbi session, open a throwaway doctor tab, echo round trip, harness binaries inside the pane, close | M | FR-07b, FR-08 | A-v17 | P17-02 |
-| **P17-04** Harness tier (start, wait for ready, blocked/exited/timeout with screen evidence) and opt-in prompt tier; tested with the scripted harness in a real herdr · waits on Q11 | M | FR-07b, FR-60 | A-v17 | P17-03 |
-| **P17-05** gbi doctor in-process: --json with exit codes 0/1/2, --fix, --report with secrets removed, --tier, --harness, --prompt | S | FR-07d, FR-32 | — | P17-04 |
-| **P17-06** API (GET /api/doctor, POST /api/doctor/fix) and Settings → herdr setup UI: tiers, evidence, human fixes, Test harnesses, test prompt, Copy report | M | FR-07a, FR-07c, FR-30 | A-v17, A-v15 | P17-05 |
-| **P17-07** Troubleshooting page with one section per doctor id, and a test that every id has one | S | FR-07e, FR-130 | A-v14 | P17-02 |
-| **P17-08** scripts/install.sh and install.ps1: version and directory, checksum and Ed25519 signature checks; AGENTS.md; test that the README, scripts and binary carry the same public key | M | FR-02b, FR-06 | — | P17-01 |
-| **P17-09** README: Install with an AI agent (numbered steps, rules, build from source while no release exists) | S | FR-02a | — | P17-08, P17-05 |
-| **P17-10** Install e2e: install.sh against a fake signed release (and a tampered one), then the installed gbi passes the doctor against an isolated herdr; in CI | M | FR-02a, FR-02b, FR-07b | — | P17-08, P17-05 |
+| **P17-02** internal/doctor: result contract (stable ids, evidence, auto/human fixes, docs link) and the static tier, incl. harnesses on the login service PATH ✅ | M | FR-07a, FR-07c, FR-07 | A-v17 | P17-01 |
+| **P17-03** Live tier: start the gbi session, open a throwaway doctor tab, echo round trip, harness binaries inside the pane, close ✅ | M | FR-07b, FR-08 | A-v17 | P17-02 |
+| **P17-04** Harness tier (start, wait for ready, blocked/exited/timeout with screen evidence) and opt-in prompt tier; tested with the scripted harness in a real herdr ✅ · waits on Q11 | M | FR-07b, FR-60 | A-v17 | P17-03 |
+| **P17-05** gbi doctor in-process: --json with exit codes 0/1/2, --fix, --report with secrets removed, --tier, --harness, --prompt ✅ | S | FR-07d, FR-32 | — | P17-04 |
+| **P17-06** API (GET /api/doctor, POST /api/doctor/fix) and Settings → herdr setup UI: tiers, evidence, human fixes, Test harnesses, test prompt, Copy report ✅ | M | FR-07a, FR-07c, FR-30 | A-v17, A-v15 | P17-05 |
+| **P17-07** Troubleshooting page with one section per doctor id, and a test that every id has one ✅ | S | FR-07e, FR-130 | A-v14 | P17-02 |
+| **P17-08** scripts/install.sh and install.ps1: version and directory, checksum and Ed25519 signature checks; AGENTS.md; test that the README, scripts and binary carry the same public key ✅ | M | FR-02b, FR-06 | — | P17-01 |
+| **P17-09** README: Install with an AI agent (numbered steps, rules, build from source while no release exists) ✅ | S | FR-02a | — | P17-08, P17-05 |
+| **P17-10** Install e2e: install.sh against a fake signed release (and a tampered one), then the installed gbi passes the doctor against an isolated herdr; in CI ✅ | M | FR-02a, FR-02b, FR-07b | — | P17-08, P17-05 |
 
 ### P18 · Learn: lessons, practice project, harness control
 
@@ -457,18 +457,18 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 
 | Task | Size | Requirements | Approach A views | Depends on |
 |---|---|---|---|---|
-| **P18-01** Lesson format in docs/learn (front matter, steps with check/show lines, Pro tips), parser and tests; API and CLI gbi learn list|get|start|done | M | FR-134, FR-135, FR-30 | — | P17-01 |
-| **P18-02** Progress per user (learn_progress): steps checked from history events in the practice project, visits and ticks | M | FR-135, NFR-10 | — | P18-01 |
-| **P18-03** Practice project: gbi learn practice [--reset|--remove], seeded repo under ~/.go-build-it/practice, starter team on the scripted harness, practice label | M | FR-136 | A-v18 | P18-01 |
-| **P18-04** Learn page (g l): lessons with progress, practice project card, How go-build-it thinks | M | FR-134, FR-138 | A-v18 | P18-02, P18-03 |
-| **P18-05** Coach panel docked in the shell: current step, live check-off, Show me navigation and highlight, Pro tips, Esc to hide | M | FR-134, FR-135 | A-v19 | P18-04 |
-| **P18-06** Mobile Learn screen (M13) and Learn on More | S | FR-134, FR-35 | A-M13, A-M9 | P18-04 |
-| **P18-07** Lessons 0–10 covering every feature, with Pro tips | L | FR-134, FR-132 | A-v18, A-v19 | P18-05 |
-| **P18-08** Drive gbi from your AI harness: lesson, cookbook page (Claude Code first; Antigravity, Pi, OpenCode notes) and gbi agent guide | M | FR-137, FR-33 | A-v20 | P18-01 |
-| **P18-09** How go-build-it thinks: explanation pages linking the ADRs | S | FR-138 | A-v18 | P17-01 |
-| **P18-10** scripts/docs_examples.sh runs every $ gbi example in the lessons and cookbook against a demo instance | S | FR-139 | — | P18-07, P18-08 |
-| **P18-11** web/e2e/learn.spec.ts completes every lesson in the practice project and regenerates the lesson screenshots | M | FR-139, FR-133, FR-131 | A-v18, A-v19, A-M13 | P18-07 |
-| **P18-12** Docs and release notes: keyboard (g l), CLI page, README tests, CHANGELOG Unreleased; keyboard test | S | FR-130, FR-06a | A-v14 | P18-11, P17-10 |
+| **P18-01** Lesson format in docs/learn (front matter, steps with check/show lines, Pro tips), parser and tests; API and CLI gbi learn list|get|start|done ✅ | M | FR-134, FR-135, FR-30 | — | P17-01 |
+| **P18-02** Progress per user (learn_progress): steps checked from history events in the practice project, visits and ticks ✅ | M | FR-135, NFR-10 | — | P18-01 |
+| **P18-03** Practice project: gbi learn practice [--reset|--remove], seeded repo under ~/.go-build-it/practice, starter team on the scripted harness, practice label ✅ | M | FR-136 | A-v18 | P18-01 |
+| **P18-04** Learn page (g l): lessons with progress, practice project card, How go-build-it thinks ✅ | M | FR-134, FR-138 | A-v18 | P18-02, P18-03 |
+| **P18-05** Coach panel docked in the shell: current step, live check-off, Show me navigation and highlight, Pro tips, Esc to hide ✅ | M | FR-134, FR-135 | A-v19 | P18-04 |
+| **P18-06** Mobile Learn screen (M13) and Learn on More ✅ | S | FR-134, FR-35 | A-M13, A-M9 | P18-04 |
+| **P18-07** Lessons 0–10 covering every feature, with Pro tips ✅ | L | FR-134, FR-132 | A-v18, A-v19 | P18-05 |
+| **P18-08** Drive gbi from your AI harness: lesson, cookbook page (Claude Code first; Antigravity, Pi, OpenCode notes) and gbi agent guide ✅ | M | FR-137, FR-33 | A-v20 | P18-01 |
+| **P18-09** How go-build-it thinks: explanation pages linking the ADRs ✅ | S | FR-138 | A-v18 | P17-01 |
+| **P18-10** scripts/docs_examples.sh runs every $ gbi example in the lessons and cookbook against a demo instance ✅ | S | FR-139 | — | P18-07, P18-08 |
+| **P18-11** web/e2e/learn.spec.ts completes every lesson in the practice project and regenerates the lesson screenshots ✅ | M | FR-139, FR-133, FR-131 | A-v18, A-v19, A-M13 | P18-07 |
+| **P18-12** Docs and release notes: keyboard (g l), CLI page, README tests, CHANGELOG Unreleased; keyboard test ✅ | S | FR-130, FR-06a | A-v14 | P18-11, P17-10 |
 
 ## 5. Open questions schedule
 

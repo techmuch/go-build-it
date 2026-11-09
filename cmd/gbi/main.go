@@ -59,6 +59,11 @@ func run(args []string) error {
 		return serviceCmd(args[1:])
 	case "doctor":
 		return doctorCmd(args[1:])
+	case "agent":
+		if len(args) > 1 && args[1] == "guide" { // no server needed (FR-137)
+			fmt.Print(docs.AgentGuide())
+			return nil
+		}
 	case "mcp":
 		return mcpServe()
 	case "dev":

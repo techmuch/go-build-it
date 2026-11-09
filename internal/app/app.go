@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/techmuch/go-build-it/internal/doctor"
+	"github.com/techmuch/go-build-it/internal/learn"
 	"log/slog"
 	"path/filepath"
 	"strings"
@@ -62,10 +63,14 @@ type App struct {
 	Updates    *update.Jobs // update and rollback jobs with their steps (FR-06d)
 	Herdr      *herdr.Supervisor
 
-	herdrReady chan struct{} // closed once the first herdr Ensure has returned
-	Doctor     *doctor.Doctor
-	doctorMu   sync.Mutex
-	lastCheck  atomic.Pointer[update.Release]
+	herdrReady  chan struct{} // closed once the first herdr Ensure has returned
+	Doctor      *doctor.Doctor
+	Learn       learn.Progress
+	lessonsOnce sync.Once
+	lessonList  []learn.Lesson
+	practiceMu  sync.Mutex
+	doctorMu    sync.Mutex
+	lastCheck   atomic.Pointer[update.Release]
 }
 
 // New opens the database and connects all services.
@@ -98,6 +103,7 @@ func Wire(cfg *config.Config, db *sql.DB, version string, log *slog.Logger) *App
 	a.Pins = pins.New(db, a.Hist)
 	a.Agent = agent.New(cfg, a.Team, a.Sessions.Ask)
 	a.Sessions.SetHerdr(a.Herdr.C)
+	a.Learn = learn.Progress{DB: db}
 	a.Doctor = &doctor.Doctor{Cfg: cfg, Sup: a.Herdr, Exe: a.Sessions.GbiBin, Version: version}
 	a.Updater = update.New(cfg.Updates.Repo, version)
 	if cfg.Updates.API != "" {

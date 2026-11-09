@@ -137,7 +137,7 @@ export function useGlobalKeys() {
 export const GOTO: [string, string, string][] = [
   ['p', '/', 'Projects'], ['q', '/questions', 'Questions'], ['s', '/sessions', 'Sessions'], ['u', '/queue', 'Queue'],
   ['r', '/reviews', 'Reviews'], ['o', '/options', 'Options'], ['e', '/rehearsals', 'Rehearsals'], ['t', '/archetypes', 'Archetypes'],
-  ['a', '/standards', 'Standards'], ['h', '/history', 'History'], [',', '/settings', 'Settings'], ['d', '/docs', 'Docs'], ['v', '/changelog', 'Change log & updates'],
+  ['a', '/standards', 'Standards'], ['h', '/history', 'History'], [',', '/settings', 'Settings'], ['d', '/docs', 'Docs'], ['l', '/learn', 'Learn (and bring back a hidden lesson)'], ['v', '/changelog', 'Change log & updates'],
 ];
 
 export function useShortcuts(handlers: { search: () => void; help: () => void; go: (to: string) => void }) {

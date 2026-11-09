@@ -2,6 +2,10 @@
 import { call } from './http';
 
 export const api = {
+  agent: {
+    /** The guide for AI agents driving gbi; save it as a harness skill (FR-137). Also works without the server. */
+    guide: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/agent/guide`, undefined, query),
+  },
   archetypes: {
     /** Apply the latest revision to one member, or to every member without overrides */
     apply: (aid: string, body?: unknown) => call<any>('POST', `/api/archetypes/${encodeURIComponent(aid)}/apply`, body),
@@ -97,6 +101,20 @@ export const api = {
   inbox: {
     /** Everything waiting on a human: questions, reviews, gates, option sets */
     list: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/inbox`, undefined, query),
+  },
+  learn: {
+    /** Tick off a step yourself */
+    done: (slug: string, body?: unknown) => call<any>('POST', `/api/learn/${encodeURIComponent(slug)}/done`, body),
+    /** One lesson with its steps and your progress */
+    get: (slug: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/learn/${encodeURIComponent(slug)}`, undefined, query),
+    /** Lessons with your progress, and the practice project (FR-134) */
+    list: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/learn`, undefined, query),
+    /** Create the practice project (scripted harness, no subscription), or reset or remove it (FR-136) */
+    practice: (body?: unknown) => call<any>('POST', `/api/learn/practice`, body),
+    /** Start (or restart) a lesson: steps check themselves off from now on */
+    start: (slug: string, body?: unknown) => call<any>('POST', `/api/learn/${encodeURIComponent(slug)}/start`, body),
+    /** Record that you opened a view (checks off visit steps) */
+    visit: (body?: unknown) => call<any>('POST', `/api/learn/visit`, body),
   },
   members: {
     /** Add an AI member from an archetype, or a human with a role */
