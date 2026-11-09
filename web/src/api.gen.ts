@@ -50,6 +50,14 @@ export const api = {
     /** Search the docs */
     search: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/docs/search`, undefined, query),
   },
+  doctor: {
+    /** Apply one automatic doctor fix, then run the static and live tiers again */
+    fix: (body?: unknown) => call<any>('POST', `/api/doctor/fix`, body),
+    /** The doctor's Markdown report (secrets removed) to paste into an AI chat or an issue */
+    report: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/doctor/report`, undefined, query),
+    /** Run the doctor through the server: static, live, harness and (opt-in) prompt tiers (FR-07a–FR-07d). `gbi doctor` runs it without the server. */
+    run: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/doctor`, undefined, query),
+  },
   events: {
     /** Live event stream (Server-Sent Events) */
     watch: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/events/stream`, undefined, query),
@@ -77,10 +85,6 @@ export const api = {
     list: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/harnesses`, undefined, query),
   },
   herdr: {
-    /** Check herdr, the gbi session, API compatibility, integrations and the login service */
-    doctor: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/herdr/doctor`, undefined, query),
-    /** Run a doctor fix (start-session, install-integration:<target>) */
-    fix: (body?: unknown) => call<any>('POST', `/api/herdr/fix`, body),
     /** The supervised gbi herdr session (FR-07) */
     status: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/herdr`, undefined, query),
   },

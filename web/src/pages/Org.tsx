@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api.gen';
 import { useData } from '../live';
 import { navigate, query } from '../router';
 import { Shell } from '../shell';
-import { A, AgentChat, Av, Card, Chip, Editor, Empty, Err, Loading, Markdown, Proposals, Status, Toggle, ago, applyHunks, day, useAction, type Hunk } from '../ui';
+import { A, AgentChat, Av, Card, Chip, Editor, Empty, Err, Loading, Markdown, Proposals, Status, Toggle, ago, applyHunks, day, useAction, useToast, type Hunk } from '../ui';
 import { EventRow } from './Projects';
 import { usePersonas } from './Team';
 
@@ -140,19 +140,65 @@ function HerdrCard() {
   </Card>;
 }
 
+type DoctorResult = { id: string; tier: string; status: 'ok' | 'warn' | 'fail' | 'skipped'; title: string; detail: string; harness?: string; evidence?: { command?: string; exit?: number; output?: string }; fix?: { kind: 'auto' | 'human'; action?: string; instructions: string }; docs: string; ms: number };
+type DoctorReport = { results: DoctorResult[]; tiers: { tier: string; ran: boolean; ok: number; total: number; note?: string }[]; exit: number; summary: string; ms: number; started: string };
+// Inline renders `code` spans in a fix's instructions.
+function Inline({ text }: { text: string }) {
+  return <>{text.split(/(`[^`]+`)/).map((p, i) => p.startsWith('`') && p.endsWith('`') ? <code key={i}>{p.slice(1, -1)}</code> : <span key={i}>{p}</span>)}</>;
+}
+const DICON: Record<DoctorResult['status'], string> = { ok: '✅', warn: '⚠️', fail: '✖', skipped: '–' };
+
+// v15 + v17 · herdr setup and the doctor (FR-07a–FR-07e, ADR-012): tiers, evidence, automatic and human fixes.
 export function HerdrSetup() {
-  const { data, error, reload } = useData<any>(() => api.herdr.doctor(), [], (e) => e.type.startsWith('herdr'));
+  const [opts, setOpts] = useState<{ through?: string; prompt?: boolean }>({});
+  const [data, setData] = useState<{ report: DoctorReport; status: any; installHint: string } | undefined>(undefined);
+  const [error, setError] = useState('');
+  const [running, setRunning] = useState(false);
   const { run, busy } = useAction();
-  const fixes = (data?.checks || []).filter((c: any) => !c.ok || c.warn).length;
-  return <Shell title="herdr setup" crumb={<A to="/settings">Settings</A>} right={data && (fixes ? <Chip c="amb">{fixes} to fix</Chip> : <Chip c="grn">all good</Chip>)}>
+  const toast = useToast();
+  const go = useCallback(async (o: { through?: string; prompt?: boolean } = {}) => {
+    setRunning(true); setError(''); setOpts(o);
+    try { setData(await api.doctor.run(o as any)); } catch (e: any) { setError(String(e.message || e)); } finally { setRunning(false); }
+  }, []);
+  useEffect(() => { go(); }, [go]);
+  const rep = data?.report;
+  const fails = rep ? rep.results.filter((r) => r.status === 'fail').length : 0;
+  const human = rep ? rep.results.filter((r) => r.status === 'fail' && r.fix?.kind !== 'auto').length : 0;
+  const copyReport = async () => {
+    const r: any = await run(() => api.doctor.report(opts as any));
+    if (!r) return;
+    try { await navigator.clipboard.writeText(r.markdown); toast('Report copied: paste it into an AI chat or an issue'); } catch { setData((d) => d && { ...d, md: r.markdown } as any); }
+  };
+  const md: string | undefined = (data as any)?.md;
+  return <Shell title="herdr setup" crumb={<A to="/settings">Settings</A>} right={rep && (human ? <Chip c="red">{human} needs you</Chip> : fails ? <Chip c="amb">{fails} to fix</Chip> : <Chip c="grn">all good</Chip>)}>
     <Err msg={error} />
-    <Card title="Checks" right={<button type="button" className="lnk small" onClick={reload}>Run again</button>}>
-      {!data ? <Loading /> : <table className="t"><tbody>{data.checks.map((c: any) => <tr key={c.name}>
-        <td style={{ width: 24 }}>{!c.ok ? '❌' : c.warn ? '⚠️' : '✅'}</td><td><b>{c.name}</b></td><td className="small">{c.detail}</td><td className="small muted">{c.hint}</td>
-        <td>{c.fix && <button type="button" className="btn p sm" disabled={busy} onClick={() => run(() => api.herdr.fix({ action: c.fix }), 'Done').then(reload)}>{c.fix.startsWith('install-integration') ? 'Update' : 'Fix'}</button>}</td></tr>)}</tbody></table>}
-      {data && <div className="small muted" style={{ marginTop: 8 }}>Missing herdr? <code>{data.installHint}</code>. go-build-it uses its own herdr session; your default session is never touched. CLI: <code>gbi herdr doctor</code></div>}
+    <Card title="Doctor" right={<span className="muted small">{running ? 'running…' : rep ? `ran ${ago(rep.started)} · ${(rep.ms / 1000).toFixed(1)}s` : ''}</span>}>
+      <div className="tiers" data-testid="doctor-tiers">
+        {(rep?.tiers || []).map((t) => <span key={t.tier} className={'tierchip ' + (!t.ran ? 'off' : t.ok === t.total ? 'ok' : 'bad')} data-tier={t.tier} title={t.note}>
+          {!t.ran ? '' : t.ok === t.total ? '✅ ' : '✖ '}{t.tier} {t.ran ? `${t.ok}/${t.total}` : `· ${t.tier === 'prompt' ? 'not run' : (t.note || '').replace(/^skipped: /, 'skipped')}`}</span>)}
+        <span className="grow" />
+        <button type="button" className="btn sm" disabled={running} onClick={() => go()}>Run again</button>
+        <button type="button" className="btn sm" disabled={running} onClick={() => go({ through: 'harness' })} data-testid="doctor-harness">Test harnesses</button>
+        <button type="button" className="btn sm" disabled={running} onClick={() => go({ through: 'harness', prompt: true })} title="Sends one short prompt to each harness" data-testid="doctor-prompt">Send a test prompt · uses tokens</button>
+        <button type="button" className="btn sm" disabled={running || busy} onClick={copyReport}>Copy report</button>
+      </div>
+      {running && !rep && <Loading what="the doctor" />}
+      {rep && <table className="t doctor" aria-busy={running}><tbody>{rep.results.map((r, i) => <tr key={r.id + (r.harness || '') + i} className={'d-' + r.status} data-check={r.id} data-status={r.status}>
+        <td style={{ width: 24 }} aria-label={r.status}>{DICON[r.status]}</td>
+        <td><b>{r.title}</b>{r.status !== 'ok' && <div className="mono small muted">{r.id}</div>}</td>
+        <td className="small">{r.detail}
+          {(r.status === 'fail' || r.status === 'warn') && r.evidence && (r.evidence.command || r.evidence.output) && <pre className="evi">{r.evidence.command ? '$ ' + r.evidence.command + '\n' : ''}{r.evidence.exit !== undefined && r.status === 'fail' ? `exit ${r.evidence.exit}\n` : ''}{r.status === 'fail' ? r.evidence.output || '' : ''}</pre>}
+          {r.fix && r.status !== 'ok' && (r.fix.kind === 'human'
+            ? <div className="hfix" data-testid="human-fix"><b>Needs you:</b> <Inline text={r.fix.instructions} /> <A to={r.docs}>Troubleshooting: {r.id}</A></div>
+            : <div className="small muted" style={{ marginTop: 4 }}>{r.fix.instructions} <A to={r.docs}>More</A></div>)}
+        </td>
+        <td className="small muted" style={{ whiteSpace: 'nowrap' }}>{r.ms ? (r.ms / 1000).toFixed(1) + 's' : ''}</td>
+        <td>{r.fix?.kind === 'auto' && r.status !== 'ok' && <button type="button" className="btn p sm" disabled={busy || running} onClick={() => run(() => api.doctor.fix({ action: r.fix!.action }), 'Fixed').then((d: any) => d && setData(d))}>{r.fix.action?.startsWith('install-integration') ? 'Update' : 'Fix'}</button>}</td>
+      </tr>)}</tbody></table>}
+      {rep && <div className="small muted" style={{ marginTop: 8 }} data-testid="doctor-summary">{rep.summary}. The doctor's throwaway panes live in the <span className="mono">gbi-doctor</span> workspace and are closed afterwards; your default herdr session is never touched. Same checks without the server: <code>gbi doctor</code> · for an AI agent: <code>gbi doctor --json --fix</code>.</div>}
+      {md && <pre className="evi" style={{ maxHeight: 240, overflow: 'auto' }}>{md}</pre>}
     </Card>
-    <Card title="See it in a terminal"><div className="small">Run <code>herdr --session {data?.status?.session || 'gbi'}</code>: one workspace per project, each member's worktree grouped under it, labelled with role, current task and context. Detach with <kbd>ctrl</kbd>+<kbd>b</kbd> <kbd>q</kbd>; the agents keep running.</div></Card>
+    <Card title="See it in a terminal"><div className="small">Run <code>herdr --session {data?.status?.session || 'gbi'}</code>: one workspace per project, each member's worktree grouped under it, labelled with role, current task and context. Detach with <kbd>ctrl</kbd>+<kbd>b</kbd> <kbd>q</kbd>; the agents keep running. Missing herdr? <code>{data?.installHint}</code></div></Card>
   </Shell>;
 }
 

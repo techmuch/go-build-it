@@ -19,6 +19,7 @@ import (
 	"github.com/techmuch/go-build-it/internal/access"
 	"github.com/techmuch/go-build-it/internal/agent"
 	"github.com/techmuch/go-build-it/internal/api"
+	"github.com/techmuch/go-build-it/internal/doctor"
 	"github.com/techmuch/go-build-it/internal/harness"
 	"github.com/techmuch/go-build-it/internal/herdr"
 	"github.com/techmuch/go-build-it/internal/history"
@@ -29,7 +30,6 @@ import (
 	"github.com/techmuch/go-build-it/internal/questions"
 	"github.com/techmuch/go-build-it/internal/queue"
 	"github.com/techmuch/go-build-it/internal/rehearsals"
-	"github.com/techmuch/go-build-it/internal/service"
 	"github.com/techmuch/go-build-it/internal/standards"
 	"github.com/techmuch/go-build-it/internal/tailscale"
 	"github.com/techmuch/go-build-it/internal/team"
@@ -269,8 +269,9 @@ func (a *App) Routes() []api.Route {
 		}, f("project", ""), fi("days", "default 7")),
 		r("GET", "/api/metrics/compare", "metrics.compare", "metrics compare", "Smart handoffs vs compaction (graduation evidence)", func(c *api.Ctx) (any, error) { return metrics.Compare(c.R.Context(), a.DB, atoi(c.Query("days"), 30)) }, fi("days", "default 30")),
 		r("GET", "/api/herdr", "herdr.status", "herdr status", "The supervised gbi herdr session (FR-07)", func(c *api.Ctx) (any, error) { return a.Herdr.Status(), nil }),
-		r("GET", "/api/herdr/doctor", "herdr.doctor", "herdr doctor", "Check herdr, the gbi session, API compatibility, integrations and the login service", a.herdrDoctor),
-		r("POST", "/api/herdr/fix", "herdr.fix", "herdr fix", "Run a doctor fix (start-session, install-integration:<target>)", a.herdrFix, f("action", "fix from the doctor")),
+		r("GET", "/api/doctor", "doctor.run", "herdr doctor", "Run the doctor through the server: static, live, harness and (opt-in) prompt tiers (FR-07a–FR-07d). `gbi doctor` runs it without the server.", a.doctorRun, f("through", "last tier: static, live (default) or harness"), f("harness", "only this harness"), fb("prompt", "also send one short prompt per harness: uses tokens")),
+		r("POST", "/api/doctor/fix", "doctor.fix", "herdr fix", "Apply one automatic doctor fix, then run the static and live tiers again", a.doctorFix, f("action", "fix action from a doctor result")),
+		r("GET", "/api/doctor/report", "doctor.report", "herdr report", "The doctor's Markdown report (secrets removed) to paste into an AI chat or an issue", a.doctorReport),
 		r("GET", "/api/pins", "pins.list", "pins list", "Comments pinned to spots on attachments and mockups", func(c *api.Ctx) (any, error) {
 			return a.Pins.List(c.R.Context(), c.Query("subject"), c.Query("item"))
 		}, f("subject", "what the viewer was opened for, e.g. Q-34"), f("item", "attachment URL or name (empty: all items)")),
@@ -781,34 +782,38 @@ func (a *App) projectRefresh(c *api.Ctx) (any, error) {
 	return a.Projects.Refresh(c.R.Context(), p), nil
 }
 
-func (a *App) herdrDoctor(c *api.Ctx) (any, error) {
-	var hs []string
-	for name, h := range a.Cfg.Harnesses {
-		if h.Enabled && name != "fake" {
-			hs = append(hs, name)
-		}
-	}
-	installed := false
-	if exe, err := os.Executable(); err == nil {
-		if p, err := service.Build(exe, a.Cfg.Dir()); err == nil && p.File != "" {
-			_, statErr := os.Stat(p.File)
-			installed = statErr == nil
-		}
-	}
-	checks := a.Herdr.Doctor(c.R.Context(), hs, installed)
-	return map[string]any{"checks": checks, "status": a.Herdr.Status(), "installHint": herdr.InstallHint()}, nil
+func (a *App) doctorOptions(c *api.Ctx) doctor.Options {
+	return doctor.Options{Through: doctor.Tier(c.Query("through")), Harness: c.Query("harness"), Prompt: c.Query("prompt") == "true"}
 }
 
-func (a *App) herdrFix(c *api.Ctx) (any, error) {
+// doctorRun runs the doctor; one run at a time (it opens panes in the gbi session).
+func (a *App) doctorRun(c *api.Ctx) (any, error) {
+	a.doctorMu.Lock()
+	defer a.doctorMu.Unlock()
+	rep := a.Doctor.Run(c.R.Context(), a.doctorOptions(c))
+	return map[string]any{"report": rep, "status": a.Herdr.Status(), "installHint": herdr.InstallHint()}, nil
+}
+
+func (a *App) doctorFix(c *api.Ctx) (any, error) {
 	var b struct{ Action string }
 	if err := c.Bind(&b); err != nil {
 		return nil, err
 	}
-	if err := a.Herdr.Fix(c.R.Context(), b.Action); err != nil {
+	a.doctorMu.Lock()
+	err := a.Doctor.Apply(c.R.Context(), b.Action)
+	a.doctorMu.Unlock()
+	if err != nil {
 		return nil, bad(err)
 	}
-	a.Hist.Must(c.R.Context(), history.Event{Type: "herdr.fix", Subject: b.Action, Summary: "Ran herdr fix " + b.Action})
-	return a.herdrDoctor(c)
+	a.Hist.Must(c.R.Context(), history.Event{Type: "doctor.fix", Subject: b.Action, Summary: "Applied doctor fix " + b.Action})
+	return a.doctorRun(c)
+}
+
+func (a *App) doctorReport(c *api.Ctx) (any, error) {
+	a.doctorMu.Lock()
+	defer a.doctorMu.Unlock()
+	rep := a.Doctor.Run(c.R.Context(), a.doctorOptions(c))
+	return map[string]any{"markdown": a.Doctor.Markdown(rep), "exit": rep.Exit}, nil
 }
 
 func (a *App) pinAdd(c *api.Ctx) (any, error) {

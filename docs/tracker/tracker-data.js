@@ -3406,7 +3406,7 @@ window.TRACKER = {
    "deps": [
     "P17-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3425,7 +3425,7 @@ window.TRACKER = {
    "deps": [
     "P17-02"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3444,7 +3444,7 @@ window.TRACKER = {
    "deps": [
     "P17-03"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": [
     "Q11"
@@ -3463,7 +3463,7 @@ window.TRACKER = {
    "deps": [
     "P17-04"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3503,7 +3503,7 @@ window.TRACKER = {
    "deps": [
     "P17-02"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3520,7 +3520,7 @@ window.TRACKER = {
    "deps": [
     "P17-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3537,7 +3537,7 @@ window.TRACKER = {
     "P17-08",
     "P17-05"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3556,7 +3556,7 @@ window.TRACKER = {
     "P17-08",
     "P17-05"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },

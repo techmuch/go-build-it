@@ -3,6 +3,10 @@
 //
 //	fakerelease keygen                         prints "PUBLIC PRIVATE" (base64 Ed25519)
 //	fakerelease serve ADDR DIR TAG [OLDER...]  serves DIR's files as the assets of TAG
+//
+// Besides the API listing (/repos/…/releases) it serves GitHub's plain download paths,
+// /OWNER/REPO/releases/latest/download/NAME and /OWNER/REPO/releases/download/TAG/NAME,
+// which scripts/install.sh uses (scripts/install_e2e.sh, ADR-012).
 package main
 
 import (
@@ -59,6 +63,31 @@ func serve(addr, dir, tag string, older []string) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(releases)
+	})
+	download := func(w http.ResponseWriter, r *http.Request, name string) {
+		b, err := os.ReadFile(filepath.Join(dir, filepath.Base(name)))
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Length", fmt.Sprint(len(b)))
+		_, _ = w.Write(b)
+	}
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		p := r.URL.Path
+		if !strings.HasPrefix(p, "/techmuch/go-build-it/releases/") {
+			http.NotFound(w, r)
+			return
+		}
+		if i := strings.Index(p, "/releases/latest/download/"); i >= 0 {
+			download(w, r, p[i+len("/releases/latest/download/"):])
+			return
+		}
+		if i := strings.Index(p, "/releases/download/"+tag+"/"); i >= 0 {
+			download(w, r, p[i+len("/releases/download/"+tag+"/"):])
+			return
+		}
+		http.NotFound(w, r)
 	})
 	mux.HandleFunc("/dl/", func(w http.ResponseWriter, r *http.Request) {
 		// Serve slowly enough that the download step is seen running with progress.

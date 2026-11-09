@@ -11,7 +11,9 @@ gbi questions ask --task T-12 --blocking --title "Per trail or per region?"
 gbi reviews verdict R-3 --verdict approve
 gbi members list ledgerly
 gbi members restart forge@ledgerly --fresh
-gbi herdr doctor
+gbi doctor                       # static and live checks, no server needed (gbi doctor --json --fix for agents)
+gbi doctor --tier harness        # also start each harness in herdr
+gbi herdr doctor                 # the same checks, run by the server
 gbi changelog
 gbi updates install && gbi updates job
 ```

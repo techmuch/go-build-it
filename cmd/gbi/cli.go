@@ -63,6 +63,10 @@ Usage:
   gbi <group> <command> [args] [--flag value] [--json]
   gbi help <group> [command]            show commands and flags
   gbi service plan|install|uninstall    run in the background at login
+  gbi doctor [--tier static|live|harness] [--harness NAME] [--prompt] [--fix] [--json] [--report FILE]
+                                        check that herdr and each harness work; runs without the server
+  gbi agent guide                       print the guide for AI agents driving gbi (install it as a skill)
+  gbi learn …                           lessons and the practice project (gbi help learn)
   gbi mcp                               MCP server over stdio for external agents
   gbi version
 

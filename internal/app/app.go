@@ -6,9 +6,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/techmuch/go-build-it/internal/doctor"
 	"log/slog"
 	"path/filepath"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -61,6 +63,8 @@ type App struct {
 	Herdr      *herdr.Supervisor
 
 	herdrReady chan struct{} // closed once the first herdr Ensure has returned
+	Doctor     *doctor.Doctor
+	doctorMu   sync.Mutex
 	lastCheck  atomic.Pointer[update.Release]
 }
 
@@ -94,6 +98,7 @@ func Wire(cfg *config.Config, db *sql.DB, version string, log *slog.Logger) *App
 	a.Pins = pins.New(db, a.Hist)
 	a.Agent = agent.New(cfg, a.Team, a.Sessions.Ask)
 	a.Sessions.SetHerdr(a.Herdr.C)
+	a.Doctor = &doctor.Doctor{Cfg: cfg, Sup: a.Herdr, Exe: a.Sessions.GbiBin, Version: version}
 	a.Updater = update.New(cfg.Updates.Repo, version)
 	if cfg.Updates.API != "" {
 		a.Updater.API = strings.TrimRight(cfg.Updates.API, "/")
