@@ -25,7 +25,7 @@ import (
 var methods = []string{
 	"ping", "session.snapshot", "workspace.create", "workspace.list", "workspace.get", "workspace.close", "workspace.report_metadata",
 	"worktree.open", "worktree.list", "tab.create", "agent.list", "agent.get", "agent.start", "agent.prompt", "agent.wait",
-	"agent.send_keys", "agent.rename", "agent.focus", "agent.view.set", "pane.get", "pane.list", "pane.read", "pane.close", "pane.send_text",
+	"agent.send_keys", "agent.rename", "agent.focus", "agent.view.set", "pane.focus", "pane.get", "pane.list", "pane.read", "pane.close", "pane.send_text",
 	"pane.report_agent", "pane.report_agent_session", "pane.release_agent", "pane.report_metadata", "notification.show",
 	"events.subscribe", "integration.list", "integration.install",
 }

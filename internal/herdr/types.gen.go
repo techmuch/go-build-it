@@ -22,6 +22,7 @@ const (
 	MethodIntegrationList         = "integration.list"
 	MethodNotificationShow        = "notification.show"
 	MethodPaneClose               = "pane.close"
+	MethodPaneFocus               = "pane.focus"
 	MethodPaneGet                 = "pane.get"
 	MethodPaneList                = "pane.list"
 	MethodPaneRead                = "pane.read"
@@ -43,7 +44,7 @@ const (
 )
 
 // RequiredMethods lists every method above, for the runtime compatibility check.
-var RequiredMethods = []string{"agent.focus", "agent.get", "agent.list", "agent.prompt", "agent.rename", "agent.send_keys", "agent.start", "agent.view.set", "agent.wait", "events.subscribe", "integration.install", "integration.list", "notification.show", "pane.close", "pane.get", "pane.list", "pane.read", "pane.release_agent", "pane.report_agent", "pane.report_agent_session", "pane.report_metadata", "pane.send_text", "ping", "session.snapshot", "tab.create", "workspace.close", "workspace.create", "workspace.get", "workspace.list", "workspace.report_metadata", "worktree.list", "worktree.open"}
+var RequiredMethods = []string{"agent.focus", "agent.get", "agent.list", "agent.prompt", "agent.rename", "agent.send_keys", "agent.start", "agent.view.set", "agent.wait", "events.subscribe", "integration.install", "integration.list", "notification.show", "pane.close", "pane.focus", "pane.get", "pane.list", "pane.read", "pane.release_agent", "pane.report_agent", "pane.report_agent_session", "pane.report_metadata", "pane.send_text", "ping", "session.snapshot", "tab.create", "workspace.close", "workspace.create", "workspace.get", "workspace.list", "workspace.report_metadata", "worktree.list", "worktree.open"}
 
 // WorkspaceCreateParams mirrors herdr's WorkspaceCreateParams schema.
 type WorkspaceCreateParams struct {

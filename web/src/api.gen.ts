@@ -97,6 +97,8 @@ export const api = {
     all: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/members`, undefined, query),
     /** Persona coach: develop a member's tuning or an archetype with an agent */
     chat: (mid: string, body?: unknown) => call<any>('POST', `/api/members/${encodeURIComponent(mid)}/chat`, body),
+    /** Focus the member's pane in the gbi herdr session */
+    focus: (mid: string, body?: unknown) => call<any>('POST', `/api/members/${encodeURIComponent(mid)}/focus`, body),
     /** A member with its effective definition and archetype */
     get: (mid: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/members/${encodeURIComponent(mid)}`, undefined, query),
     /** A project's team (FR-11) */
@@ -109,6 +111,8 @@ export const api = {
     restart: (mid: string, body?: unknown) => call<any>('POST', `/api/members/${encodeURIComponent(mid)}/restart`, body),
     /** Give a project with no AI members the starter team */
     starter: (id: string, body?: unknown) => call<any>('POST', `/api/projects/${encodeURIComponent(id)}/members/starter`, body),
+    /** Live terminal of the member's herdr pane (WebSocket; mode=observe|control) */
+    terminal: (mid: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/members/${encodeURIComponent(mid)}/terminal`, undefined, query),
     /** Tune a member for its project */
     tune: (mid: string, body?: unknown) => call<any>('PATCH', `/api/members/${encodeURIComponent(mid)}`, body),
   },

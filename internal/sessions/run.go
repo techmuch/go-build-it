@@ -124,6 +124,7 @@ func (m *Manager) waitUnblocked(ctx context.Context, r *run, msg string) bool {
 		a, err := r.h.Agent(ctx, r.pane)
 		if err == nil && a.AgentStatus != herdr.AgentStatusBlocked && a.AgentStatus != herdr.AgentStatusUnknown {
 			r.s.ExitReason = ""
+			m.hist.Must(ctx, history.Event{ProjectID: r.s.ProjectID, Type: "session.unblocked", Subject: r.s.ID, Summary: r.mem.Name + " is ready again (" + r.t.ID + ")"})
 			if r.s.HarnessSession == "" && a.AgentSession != nil {
 				r.s.HarnessSession = a.AgentSession.Value
 			}
@@ -271,6 +272,9 @@ func (m *Manager) follow(ctx context.Context, r *run, seq int64) {
 			}
 			continue
 		case herdr.AgentStatusWorking:
+			if r.state == "blocked" {
+				m.hist.Must(ctx, history.Event{ProjectID: r.s.ProjectID, Type: "session.unblocked", Subject: r.s.ID, Summary: r.mem.Name + " is working again (" + r.t.ID + ")"})
+			}
 			if r.state != "working" {
 				r.s.Status, r.s.ExitReason = "running", ""
 				_ = m.write(ctx, r.s)

@@ -367,14 +367,14 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 
 | Task | Size | Requirements | Approach A views | Depends on |
 |---|---|---|---|---|
-| **P14-01** Terminal bridge: herdr terminal session observe/control → WebSocket with ack-based flow control and takeover | L | FR-66 | — | P11-01, P10-04 |
-| **P14-02** Desktop terminal view with take control and hand back | M | FR-66 | A-v05b | P14-01, P10-07 |
-| **P14-03** Mobile terminal with key bar | M | FR-35, FR-66 | A-M10 | P14-01, P10-08 |
-| **P14-04** Live members view: herdr state, task, context %, structured view | M | NFR-11, FR-66 | A-v05, A-M8 | P13-04, P13-05 |
-| **P14-05** Blocked members in the Questions dashboard and mobile Inbox | S | FR-68, FR-104 | A-v04, A-M3 | P13-05 |
-| **P14-06** Open in herdr: copy herdr --session gbi and focus the member's pane | S | FR-67 | A-v05 | P13-02 |
-| **P14-07** Settings: herdr section (version, session, socket, integrations) | S | FR-63, FR-07 | A-v13 | P11-03 |
-| **P14-08** History events for herdr state changes, rotations and takeovers | S | NFR-10, NFR-14 | A-v12, A-v12b | P13-05, P14-01 |
+| **P14-01** Terminal bridge: herdr terminal session observe/control → WebSocket with ack-based flow control and takeover ✅ | L | FR-66 | — | P11-01, P10-04 |
+| **P14-02** Desktop terminal view with take control and hand back ✅ | M | FR-66 | A-v05b | P14-01, P10-07 |
+| **P14-03** Mobile terminal with key bar ✅ | M | FR-35, FR-66 | A-M10 | P14-01, P10-08 |
+| **P14-04** Live members view: herdr state, task, context %, structured view ✅ | M | NFR-11, FR-66 | A-v05, A-M8 | P13-04, P13-05 |
+| **P14-05** Blocked members in the Questions dashboard and mobile Inbox ✅ | S | FR-68, FR-104 | A-v04, A-M3 | P13-05 |
+| **P14-06** Open in herdr: copy herdr --session gbi and focus the member's pane ✅ | S | FR-67 | A-v05 | P13-02 |
+| **P14-07** Settings: herdr section (version, session, socket, integrations) ✅ | S | FR-63, FR-07 | A-v13 | P11-03 |
+| **P14-08** History events for herdr state changes, rotations and takeovers ✅ | S | NFR-10, NFR-14 | A-v12, A-v12b | P13-05, P14-01 |
 
 ### P15 · Rev 3 docs, UAT & upstream watch
 
