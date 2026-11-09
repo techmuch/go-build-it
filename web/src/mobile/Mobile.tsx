@@ -8,6 +8,7 @@ import { Bar, Chip, DictArea, Empty, Loading, Markdown, Status, Viewer, ago, clo
 import { attachmentsFor } from '../pages/Artifacts';
 import './mobile.css';
 import { clickable, useGlobalKeys } from '../keys';
+import { LiveTerminal } from '../terminal';
 
 function Tabbar({ on }: { on: string }) {
   const { data: inbox } = useData<any[]>(() => api.inbox.list(), [], (e) => /^(question|review|rehearsal|options|value)\./.test(e.type));
@@ -60,12 +61,12 @@ function ProjectStatus({ id }: { id: string }) {
 }
 
 function mlink(n: any) {
-  return ({ question: '/m/q/' + n.id, review: '/m/review/' + n.id, gate: '/m/rehearsal/' + n.id, options: '/m/options/' + n.id, value: '/m/projects/' + n.projectId } as any)[n.kind] || '/m/inbox';
+  return ({ question: '/m/q/' + n.id, review: '/m/review/' + n.id, gate: '/m/rehearsal/' + n.id, options: '/m/options/' + n.id, value: '/m/projects/' + n.projectId, member: '/m/sessions/' + n.id } as any)[n.kind] || '/m/inbox';
 }
 
 // M3 · Inbox (everything waiting on you, FR-104)
 function Inbox() {
-  const { data } = useData<any[]>(() => api.inbox.list(), [], (e) => /^(question|review|rehearsal|options|value)\./.test(e.type));
+  const { data } = useData<any[]>(() => api.inbox.list(), [], (e) => /^(question|review|rehearsal|options|value|session)\./.test(e.type));
   const items = data || [];
   const group = (label: string, xs: any[]) => xs.length > 0 && <><div className="m-label">{label}</div>{xs.map((n) => <div key={n.kind + n.id} className="m-li" {...clickable(() => navigate(mlink(n)), { role: 'link' })}>
     <div><div className="small muted">{[n.projectId, n.from, ago(n.createdAt)].filter(Boolean).join(' · ')}</div><b>{n.title}</b>{n.detail && <div className="small muted">{n.detail.slice(0, 80)}</div>}</div><Chip c={n.blocking ? 'red' : n.kind === 'review' || n.kind === 'gate' ? 'amb' : 'blue'}>{n.kind === 'question' ? 'Q' : n.kind}</Chip></div>)}</>;
@@ -207,7 +208,8 @@ function Terminal({ sid }: { sid: string }) {
       <div className="m-termfoot">{s?.live ? <div className="m-row" style={{ gap: 6 }}><input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Send input to the agent" style={{ flex: 1 }} /><button type="button" className="m-btn p sm" onClick={() => run(() => api.sessions.send(sid, { text: input }), 'Sent').then((r) => r && setInput(''))}>Send</button></div>
         : <div className="small" style={{ color: '#6f8190', textAlign: 'center' }}>{s?.exitReason}</div>}
         <div className="small" style={{ color: '#6f8190', textAlign: 'center', marginTop: 6 }}>{s?.status === 'blocked' ? 'Waiting for you: answer in its herdr terminal' : 'Runs in herdr: herdr --session gbi'}</div></div></>}>
-    <div ref={box} className="m-term">{lines.map((l) => <div key={l.seq} className={'k-' + l.kind}>{l.text}</div>)}{lines.length === 0 && <span style={{ color: '#6f8190' }}>No output yet.</span>}</div>
+    {view === 'terminal' && s?.memberId ? <LiveTerminal memberId={s.memberId} height="60vh" keyBar compact />
+      : <div ref={box} className="m-term">{lines.map((l) => <div key={l.seq} className={'k-' + l.kind}>{l.text}</div>)}{lines.length === 0 && <span style={{ color: '#6f8190' }}>No output yet.</span>}</div>}
   </Screen>;
 }
 

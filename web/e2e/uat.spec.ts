@@ -63,8 +63,15 @@ test.describe('desktop · owner', () => {
     await shot(page, 'sessions');
     await page.locator('table.t tr.click').first().click();
     await page.getByRole('button', { name: 'Terminal' }).click();
-    await expect(page.locator('.term')).toBeVisible();
+    // The member's herdr pane, streamed live (FR-66): watch, take control, hand back.
+    await expect(page.locator('.live-term .xterm')).toBeVisible();
+    await expect(page.locator('.live-term').getByText('watching · read-only')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('.xterm-rows')).toContainText(/\S/, { timeout: 15000 });
+    await page.getByRole('button', { name: '⌨ Take control' }).click();
+    await expect(page.locator('.live-term').getByText('you have control')).toBeVisible({ timeout: 15000 });
     await shot(page, 'session-terminal');
+    await page.getByRole('button', { name: 'Hand back' }).click();
+    await expect(page.locator('.live-term').getByText('watching · read-only')).toBeVisible({ timeout: 15000 });
   });
 
   test('06 task queue shows gate-blocked work', async ({ page }) => {

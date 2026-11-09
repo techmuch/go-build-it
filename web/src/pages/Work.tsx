@@ -6,16 +6,22 @@ import { ProjectTabs, Shell, useSystem } from '../shell';
 import { A, Av, Bar, Card, Chip, DictArea, Empty, Err, Loading, Seg, Status, Viewer, ago, clock, kfmt, useAction } from '../ui';
 import { attachmentsFor } from './Artifacts';
 import { clickable, useDialog } from '../keys';
+import { LiveTerminal } from '../terminal';
 
 // v04 · Questions dashboard (FR-100–FR-105, FR-102a, FR-107)
 export function Questions({ qid }: { qid?: string }) {
   const { data, error } = useData<any[]>(() => api.questions.list({ status: 'open' }), [], (e) => e.type.startsWith('question'));
   const open = data || [];
+  const { data: inbox } = useData<any[]>(() => api.inbox.list(), [], (e) => e.type.startsWith('session'));
+  const waiting = (inbox || []).filter((n) => n.kind === 'member');
   const sel = qid || open[0]?.id || '';
   return <Shell title="Questions" right={<><Chip c="red">{open.filter((q) => q.blocking).length} blocking</Chip><Chip>{open.filter((q) => !q.blocking).length} non-blocking</Chip></>} noPad>
     <Err msg={error} />
     <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px, 380px) 1fr', minHeight: 'calc(100vh - 52px)' }}>
       <div style={{ borderRight: '1px solid var(--line)', background: 'var(--card)' }}>
+        {waiting.length > 0 && <><div className="section-label">Members waiting for you — in their terminal</div>
+          {waiting.map((n) => <div key={n.id} className="list-item" {...clickable(() => navigate('/sessions/' + n.id + '?view=terminal'), { role: 'link' })}>
+            <div className="small muted">{n.projectId} · herdr · {ago(n.createdAt)}</div><b>{n.title}</b> <Chip c="red">blocked</Chip><div className="small muted">{n.detail}</div></div>)}</>}
         <div className="section-label">Blocking — work is paused</div>
         {open.filter((q) => q.blocking).map((q) => <QRow key={q.id} q={q} sel={q.id === sel} />)}
         <div className="section-label">Non-blocking — proceeding on an assumption</div>
@@ -91,15 +97,16 @@ export function Sessions({ projectId }: { projectId?: string }) {
   const hx = sys?.experimental?.smartHandoffs;
   const body = <>
     <div className="row c"><Seg value={all ? 'all' : 'live'} onChange={(v) => setAll(v === 'all')} options={[['live', 'Live'], ['all', 'Recent']]} />
-      <span className="small muted">When context fills: <b>harness auto-compaction</b> (default){hx ? ` · smart handoffs (experimental) on for ${(sys?.experimental?.smartHandoffProjects || []).join(', ') || 'all projects'}` : ''}</span></div>
+      <span className="small muted">Each member runs in herdr and keeps its conversation until context reaches {Math.round((sys?.experimental?.handoffThreshold || .75) * 100)}%, then rotates{hx ? ` · smart handoffs (experimental) on for ${(sys?.experimental?.smartHandoffProjects || []).join(', ') || 'all projects'}` : ''}. In a terminal: <code>herdr --session gbi</code></span></div>
     <Err msg={error} />
     <Card style={{ padding: '6px 14px' }}>{ss.length === 0 ? <Empty>{all ? 'No sessions yet.' : 'Nothing running.'} Run a task from the <A to="/queue">queue</A>.</Empty> :
-      <table className="t"><tbody><tr><th>Persona</th><th>Project · Task</th><th>Harness</th><th style={{ width: 220 }}>Context</th><th>When full</th><th>State</th><th /></tr>
-        {ss.map((s) => <tr key={s.id} className="click" {...clickable(() => navigate('/sessions/' + s.id), { role: 'link' })}>
-          <td><Av s name={s.memberId} role="developer" /> {s.memberId}</td><td>{s.projectId} · {s.taskId}</td><td>{s.harness}</td>
+      <table className="t"><tbody><tr><th>Member</th><th>Project · Task</th><th>Harness</th><th style={{ width: 220 }}>Context</th><th>When full</th><th>herdr</th><th /></tr>
+        {[...ss].sort((a, b) => Number(b.status === 'blocked') - Number(a.status === 'blocked')).map((s) => <tr key={s.id} className="click" style={s.status === 'blocked' ? { background: 'var(--red-s)' } : undefined} {...clickable(() => navigate('/sessions/' + s.id + (s.status === 'blocked' ? '?view=terminal' : '')), { role: 'link' })}>
+          <td><Av s name={s.memberId} role="developer" /> {s.memberId.split('@')[0]}</td><td>{s.projectId} · {s.taskId}</td><td>{s.harness}{s.model ? ` · ${s.model}` : ''}</td>
           <td><Bar pct={s.fraction * 100} warn={70} /><span className="small">{kfmt(s.used)} / {kfmt(s.window)} · {Math.round(s.fraction * 100)}%{s.measured ? '' : ' (est.)'}</span></td>
           <td className="small">{hx && (sys?.experimental?.smartHandoffProjects || []).concat([]).some((p: string) => p === s.projectId) ? <Chip c="blue">Handoff at {Math.round((sys?.experimental?.handoffThreshold || .75) * 100)}% · exp.</Chip> : `Auto-compact${s.compactions ? ` · ${s.compactions}× so far` : ''}`}</td>
-          <td><Status s={s.status} />{s.resumeAt && s.status === 'rate_limited' && <div className="small muted">resumes {clock(s.resumeAt)}</div>}</td><td><A to={'/sessions/' + s.id}>Open</A></td></tr>)}</tbody></table>}
+          <td>{s.status === 'blocked' ? <Chip c="red">blocked · needs you</Chip> : s.live ? <Chip c="acc">{s.herdrState || 'working'}</Chip> : <Status s={s.status} />}{s.resumeAt && s.status === 'rate_limited' && <div className="small muted">resumes {clock(s.resumeAt)}</div>}</td>
+          <td>{s.status === 'blocked' ? <A to={'/sessions/' + s.id + '?view=terminal'} className="btn p sm">Open terminal</A> : <A to={'/sessions/' + s.id}>Open</A>}</td></tr>)}</tbody></table>}
     </Card></>;
   if (projectId) return <Shell title="Sessions" crumb={<A to={`/projects/${projectId}`}>{projectId}</A>} tabs={<ProjectTabs id={projectId} on="sessions" />}>{body}</Shell>;
   return <Shell title="Sessions" right={<><Chip>{ss.filter((s) => s.live).length} running</Chip><Chip>{ss.filter((s) => s.status === 'rate_limited').length} rate-limited</Chip></>}>{body}</Shell>;
@@ -130,11 +137,12 @@ export function SessionDetail({ sid }: { sid: string }) {
       {s.live && <button type="button" className="btn d" onClick={() => { if (window.confirm('Cancel this session?')) run(() => api.sessions.cancel(sid), 'Cancelled'); }}>Cancel</button>}
     </div>
     <div style={{ width: '100%' }}><Bar pct={s.fraction * 100} warn={70} /></div>
-    <div>
+    {view === 'terminal' && (s.paneId ? <LiveTerminal memberId={s.memberId} height={460} /> : <div className="note small">{s.memberId} has no herdr pane yet.</div>)}
+    <div style={{ display: view === 'terminal' ? 'none' : undefined }}>
       <div className="termbar"><span>● {s.id} {s.harness}</span><span className="right">{view === 'terminal' ? 'herdr pane' : 'structured events from the transcript'}{s.live ? ' · live' : ''}</span></div>
       <div ref={box} className={view === 'terminal' ? 'term' : 'out'} style={{ height: 460, borderRadius: '0 0 6px 6px' }}>
         {lines.length === 0 && <span className="muted">No output yet.</span>}
-        {view === 'terminal' ? <div className="muted">The live terminal streams from herdr. Open <code>herdr --session gbi</code> to watch {s.memberId}.</div> :
+        {view === 'terminal' ? null :
           lines.map((l) => <div key={l.seq} className={'k-' + l.kind}><span className="ts">{clock(l.ts)} </span>{l.kind === 'tool' ? '● ' : l.kind === 'input' ? '> ' : ''}{l.text}</div>)}
       </div>
     </div>

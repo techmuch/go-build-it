@@ -220,7 +220,10 @@ window.TRACKER = {
     "Watch any member live on desktop and phone; take control and hand it back",
     "Blocked members appear in the Questions dashboard and mobile Inbox",
     "Every herdr state change, rotation and takeover is in the history"
-   ]
+   ],
+   "gateApproved": "2026-11-09",
+   "gateApprovedBy": "david (owner)",
+   "gateEvidence": "Live terminal of any member over WebSocket from herdr terminal session observe/control with ack-based flow control (1 MiB budget) and takeover; xterm.js on desktop and phone (key bar); live members view with herdr state and blocked rows first; blocked members in the Questions dashboard and mobile Inbox; Open in herdr (focus + copy); takeover, release, blocked and unblocked in History. TestMemberTerminalStream passes against herdr; UAT drives watch → take control → hand back in the browser."
   },
   {
    "id": "P15",
@@ -2869,7 +2872,7 @@ window.TRACKER = {
     "P11-01",
     "P10-04"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2888,7 +2891,7 @@ window.TRACKER = {
     "P14-01",
     "P10-07"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2908,7 +2911,7 @@ window.TRACKER = {
     "P14-01",
     "P10-08"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2929,7 +2932,7 @@ window.TRACKER = {
     "P13-04",
     "P13-05"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2949,7 +2952,7 @@ window.TRACKER = {
    "deps": [
     "P13-05"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2967,7 +2970,7 @@ window.TRACKER = {
    "deps": [
     "P13-02"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -2986,7 +2989,7 @@ window.TRACKER = {
    "deps": [
     "P11-03"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },
@@ -3007,7 +3010,7 @@ window.TRACKER = {
     "P13-05",
     "P14-01"
    ],
-   "status": "todo",
+   "status": "done",
    "done": "",
    "q": []
   },

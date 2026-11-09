@@ -208,3 +208,8 @@ table.t tr.sel td { background: var(--acc-s); }
   .row { flex-direction: column; } .row.c { flex-direction: row; flex-wrap: wrap; }
   .pgrid { grid-template-columns: 1fr; }
 }
+/* Live terminal (P14): key bar for phones and touch screens. */
+.live-term .m-keys { display: flex; gap: 5px; padding: 6px 8px; background: #1b252e; flex-wrap: wrap; }
+.live-term .m-keys button { flex: 1; min-width: 44px; text-align: center; background: #2b3a47; color: #dfe7ee; border: 0; border-radius: 5px; padding: 8px 0; font: 600 11px ui-monospace, Menlo, monospace; cursor: pointer; }
+.live-term .termbar { display: flex; gap: 8px; align-items: center; }
+.xterm-box .xterm { height: 100%; }

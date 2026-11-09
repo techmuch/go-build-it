@@ -131,6 +131,8 @@ func (a *App) Routes() []api.Route {
 			}
 			return map[string]bool{"ok": true}, nil
 		}, fb("fresh", "start a new conversation next task")),
+		r("GET", "/api/members/{mid}/terminal", "members.terminal", "members terminal", "Live terminal of the member's herdr pane (WebSocket; mode=observe|control)", a.memberTerminal, f("mode", "observe|control"), fi("cols", ""), fi("rows", "")),
+		r("POST", "/api/members/{mid}/focus", "members.focus", "members focus", "Focus the member's pane in the gbi herdr session", a.memberFocus),
 		r("POST", "/api/members/{mid}/promote", "members.promote", "members promote", "Promote tuning text into the member's archetype (FR-12c)", a.memberPromote, f("text", "tuning lines to promote")),
 		r("GET", "/api/projects/{id}/members", "members.list", "members list", "A project's team (FR-11)", func(c *api.Ctx) (any, error) { return a.Team.Members(c.R.Context(), c.Param("id")) }),
 		r("POST", "/api/projects/{id}/members", "members.add", "members add", "Add an AI member from an archetype, or a human with a role", a.memberAdd, f("archetype", "archetype id (AI member)"), f("name", "display name"), f("kind", "ai|human"), f("login", "human: Tailscale login"), f("role", "human: role")),
