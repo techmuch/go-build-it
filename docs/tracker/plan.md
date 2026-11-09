@@ -1,6 +1,6 @@
 # go-build-it — Phased delivery plan
 
-Status: Draft · 2026-11-08 · Based on [requirements rev 2](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
+Status: Draft · 2026-11-08 · Based on [requirements rev 3](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
 
 ## 1. How this plan is built
 
@@ -9,6 +9,7 @@ Status: Draft · 2026-11-08 · Based on [requirements rev 2](../requirements.md)
 - **Each phase ends at a review gate (◆),** the same mechanism the app itself provides (FR-115). A gate passes only when the owner approves it.
 - **The MVP is the desktop app at the end of P5.** Mobile (P6), observability UI (P7), docs/UAT/auto-update (P8) and experimental features (P9) follow.
 - **Simple path first.** Harness compaction is the MVP default; smart handoffs and attachable headed sessions are experimental (P9), as decided in rev 2.
+- **Rev 3 (P10–P15): herdr and per-project teams.** P0–P9 delivered rev 2. Rev 3 makes [herdr](https://herdr.dev) the only agent backend ([ADR-009](../decisions/ADR-009-herdr-backend.md)) and replaces global teams with per-project team members made from global persona archetypes ([ADR-010](../decisions/ADR-010-project-team-members.md)). It starts with a spike and redesigned mockups (P10), then builds the runtime (P11), teams (P12), members on herdr (P13), the live terminal and UI (P14), and docs, UAT and the upstream watch (P15). Rev 3 phases are not MVP-flagged: the MVP shipped with P5.
 - **Dogfooding from P4.** Once Courier can branch, PR, merge and release (end of P4), go-build-it manages its own remaining phases, and this tracker's data is imported into it.
 - **Sizes, not dates.** S ≈ up to a day of agent work, M ≈ 2–4 days, L ≈ 1–2 weeks. Progress is weighted S=1, M=3, L=8. Dates are set once the P0 spike shows real throughput.
 
@@ -26,6 +27,12 @@ Status: Draft · 2026-11-08 · Based on [requirements rev 2](../requirements.md)
 | P7 | Observability & self-improvement |  | 5 | 13 | ◆ First retro |
 | P8 | Docs, UAT, updates & integrations |  | 7 | 22 | ◆ v1 UAT |
 | P9 | Experimental & expansion |  | 8 | 44 | ◆ Graduation reviews |
+| P10 | herdr direction: decisions, spike & design |  | 11 | 24 | ◆ herdr direction review |
+| P11 | herdr runtime foundation |  | 7 | 19 | ◆ Runtime demo |
+| P12 | Per-project teams from archetypes |  | 9 | 24 | ◆ Team review |
+| P13 | Team members on herdr |  | 13 | 39 | ◆ Member demo |
+| P14 | Live terminal & UI |  | 8 | 21 | ◆ Watch & steer UAT |
+| P15 | Rev 3 docs, UAT & upstream watch |  | 5 | 16 | ◆ Rev 3 UAT |
 
 ## 3. Critical path
 
@@ -33,7 +40,9 @@ Status: Draft · 2026-11-08 · Based on [requirements rev 2](../requirements.md)
 - **In parallel:** P0-04 harness spike → P3 adapters; P1 → P2 projects and artifacts (feeds P3 context preparation and P5 editors).
 - **After the MVP:** P5 → P6 mobile; P1 history store → P7 observability; P0-12 e2e harness + P5 rehearsals → P8 UAT and docs; P3 sessions view → P9 attachable sessions.
 
-The longest chain runs through the **harness spike (P0-04, Q2)**, the adapter interface, the queue and dispatcher, Courier, and the work review. Start P0-04 first: its findings decide the scope of P3-06 and P3-07.
+**Rev 3 chain:** P10 requirements and ADRs → P10-04 herdr spike → P11-01 herdr client → P11-02 session supervisor → P13-02 member pane lifecycle → P13-03 dispatch → P13-13 removal of tmux and headless runs → P14 live terminal → P15 UAT. P12 (teams) runs in parallel with P11 and must land before P13-02. Mockups (P10-07, P10-08) gate the UI tasks in P12 and P14.
+
+The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapter interface, the queue and dispatcher, Courier, and the work review. Start P0-04 first: its findings decide the scope of P3-06 and P3-07.
 
 ## 4. Phases in detail
 
@@ -257,6 +266,133 @@ The longest chain runs through the **harness spike (P0-04, Q2)**, the adapter in
 | **P9-07** External interface challenge (if Q1 allows external access) ✅ · waits on Q1 | M | FR-18 | — | P1-06 |
 | **P9-08** Multi-user roles and review assignment ✅ · waits on Q4 | L | FR-17, FR-117a | — | P5-09 |
 
+### P10 · herdr direction: decisions, spike & design
+
+**Goal:** Record rev 3 (herdr as the only backend, per-project team members from archetypes), prove the herdr integration with a spike, decide the open questions, and redesign the affected mockups before building.
+
+**◆ Gate: herdr direction review.** Passes when:
+- Requirements rev 3, ADR-009 and ADR-010 approved by the owner
+- Spike: a Claude member in the gbi herdr session takes a prompt, finishes, reports its conversation ID and usage, and streams live to a browser
+- Q8 and Q10 decided (Q9 can wait for P15)
+- Rev 3 mockups (desktop, mobile, herdr layout) reviewed
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P10-01** Requirements rev 3: herdr backend, per-project team members, upstream tracking ✅ | M | FR-01, FR-07 | — | — |
+| **P10-02** ADR-009: herdr is the only agent backend; ADR-008 superseded ✅ | S | FR-60, FR-07 | — | P10-01 |
+| **P10-03** ADR-010: per-project team members from global persona archetypes ✅ | S | FR-11, FR-12 | — | P10-01 |
+| **P10-04** Spike: gbi herdr session, agent start + prompt --wait, agent_session → transcript usage, terminal observe → xterm.js | M | FR-60, FR-61, FR-66, FR-71 | — | P10-02 |
+| **P10-05** Decide conversation rotation policy from spike cost data ✅ · waits on Q8 | S | FR-76 | — | P10-04 |
+| **P10-06** Decide how archetype changes reach project members ✅ · waits on Q10 | S | FR-12b | — | P10-03 |
+| **P10-07** Mockups rev 3, desktop: live members, live terminal, archetypes, project team, herdr settings and setup, card and overview team panel, queue assignment | L | FR-34, FR-12a, FR-66, FR-67 | A-v01, A-v02, A-v05, A-v05b, A-v06, A-v10, A-v10b, A-v13, A-v15 | P10-02, P10-03 |
+| **P10-08** Mockups rev 3, mobile: members, terminal control and takeover, project team, blocked members in Inbox | M | FR-35, FR-66 | A-M2, A-M3, A-M8, A-M10 | P10-07 |
+| **P10-09** herdr layout spec: what herdr --session gbi shows (workspaces, grouped worktrees, pane labels, tokens, summaries, notifications) | S | FR-67 | — | P10-04 |
+| **P10-10** Upstream baseline: docs/upstream/ with herdr and Ovis revisions reviewed and findings | S | NFR-30 | — | P10-02 |
+| **P10-11** Docs tooling in the repo: tracker, plan and HTML generators under scripts/docs ✅ | S |  | — | — |
+
+### P11 · herdr runtime foundation
+
+**Goal:** go-build-it owns and supervises the gbi herdr session: generated client, version and capability checks, onboarding and integrations, login service, event reconciliation, fake harness, CI with herdr on every platform.
+
+**◆ Gate: Runtime demo.** Passes when:
+- Login starts go-build-it and the gbi herdr session; restarting go-build-it leaves agents running
+- Doctor shows herdr version, session and integration status, and fixes outdated integrations
+- CI is green on macOS, Linux and Windows with a pinned herdr
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P11-01** herdr client: socket/named-pipe NDJSON transport, types generated from herdr api schema, ping capability check, supported version range | M | NFR-32, FR-07 | — | P10-04 |
+| **P11-02** Supervise herdr server --session gbi: start, health, restart, stop | M | FR-07 | — | P11-01 |
+| **P11-03** Doctor and onboarding: herdr install and version, integration status, install or update integrations | M | FR-07 | A-v15, A-v13 | P11-01, P10-07 |
+| **P11-04** Login service brings up go-build-it and the gbi session; go-build-it restarts and updates leave agents running | S | FR-08, FR-02, FR-06 | — | P11-02 |
+| **P11-05** Event subscription and snapshot reconciler with events_lost recovery | M | NFR-11, FR-68 | — | P11-01 |
+| **P11-06** Fake harness in herdr: reports state with pane.report_agent and writes a transcript | M | FR-61 | — | P11-01 |
+| **P11-07** CI installs a pinned herdr on macOS, Linux and Windows; weekly job against latest herdr | M | NFR-32, NFR-01 | — | P11-06 |
+
+### P12 · Per-project teams from archetypes
+
+**Goal:** Replace global teams and personas with global persona archetypes and per-project team members that can be tuned, compared with their archetype, and promoted back.
+
+**◆ Gate: Team review.** Passes when:
+- Every imported project has a team made from starter archetypes
+- A member's tuning, its difference from the archetype, and an archetype change applied per member are shown
+- Each member's instruction file is generated in its worktree
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P12-01** Schema: archetypes and project_members replace global teams and personas | M | FR-11, FR-12, FR-12d, FR-12e | — | P10-03 |
+| **P12-02** Starter archetype per built-in role | S | FR-12, FR-25 | — | P12-01 |
+| **P12-03** API, CLI and MCP: archetypes, project members (add, tune, remove), human roles per project | M | FR-30, FR-12a, FR-12e | — | P12-01 |
+| **P12-04** Archetype change review: affected members, per-member apply keeping tuning · waits on Q10 | M | FR-12b | A-v10 | P12-03, P10-06 |
+| **P12-05** Promote member tuning to its archetype through the artifact editor | S | FR-12c, FR-13 | A-v03b | P12-03 |
+| **P12-06** Archetypes library and project Team tab with member detail and tuning | L | FR-13, FR-12a, FR-10 | A-v10, A-v10b | P12-03, P10-07 |
+| **P12-07** Per-member instruction file generated in the member's worktree | S | FR-53 | — | P12-01 |
+| **P12-08** Queue assignment to a role or a specific member; dispatcher picks a free member | M | FR-81 | A-v06 | P12-01 |
+| **P12-09** Catalog card and overview show the project team and each member's herdr state | S | FR-41 | A-v01, A-v02, A-M2 | P12-06, P11-05 |
+
+### P13 · Team members on herdr
+
+**Goal:** Run every AI team member as a long-running harness in its herdr pane: profiles, pane lifecycle, dispatch, transcripts, status, limits, conversation rotation, reconnection and labels. Remove tmux and headless runs.
+
+**◆ Gate: Member demo.** Passes when:
+- Claude Code, Antigravity and Pi members each finish a task end to end through herdr, reviewed by Lens
+- A blocked member shows as needing the human; herdr restart resumes members in their conversations
+- herdr --session gbi shows every project and member labelled with role, task and context %
+- No tmux or stream-json code remains
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P13-01** Harness profiles: Claude Code, Antigravity, Pi, OpenCode (kind, launch and resume args, transcript reader, limit signals) | L | FR-61, FR-62, FR-63 | — | P11-01 |
+| **P13-02** Member pane lifecycle: workspace per project, member worktree opened grouped, agent start, name, release | M | FR-12d, FR-64, FR-67 | — | P12-01, P11-02 |
+| **P13-03** Dispatch: write .gbi-task.md, agent prompt --wait, hand completion to Courier and Lens | M | FR-60, FR-70 | — | P13-02, P12-08 |
+| **P13-04** Transcript readers: structured events, messages and usage (measured or estimated) per harness | L | FR-66, FR-71, NFR-10 | — | P13-01 |
+| **P13-05** Status mapping: herdr state drives session and task state; blocked becomes a needs-you item | M | FR-68 | — | P11-05, P13-02 |
+| **P13-06** Rate and usage limit detection with pause and auto-resume | S | FR-65 | — | P13-04 |
+| **P13-07** Conversation continuity and rotation per policy; smart handoff starts the new conversation · waits on Q8 | M | FR-69, FR-76, FR-72, FR-73, FR-74 | — | P13-04, P10-05 |
+| **P13-08** Reconnect after herdr or machine restart by conversation ID; queue resumes | M | FR-69, FR-82 | — | P13-05 |
+| **P13-09** herdr labels: pane metadata (name, role, task, context %), workspace summaries, notifications for gates and questions | S | FR-67 | — | P13-02, P10-09 |
+| **P13-10** Permission prompts: permission modes, per-project allowlists, optional Claude permission hook as structured approval | M | FR-68 | — | P13-05 |
+| **P13-11** Lens reviews run in a fresh conversation per review | S | FR-54, FR-112 | — | P13-03 |
+| **P13-12** Interrupt, cancel and restart a member through herdr | S | FR-61 | — | P13-02 |
+| **P13-13** Remove tmux mode, attachable_sessions flag and the headless stream-json path | S | FR-60 | — | P13-03, P13-04 |
+
+### P14 · Live terminal & UI
+
+**Goal:** Watch and steer any team member from the desktop and mobile UI through herdr's terminal streams, and bring herdr state into the live views, Inbox, settings and history.
+
+**◆ Gate: Watch & steer UAT.** Passes when:
+- Watch any member live on desktop and phone; take control and hand it back
+- Blocked members appear in the Questions dashboard and mobile Inbox
+- Every herdr state change, rotation and takeover is in the history
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P14-01** Terminal bridge: herdr terminal session observe/control → WebSocket with ack-based flow control and takeover | L | FR-66 | — | P11-01, P10-04 |
+| **P14-02** Desktop terminal view with take control and hand back | M | FR-66 | A-v05b | P14-01, P10-07 |
+| **P14-03** Mobile terminal with key bar | M | FR-35, FR-66 | A-M10 | P14-01, P10-08 |
+| **P14-04** Live members view: herdr state, task, context %, structured view | M | NFR-11, FR-66 | A-v05, A-M8 | P13-04, P13-05 |
+| **P14-05** Blocked members in the Questions dashboard and mobile Inbox | S | FR-68, FR-104 | A-v04, A-M3 | P13-05 |
+| **P14-06** Open in herdr: copy herdr --session gbi and focus the member's pane | S | FR-67 | A-v05 | P13-02 |
+| **P14-07** Settings: herdr section (version, session, socket, integrations) | S | FR-63, FR-07 | A-v13 | P11-03 |
+| **P14-08** History events for herdr state changes, rotations and takeovers | S | NFR-10, NFR-14 | A-v12, A-v12b | P13-05, P14-01 |
+
+### P15 · Rev 3 docs, UAT & upstream watch
+
+**Goal:** Update the embedded docs, UAT scripts and screenshots for the herdr flow, schedule the weekly herdr/Ovis upstream review, and settle Windows support.
+
+**◆ Gate: Rev 3 UAT.** Passes when:
+- UAT scripts for every role pass on the herdr flow and regenerate screenshots
+- The first scheduled upstream review has run and recorded its findings
+- Windows support level decided (Q9) and documented
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P15-01** User docs rewrite: install, team, sessions, settings, mobile and CLI for herdr and archetypes | M | FR-130 | A-v14 | P14-04, P12-06 |
+| **P15-02** UAT scripts for the herdr flow per role; regenerate screenshots | L | FR-132, FR-133, FR-131 | A-v14 | P15-01, P11-06 |
+| **P15-03** Weekly upstream review job for herdr and Ovis that opens an issue or PR | S | NFR-31 | — | P10-10 |
+| **P15-04** Windows at herdr's support level · waits on Q9 | M | NFR-01 | — | P11-07 |
+| **P15-05** Rev 3 close-out: retire obsolete tests and text, mockup change log, coverage check | S | FR-01 | — | P15-02 |
+
 ## 5. Open questions schedule
 
 | Question | Answer before | Why |
@@ -267,7 +403,10 @@ The longest chain runs through the **harness spike (P0-04, Q2)**, the adapter in
 | Q1 external access | P0 (P0-07) | MVP default: refuse; full challenge only if needed (P9-07) |
 | Q4 multi-user | before P5-09 | Rehearsals already show a second reviewer (FR-117a) |
 | Q3 handoff threshold and graduation | P9 | Smart handoffs are experimental |
-| Q7 attachable sessions | P9 | Headed sessions are experimental |
+| Q7 attachable sessions | answered (rev 3) | Every session runs in herdr (ADR-009) |
+| Q8 conversation rotation policy | P10 (P10-05) | Needs the spike's cost data; drives P13-07 |
+| Q10 archetype change propagation | P10 (P10-06) | Shapes P12-04 |
+| Q9 Windows support level | P15 (P15-04) | Depends on herdr's Windows beta |
 
 ## 6. Risks
 
@@ -279,7 +418,17 @@ The longest chain runs through the **harness spike (P0-04, Q2)**, the adapter in
 | Attachment viewer rendering untrusted HTML mockups | Script access to the app | Sandboxed iframe with no same-origin access |
 | Subscription rate limits slow the team | Throughput drops | Pause/resume (P3-13), concurrency limits, schedule heavy work off-peak |
 | Scope creep from experimental features | MVP never lands | Experimental work stays in P9 behind flags until a graduation review |
+| herdr API changes (0.9.x, frequent releases) | go-build-it breaks after a herdr update | Types generated from `herdr api schema` (P11-01), capability check at connect, pinned herdr in CI plus a weekly latest-herdr job (P11-07), weekly upstream review (P15-03) |
+| Transcript formats and screen-based state are not documented as stable | Wrong usage or status | Per-harness transcript readers with fixtures (P13-04); herdr state is authoritative; follow Ovis's readers (NFR-30) |
+| Long-running conversations get expensive or degrade | Cost and quality drop | Memory kept in go-build-it, rotation policy (Q8, P13-07), fresh conversation per Lens review (P13-11) |
+| herdr on Windows is beta | Windows lags | Support Windows at herdr's level (Q9, P15-04) |
+| Permission prompts stall unattended members | Work waits on the human | Permission modes and allowlists, optional Claude permission hook (P13-10); blocked members surface in the Inbox (P14-05) |
 
 ## 7. Tracking
 
-Status lives in [`tracker-data.js`](tracker-data.js) and is shown by [`index.html`](index.html). Set a task's `status` to `todo`, `in-progress`, `blocked` or `done` and commit. The task tables in this document are generated from the same data, so regenerate them when tasks are added or renamed.
+Status lives in [`tracker-data.js`](tracker-data.js) and is shown by [`index.html`](index.html). Set a task's `status` to `todo`, `in-progress`, `blocked` or `done` and commit. The task tables in this document are generated from the same data, so regenerate them when tasks are added or renamed:
+
+- `python3 scripts/docs/add_rev3_phases.py`: re-sync requirements and rev 3 tasks into the data, and check coverage
+- `python3 scripts/docs/setstatus.py done P10-04`: set task status
+- `python3 scripts/docs/genmd.py`: regenerate this file
+- `python3 scripts/docs/md2html.py docs/tracker/plan.md docs/tracker/plan.html` (and the same for `docs/requirements.md`): regenerate the HTML views

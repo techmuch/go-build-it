@@ -82,9 +82,9 @@ td:first-child { white-space: nowrap; }
 </ol></nav>
 <main>
 <h1>go-build-it — Requirements</h1>
-<p class="meta">Status: Draft · Last updated: 2026-11-07 (rev. 2: mockup review feedback)</p>
+<p class="meta">Status: Draft · Last updated: 2026-11-08 (rev. 3: herdr as the only agent backend; per-project team members from global archetypes. See [ADR-009](decisions/ADR-009-herdr-backend.md) and [ADR-010](decisions/ADR-010-project-team-members.md))</p>
 <h2 id="1-overview">1. Overview</h2>
-<p>go-build-it is a Go application with an embedded React frontend that manages long-running software project development. It is installed globally on a machine and provides a web UI and a CLI. A team of AI personas and humans works through it to take projects from problem definition to released software. The app coordinates external agent harnesses such as Claude Code, Antigravity and OpenCode, and it drives them headlessly.</p>
+<p>go-build-it is a Go application with an embedded React frontend that manages long-running software project development. It is installed globally on a machine and provides a web UI and a CLI. A team of AI personas and humans works through it to take projects from problem definition to released software. The app coordinates external agent harnesses such as Claude Code, Antigravity and OpenCode. Every harness runs interactively inside [herdr](https://herdr.dev), a terminal workspace manager for coding agents, in a herdr session that go-build-it owns. Opening that session in any terminal shows everything go-build-it is doing, organized by project and team member.</p>
 <h3 id="conventions">Conventions</h3>
 <ul><li>
 <strong><span class="kw kw-SHALL">SHALL</span></strong>: required for the release the requirement is assigned to.
@@ -98,12 +98,16 @@ Requirement IDs (<code>FR-xx</code>, <code>NFR-xx</code>) are stable. Tests, the
 <h2 id="2-glossary">2. Glossary</h2>
 <div class="table-wrap"><table><thead><tr><th>Term</th><th>Definition</th></tr></thead><tbody>
 <tr><td><strong>Project</strong></td><td>A software product managed by go-build-it. It is backed by a git repository and has its own requirements, values, roadmap, task queue and history.</td></tr>
-<tr><td><strong>Team</strong></td><td>A user-defined set of team members assigned to work on one or more projects.</td></tr>
-<tr><td><strong>Team member</strong></td><td>Either an <strong>AI persona</strong> or a <strong>human user</strong>, holding one role.</td></tr>
-<tr><td><strong>AI persona</strong></td><td>A configured agent identity: role, instructions or prompt, assigned harness, model, and any role-specific standards.</td></tr>
+<tr><td><strong>Team</strong></td><td>The team members working on one project. Each project has its own team.</td></tr>
+<tr><td><strong>Team member</strong></td><td>Either an <strong>AI team member</strong> or a <strong>human user</strong>, holding one role in a project.</td></tr>
+<tr><td><strong>Persona archetype</strong></td><td>A global, reusable template for an AI team member: role, base instructions, default harness and model, and role-specific standards. Archetypes do no work themselves.</td></tr>
+<tr><td><strong>AI team member</strong></td><td>An archetype made concrete inside one project, with optional project-specific tuning. It is bound to one harness and model, one long-running harness conversation, one git worktree and one herdr pane. Also called an <em>AI persona</em>.</td></tr>
 <tr><td><strong>Role</strong></td><td>A responsibility within the team. See §4.3.</td></tr>
-<tr><td><strong>Agent harness</strong></td><td>An external agent CLI (e.g. Claude Code, Antigravity, OpenCode, Pi-agent) that go-build-it drives headlessly to carry out a task.</td></tr>
-<tr><td><strong>Session</strong></td><td>One run of a harness working on a task, with its own context window.</td></tr>
+<tr><td><strong>Agent harness</strong></td><td>An external agent CLI (e.g. Claude Code, Antigravity, OpenCode, Pi-agent) that go-build-it runs interactively in a herdr pane to carry out tasks.</td></tr>
+<tr><td><strong>herdr</strong></td><td>The terminal workspace manager that owns every harness process for go-build-it. It reports agent state (working, blocked, done, idle) and exposes a socket API. It is the only agent backend.</td></tr>
+<tr><td><strong>gbi herdr session</strong></td><td>The named herdr session (<code>gbi</code>) that go-build-it starts and supervises. Open it with <code>herdr --session gbi</code>.</td></tr>
+<tr><td><strong>Conversation</strong></td><td>A harness's own resumable conversation (e.g. a Claude Code session ID). Each AI team member keeps one current conversation across tasks until it is rotated.</td></tr>
+<tr><td><strong>Session</strong></td><td>The span of one AI team member working on one task: from the prompt that starts the task to its completion, inside the member's conversation.</td></tr>
 <tr><td><strong>Handoff</strong></td><td>A curated briefing produced when a session ends, mainly when its context window is nearly full. The next session starts from it instead of from a raw memory dump. Smart handoffs are an <strong>experimental</strong> feature; the MVP relies on the harness's own compaction (§8.2).</td></tr>
 <tr><td><strong>Artifact editor</strong></td><td>The view for changing a project artifact, standard or persona definition: chat with an AI agent to make changes, or edit directly in a rich editor. Saving creates a new revision.</td></tr>
 <tr><td><strong>Global standards</strong></td><td>Rules and conventions that apply to every project, e.g. the standard backend stack, frontend stack and test requirements.</td></tr>
@@ -115,11 +119,24 @@ Requirement IDs (<code>FR-xx</code>, <code>NFR-xx</code>) are stable. Tests, the
 </tbody></table></div>
 <h2 id="3-platform-installation-and-runtime">3. Platform, installation and runtime</h2>
 <ul><li>
-<strong class="rid" id="FR-01">FR-01</strong>: The application <span class="kw kw-SHALL">SHALL</span> be a single Go binary with the React frontend embedded.
+<strong class="rid" id="FR-01">FR-01</strong>: The application <span class="kw kw-SHALL">SHALL</span> be a single Go binary with the React frontend embedded. Its one required runtime dependency is herdr (FR-07).
+</li><li>
+<strong class="rid" id="FR-07">FR-07</strong>: go-build-it <span class="kw kw-SHALL">SHALL</span> require herdr and <span class="kw kw-SHALL">SHALL</span> use it as its only agent backend:
+<ul><li>
+It <span class="kw kw-SHALL">SHALL</span> check that herdr is installed and within the supported version range, and <span class="kw kw-SHALL">SHALL</span> guide the user to install or update it (e.g. <code>brew install herdr</code>).
+</li><li>
+It <span class="kw kw-SHALL">SHALL</span> start and supervise a headless herdr server for a named session <code>gbi</code> (<code>herdr server --session gbi</code>), and restart it if it stops.
+</li><li>
+It <span class="kw kw-SHALL">SHALL</span> check that herdr's integration for each enabled harness is installed and current (<code>herdr integration status</code>), and <span class="kw kw-SHALL">SHALL</span> offer to install or update it.
+</li><li>
+It <span class="kw kw-SHALL">SHALL</span> check herdr's advertised API methods at connect time and report a clear error when a required method is missing.
+</li></ul>
+</li><li>
+<strong class="rid" id="FR-08">FR-08</strong>: The background service (FR-02) <span class="kw kw-SHALL">SHALL</span> ensure both go-build-it and its herdr session are running at login. Stopping or updating go-build-it <span class="kw kw-SHALLNOT">SHALL NOT</span> stop running harnesses, because herdr owns them.
 </li><li>
 <strong class="rid" id="FR-02">FR-02</strong>: The application <span class="kw kw-SHALL">SHALL</span> be installable globally on a machine and <span class="kw kw-SHOULD">SHOULD</span> run as a background service (launchd on macOS, systemd on Linux, a Windows service on Windows).
 </li><li>
-<strong class="rid" id="NFR-01">NFR-01</strong>: macOS <span class="kw kw-SHALL">SHALL</span> be the initial target platform. Linux and Windows <span class="kw kw-SHALL">SHALL</span> be supported later. Code <span class="kw kw-SHALLNOT">SHALL NOT</span> assume macOS-only paths, shells or tools without a cross-platform abstraction.
+<strong class="rid" id="NFR-01">NFR-01</strong>: macOS <span class="kw kw-SHALL">SHALL</span> be the initial target platform. Linux and Windows <span class="kw kw-SHALL">SHALL</span> be supported later. Code <span class="kw kw-SHALLNOT">SHALL NOT</span> assume macOS-only paths, shells or tools without a cross-platform abstraction. Platform support <span class="kw kw-SHALL">SHALL</span> follow herdr's: a platform where herdr is in beta (currently Windows) is supported at the same level.
 </li><li>
 <strong class="rid" id="FR-03">FR-03</strong>: All application state <span class="kw kw-SHALL">SHALL</span> live under <code>~/.go-build-it/</code> (<code>%USERPROFILE%\.go-build-it\</code> on Windows). This includes:
 <ul><li>
@@ -129,7 +146,9 @@ the SQLite database
 </li><li>
 logs and session transcripts
 </li></ul>
-</li><li>
+</li></ul>
+<p>  herdr's own state lives in herdr's config directory under its <code>gbi</code> session.</p>
+<ul><li>
 <strong class="rid" id="FR-04">FR-04</strong>: Persistence <span class="kw kw-SHALL">SHALL</span> use SQLite.
 </li><li>
 <strong class="rid" id="FR-05">FR-05</strong>: The application <span class="kw kw-SHALL">SHALL</span> use calendar versioning in the format <code>YYYY.MM.DD.N</code>, where <code>N</code> is the release number for that day, starting at 1. The application is not intended to be consumed as a Go module.
@@ -138,7 +157,7 @@ logs and session transcripts
 <ul><li>
 Releases <span class="kw kw-SHALL">SHALL</span> be verified by checksum and <span class="kw kw-SHOULD">SHOULD</span> be signed.
 </li><li>
-An update <span class="kw kw-SHALLNOT">SHALL NOT</span> be applied while agent sessions are running. It <span class="kw kw-SHALL">SHALL</span> wait for them to finish or for an idle window.
+Because herdr owns the harness processes (FR-08), an update <span class="kw kw-MAY">MAY</span> be applied while AI team members are working; go-build-it <span class="kw kw-SHALL">SHALL</span> reconnect to the gbi herdr session after restarting. Updating herdr itself is left to herdr's own updater or package manager, and go-build-it <span class="kw kw-SHALL">SHALL</span> warn when herdr falls outside the supported range.
 </li><li>
 The previous version <span class="kw kw-SHALL">SHALL</span> be kept so the user can roll back.
 </li><li>
@@ -148,13 +167,23 @@ The user <span class="kw kw-SHALL">SHALL</span> be able to turn automatic update
 <h2 id="4-users-team-and-roles">4. Users, team and roles</h2>
 <h3 id="4-1-team-members">4.1 Team members</h3>
 <ul><li>
-<strong class="rid" id="FR-10">FR-10</strong>: A team member <span class="kw kw-SHALL">SHALL</span> be either an AI persona or a human user.
+<strong class="rid" id="FR-10">FR-10</strong>: A team member <span class="kw kw-SHALL">SHALL</span> be either an AI team member or a human user.
 </li><li>
-<strong class="rid" id="FR-11">FR-11</strong>: The user <span class="kw kw-SHALL">SHALL</span> be able to create, edit and remove teams, and assign teams to projects.
+<strong class="rid" id="FR-11">FR-11</strong>: Each project <span class="kw kw-SHALL">SHALL</span> have its own team. The user <span class="kw kw-SHALL">SHALL</span> be able to add, tune and remove team members per project. There are no global teams.
 </li><li>
-<strong class="rid" id="FR-12">FR-12</strong>: Each AI persona <span class="kw kw-SHALL">SHALL</span> be configurable with: role, instructions, assigned harness, model, and any role-specific standards that add to the global standards.
+<strong class="rid" id="FR-12">FR-12</strong>: The application <span class="kw kw-SHALL">SHALL</span> maintain global <strong>persona archetypes</strong>. Each archetype <span class="kw kw-SHALL">SHALL</span> be configurable with: role, base instructions, default harness, default model, and any role-specific standards that add to the global standards. go-build-it <span class="kw kw-SHALL">SHALL</span> ship a starter archetype for each built-in role (§4.3).
 </li><li>
-<strong class="rid" id="FR-13">FR-13</strong>: Persona definitions <span class="kw kw-SHALL">SHALL</span> be edited in the artifact editor (FR-45a). The user can write the definition directly, or chat with an AI agent that helps develop the persona (e.g. interviews the user, suggests instructions, checks for conflicts with global standards).
+<strong class="rid" id="FR-12a">FR-12a</strong>: An AI team member <span class="kw kw-SHALL">SHALL</span> be created in a project from an archetype. The project <span class="kw kw-MAY">MAY</span> tune it: extra or replacement instructions, a different harness or model, a display name, and project-specific standards. The member <span class="kw kw-SHALL">SHALL</span> keep a link to its archetype and <span class="kw kw-SHALL">SHALL</span> show where it differs.
+</li><li>
+<strong class="rid" id="FR-12b">FR-12b</strong>: When an archetype changes, the application <span class="kw kw-SHALL">SHALL</span> show which project members it affects and <span class="kw kw-SHALL">SHALL</span> let the user apply the change to each of them, keeping their project tuning. Changes <span class="kw kw-SHALLNOT">SHALL NOT</span> be pushed to members silently.
+</li><li>
+<strong class="rid" id="FR-12c">FR-12c</strong>: Tuning made in a project <span class="kw kw-MAY">MAY</span> be promoted back to the archetype, through the artifact editor's normal accept or reject flow.
+</li><li>
+<strong class="rid" id="FR-12d">FR-12d</strong>: Each AI team member <span class="kw kw-SHALL">SHALL</span> be bound to exactly one harness and model, one current harness conversation, one long-lived git worktree, and one herdr pane in the gbi herdr session (§8.1). One member works on one task at a time; more parallel work means more members.
+</li><li>
+<strong class="rid" id="FR-12e">FR-12e</strong>: Human users <span class="kw kw-SHALL">SHALL</span> remain global identities (§4.2). A human <span class="kw kw-SHALL">SHALL</span> hold a role per project.
+</li><li>
+<strong class="rid" id="FR-13">FR-13</strong>: Archetypes and project members' tuning <span class="kw kw-SHALL">SHALL</span> be edited in the artifact editor (FR-45a). The user can write the definition directly, or chat with an AI agent that helps develop it (e.g. interviews the user, suggests instructions, checks for conflicts with global standards).
 </li></ul>
 <h3 id="4-2-access-and-identity">4.2 Access and identity</h3>
 <p>Authentication is delegated to Tailscale. go-build-it does not run its own login system for local or tailnet access.</p>
@@ -296,46 +325,57 @@ documentation requirements
 <h2 id="8-agent-harness-orchestration">8. Agent harness orchestration</h2>
 <h3 id="8-1-harness-integration">8.1 Harness integration</h3>
 <ul><li>
-<strong class="rid" id="FR-60">FR-60</strong>: The application <span class="kw kw-SHALL">SHALL</span> drive agent harnesses headlessly through their command-line interfaces, at the direction of the development team.
+<strong class="rid" id="FR-60">FR-60</strong>: The application <span class="kw kw-SHALL">SHALL</span> run every agent harness interactively in a herdr pane of the gbi herdr session (FR-07), at the direction of the development team. herdr <span class="kw kw-SHALL">SHALL</span> be the only process host: there <span class="kw kw-SHALL">SHALL</span> be no tmux, direct-PTY or headless (<code>-p</code> / <code>stream-json</code>) execution path.
 </li><li>
-<strong class="rid" id="FR-61">FR-61</strong>: Harness support <span class="kw kw-SHALL">SHALL</span> be implemented through an adapter interface providing:
+<strong class="rid" id="FR-61">FR-61</strong>: Harness support <span class="kw kw-SHALL">SHALL</span> be implemented through a harness profile that describes, for each harness:
 <ul><li>
-start a session with a prepared context
+its herdr agent kind and launch arguments (model, permission mode, flags)
 </li><li>
-stream output and events
+how to resume a conversation (e.g. <code>claude --resume &lt;id&gt;</code>)
 </li><li>
-send input
+where its transcript lives and how to read events, messages and context-window usage from it
 </li><li>
-interrupt or cancel
-</li><li>
-report context-window usage
-</li><li>
-report exit status
+how it reports rate or usage limits
 </li></ul>
-</li><li>
+</li></ul>
+<p>  The application <span class="kw kw-SHALL">SHALL</span> start the harness with <code>agent start</code>, send work with <code>agent prompt</code>, follow state through herdr events, interrupt with <code>agent send-keys</code>, and detect exit through pane events.</p>
+<ul><li>
 <strong class="rid" id="FR-62">FR-62</strong>: Initial adapters: <strong>Claude Code</strong> (Anthropic subscription), <strong>Antigravity</strong> (Google / Gemini subscription) and <strong>OpenCode</strong> (open-source harness that works with multiple model providers). Pi-agent and others <span class="kw kw-SHOULD">SHOULD</span> be addable through the same interface.
 </li><li>
 <strong class="rid" id="FR-63">FR-63</strong>: Harnesses and their settings (binary path, model, flags, permission mode) <span class="kw kw-SHALL">SHALL</span> be configurable in the UI and the CLI.
 </li><li>
-<strong class="rid" id="FR-66">FR-66</strong>: The live view of a session <span class="kw kw-SHALL">SHALL</span> offer two modes:
+<strong class="rid" id="FR-66">FR-66</strong>: The live view of an AI team member <span class="kw kw-SHALL">SHALL</span> offer two modes:
 <ul><li>
-a <strong>structured view</strong>: the harness's events rendered natively (edits, commands, test results, messages)
+a <strong>structured view</strong>: events and messages read from the harness's transcript (edits, commands, test results, messages)
 </li><li>
-a <strong>terminal view</strong>: the harness's raw terminal output
+a <strong>terminal view</strong>: the member's herdr pane streamed live to the desktop and mobile UI (herdr <code>terminal session observe</code>), with the option to take control (<code>terminal session control</code>) and type, resize and use keys. Several viewers can watch at once; one controls at a time.
 </li></ul>
 </li><li>
-<strong class="rid" id="FR-67">FR-67</strong>: The application <span class="kw kw-MAY">MAY</span> support <strong>attachable (headed) sessions</strong>: the harness runs interactively in a persistent terminal session that the user can attach to from the desktop or mobile UI, to watch and take control when needed (similar to terminal agent multiplexers such as Herdr and its web front-ends). When the user detaches, control returns to the application.
+<strong class="rid" id="FR-67">FR-67</strong>: The gbi herdr session <span class="kw kw-SHALL">SHALL</span> be organized so that opening it shows everything go-build-it is doing:
+<ul><li>
+one herdr workspace per project, with each AI team member's worktree grouped under it
 </li><li>
-<strong class="rid" id="FR-64">FR-64</strong>: Concurrent sessions on the same project <span class="kw kw-SHOULD">SHOULD</span> work in isolated workspaces, such as git worktrees, so they don't interfere with each other.
+each member's pane labelled with its name, role and current task, plus small status values such as context usage (herdr pane metadata)
+</li><li>
+each project workspace showing a summary such as "2 working · 1 needs you" (herdr workspace metadata)
+</li><li>
+review gates and questions that need the human raised as herdr notifications
+</li></ul>
+</li><li>
+<strong class="rid" id="FR-64">FR-64</strong>: Each AI team member <span class="kw kw-SHALL">SHALL</span> work in its own long-lived git worktree, so concurrent members don't interfere. Each task <span class="kw kw-SHALL">SHALL</span> get a fresh branch in that worktree. The application <span class="kw kw-SHALL">SHALL</span> keep creating worktrees itself and <span class="kw kw-SHALL">SHALL</span> ask herdr to open them grouped under the project workspace.
+</li><li>
+<strong class="rid" id="FR-68">FR-68</strong>: The application <span class="kw kw-SHALL">SHALL</span> treat herdr's agent state as the source of truth for whether a member is working, blocked, done or idle. A <strong>blocked</strong> member <span class="kw kw-SHALL">SHALL</span> appear in the UI as needing the human, linked to its live terminal view. The application <span class="kw kw-SHALLNOT">SHALL NOT</span> try to understand harness dialogs from the screen. It <span class="kw kw-SHOULD">SHOULD</span> avoid permission prompts through permission modes and per-project allowlists, and <span class="kw kw-MAY">MAY</span> use harness hooks (e.g. Claude Code's permission hooks) to offer structured approvals.
+</li><li>
+<strong class="rid" id="FR-69">FR-69</strong>: Each AI team member's conversation <span class="kw kw-SHALL">SHALL</span> continue across tasks until it is rotated (§8.2). After a herdr or machine restart, the application <span class="kw kw-SHALL">SHALL</span> find each member's pane again by its conversation ID and <span class="kw kw-SHALL">SHALL</span> resume or relaunch it.
 </li><li>
 <strong class="rid" id="FR-65">FR-65</strong>: Cost is limited by the user's AI subscriptions, so no budget controls are needed. The application <span class="kw kw-SHALL">SHALL</span> detect subscription rate or usage limits reported by a harness. It <span class="kw kw-SHALL">SHALL</span> then pause the affected work and resume it automatically when the limit resets.
 </li></ul>
 <h3 id="8-2-context-management-and-smart-handoffs">8.2 Context management and smart handoffs</h3>
-<p>For the MVP, sessions <span class="kw kw-SHALL">SHALL</span> rely on each harness's built-in auto-compaction when the context window fills. Smart handoffs (FR-72–FR-74) are an <strong>experimental</strong> feature: off by default and enabled in Settings, globally or per project. FR-70 and FR-71 apply in both modes.</p>
+<p>By default, an AI team member's conversation relies on the harness's built-in auto-compaction when the context window fills. Smart handoffs (FR-72–FR-74) rotate the member to a new conversation instead; they are <strong>experimental</strong>, off by default and enabled in Settings, globally or per project. FR-70, FR-71 and FR-76 apply in both modes.</p>
 <ul><li>
 <strong class="rid" id="FR-70">FR-70</strong>: The application <span class="kw kw-SHALL">SHALL</span> prepare each session's starting context deliberately: the task, the relevant requirements, standards, values, and the incoming handoff (if any). It <span class="kw kw-SHALLNOT">SHALL NOT</span> dump all of the project's history.
 </li><li>
-<strong class="rid" id="FR-71">FR-71</strong>: The application <span class="kw kw-SHALL">SHALL</span> monitor each session's context-window usage while it runs.
+<strong class="rid" id="FR-71">FR-71</strong>: The application <span class="kw kw-SHALL">SHALL</span> monitor each AI team member's context-window usage, read from its harness transcript, and <span class="kw kw-SHALL">SHALL</span> show whether the value is measured or estimated.
 </li><li>
 <strong class="rid" id="FR-72">FR-72</strong>: <em>(Experimental.)</em> When smart handoffs are enabled and usage reaches a configurable threshold (e.g. 70–80%), the application <span class="kw kw-SHALL">SHALL</span> step in and start a smart handoff <strong>before</strong> the harness auto-compacts. When they are disabled, the application <span class="kw kw-SHALL">SHALL</span> record each compaction event in the history.
 </li><li>
@@ -356,6 +396,8 @@ pointers to the relevant files and artifacts (references, not copies)
 </li><li>
 <strong class="rid" id="FR-74">FR-74</strong>: The next session <span class="kw kw-SHALL">SHALL</span> start from the handoff and FR-70's prepared context. Every handoff <span class="kw kw-SHALL">SHALL</span> be stored in the history.
 </li><li>
+<strong class="rid" id="FR-76">FR-76</strong>: A member's lasting knowledge <span class="kw kw-SHALL">SHALL</span> live in go-build-it (persona, project values, decisions, notes from finished tasks), not only in its conversation. The application <span class="kw kw-SHALL">SHALL</span> rotate a member to a new conversation when the rotation policy says so (see Q8), starting it from FR-70's prepared context and the member's notes.
+</li><li>
 <strong class="rid" id="FR-75">FR-75</strong>: Tasks <span class="kw kw-SHOULD">SHOULD</span> be sized so most of them fit in one session. The Project Manager role <span class="kw kw-SHOULD">SHOULD</span> split tasks that repeatedly need handoffs.
 </li></ul>
 <h3 id="8-3-task-queues">8.3 Task queues</h3>
@@ -372,10 +414,18 @@ concurrency limits per project and globally
 </li><li>
 retries
 </li><li>
-assignment of tasks to roles or personas
+assignment of tasks to roles or to specific AI team members
 </li></ul>
 </li><li>
-<strong class="rid" id="FR-82">FR-82</strong>: Queue state <span class="kw kw-SHALL">SHALL</span> survive application and machine restarts. Interrupted sessions <span class="kw kw-SHALL">SHALL</span> be resumed or restarted from their latest handoff.
+<strong class="rid" id="FR-82">FR-82</strong>: Queue state <span class="kw kw-SHALL">SHALL</span> survive application and machine restarts. Work interrupted by a restart <span class="kw kw-SHALL">SHALL</span> continue in the member's resumed conversation (FR-69), or from its latest handoff if the conversation cannot be resumed.
+</li></ul>
+<h3 id="8-4-upstream-tracking">8.4 Upstream tracking</h3>
+<ul><li>
+<strong class="rid" id="NFR-30">NFR-30</strong>: Because go-build-it depends on herdr, it <span class="kw kw-SHALL">SHALL</span> keep a record of the herdr and Ovis (a herdr web client) source revisions last reviewed, what changed, and what go-build-it did about it (<code>docs/upstream/</code>).
+</li><li>
+<strong class="rid" id="NFR-31">NFR-31</strong>: A scheduled review <span class="kw kw-SHOULD">SHOULD</span> run at least weekly. It compares the latest herdr and Ovis sources, herdr's API schema (<code>herdr api schema --json</code>) and changelogs with the recorded revisions, and opens an issue or PR when something affects go-build-it.
+</li><li>
+<strong class="rid" id="NFR-32">NFR-32</strong>: go-build-it's herdr client types <span class="kw kw-SHALL">SHALL</span> be generated from herdr's published API schema, so an incompatible change fails the build. The supported herdr version range <span class="kw kw-SHALL">SHALL</span> be declared in one place and tested in CI.
 </li></ul>
 <h2 id="9-git-github-and-gitlab-workflow">9. Git, GitHub and GitLab workflow</h2>
 <ul><li>
@@ -498,7 +548,7 @@ feedback and design choices
 git operations
 </li></ul>
 </li><li>
-<strong class="rid" id="NFR-11">NFR-11</strong>: It <span class="kw kw-SHALL">SHALL</span> always be possible to determine what the system is currently doing and why. Live views <span class="kw kw-SHALL">SHALL</span> show active sessions, their tasks, and their context usage.
+<strong class="rid" id="NFR-11">NFR-11</strong>: It <span class="kw kw-SHALL">SHALL</span> always be possible to determine what the system is currently doing and why. Live views <span class="kw kw-SHALL">SHALL</span> show active AI team members, their herdr state, their tasks, and their context usage.
 </li><li>
 <strong class="rid" id="NFR-12">NFR-12</strong>: Records <span class="kw kw-SHALL">SHALL</span> be structured so AI agents can analyze the application's own performance. Examples:
 <ul><li>
@@ -539,7 +589,10 @@ time per task
 <tr><td>Q4</td><td>Can multiple humans collaborate on the same projects (e.g. different Tailscale users with different roles), or is it single-user with optional reviewers?</td></tr>
 <tr><td>Q5</td><td>What is the exact default git workflow (branch naming, PR/MR requirements, merge strategy)?</td></tr>
 <tr><td>Q6</td><td>What is the mechanism and channel for auto-updates (GitHub Releases, Homebrew tap, etc.)?</td></tr>
-<tr><td>Q7</td><td>How should attachable (headed) sessions work (FR-67): which terminal multiplexer or PTY approach, and how does the app read context usage and events from an interactive session?</td></tr>
+<tr><td>Q7</td><td>~~How should attachable (headed) sessions work?~~ <strong>Answered (rev 3):</strong> every session runs in herdr; see ADR-009.</td></tr>
+<tr><td>Q8</td><td>~~Conversation rotation policy (FR-76)?~~ <strong>Answered 2026-11-08:</strong> keep one conversation per member across tasks until context reaches the handoff threshold (75%), then rotate, starting from a handoff plus the member's notes. Lens starts a fresh conversation for every review. See ADR-010.</td></tr>
+<tr><td>Q9</td><td>~~Windows support level?~~ <strong>Answered 2026-11-08:</strong> ship Windows at herdr's beta level, with herdr in the Windows CI job. A herdr capability missing on Windows is shown as unavailable there. See ADR-009.</td></tr>
+<tr><td>Q10</td><td>~~Archetype change propagation (FR-12b)?~~ <strong>Answered 2026-11-08:</strong> a proposal per affected member, plus one action to apply the change to every member that has not overridden the changed fields. See ADR-010.</td></tr>
 </tbody></table></div>
 <h2 id="15-out-of-scope-for-now">15. Out of scope (for now)</h2>
 <ul><li>
@@ -550,6 +603,12 @@ Container or VM sandboxing of agents
 Cost and budget tracking beyond detecting subscription limits
 </li><li>
 Consuming go-build-it as a Go module
+</li><li>
+Agent process hosts other than herdr (tmux, a built-in PTY, headless <code>-p</code> / <code>stream-json</code> runs)
+</li><li>
+Driving herdr on remote machines (herdr's saved SSH machines); go-build-it uses the local gbi session only
+</li><li>
+Parsing harness dialogs from the screen to answer them on the user's behalf
 </li></ul>
 </main>
 </div>

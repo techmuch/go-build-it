@@ -74,7 +74,7 @@ td:first-child { white-space: nowrap; }
 </ol></nav>
 <main>
 <h1>go-build-it — Phased delivery plan</h1>
-<p class="meta">Status: Draft · 2026-11-08 · Based on [requirements rev 2](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)</p>
+<p class="meta">Status: Draft · 2026-11-08 · Based on [requirements rev 3](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)</p>
 <h2 id="1-how-this-plan-is-built">1. How this plan is built</h2>
 <ul><li>
 <strong>Approach A is the UI baseline.</strong> Every UI task names the Approach A view it implements (desktop <code>A-v01</code>…<code>A-v14</code> plus detail views <code>02b</code>, <code>03b</code>, <code>04b</code>, <code>05b</code>, <code>12b</code>; mobile <code>A-M1</code>…<code>A-M11</code>).
@@ -86,6 +86,8 @@ td:first-child { white-space: nowrap; }
 <strong>The MVP is the desktop app at the end of P5.</strong> Mobile (P6), observability UI (P7), docs/UAT/auto-update (P8) and experimental features (P9) follow.
 </li><li>
 <strong>Simple path first.</strong> Harness compaction is the MVP default; smart handoffs and attachable headed sessions are experimental (P9), as decided in rev 2.
+</li><li>
+<strong>Rev 3 (P10–P15): herdr and per-project teams.</strong> P0–P9 delivered rev 2. Rev 3 makes [herdr](https://herdr.dev) the only agent backend ([ADR-009](../decisions/ADR-009-herdr-backend.md)) and replaces global teams with per-project team members made from global persona archetypes ([ADR-010](../decisions/ADR-010-project-team-members.md)). It starts with a spike and redesigned mockups (P10), then builds the runtime (P11), teams (P12), members on herdr (P13), the live terminal and UI (P14), and docs, UAT and the upstream watch (P15). Rev 3 phases are not MVP-flagged: the MVP shipped with P5.
 </li><li>
 <strong>Dogfooding from P4.</strong> Once Courier can branch, PR, merge and release (end of P4), go-build-it manages its own remaining phases, and this tracker's data is imported into it.
 </li><li>
@@ -103,6 +105,12 @@ td:first-child { white-space: nowrap; }
 <tr><td>P7</td><td>Observability &amp; self-improvement</td><td></td><td>5</td><td>13</td><td>◆ First retro</td></tr>
 <tr><td>P8</td><td>Docs, UAT, updates &amp; integrations</td><td></td><td>7</td><td>22</td><td>◆ v1 UAT</td></tr>
 <tr><td>P9</td><td>Experimental &amp; expansion</td><td></td><td>8</td><td>44</td><td>◆ Graduation reviews</td></tr>
+<tr><td>P10</td><td>herdr direction: decisions, spike &amp; design</td><td></td><td>11</td><td>24</td><td>◆ herdr direction review</td></tr>
+<tr><td>P11</td><td>herdr runtime foundation</td><td></td><td>7</td><td>19</td><td>◆ Runtime demo</td></tr>
+<tr><td>P12</td><td>Per-project teams from archetypes</td><td></td><td>9</td><td>24</td><td>◆ Team review</td></tr>
+<tr><td>P13</td><td>Team members on herdr</td><td></td><td>13</td><td>39</td><td>◆ Member demo</td></tr>
+<tr><td>P14</td><td>Live terminal &amp; UI</td><td></td><td>8</td><td>21</td><td>◆ Watch &amp; steer UAT</td></tr>
+<tr><td>P15</td><td>Rev 3 docs, UAT &amp; upstream watch</td><td></td><td>5</td><td>16</td><td>◆ Rev 3 UAT</td></tr>
 </tbody></table></div>
 <h2 id="3-critical-path">3. Critical path</h2>
 <ul><li>
@@ -112,7 +120,8 @@ td:first-child { white-space: nowrap; }
 </li><li>
 <strong>After the MVP:</strong> P5 → P6 mobile; P1 history store → P7 observability; P0-12 e2e harness + P5 rehearsals → P8 UAT and docs; P3 sessions view → P9 attachable sessions.
 </li></ul>
-<p>The longest chain runs through the <strong>harness spike (P0-04, Q2)</strong>, the adapter interface, the queue and dispatcher, Courier, and the work review. Start P0-04 first: its findings decide the scope of P3-06 and P3-07.</p>
+<p><strong>Rev 3 chain:</strong> P10 requirements and ADRs → P10-04 herdr spike → P11-01 herdr client → P11-02 session supervisor → P13-02 member pane lifecycle → P13-03 dispatch → P13-13 removal of tmux and headless runs → P14 live terminal → P15 UAT. P12 (teams) runs in parallel with P11 and must land before P13-02. Mockups (P10-07, P10-08) gate the UI tasks in P12 and P14.</p>
+<p>The longest rev 2 chain ran through the <strong>harness spike (P0-04, Q2)</strong>, the adapter interface, the queue and dispatcher, Courier, and the work review. Start P0-04 first: its findings decide the scope of P3-06 and P3-07.</p>
 <h2 id="4-phases-in-detail">4. Phases in detail</h2>
 <h3 id="p0-foundations-decisions-mvp">P0 · Foundations &amp; decisions (MVP)</h3>
 <p><strong>Goal:</strong> Lock the requirements and UI baseline, answer the questions that block building, and set up the repo, CI, standards and design kit.</p>
@@ -333,6 +342,135 @@ Linux and Windows pass the UAT suite
 <tr><td><strong>P9-07</strong> External interface challenge (if Q1 allows external access) ✅ · waits on Q1</td><td>M</td><td>FR-18</td><td>—</td><td>P1-06</td></tr>
 <tr><td><strong>P9-08</strong> Multi-user roles and review assignment ✅ · waits on Q4</td><td>L</td><td>FR-17, FR-117a</td><td>—</td><td>P5-09</td></tr>
 </tbody></table></div>
+<h3 id="p10-herdr-direction-decisions-spike-design">P10 · herdr direction: decisions, spike &amp; design</h3>
+<p><strong>Goal:</strong> Record rev 3 (herdr as the only backend, per-project team members from archetypes), prove the herdr integration with a spike, decide the open questions, and redesign the affected mockups before building.</p>
+<p><strong>◆ Gate: herdr direction review.</strong> Passes when:</p>
+<ul><li>
+Requirements rev 3, ADR-009 and ADR-010 approved by the owner
+</li><li>
+Spike: a Claude member in the gbi herdr session takes a prompt, finishes, reports its conversation ID and usage, and streams live to a browser
+</li><li>
+Q8 and Q10 decided (Q9 can wait for P15)
+</li><li>
+Rev 3 mockups (desktop, mobile, herdr layout) reviewed
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P10-01</strong> Requirements rev 3: herdr backend, per-project team members, upstream tracking ✅</td><td>M</td><td>FR-01, FR-07</td><td>—</td><td>—</td></tr>
+<tr><td><strong>P10-02</strong> ADR-009: herdr is the only agent backend; ADR-008 superseded ✅</td><td>S</td><td>FR-60, FR-07</td><td>—</td><td>P10-01</td></tr>
+<tr><td><strong>P10-03</strong> ADR-010: per-project team members from global persona archetypes ✅</td><td>S</td><td>FR-11, FR-12</td><td>—</td><td>P10-01</td></tr>
+<tr><td><strong>P10-04</strong> Spike: gbi herdr session, agent start + prompt --wait, agent_session → transcript usage, terminal observe → xterm.js</td><td>M</td><td>FR-60, FR-61, FR-66, FR-71</td><td>—</td><td>P10-02</td></tr>
+<tr><td><strong>P10-05</strong> Decide conversation rotation policy from spike cost data ✅ · waits on Q8</td><td>S</td><td>FR-76</td><td>—</td><td>P10-04</td></tr>
+<tr><td><strong>P10-06</strong> Decide how archetype changes reach project members ✅ · waits on Q10</td><td>S</td><td>FR-12b</td><td>—</td><td>P10-03</td></tr>
+<tr><td><strong>P10-07</strong> Mockups rev 3, desktop: live members, live terminal, archetypes, project team, herdr settings and setup, card and overview team panel, queue assignment</td><td>L</td><td>FR-34, FR-12a, FR-66, FR-67</td><td>A-v01, A-v02, A-v05, A-v05b, A-v06, A-v10, A-v10b, A-v13, A-v15</td><td>P10-02, P10-03</td></tr>
+<tr><td><strong>P10-08</strong> Mockups rev 3, mobile: members, terminal control and takeover, project team, blocked members in Inbox</td><td>M</td><td>FR-35, FR-66</td><td>A-M2, A-M3, A-M8, A-M10</td><td>P10-07</td></tr>
+<tr><td><strong>P10-09</strong> herdr layout spec: what herdr --session gbi shows (workspaces, grouped worktrees, pane labels, tokens, summaries, notifications)</td><td>S</td><td>FR-67</td><td>—</td><td>P10-04</td></tr>
+<tr><td><strong>P10-10</strong> Upstream baseline: docs/upstream/ with herdr and Ovis revisions reviewed and findings</td><td>S</td><td>NFR-30</td><td>—</td><td>P10-02</td></tr>
+<tr><td><strong>P10-11</strong> Docs tooling in the repo: tracker, plan and HTML generators under scripts/docs ✅</td><td>S</td><td></td><td>—</td><td>—</td></tr>
+</tbody></table></div>
+<h3 id="p11-herdr-runtime-foundation">P11 · herdr runtime foundation</h3>
+<p><strong>Goal:</strong> go-build-it owns and supervises the gbi herdr session: generated client, version and capability checks, onboarding and integrations, login service, event reconciliation, fake harness, CI with herdr on every platform.</p>
+<p><strong>◆ Gate: Runtime demo.</strong> Passes when:</p>
+<ul><li>
+Login starts go-build-it and the gbi herdr session; restarting go-build-it leaves agents running
+</li><li>
+Doctor shows herdr version, session and integration status, and fixes outdated integrations
+</li><li>
+CI is green on macOS, Linux and Windows with a pinned herdr
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P11-01</strong> herdr client: socket/named-pipe NDJSON transport, types generated from herdr api schema, ping capability check, supported version range</td><td>M</td><td>NFR-32, FR-07</td><td>—</td><td>P10-04</td></tr>
+<tr><td><strong>P11-02</strong> Supervise herdr server --session gbi: start, health, restart, stop</td><td>M</td><td>FR-07</td><td>—</td><td>P11-01</td></tr>
+<tr><td><strong>P11-03</strong> Doctor and onboarding: herdr install and version, integration status, install or update integrations</td><td>M</td><td>FR-07</td><td>A-v15, A-v13</td><td>P11-01, P10-07</td></tr>
+<tr><td><strong>P11-04</strong> Login service brings up go-build-it and the gbi session; go-build-it restarts and updates leave agents running</td><td>S</td><td>FR-08, FR-02, FR-06</td><td>—</td><td>P11-02</td></tr>
+<tr><td><strong>P11-05</strong> Event subscription and snapshot reconciler with events_lost recovery</td><td>M</td><td>NFR-11, FR-68</td><td>—</td><td>P11-01</td></tr>
+<tr><td><strong>P11-06</strong> Fake harness in herdr: reports state with pane.report_agent and writes a transcript</td><td>M</td><td>FR-61</td><td>—</td><td>P11-01</td></tr>
+<tr><td><strong>P11-07</strong> CI installs a pinned herdr on macOS, Linux and Windows; weekly job against latest herdr</td><td>M</td><td>NFR-32, NFR-01</td><td>—</td><td>P11-06</td></tr>
+</tbody></table></div>
+<h3 id="p12-per-project-teams-from-archetypes">P12 · Per-project teams from archetypes</h3>
+<p><strong>Goal:</strong> Replace global teams and personas with global persona archetypes and per-project team members that can be tuned, compared with their archetype, and promoted back.</p>
+<p><strong>◆ Gate: Team review.</strong> Passes when:</p>
+<ul><li>
+Every imported project has a team made from starter archetypes
+</li><li>
+A member's tuning, its difference from the archetype, and an archetype change applied per member are shown
+</li><li>
+Each member's instruction file is generated in its worktree
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P12-01</strong> Schema: archetypes and project_members replace global teams and personas</td><td>M</td><td>FR-11, FR-12, FR-12d, FR-12e</td><td>—</td><td>P10-03</td></tr>
+<tr><td><strong>P12-02</strong> Starter archetype per built-in role</td><td>S</td><td>FR-12, FR-25</td><td>—</td><td>P12-01</td></tr>
+<tr><td><strong>P12-03</strong> API, CLI and MCP: archetypes, project members (add, tune, remove), human roles per project</td><td>M</td><td>FR-30, FR-12a, FR-12e</td><td>—</td><td>P12-01</td></tr>
+<tr><td><strong>P12-04</strong> Archetype change review: affected members, per-member apply keeping tuning · waits on Q10</td><td>M</td><td>FR-12b</td><td>A-v10</td><td>P12-03, P10-06</td></tr>
+<tr><td><strong>P12-05</strong> Promote member tuning to its archetype through the artifact editor</td><td>S</td><td>FR-12c, FR-13</td><td>A-v03b</td><td>P12-03</td></tr>
+<tr><td><strong>P12-06</strong> Archetypes library and project Team tab with member detail and tuning</td><td>L</td><td>FR-13, FR-12a, FR-10</td><td>A-v10, A-v10b</td><td>P12-03, P10-07</td></tr>
+<tr><td><strong>P12-07</strong> Per-member instruction file generated in the member's worktree</td><td>S</td><td>FR-53</td><td>—</td><td>P12-01</td></tr>
+<tr><td><strong>P12-08</strong> Queue assignment to a role or a specific member; dispatcher picks a free member</td><td>M</td><td>FR-81</td><td>A-v06</td><td>P12-01</td></tr>
+<tr><td><strong>P12-09</strong> Catalog card and overview show the project team and each member's herdr state</td><td>S</td><td>FR-41</td><td>A-v01, A-v02, A-M2</td><td>P12-06, P11-05</td></tr>
+</tbody></table></div>
+<h3 id="p13-team-members-on-herdr">P13 · Team members on herdr</h3>
+<p><strong>Goal:</strong> Run every AI team member as a long-running harness in its herdr pane: profiles, pane lifecycle, dispatch, transcripts, status, limits, conversation rotation, reconnection and labels. Remove tmux and headless runs.</p>
+<p><strong>◆ Gate: Member demo.</strong> Passes when:</p>
+<ul><li>
+Claude Code, Antigravity and Pi members each finish a task end to end through herdr, reviewed by Lens
+</li><li>
+A blocked member shows as needing the human; herdr restart resumes members in their conversations
+</li><li>
+herdr --session gbi shows every project and member labelled with role, task and context %
+</li><li>
+No tmux or stream-json code remains
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P13-01</strong> Harness profiles: Claude Code, Antigravity, Pi, OpenCode (kind, launch and resume args, transcript reader, limit signals)</td><td>L</td><td>FR-61, FR-62, FR-63</td><td>—</td><td>P11-01</td></tr>
+<tr><td><strong>P13-02</strong> Member pane lifecycle: workspace per project, member worktree opened grouped, agent start, name, release</td><td>M</td><td>FR-12d, FR-64, FR-67</td><td>—</td><td>P12-01, P11-02</td></tr>
+<tr><td><strong>P13-03</strong> Dispatch: write .gbi-task.md, agent prompt --wait, hand completion to Courier and Lens</td><td>M</td><td>FR-60, FR-70</td><td>—</td><td>P13-02, P12-08</td></tr>
+<tr><td><strong>P13-04</strong> Transcript readers: structured events, messages and usage (measured or estimated) per harness</td><td>L</td><td>FR-66, FR-71, NFR-10</td><td>—</td><td>P13-01</td></tr>
+<tr><td><strong>P13-05</strong> Status mapping: herdr state drives session and task state; blocked becomes a needs-you item</td><td>M</td><td>FR-68</td><td>—</td><td>P11-05, P13-02</td></tr>
+<tr><td><strong>P13-06</strong> Rate and usage limit detection with pause and auto-resume</td><td>S</td><td>FR-65</td><td>—</td><td>P13-04</td></tr>
+<tr><td><strong>P13-07</strong> Conversation continuity and rotation per policy; smart handoff starts the new conversation · waits on Q8</td><td>M</td><td>FR-69, FR-76, FR-72, FR-73, FR-74</td><td>—</td><td>P13-04, P10-05</td></tr>
+<tr><td><strong>P13-08</strong> Reconnect after herdr or machine restart by conversation ID; queue resumes</td><td>M</td><td>FR-69, FR-82</td><td>—</td><td>P13-05</td></tr>
+<tr><td><strong>P13-09</strong> herdr labels: pane metadata (name, role, task, context %), workspace summaries, notifications for gates and questions</td><td>S</td><td>FR-67</td><td>—</td><td>P13-02, P10-09</td></tr>
+<tr><td><strong>P13-10</strong> Permission prompts: permission modes, per-project allowlists, optional Claude permission hook as structured approval</td><td>M</td><td>FR-68</td><td>—</td><td>P13-05</td></tr>
+<tr><td><strong>P13-11</strong> Lens reviews run in a fresh conversation per review</td><td>S</td><td>FR-54, FR-112</td><td>—</td><td>P13-03</td></tr>
+<tr><td><strong>P13-12</strong> Interrupt, cancel and restart a member through herdr</td><td>S</td><td>FR-61</td><td>—</td><td>P13-02</td></tr>
+<tr><td><strong>P13-13</strong> Remove tmux mode, attachable_sessions flag and the headless stream-json path</td><td>S</td><td>FR-60</td><td>—</td><td>P13-03, P13-04</td></tr>
+</tbody></table></div>
+<h3 id="p14-live-terminal-ui">P14 · Live terminal &amp; UI</h3>
+<p><strong>Goal:</strong> Watch and steer any team member from the desktop and mobile UI through herdr's terminal streams, and bring herdr state into the live views, Inbox, settings and history.</p>
+<p><strong>◆ Gate: Watch &amp; steer UAT.</strong> Passes when:</p>
+<ul><li>
+Watch any member live on desktop and phone; take control and hand it back
+</li><li>
+Blocked members appear in the Questions dashboard and mobile Inbox
+</li><li>
+Every herdr state change, rotation and takeover is in the history
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P14-01</strong> Terminal bridge: herdr terminal session observe/control → WebSocket with ack-based flow control and takeover</td><td>L</td><td>FR-66</td><td>—</td><td>P11-01, P10-04</td></tr>
+<tr><td><strong>P14-02</strong> Desktop terminal view with take control and hand back</td><td>M</td><td>FR-66</td><td>A-v05b</td><td>P14-01, P10-07</td></tr>
+<tr><td><strong>P14-03</strong> Mobile terminal with key bar</td><td>M</td><td>FR-35, FR-66</td><td>A-M10</td><td>P14-01, P10-08</td></tr>
+<tr><td><strong>P14-04</strong> Live members view: herdr state, task, context %, structured view</td><td>M</td><td>NFR-11, FR-66</td><td>A-v05, A-M8</td><td>P13-04, P13-05</td></tr>
+<tr><td><strong>P14-05</strong> Blocked members in the Questions dashboard and mobile Inbox</td><td>S</td><td>FR-68, FR-104</td><td>A-v04, A-M3</td><td>P13-05</td></tr>
+<tr><td><strong>P14-06</strong> Open in herdr: copy herdr --session gbi and focus the member's pane</td><td>S</td><td>FR-67</td><td>A-v05</td><td>P13-02</td></tr>
+<tr><td><strong>P14-07</strong> Settings: herdr section (version, session, socket, integrations)</td><td>S</td><td>FR-63, FR-07</td><td>A-v13</td><td>P11-03</td></tr>
+<tr><td><strong>P14-08</strong> History events for herdr state changes, rotations and takeovers</td><td>S</td><td>NFR-10, NFR-14</td><td>A-v12, A-v12b</td><td>P13-05, P14-01</td></tr>
+</tbody></table></div>
+<h3 id="p15-rev-3-docs-uat-upstream-watch">P15 · Rev 3 docs, UAT &amp; upstream watch</h3>
+<p><strong>Goal:</strong> Update the embedded docs, UAT scripts and screenshots for the herdr flow, schedule the weekly herdr/Ovis upstream review, and settle Windows support.</p>
+<p><strong>◆ Gate: Rev 3 UAT.</strong> Passes when:</p>
+<ul><li>
+UAT scripts for every role pass on the herdr flow and regenerate screenshots
+</li><li>
+The first scheduled upstream review has run and recorded its findings
+</li><li>
+Windows support level decided (Q9) and documented
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P15-01</strong> User docs rewrite: install, team, sessions, settings, mobile and CLI for herdr and archetypes</td><td>M</td><td>FR-130</td><td>A-v14</td><td>P14-04, P12-06</td></tr>
+<tr><td><strong>P15-02</strong> UAT scripts for the herdr flow per role; regenerate screenshots</td><td>L</td><td>FR-132, FR-133, FR-131</td><td>A-v14</td><td>P15-01, P11-06</td></tr>
+<tr><td><strong>P15-03</strong> Weekly upstream review job for herdr and Ovis that opens an issue or PR</td><td>S</td><td>NFR-31</td><td>—</td><td>P10-10</td></tr>
+<tr><td><strong>P15-04</strong> Windows at herdr's support level · waits on Q9</td><td>M</td><td>NFR-01</td><td>—</td><td>P11-07</td></tr>
+<tr><td><strong>P15-05</strong> Rev 3 close-out: retire obsolete tests and text, mockup change log, coverage check</td><td>S</td><td>FR-01</td><td>—</td><td>P15-02</td></tr>
+</tbody></table></div>
 <h2 id="5-open-questions-schedule">5. Open questions schedule</h2>
 <div class="table-wrap"><table><thead><tr><th>Question</th><th>Answer before</th><th>Why</th></tr></thead><tbody>
 <tr><td>Q2 harness headless + usage</td><td>P0 (spike P0-04)</td><td>Sets adapter scope for OpenCode and Antigravity</td></tr>
@@ -341,7 +479,10 @@ Linux and Windows pass the UAT suite
 <tr><td>Q1 external access</td><td>P0 (P0-07)</td><td>MVP default: refuse; full challenge only if needed (P9-07)</td></tr>
 <tr><td>Q4 multi-user</td><td>before P5-09</td><td>Rehearsals already show a second reviewer (FR-117a)</td></tr>
 <tr><td>Q3 handoff threshold and graduation</td><td>P9</td><td>Smart handoffs are experimental</td></tr>
-<tr><td>Q7 attachable sessions</td><td>P9</td><td>Headed sessions are experimental</td></tr>
+<tr><td>Q7 attachable sessions</td><td>answered (rev 3)</td><td>Every session runs in herdr (ADR-009)</td></tr>
+<tr><td>Q8 conversation rotation policy</td><td>P10 (P10-05)</td><td>Needs the spike's cost data; drives P13-07</td></tr>
+<tr><td>Q10 archetype change propagation</td><td>P10 (P10-06)</td><td>Shapes P12-04</td></tr>
+<tr><td>Q9 Windows support level</td><td>P15 (P15-04)</td><td>Depends on herdr's Windows beta</td></tr>
 </tbody></table></div>
 <h2 id="6-risks">6. Risks</h2>
 <div class="table-wrap"><table><thead><tr><th>Risk</th><th>Effect</th><th>Mitigation</th></tr></thead><tbody>
@@ -351,9 +492,23 @@ Linux and Windows pass the UAT suite
 <tr><td>Attachment viewer rendering untrusted HTML mockups</td><td>Script access to the app</td><td>Sandboxed iframe with no same-origin access</td></tr>
 <tr><td>Subscription rate limits slow the team</td><td>Throughput drops</td><td>Pause/resume (P3-13), concurrency limits, schedule heavy work off-peak</td></tr>
 <tr><td>Scope creep from experimental features</td><td>MVP never lands</td><td>Experimental work stays in P9 behind flags until a graduation review</td></tr>
+<tr><td>herdr API changes (0.9.x, frequent releases)</td><td>go-build-it breaks after a herdr update</td><td>Types generated from <code>herdr api schema</code> (P11-01), capability check at connect, pinned herdr in CI plus a weekly latest-herdr job (P11-07), weekly upstream review (P15-03)</td></tr>
+<tr><td>Transcript formats and screen-based state are not documented as stable</td><td>Wrong usage or status</td><td>Per-harness transcript readers with fixtures (P13-04); herdr state is authoritative; follow Ovis's readers (NFR-30)</td></tr>
+<tr><td>Long-running conversations get expensive or degrade</td><td>Cost and quality drop</td><td>Memory kept in go-build-it, rotation policy (Q8, P13-07), fresh conversation per Lens review (P13-11)</td></tr>
+<tr><td>herdr on Windows is beta</td><td>Windows lags</td><td>Support Windows at herdr's level (Q9, P15-04)</td></tr>
+<tr><td>Permission prompts stall unattended members</td><td>Work waits on the human</td><td>Permission modes and allowlists, optional Claude permission hook (P13-10); blocked members surface in the Inbox (P14-05)</td></tr>
 </tbody></table></div>
 <h2 id="7-tracking">7. Tracking</h2>
-<p>Status lives in [<code>tracker-data.js</code>](tracker-data.js) and is shown by [<code>index.html</code>](index.html). Set a task's <code>status</code> to <code>todo</code>, <code>in-progress</code>, <code>blocked</code> or <code>done</code> and commit. The task tables in this document are generated from the same data, so regenerate them when tasks are added or renamed.</p>
+<p>Status lives in [<code>tracker-data.js</code>](tracker-data.js) and is shown by [<code>index.html</code>](index.html). Set a task's <code>status</code> to <code>todo</code>, <code>in-progress</code>, <code>blocked</code> or <code>done</code> and commit. The task tables in this document are generated from the same data, so regenerate them when tasks are added or renamed:</p>
+<ul><li>
+<code>python3 scripts/docs/add_rev3_phases.py</code>: re-sync requirements and rev 3 tasks into the data, and check coverage
+</li><li>
+<code>python3 scripts/docs/setstatus.py done P10-04</code>: set task status
+</li><li>
+<code>python3 scripts/docs/genmd.py</code>: regenerate this file
+</li><li>
+<code>python3 scripts/docs/md2html.py docs/tracker/plan.md docs/tracker/plan.html</code> (and the same for <code>docs/requirements.md</code>): regenerate the HTML views
+</li></ul>
 </main>
 </div>
 </body>
