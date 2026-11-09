@@ -10,6 +10,7 @@ import { attachmentsFor } from '../pages/Artifacts';
 import './mobile.css';
 import { clickable, useGlobalKeys } from '../keys';
 import { LiveTerminal } from '../terminal';
+import { LessonSteps, useLessons, useLesson, type Lesson } from '../learn';
 
 function Tabbar({ on }: { on: string }) {
   const { data: inbox } = useData<any[]>(() => api.inbox.list(), [], (e) => /^(question|review|rehearsal|options|value)\./.test(e.type));
@@ -225,6 +226,7 @@ function More() {
   const upd = sys?.update?.updating ? ' · updating…' : sys?.update?.newer ? ` · update ready: ${sys.update.latest}` : '';
   return <Screen title="More" sub={<button type="button" className="lnk m-sub" style={{ color: 'inherit', padding: 0 }} onClick={() => navigate('/m/changelog')} data-testid="version-link">v{sys?.version || ''}{upd} ›</button>} tab="more">
     <div className="m-flush">
+      <div className="m-li" {...clickable(() => navigate('/m/learn'))} data-testid="m-learn"><span>🎓 Learn</span><span className="muted">›</span></div>
       {[['👥 Team & personas', '/team'], ['📐 Global standards', '/standards'], ['☰ Task queue', '/queue'], ['🕘 History & insights', '/history'], ['⚙ Settings', '/settings'], ['🖥 Desktop UI', '/']].map(([l, to]) => <a key={to} className="m-li" href={to}><span>{l}</span><span className="muted">›</span></a>)}
       <div className="m-label">Docs</div>{(docs || []).map((d) => <div key={d.slug} className="m-li" {...clickable(() => setDoc(d.slug))}><span>📖 {d.title}</span><span className="muted">›</span></div>)}
       <div className="m-label">Theme</div><div className="m-li"><span className="seg"><button type="button" onClick={() => setTheme('light')}>Light</button><button type="button" onClick={() => setTheme('dark')}>Dark</button></span></div>
@@ -243,13 +245,36 @@ function ChangelogScreen() {
   </Screen>;
 }
 
+// M13 · Learn (FR-134–FR-136): lessons and progress; steps tick themselves off as on desktop.
+function LearnScreen() {
+  const { data, reload } = useLessons();
+  const [open, setOpen] = useState('');
+  const { data: one, setData } = useLesson(open || undefined);
+  const { run } = useAction();
+  const ls = data?.lessons || [];
+  const done = ls.filter((l) => l.total > 0 && l.done === l.total).length;
+  const start = async (l: Lesson) => { if (!l.started) await run(() => api.learn.start(l.slug)); setOpen(l.slug); reload(); };
+  const l = one?.lesson;
+  return <Screen title="Learn" sub={data ? `${done} of ${ls.length} done${data.practice ? ' · practice project: ' + data.practice.name : ''}` : ''} back="/m/more" tab="more">
+    {!data ? <Loading what="the lessons" /> : <>
+      {!data.practice && <div className="m-card small">Lessons use the practice project. <button type="button" className="btn p sm" onClick={() => run(() => api.learn.practice({}), 'Practice project created').then(reload)}>Create it</button></div>}
+      {l && <div className="m-card small" data-testid="m-lesson"><h4 style={{ margin: '0 0 4px' }}>{l.done === l.total ? '✅' : '▶'} {l.number} · {l.title}</h4>
+        <div className="bar"><i style={{ width: `${l.total ? (l.done / l.total) * 100 : 0}%` }} /></div>
+        <LessonSteps lesson={l} practice={one!.practice} mobile onDone={(n) => run(() => api.learn.done(l.slug, { step: n })).then((d: any) => d && setData(d))} />
+        {l.desktopOnly && <div className="muted" style={{ marginTop: 6 }}>Most of this lesson is on the desktop UI.</div>}</div>}
+      <div className="m-flush">{ls.map((x) => <div key={x.slug} className="m-li" {...clickable(() => start(x))} data-lesson={x.slug}>
+        <span>{x.total && x.done === x.total ? '✅ ' : x.started ? '▶ ' : ''}{x.number} · {x.title}</span><span className="muted small">{x.started && x.done < x.total ? `${Math.round((x.done / x.total) * 100)}%` : `${x.minutes} min`} ›</span></div>)}</div>
+    </>}
+  </Screen>;
+}
+
 export function MobileApp() {
   const path = usePath();
   useGlobalKeys();
   const routes: [string, (p: any) => JSX.Element][] = [
     ['/m', () => <Home />], ['/m/projects/:id', (p) => <ProjectStatus id={p.id} />], ['/m/inbox', () => <Inbox />], ['/m/q/:id', (p) => <Answer id={p.id} />],
     ['/m/review/:id', (p) => <ReviewScreen id={p.id} />], ['/m/rehearsal/:id', (p) => <RehearsalStep id={p.id} />], ['/m/options/:id', (p) => <OptionScreen id={p.id} />],
-    ['/m/sessions', () => <SessionsScreen />], ['/m/sessions/:sid', (p) => <Terminal sid={p.sid} />], ['/m/more', () => <More />], ['/m/changelog', () => <ChangelogScreen />],
+    ['/m/sessions', () => <SessionsScreen />], ['/m/sessions/:sid', (p) => <Terminal sid={p.sid} />], ['/m/more', () => <More />], ['/m/changelog', () => <ChangelogScreen />], ['/m/learn', () => <LearnScreen />],
   ];
   for (const [pat, r] of routes) { const m = match(pat, path.replace(/\/$/, '') || '/m'); if (m) return <div className="m-root">{r(m)}</div>; }
   return <div className="m-root"><Home /></div>;

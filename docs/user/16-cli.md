@@ -1,5 +1,5 @@
 section: Reference
-reqs: FR-30, FR-31, FR-32, FR-33
+reqs: FR-137, FR-30, FR-31, FR-32, FR-33
 # CLI, API and MCP
 
 Every UI action is an API call with a matching CLI command: `gbi help` lists them, and `gbi help <group>` shows flags. Add `--json` for machine-readable output.
@@ -11,8 +11,13 @@ gbi questions ask --task T-12 --blocking --title "Per trail or per region?"
 gbi reviews verdict R-3 --verdict approve
 gbi members list ledgerly
 gbi members restart forge@ledgerly --fresh
-gbi herdr doctor
+gbi doctor                       # static and live checks, no server needed (gbi doctor --json --fix for agents)
+gbi doctor --tier harness        # also start each harness in herdr
+gbi herdr doctor                 # the same checks, run by the server
 gbi changelog
+gbi learn list                   # lessons and your progress; gbi learn practice [--reset|--remove]
+gbi learn done setup --step 3    # tick off a step yourself
+gbi agent guide                  # the guide for AI agents driving gbi (no server needed)
 gbi updates install && gbi updates job
 ```
 

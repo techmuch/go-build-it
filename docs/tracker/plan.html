@@ -74,7 +74,7 @@ td:first-child { white-space: nowrap; }
 </ol></nav>
 <main>
 <h1>go-build-it — Phased delivery plan</h1>
-<p class="meta">Status: Draft · 2026-11-09 · Based on [requirements rev 3](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)</p>
+<p class="meta">Status: Draft · 2026-11-09 · Based on [requirements rev 5](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)</p>
 <h2 id="1-how-this-plan-is-built">1. How this plan is built</h2>
 <ul><li>
 <strong>Approach A is the UI baseline.</strong> Every UI task names the Approach A view it implements (desktop <code>A-v01</code>…<code>A-v14</code> plus detail views <code>02b</code>, <code>03b</code>, <code>04b</code>, <code>05b</code>, <code>12b</code>; mobile <code>A-M1</code>…<code>A-M11</code>).
@@ -88,6 +88,10 @@ td:first-child { white-space: nowrap; }
 <strong>Simple path first.</strong> Harness compaction is the MVP default; smart handoffs and attachable headed sessions are experimental (P9), as decided in rev 2.
 </li><li>
 <strong>Rev 3 (P10–P15): herdr and per-project teams.</strong> P0–P9 delivered rev 2. Rev 3 makes [herdr](https://herdr.dev) the only agent backend ([ADR-009](../decisions/ADR-009-herdr-backend.md)) and replaces global teams with per-project team members made from global persona archetypes ([ADR-010](../decisions/ADR-010-project-team-members.md)). It starts with a spike and redesigned mockups (P10), then builds the runtime (P11), teams (P12), members on herdr (P13), the live terminal and UI (P14), and docs, UAT and the upstream watch (P15). Rev 3 phases are not MVP-flagged: the MVP shipped with P5.
+</li><li>
+<strong>Rev 4 (P16): change log and guided updates</strong> ([ADR-011](../decisions/ADR-011-changelog-guided-updates.md)).
+</li><li>
+<strong>Rev 5 (P17–P18): doctor, AI-agent install and Learn</strong> ([ADR-012](../decisions/ADR-012-doctor-and-learning.md)). P17 makes the doctor prove that gbi can start herdr and a harness, and explain failures to a person or an AI agent; it adds the install that works from the GitHub URL alone. P18 adds lessons with a coach panel and a practice project, driving gbi from your AI harness, and <em>How go-build-it thinks</em>.
 </li><li>
 <strong>Dogfooding from P4.</strong> Once Courier can branch, PR, merge and release (end of P4), go-build-it manages its own remaining phases, and this tracker's data is imported into it.
 </li><li>
@@ -112,6 +116,8 @@ td:first-child { white-space: nowrap; }
 <tr><td>P14</td><td>Live terminal &amp; UI</td><td></td><td>8</td><td>21</td><td>◆ Watch &amp; steer UAT</td></tr>
 <tr><td>P15</td><td>Rev 3 docs, UAT &amp; upstream watch</td><td></td><td>5</td><td>16</td><td>◆ Rev 3 UAT</td></tr>
 <tr><td>P16</td><td>Change log &amp; guided updates</td><td></td><td>11</td><td>19</td><td>◆ Update UAT</td></tr>
+<tr><td>P17</td><td>Doctor &amp; AI-agent install</td><td></td><td>10</td><td>22</td><td>◆ Doctor UAT</td></tr>
+<tr><td>P18</td><td>Learn: lessons, practice project, harness control</td><td></td><td>12</td><td>33</td><td>◆ Learn UAT</td></tr>
 </tbody></table></div>
 <h2 id="3-critical-path">3. Critical path</h2>
 <ul><li>
@@ -496,6 +502,56 @@ A failed verification leaves the running version untouched and offers Try again;
 <tr><td><strong>P16-09</strong> Mobile change log screen from the version on More ✅</td><td>S</td><td>FR-06b, FR-35</td><td>A-M12, A-M9</td><td>P16-08</td></tr>
 <tr><td><strong>P16-10</strong> End-to-end update test against a fake signed release with a real restart (scripts/update_e2e.sh, web/e2e/update.spec.ts) ✅</td><td>M</td><td>FR-06d, FR-132</td><td>A-v16</td><td>P16-05, P16-08</td></tr>
 <tr><td><strong>P16-11</strong> Docs: settings and updates page, keyboard (g v), CLI, README release steps; keyboard test ✅</td><td>S</td><td>FR-130, FR-06a</td><td>A-v14</td><td>P16-08</td></tr>
+</tbody></table></div>
+<h3 id="p17-doctor-ai-agent-install">P17 · Doctor &amp; AI-agent install</h3>
+<p><strong>Goal:</strong> Prove that gbi can start herdr and each harness inside it, explain every failure to a person or an AI agent with evidence and a fix, and let an AI agent install gbi from the GitHub URL alone.</p>
+<p><strong>◆ Gate: Doctor UAT.</strong> Passes when:</p>
+<ul><li>
+gbi doctor runs with no server; static and live tiers open and close a real pane in the gbi session
+</li><li>
+The harness tier starts the scripted harness in herdr and reports a blocked or missing harness with evidence and a human fix
+</li><li>
+--json exit codes 0/1/2, --fix and --report behave as specified; every result id has a troubleshooting section
+</li><li>
+install.sh installs from a fake signed release, refuses a tampered one, and the installed gbi passes the doctor
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P17-01</strong> Requirements rev 5 (FR-02a–b, FR-07a–e, FR-134–139), ADR-012, mockups 17–20 and M13, plan and tracker ✅ · waits on Q11, Q12</td><td>S</td><td>FR-02a, FR-02b, FR-07a, FR-07b, FR-07c, FR-07d, FR-07e, FR-134, FR-135, FR-136, FR-137, FR-138, FR-139</td><td>A-v17, A-v18, A-v19, A-v20, A-M13</td><td>—</td></tr>
+<tr><td><strong>P17-02</strong> internal/doctor: result contract (stable ids, evidence, auto/human fixes, docs link) and the static tier, incl. harnesses on the login service PATH ✅</td><td>M</td><td>FR-07a, FR-07c, FR-07</td><td>A-v17</td><td>P17-01</td></tr>
+<tr><td><strong>P17-03</strong> Live tier: start the gbi session, open a throwaway doctor tab, echo round trip, harness binaries inside the pane, close ✅</td><td>M</td><td>FR-07b, FR-08</td><td>A-v17</td><td>P17-02</td></tr>
+<tr><td><strong>P17-04</strong> Harness tier (start, wait for ready, blocked/exited/timeout with screen evidence) and opt-in prompt tier; tested with the scripted harness in a real herdr ✅ · waits on Q11</td><td>M</td><td>FR-07b, FR-60</td><td>A-v17</td><td>P17-03</td></tr>
+<tr><td><strong>P17-05</strong> gbi doctor in-process: --json with exit codes 0/1/2, --fix, --report with secrets removed, --tier, --harness, --prompt ✅</td><td>S</td><td>FR-07d, FR-32</td><td>—</td><td>P17-04</td></tr>
+<tr><td><strong>P17-06</strong> API (GET /api/doctor, POST /api/doctor/fix) and Settings → herdr setup UI: tiers, evidence, human fixes, Test harnesses, test prompt, Copy report ✅</td><td>M</td><td>FR-07a, FR-07c, FR-30</td><td>A-v17, A-v15</td><td>P17-05</td></tr>
+<tr><td><strong>P17-07</strong> Troubleshooting page with one section per doctor id, and a test that every id has one ✅</td><td>S</td><td>FR-07e, FR-130</td><td>A-v14</td><td>P17-02</td></tr>
+<tr><td><strong>P17-08</strong> scripts/install.sh and install.ps1: version and directory, checksum and Ed25519 signature checks; AGENTS.md; test that the README, scripts and binary carry the same public key ✅</td><td>M</td><td>FR-02b, FR-06</td><td>—</td><td>P17-01</td></tr>
+<tr><td><strong>P17-09</strong> README: Install with an AI agent (numbered steps, rules, build from source while no release exists) ✅</td><td>S</td><td>FR-02a</td><td>—</td><td>P17-08, P17-05</td></tr>
+<tr><td><strong>P17-10</strong> Install e2e: install.sh against a fake signed release (and a tampered one), then the installed gbi passes the doctor against an isolated herdr; in CI ✅</td><td>M</td><td>FR-02a, FR-02b, FR-07b</td><td>—</td><td>P17-08, P17-05</td></tr>
+</tbody></table></div>
+<h3 id="p18-learn-lessons-practice-project-harness-control">P18 · Learn: lessons, practice project, harness control</h3>
+<p><strong>Goal:</strong> Teach every feature through short lessons with pro tips, run in a practice project that costs nothing, show how to drive gbi from your AI harness, and explain why gbi is designed the way it is.</p>
+<p><strong>◆ Gate: Learn UAT.</strong> Passes when:</p>
+<ul><li>
+Every lesson can be completed in the practice project and each step checks itself off
+</li><li>
+The coach panel's Show me goes to the right view and highlights the control; progress survives a reload
+</li><li>
+Every $ gbi example in the lessons and cookbook runs against a demo instance
+</li><li>
+How go-build-it thinks covers herdr, archetypes, worktrees, gates, questions, history and the route table, each linking its ADRs
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P18-01</strong> Lesson format in docs/learn (front matter, steps with check/show lines, Pro tips), parser and tests; API and CLI gbi learn list</td><td>get</td><td>start</td><td>done ✅</td><td>M</td><td>FR-134, FR-135, FR-30</td><td>—</td><td>P17-01</td></tr>
+<tr><td><strong>P18-02</strong> Progress per user (learn_progress): steps checked from history events in the practice project, visits and ticks ✅</td><td>M</td><td>FR-135, NFR-10</td><td>—</td><td>P18-01</td></tr>
+<tr><td><strong>P18-03</strong> Practice project: gbi learn practice [--reset</td><td>--remove], seeded repo under ~/.go-build-it/practice, starter team on the scripted harness, practice label ✅</td><td>M</td><td>FR-136</td><td>A-v18</td><td>P18-01</td></tr>
+<tr><td><strong>P18-04</strong> Learn page (g l): lessons with progress, practice project card, How go-build-it thinks ✅</td><td>M</td><td>FR-134, FR-138</td><td>A-v18</td><td>P18-02, P18-03</td></tr>
+<tr><td><strong>P18-05</strong> Coach panel docked in the shell: current step, live check-off, Show me navigation and highlight, Pro tips, Esc to hide ✅</td><td>M</td><td>FR-134, FR-135</td><td>A-v19</td><td>P18-04</td></tr>
+<tr><td><strong>P18-06</strong> Mobile Learn screen (M13) and Learn on More ✅</td><td>S</td><td>FR-134, FR-35</td><td>A-M13, A-M9</td><td>P18-04</td></tr>
+<tr><td><strong>P18-07</strong> Lessons 0–10 covering every feature, with Pro tips ✅</td><td>L</td><td>FR-134, FR-132</td><td>A-v18, A-v19</td><td>P18-05</td></tr>
+<tr><td><strong>P18-08</strong> Drive gbi from your AI harness: lesson, cookbook page (Claude Code first; Antigravity, Pi, OpenCode notes) and gbi agent guide ✅</td><td>M</td><td>FR-137, FR-33</td><td>A-v20</td><td>P18-01</td></tr>
+<tr><td><strong>P18-09</strong> How go-build-it thinks: explanation pages linking the ADRs ✅</td><td>S</td><td>FR-138</td><td>A-v18</td><td>P17-01</td></tr>
+<tr><td><strong>P18-10</strong> scripts/docs_examples.sh runs every $ gbi example in the lessons and cookbook against a demo instance ✅</td><td>S</td><td>FR-139</td><td>—</td><td>P18-07, P18-08</td></tr>
+<tr><td><strong>P18-11</strong> web/e2e/learn.spec.ts completes every lesson in the practice project and regenerates the lesson screenshots ✅</td><td>M</td><td>FR-139, FR-133, FR-131</td><td>A-v18, A-v19, A-M13</td><td>P18-07</td></tr>
+<tr><td><strong>P18-12</strong> Docs and release notes: keyboard (g l), CLI page, README tests, CHANGELOG Unreleased; keyboard test ✅</td><td>S</td><td>FR-130, FR-06a</td><td>A-v14</td><td>P18-11, P17-10</td></tr>
 </tbody></table></div>
 <h2 id="5-open-questions-schedule">5. Open questions schedule</h2>
 <div class="table-wrap"><table><thead><tr><th>Question</th><th>Answer before</th><th>Why</th></tr></thead><tbody>

@@ -93,8 +93,18 @@ export function DictArea({ value, onChange, placeholder, rows, autoFocus }: { va
 }
 
 // ---------- markdown ----------
+// headingIds gives h2/h3 an id to link to: a heading that is only `code` keeps that text
+// (doctor ids such as harness.starts, FR-07e); others get a slug.
+function headingIds(html: string): string {
+  return html.replace(/<h([23])>(.*?)<\/h\1>/g, (_m, n, inner) => {
+    const code = /^<code>([^<]+)<\/code>$/.exec(inner);
+    const id = code ? code[1] : inner.replace(/<[^>]+>/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return `<h${n} id="${id}">${inner}</h${n}>`;
+  });
+}
+
 export function Markdown({ src, className }: { src: string; className?: string }) {
-  const html = useMemo(() => marked.parse(src || '', { async: false }) as string, [src]);
+  const html = useMemo(() => headingIds(marked.parse(src || '', { async: false }) as string), [src]);
   return <div className={'md ' + (className || '')} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 

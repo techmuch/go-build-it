@@ -1,6 +1,6 @@
 # go-build-it — Requirements
 
-Status: Draft · Last updated: 2026-11-09 (rev. 4: in-app change log and guided updates, FR-06a–FR-06e, see [ADR-011](decisions/ADR-011-changelog-guided-updates.md). Rev. 3: herdr as the only agent backend; per-project team members from global archetypes, see [ADR-009](decisions/ADR-009-herdr-backend.md) and [ADR-010](decisions/ADR-010-project-team-members.md))
+Status: Draft · Last updated: 2026-11-09 (rev. 5: a doctor that proves gbi can start herdr and a harness and explains failures to people and AI agents, FR-07a–FR-07e; install by giving an AI agent the GitHub URL, FR-02a–FR-02b; lessons, a practice project, harness control and design rationale, FR-134–FR-139; see [ADR-012](decisions/ADR-012-doctor-and-learning.md). Rev. 4: in-app change log and guided updates, FR-06a–FR-06e, see [ADR-011](decisions/ADR-011-changelog-guided-updates.md). Rev. 3: herdr as the only agent backend; per-project team members from global archetypes, see [ADR-009](decisions/ADR-009-herdr-backend.md) and [ADR-010](decisions/ADR-010-project-team-members.md))
 
 ## 1. Overview
 
@@ -45,8 +45,36 @@ go-build-it is a Go application with an embedded React frontend that manages lon
   - It SHALL start and supervise a headless herdr server for a named session `gbi` (`herdr server --session gbi`), and restart it if it stops.
   - It SHALL check that herdr's integration for each enabled harness is installed and current (`herdr integration status`), and SHALL offer to install or update it.
   - It SHALL check herdr's advertised API methods at connect time and report a clear error when a required method is missing.
+- **FR-07a**: go-build-it SHALL provide a **doctor** (`gbi doctor`, and **Settings → herdr setup** in the UI) that runs inside the `gbi` binary itself. It SHALL work when `gbi serve` is not running, because a broken server is one of the things it diagnoses.
+- **FR-07b**: The doctor SHALL run its checks in tiers. Each tier runs only if the tiers before it passed:
+  1. **static**: the herdr checks of FR-07, the login service, and each enabled harness's binary found on the PATH the login service uses (FR-02).
+  2. **live**: go-build-it starts the gbi herdr session if it is not running, opens a throwaway `doctor` tab in it, runs a command there and reads its output back, checks that each enabled harness's binary is found *inside the pane*, then closes the tab.
+  3. **harness**: for each enabled harness (or the one named), the doctor starts the harness in a throwaway pane and waits until herdr reports it ready. A harness that stops at a sign-in, trust or first-run screen, exits, or does not start within the time limit fails the check, and the doctor shows the last lines of the screen. No prompt is sent, so this uses no tokens.
+  4. **prompt**: the doctor sends one short prompt and waits for the reply, which proves sign-in and quota end to end. It uses a few tokens, so it SHALL run only when asked for (`--prompt`, or a button labeled with that cost). It SHALL never run automatically.
+
+  The static and live tiers run by default. Throwaway tabs and panes SHALL be closed afterwards, and the doctor SHALL never touch the user's default herdr session.
+- **FR-07c**: Every doctor result SHALL serve both a person and an AI agent. It SHALL carry:
+  - a stable `id` (e.g. `harness.not_on_pane_path`)
+  - a status: ok, warn, fail or skipped
+  - what was checked, in plain words
+  - **evidence**: the command run, its exit code, and the last lines of its output or of the pane
+  - a **fix**, which is one of two kinds. An *automatic* fix is one the doctor can apply itself (`gbi doctor --fix`). A *human* fix (signing in to a harness, sudo, approving a package install) says exactly what the person must do, written so an AI agent can pass it on word for word.
+  - a link to the troubleshooting section of the user docs for that `id`
+- **FR-07d**: `gbi doctor --json` SHALL print the results as JSON. It SHALL exit 0 when nothing failed, 1 when every failure has an automatic fix, and 2 when a failure needs a human. `gbi doctor --fix` SHALL apply the automatic fixes and run the checks again. `gbi doctor --report` SHALL write one Markdown file to paste into an AI chat or an issue. The file holds the versions, the platform, the configuration with secrets removed, and every result with its evidence.
+- **FR-07e**: The user docs SHALL have a troubleshooting page with one section per doctor `id`: what it means, how to fix it, and how to confirm the fix.
 - **FR-08**: The background service (FR-02) SHALL ensure both go-build-it and its herdr session are running at login. Stopping or updating go-build-it SHALL NOT stop running harnesses, because herdr owns them.
 - **FR-02**: The application SHALL be installable globally on a machine and SHOULD run as a background service (launchd on macOS, systemd on Linux, a Windows service on Windows).
+- **FR-02a**: An AI coding agent SHALL be able to install go-build-it given only the GitHub repository URL. The README SHALL contain an **Install with an AI agent** section that the agent can follow step by step:
+  1. detect the platform
+  2. install herdr
+  3. download the release for the platform and verify its checksum and signature against the public key printed in the README
+  4. put `gbi` on the PATH without sudo
+  5. find which harnesses are installed, and ask the person which to use when none is
+  6. run `gbi doctor --json --fix` until nothing is left to fix, passing every human fix to the person word for word
+  7. install the login service, run the harness tier, and open the UI
+
+  The section SHALL also state the rules: never touch the person's default herdr session, never send a prompt or start paid work without asking, never use sudo without asking. While no release is published, the section SHALL say so and give the build-from-source steps instead.
+- **FR-02b**: The repository SHALL include `scripts/install.sh` (macOS and Linux) and `scripts/install.ps1` (Windows) that perform steps 3–4 of FR-02a in one command. Each SHALL accept a version and an install directory, and SHALL refuse to install a download whose checksum does not match. It SHALL also refuse one whose signature fails when it can verify the signature, and say so when it cannot. An `AGENTS.md` at the repository root SHALL point AI agents to the README section.
 - **NFR-01**: macOS SHALL be the initial target platform. Linux and Windows SHALL be supported later. Code SHALL NOT assume macOS-only paths, shells or tools without a cross-platform abstraction. Platform support SHALL follow herdr's: a platform where herdr is in beta (currently Windows) is supported at the same level.
 - **FR-03**: All application state SHALL live under `~/.go-build-it/` (`%USERPROFILE%\.go-build-it\` on Windows). This includes:
   - configuration files
@@ -325,6 +353,26 @@ By default, an AI team member's conversation relies on the harness's built-in au
 - **FR-132**: Documentation SHALL include a dress-rehearsal / UAT walkthrough that covers every feature, step by step, for every role.
 - **FR-133**: The UAT walkthrough SHOULD be written as automated end-to-end scripts (e.g. Playwright) that both verify the features and regenerate the documentation screenshots, so screenshots stay current.
 
+### 12.1 Learning go-build-it
+
+- **FR-134**: go-build-it SHALL have a **Learn** area (desktop `g l`, and on the phone under More) with a series of short lessons that together cover every feature. Each lesson SHALL have:
+  - a goal and an estimated time of 5–10 minutes
+  - numbered steps
+  - one to three **Pro tip** callouts
+  - links to the how-to pages it builds on
+
+  A lesson SHALL open as a coach panel docked beside the app, so the user follows the steps in the real UI. A step's **Show me** button SHALL go to the right view and highlight the control it names.
+- **FR-135**: Lessons SHALL know when a step is done. A step is checked off from go-build-it's own history events (e.g. a task created in the practice project after the lesson started) or from the user visiting a view. The user MAY also tick it off. Progress SHALL be kept per user, so a lesson can be left and resumed. Lessons and progress SHALL also be available from the CLI (`gbi learn …`).
+- **FR-136**: Lessons SHALL run in a **practice project** by default. It is created on request with its own small git repository under `~/.go-build-it/practice/` and a starter team whose AI members use the scripted fake harness, so practice uses no AI subscription and never touches the user's real repositories. It SHALL be clearly labeled as practice everywhere it appears, and the user SHALL be able to reset or remove it. The last lesson SHALL show how to move to a real project.
+- **FR-137**: A lesson and a cookbook page SHALL teach controlling go-build-it **from the user's AI harness**, with Claude Code as the main example and notes for Antigravity, Pi and OpenCode:
+  - the two ways to connect: running `gbi` commands, and the MCP server (`gbi mcp`), and how to choose between them
+  - examples that each show what the user asks the harness, the `gbi` commands the harness runs, and what then appears in the UI. Terminal output SHALL be shown as text transcripts, and UI results as screenshots.
+  - `gbi agent guide`, which prints a guide for AI agents (the workflow, the commands, and the rules such as asking before starting paid work) that the user can install as a harness skill or `AGENTS.md`
+- **FR-138**: The docs SHALL include **How go-build-it thinks**, short explanation pages on why it is designed the way it is: herdr as the only backend, persona archetypes and project members, one worktree per member, gates and phases, questions instead of guesses, the history as an audit trail, and one route table for UI, CLI, API and MCP. Each page SHALL link the ADRs behind it.
+- **FR-139**: The lessons SHALL be tested so they stay current:
+  - Every `gbi` example in the lessons and the cookbook SHALL be run against a demo instance by an automated test, which fails when an example fails.
+  - Each lesson's steps SHALL be completed and checked off by an end-to-end test in the practice project, which also regenerates the lesson screenshots.
+
 ## 13. Security posture
 
 - **NFR-20**: Agents MAY run arbitrary code on the development machine. Container or VM sandboxing is explicitly **not** required.
@@ -344,6 +392,8 @@ By default, an AI team member's conversation relies on the harness's built-in au
 | Q8 | ~~Conversation rotation policy (FR-76)?~~ **Answered 2026-11-08:** keep one conversation per member across tasks until context reaches the handoff threshold (75%), then rotate, starting from a handoff plus the member's notes. Lens starts a fresh conversation for every review. See ADR-010. |
 | Q9 | ~~Windows support level?~~ **Answered 2026-11-08:** ship Windows at herdr's beta level, with herdr in the Windows CI job. A herdr capability missing on Windows is shown as unavailable there. See ADR-009. |
 | Q10 | ~~Archetype change propagation (FR-12b)?~~ **Answered 2026-11-08:** a proposal per affected member, plus one action to apply the change to every member that has not overridden the changed fields. See ADR-010. |
+| Q11 | ~~Should the doctor's prompt tier (FR-07b) ever run on its own?~~ **Answered 2026-11-09:** no. It runs only when asked for, because it uses tokens. See ADR-012. |
+| Q12 | ~~Should lessons use a sandbox or a real project?~~ **Answered 2026-11-09:** a practice project with the scripted fake harness by default (FR-136); the last lesson moves to a real project. Claude Code is the main harness example (FR-137). See ADR-012. |
 
 ## 15. Out of scope (for now)
 

@@ -36,6 +36,10 @@ var version = "dev"
 
 func main() {
 	if err := run(os.Args[1:]); err != nil {
+		var code exitError
+		if errors.As(err, &code) {
+			os.Exit(int(code)) // the command already explained itself (gbi doctor)
+		}
 		fmt.Fprintln(os.Stderr, "gbi:", err)
 		os.Exit(1)
 	}
@@ -53,6 +57,13 @@ func run(args []string) error {
 		return nil
 	case "service":
 		return serviceCmd(args[1:])
+	case "doctor":
+		return doctorCmd(args[1:])
+	case "agent":
+		if len(args) > 1 && args[1] == "guide" { // no server needed (FR-137)
+			fmt.Print(docs.AgentGuide())
+			return nil
+		}
 	case "mcp":
 		return mcpServe()
 	case "dev":

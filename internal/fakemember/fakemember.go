@@ -12,6 +12,10 @@
 //	FAKE:fail     finish with an error result
 //	FAKE:compact  write a compaction boundary
 //	FAKE:big      use ~150k tokens of context (for rotation tests)
+//
+// The doctor's prompt ("Reply with the single word READY.") is answered with READY.
+// --start-blocked shows a sign-in screen and reports "blocked" at start, like a harness
+// that has never been signed in (doctor tests, FR-07b).
 package fakemember
 
 import (
@@ -89,20 +93,25 @@ const handoffBrief = "<<<HANDOFF\nObjective and definition of done: finish the l
 
 type agent struct {
 	handedOff bool
-	h       *herdr.Client
-	pane    string
-	session string
-	tx      *os.File
-	out     io.Writer
-	seq     int64
-	used    int
+	h         *herdr.Client
+	pane      string
+	session   string
+	tx        *os.File
+	out       io.Writer
+	seq       int64
+	used      int
 }
 
 // Run starts the agent. --session-id <id> starts a conversation with that ID (go-build-it
 // chooses it, as it does for Claude Code); --resume <id> continues one.
 func Run(args []string, in io.Reader, out io.Writer) error {
 	a := &agent{h: herdr.FromEnv(), pane: os.Getenv("HERDR_PANE_ID"), out: out}
+	startBlocked := false
 	for i := 0; i < len(args); i++ {
+		if args[i] == "--start-blocked" {
+			startBlocked = true
+			continue
+		}
 		if (args[i] == "--resume" || args[i] == "--session-id") && i+1 < len(args) {
 			a.session = args[i+1]
 			i++
@@ -122,6 +131,12 @@ func Run(args []string, in io.Reader, out io.Writer) error {
 	}
 	a.tx = f
 	defer f.Close()
+	if startBlocked {
+		fmt.Fprintln(out, "fake agent · not signed in\nSelect login method:\n❯ 1. Fake account\n  2. Fake console")
+		a.report("blocked", "sign in")
+		_, _ = io.Copy(io.Discard, in)
+		return nil
+	}
 	fmt.Fprintf(out, "fake agent · session %s · ready\n", a.session)
 	a.report("idle", "")
 	sc := bufio.NewScanner(in)
@@ -181,6 +196,11 @@ func (a *agent) turn(prompt string, sc *bufio.Scanner) {
 	a.report("working", "")
 	fmt.Fprintln(a.out, "❯ "+prompt)
 	a.write(map[string]any{"type": "user", "message": map[string]any{"role": "user", "content": prompt}})
+	if strings.Contains(prompt, "Reply with the single word READY") {
+		a.say("READY", 100)
+		a.report("idle", "")
+		return
+	}
 	if m := askRe.FindStringSubmatch(prompt); m != nil {
 		a.ask(m[1])
 		return

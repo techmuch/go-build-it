@@ -11,7 +11,7 @@ Everything in the desktop UI can be done from the keyboard. Press <kbd>?</kbd> o
 | <kbd>⌘</kbd> <kbd>K</kbd> or <kbd>/</kbd> | Search and run commands. Every result shows its `gbi` CLI equivalent. |
 | <kbd>?</kbd> | Show the keyboard shortcuts. |
 | <kbd>Tab</kbd> / <kbd>Shift</kbd> <kbd>Tab</kbd> | Move between controls. The first <kbd>Tab</kbd> on a page offers **Skip to content**. |
-| <kbd>g</kbd> then a letter | Go to a page: <kbd>p</kbd> Projects, <kbd>q</kbd> Questions, <kbd>s</kbd> Sessions, <kbd>u</kbd> Queue, <kbd>r</kbd> Reviews, <kbd>o</kbd> Options, <kbd>e</kbd> Rehearsals, <kbd>t</kbd> Team, <kbd>a</kbd> Standards, <kbd>h</kbd> History, <kbd>,</kbd> Settings, <kbd>d</kbd> Docs, <kbd>v</kbd> Change log &amp; updates. |
+| <kbd>g</kbd> then a letter | Go to a page: <kbd>p</kbd> Projects, <kbd>q</kbd> Questions, <kbd>s</kbd> Sessions, <kbd>u</kbd> Queue, <kbd>r</kbd> Reviews, <kbd>o</kbd> Options, <kbd>e</kbd> Rehearsals, <kbd>t</kbd> Team, <kbd>a</kbd> Standards, <kbd>h</kbd> History, <kbd>,</kbd> Settings, <kbd>d</kbd> Docs, <kbd>l</kbd> Learn (also brings back a hidden lesson coach), <kbd>v</kbd> Change log &amp; updates. |
 
 Single-key shortcuts are ignored while you type in a text field, so typing "g" in an answer never navigates away.
 
@@ -63,3 +63,7 @@ While you are only watching, the terminal is read-only and page shortcuts keep w
 ## Mobile
 
 The mobile UI is built for touch, but it follows the same rules with a Bluetooth keyboard: <kbd>Tab</kbd> reaches every control, <kbd>Enter</kbd> opens cards and list rows, and <kbd>↑</kbd> <kbd>↓</kbd> move through lists.
+
+## Lesson coach
+
+While a lesson is open, its coach is docked on the right of every page. <kbd>Tab</kbd> reaches **Show me** and **Mark done**. <kbd>Esc</kbd> with focus in the coach hides it, and <kbd>g</kbd> <kbd>l</kbd> brings it back. Step changes are announced to screen readers.

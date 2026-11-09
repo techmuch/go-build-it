@@ -429,7 +429,7 @@ func (c *Client) Pane(ctx context.Context, paneID string) (PaneInfo, error) {
 	return r.Pane, err
 }
 
-// Read returns pane text (source: visible, recent, recent-unwrapped, detection).
+// Read returns pane text (source: visible, recent, recent_unwrapped, detection).
 func (c *Client) Read(ctx context.Context, paneID, source string, lines int) (string, error) {
 	var r struct {
 		Read PaneReadResult `json:"read"`

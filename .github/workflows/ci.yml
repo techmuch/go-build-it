@@ -30,6 +30,8 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           "$HOME/.local/bin/herdr" --version
       - run: make test
+      - name: install e2e (install.sh against fake signed/tampered/missing releases, then gbi doctor; ADR-012)
+        run: scripts/install_e2e.sh
       - name: cross-compile
         run: |
           for p in darwin/arm64 linux/amd64 windows/amd64; do

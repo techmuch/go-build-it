@@ -27,7 +27,7 @@ export function Catalog() {
   if (q) ps = ps.filter((p) => (p.id + ' ' + p.purpose).toLowerCase().includes(q.toLowerCase()));
   if (sort === 'name') ps = [...ps].sort((a, b) => a.name.localeCompare(b.name));
   if (sort === 'updated') ps = [...ps].sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
-  return <Shell title="Projects" right={<button type="button" className="btn p" onClick={() => setImporting(true)}>+ Import project</button>}>
+  return <Shell title="Projects" right={<button type="button" className="btn p" onClick={() => setImporting(true)} data-tour="import-project">+ Import project</button>}>
     <div className="row c wrap">
       {([['needs', `Needs you · ${needs.length}`, 'red'], ['all', `All · ${(data || []).length}`, ''], ['active', 'Active', ''], ['paused', 'Paused', '']] as const).map(([k, l, c]) =>
         <button type="button" key={k} className={'chip ' + (filter === k ? 'acc' : c)} style={{ border: 0, cursor: 'pointer', fontSize: 12, padding: '3px 10px' }} onClick={() => setFilter(k)}>{l}</button>)}
@@ -50,7 +50,7 @@ function ProjectCard({ p }: { p: any }) {
   const attn = p.needsYou > 0 || un.commits > 0 || un.uncommitted > 0 || l.repo?.ci === 'failing';
   const web = p.websiteUrl || l.repo?.websiteUrl;
   return <div className={'pcard ' + (attn ? 'attn' : '')} {...clickable(() => navigate('/projects/' + p.id), { role: 'link' })}>
-    <div className="row c"><span className="nm">{p.name}</span><span className="right"><Chip c={stageColor(p.stage)}>{p.stage}</Chip></span></div>
+    <div className="row c"><span className="nm">{p.name}</span>{p.id === 'practice' && <Chip c="amb">practice</Chip>}<span className="right"><Chip c={stageColor(p.stage)}>{p.stage}</Chip></span></div>
     <div className="small">{p.purpose || <span className="muted">No purpose written yet</span>}</div>
     <div className="small muted">{p.statusLine}{p.milestone ? ` · ${p.milestone}` : ''}</div>
     <div className="row c wrap" style={{ gap: 6 }}>
@@ -108,17 +108,17 @@ export function ProjectOverview({ id }: { id: string }) {
   if (error) return <Shell title={id} crumb="Projects"><Err msg={error} /></Shell>;
   if (!data) return <Shell title={id} crumb="Projects"><Loading /></Shell>;
   const p = data.project, l = p.live || {};
-  return <Shell title={p.name} crumb={<A to="/">Projects</A>} right={<Chip c={stageColor(p.stage)}>{p.stage}</Chip>} tabs={<ProjectTabs id={id} on="overview" />}>
+  return <Shell title={p.name} crumb={<A to="/">Projects</A>} right={<>{p.id === 'practice' && <Chip c="amb" title="The Learn lessons' practice project: scripted members, no AI subscription used">practice</Chip>}<Chip c={stageColor(p.stage)}>{p.stage}</Chip></>} tabs={<ProjectTabs id={id} on="overview" />}>
     <div className="row">
       <div className="col grow">
-        <Card title="Purpose & values" right={<button type="button" className="lnk" onClick={() => setEditPurpose(editPurpose === null ? p.purpose : null)}>Edit</button>}>
+        <Card title="Purpose & values" right={<button type="button" className="lnk" data-tour="edit-purpose" onClick={() => setEditPurpose(editPurpose === null ? p.purpose : null)}>Edit</button>}>
           {editPurpose !== null ? <div className="col" style={{ gap: 6 }}><DictArea value={editPurpose} onChange={setEditPurpose} rows={2} />
             <div className="row c"><span className="right" /><button type="button" className="btn p" onClick={() => run(() => api.projects.update(id, { purpose: editPurpose }), 'Saved').then(() => setEditPurpose(null))}>Save</button></div></div>
             : <div style={{ fontSize: 14, marginBottom: 8 }}>{p.purpose || <span className="muted">No purpose yet.</span>}</div>}
           <div className="row c wrap" style={{ gap: 6 }}>{data.values.map((v: any) => <Chip key={v.id} c={v.status === 'proposed' ? 'acc' : ''} title={v.source}>{v.status === 'proposed' ? 'Proposed: ' : ''}{v.text}</Chip>)}
             <A to={`/projects/${id}/artifacts`} className="small">Values & problem ›</A></div>
         </Card>
-        <Card title="Roadmap" right={<span className="small muted">◆ = review gate · click a row for detail · <button type="button" className="lnk" onClick={() => setNewM(true)}>+ Milestone</button></span>}>
+        <Card title="Roadmap" right={<span className="small muted">◆ = review gate · click a row for detail · <button type="button" className="lnk" data-tour="add-milestone" onClick={() => setNewM(true)}>+ Milestone</button></span>}>
           {data.milestones?.length ? <table className="t"><tbody>
             <tr><th style={{ width: '36%' }}>Milestone</th><th>Progress</th><th style={{ width: '24%' }}>Gate</th><th style={{ width: 90 }}>Status</th></tr>
             {data.milestones.map((m: any) => <tr key={m.id} className="click" {...clickable(() => navigate('/milestones/' + m.id), { role: 'link' })}>

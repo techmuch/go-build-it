@@ -14,3 +14,7 @@ Open `/m/` on your phone, over your tailnet. The mobile UI puts the common tasks
 Add it to your home screen to install it.
 
 ![Mobile inbox](screenshots/m-inbox.png)
+
+## Learn on the phone
+
+**More → Learn** lists the lessons and your progress, the same as on desktop. Open one to see its steps with Pro tips. **Go there** opens the phone screen a step is about, and steps tick themselves off as you work. Lessons about desktop-only areas say so.
