@@ -282,6 +282,19 @@ window.TRACKER = {
    "gateApproved": "2026-11-09",
    "gateApprovedBy": "david (owner)",
    "gateEvidence": "scripts/learn_e2e.sh: 16 gbi examples from lessons and cookbook run against a demo; web/e2e/learn.spec.ts completes all 11 lessons in the practice project with each step checked off (history events, visits, ticks), Show me highlights, progress survives reload, Esc/g l, phone Learn; How go-build-it thinks: 7 pages linking ADRs; UAT + keyboard 29/29 and update e2e still pass"
+  },
+  {
+   "id": "P19",
+   "name": "Folder trust",
+   "mvp": false,
+   "goal": "Start members, helpers and the doctor without a person: go-build-it answers a harness's folder trust prompt for folders it created, records it, and leaves every other prompt to the person.",
+   "gate": "Folder trust UAT",
+   "gateCriteria": [
+    "A member whose harness starts at a trust prompt in its worktree runs its task without becoming blocked; agent.trusted is in the history",
+    "The doctor's harness tier answers the trust prompt and passes; with the setting off it fails with a human fix naming the prompt",
+    "Real Claude Code and Antigravity trust prompts are recognised and answered; sign-in and permission screens are not",
+    "Folders outside ~/.go-build-it are never answered"
+   ]
   }
  ],
  "tasks": [
@@ -3793,6 +3806,93 @@ window.TRACKER = {
    "status": "done",
    "done": "",
    "q": []
+  },
+  {
+   "id": "P19-01",
+   "phase": "P19",
+   "title": "Requirements rev 6 (FR-07f, FR-68 amended), ADR-013 (amends ADR-009), plan and tracker",
+   "reqs": [
+    "FR-07f",
+    "FR-68"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "docs/requirements.md rev 6; docs/decisions/ADR-013-folder-trust.md",
+   "q": []
+  },
+  {
+   "id": "P19-02",
+   "phase": "P19",
+   "title": "internal/sessions/trust.go: recognise the trust screen and the keys that choose Yes; only folders inside go-build-it's directory; agent.send_keys with a pane fallback",
+   "reqs": [
+    "FR-07f"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P19-01"
+   ],
+   "status": "done",
+   "done": "TrustKeys, TrustAllowed, AnswerTrust; unit tests hold the real Claude Code and Antigravity screens",
+   "q": []
+  },
+  {
+   "id": "P19-03",
+   "phase": "P19",
+   "title": "Answer it when a member starts, while it waits to be ready, and for helpers; agent.trusted history event",
+   "reqs": [
+    "FR-07f",
+    "FR-68"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P19-02"
+   ],
+   "status": "done",
+   "done": "members.go, run.go, ask.go; internal/app TestMemberTrustScreenAnswered",
+   "q": []
+  },
+  {
+   "id": "P19-04",
+   "phase": "P19",
+   "title": "Doctor harness tier answers it; names it in the human fix when the setting is off; fake member --start-trust",
+   "reqs": [
+    "FR-07f",
+    "FR-07b"
+   ],
+   "views": [
+    "A-v17"
+   ],
+   "size": "S",
+   "deps": [
+    "P19-02"
+   ],
+   "status": "done",
+   "done": "internal/doctor TestTrustScreenAnswered",
+   "q": []
+  },
+  {
+   "id": "P19-05",
+   "phase": "P19",
+   "title": "Setting [agents] trust_folders (on by default) and the Settings toggle; docs (sessions, settings, troubleshooting), CHANGELOG",
+   "reqs": [
+    "FR-07f",
+    "FR-07e"
+   ],
+   "views": [
+    "A-v15"
+   ],
+   "size": "S",
+   "deps": [
+    "P19-03",
+    "P19-04"
+   ],
+   "status": "done",
+   "done": "Settings → Agent harnesses → Answer folder trust prompts",
+   "q": []
   }
  ],
  "requirements": {
@@ -3822,6 +3922,10 @@ window.TRACKER = {
   },
   "FR-07e": {
    "text": "The user docs SHALL have a troubleshooting page with one section per doctor id:",
+   "section": "3. Platform, installation and runtime"
+  },
+  "FR-07f": {
+   "text": "When a harness stops at its folder trust prompt (\"Do you trust this folder?\") in a folder inside go-build-it's own directory (member worktrees, helpers, the practice project), go-b",
    "section": "3. Platform, installation and runtime"
   },
   "FR-08": {

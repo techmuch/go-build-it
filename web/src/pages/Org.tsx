@@ -224,6 +224,7 @@ export function Settings() {
               <td>{h.installed ? <Chip c="grn">✓ {h.kind}</Chip> : '—'}</td><td><Chip c={h.usageReported === 'measured' ? 'grn' : 'amb'}>{h.usageReported === 'measured' ? '✓ measured (transcript)' : 'unavailable'}</Chip></td>
               <td>{h.verified ? <Chip c="grn">ADR-009</Chip> : <Chip c="amb">unverified</Chip>}</td>
               <td><Toggle on={h.enabled} label={h.name} onChange={(v) => patch({ harnesses: { ...cfg.harnesses, [h.name]: { ...cfg.harnesses[h.name], enabled: v } } })} /></td></tr>)}</tbody></table>
+          <div className="small" style={{ marginTop: 8 }}><Toggle on={!!cfg.agents?.trustFolders} label="answer folder trust prompts" onChange={(v) => patch({ agents: { ...cfg.agents, trustFolders: v } }, v ? 'go-build-it will answer folder trust prompts' : 'Folder trust prompts will wait for you')} /> <b>Answer folder trust prompts</b> · say yes when a harness asks to trust a folder go-build-it created (member worktrees, helpers, the practice project). Sign-in and permission prompts still come to you (FR-07f).</div>
           <div className="small" style={{ marginTop: 8 }}>Every member runs in herdr. A member keeps its conversation until context reaches the threshold, then rotates (Q8) · compactions are logged · rate limits: <b>pause & auto-resume</b></div>
         </Card>
         <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>

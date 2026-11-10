@@ -1,6 +1,6 @@
 # go-build-it — Phased delivery plan
 
-Status: Draft · 2026-11-09 · Based on [requirements rev 5](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
+Status: Draft · 2026-11-09 · Based on [requirements rev 6](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
 
 ## 1. How this plan is built
 
@@ -12,6 +12,7 @@ Status: Draft · 2026-11-09 · Based on [requirements rev 5](../requirements.md)
 - **Rev 3 (P10–P15): herdr and per-project teams.** P0–P9 delivered rev 2. Rev 3 makes [herdr](https://herdr.dev) the only agent backend ([ADR-009](../decisions/ADR-009-herdr-backend.md)) and replaces global teams with per-project team members made from global persona archetypes ([ADR-010](../decisions/ADR-010-project-team-members.md)). It starts with a spike and redesigned mockups (P10), then builds the runtime (P11), teams (P12), members on herdr (P13), the live terminal and UI (P14), and docs, UAT and the upstream watch (P15). Rev 3 phases are not MVP-flagged: the MVP shipped with P5.
 - **Rev 4 (P16): change log and guided updates** ([ADR-011](../decisions/ADR-011-changelog-guided-updates.md)).
 - **Rev 5 (P17–P18): doctor, AI-agent install and Learn** ([ADR-012](../decisions/ADR-012-doctor-and-learning.md)). P17 makes the doctor prove that gbi can start herdr and a harness, and explain failures to a person or an AI agent; it adds the install that works from the GitHub URL alone. P18 adds lessons with a coach panel and a practice project, driving gbi from your AI harness, and *How go-build-it thinks*.
+- **Rev 6 (P19): folder trust** ([ADR-013](../decisions/ADR-013-folder-trust.md)). go-build-it answers a harness's "trust this folder" prompt for the folders it created, so members, helpers and the doctor start without a person. Other prompts stay with the person.
 - **Dogfooding from P4.** Once Courier can branch, PR, merge and release (end of P4), go-build-it manages its own remaining phases, and this tracker's data is imported into it.
 - **Sizes, not dates.** S ≈ up to a day of agent work, M ≈ 2–4 days, L ≈ 1–2 weeks. Progress is weighted S=1, M=3, L=8. Dates are set once the P0 spike shows real throughput.
 
@@ -38,6 +39,7 @@ Status: Draft · 2026-11-09 · Based on [requirements rev 5](../requirements.md)
 | P16 | Change log & guided updates |  | 11 | 19 | ◆ Update UAT |
 | P17 | Doctor & AI-agent install |  | 10 | 22 | ◆ Doctor UAT |
 | P18 | Learn: lessons, practice project, harness control |  | 12 | 33 | ◆ Learn UAT |
+| P19 | Folder trust |  | 5 | 9 | ◆ Folder trust UAT |
 
 ## 3. Critical path
 
@@ -469,6 +471,24 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 | **P18-10** scripts/docs_examples.sh runs every $ gbi example in the lessons and cookbook against a demo instance ✅ | S | FR-139 | — | P18-07, P18-08 |
 | **P18-11** web/e2e/learn.spec.ts completes every lesson in the practice project and regenerates the lesson screenshots ✅ | M | FR-139, FR-133, FR-131 | A-v18, A-v19, A-M13 | P18-07 |
 | **P18-12** Docs and release notes: keyboard (g l), CLI page, README tests, CHANGELOG Unreleased; keyboard test ✅ | S | FR-130, FR-06a | A-v14 | P18-11, P17-10 |
+
+### P19 · Folder trust
+
+**Goal:** Start members, helpers and the doctor without a person: go-build-it answers a harness's folder trust prompt for folders it created, records it, and leaves every other prompt to the person.
+
+**◆ Gate: Folder trust UAT.** Passes when:
+- A member whose harness starts at a trust prompt in its worktree runs its task without becoming blocked; agent.trusted is in the history
+- The doctor's harness tier answers the trust prompt and passes; with the setting off it fails with a human fix naming the prompt
+- Real Claude Code and Antigravity trust prompts are recognised and answered; sign-in and permission screens are not
+- Folders outside ~/.go-build-it are never answered
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P19-01** Requirements rev 6 (FR-07f, FR-68 amended), ADR-013 (amends ADR-009), plan and tracker ✅ | S | FR-07f, FR-68 | — | — |
+| **P19-02** internal/sessions/trust.go: recognise the trust screen and the keys that choose Yes; only folders inside go-build-it's directory; agent.send_keys with a pane fallback ✅ | M | FR-07f | — | P19-01 |
+| **P19-03** Answer it when a member starts, while it waits to be ready, and for helpers; agent.trusted history event ✅ | M | FR-07f, FR-68 | — | P19-02 |
+| **P19-04** Doctor harness tier answers it; names it in the human fix when the setting is off; fake member --start-trust ✅ | S | FR-07f, FR-07b | A-v17 | P19-02 |
+| **P19-05** Setting [agents] trust_folders (on by default) and the Settings toggle; docs (sessions, settings, troubleshooting), CHANGELOG ✅ | S | FR-07f, FR-07e | A-v15 | P19-03, P19-04 |
 
 ## 5. Open questions schedule
 

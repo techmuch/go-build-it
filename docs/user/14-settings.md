@@ -1,10 +1,10 @@
 section: Using go-build-it
-reqs: FR-05, FR-06, FR-06a, FR-06b, FR-06c, FR-06d, FR-06e, FR-07, FR-63, FR-90
+reqs: FR-05, FR-07f, FR-06, FR-06a, FR-06b, FR-06c, FR-06d, FR-06e, FR-07, FR-63, FR-90
 # Settings and updates
 
 Settings cover:
 - **herdr:** the supervised `gbi` session, its version and socket; **herdr setup** runs the doctor (FR-07)
-- **harnesses:** detection, enable or disable each one, its herdr agent kind, and whether its context usage is measured (from the transcript) or unavailable
+- **harnesses:** detection, enable or disable each one, its herdr agent kind, and whether its context usage is measured (from the transcript) or unavailable. **Answer folder trust prompts** (on by default) lets go-build-it say yes when a harness asks to trust one of go-build-it's own folders ([Sessions](sessions))
 - **access:** Tailscale
 - **forges:** GitHub and GitLab
 - **dispatch**

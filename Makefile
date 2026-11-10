@@ -1,7 +1,7 @@
 # go-build-it build (P0-09, P1-12)
 VERSION ?= dev
 LDFLAGS := -s -w -X main.version=$(VERSION)
-PLATFORMS := darwin/arm64 darwin/amd64 linux/amd64 linux/arm64 windows/amd64
+PLATFORMS := darwin/arm64 darwin/amd64 linux/amd64 linux/arm64 windows/amd64 windows/arm64
 
 .PHONY: all build web go gen test vet e2e release run
 

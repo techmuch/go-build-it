@@ -23,7 +23,7 @@ const HelpersWorkspace = "gbi-helpers"
 // Ask runs one turn as a persona in a fresh, short-lived herdr conversation and returns
 // its answer (artifact and persona edits, Lens assessments, release notes). The prompt
 // goes in a file and the answer comes back in a file, so nothing is read off the screen.
-// Each helper harness works in a fixed folder (one first-run trust prompt per harness),
+// Each helper harness works in a fixed folder (its trust prompt is answered, FR-07f),
 // and its pane is closed afterwards. FR-60: herdr is the only way a harness runs.
 func (m *Manager) Ask(ctx context.Context, mem team.Member, prompt string) (string, error) {
 	h, err := m.herdr()
@@ -64,10 +64,12 @@ func (m *Manager) Ask(ctx context.Context, mem team.Member, prompt string) (stri
 	name := herdr.SafeName("ask", fmt.Sprint(n))
 	if prof.Kind != "" {
 		if _, err := h.StartAgent(ctx, name, prof.Kind, sp, args, 60*time.Second); err != nil {
-			if herdr.IsCode(err, "agent_not_ready") {
+			if !herdr.IsCode(err, "agent_not_ready") {
+				return "", err
+			}
+			if !m.answerTrust(ctx, h, mem.ProjectID, mem.Name, prof.Label, sp) {
 				return "", fmt.Errorf("%s needs you once in herdr (workspace %s): answer its first-run prompt for %s, then try again", prof.Label, HelpersWorkspace, dir)
 			}
-			return "", err
 		}
 	} else {
 		bin := firstNonEmpty(hc.Binary, m.GbiBin)
@@ -79,7 +81,14 @@ func (m *Manager) Ask(ctx context.Context, mem team.Member, prompt string) (stri
 			return "", err
 		}
 	}
-	seq, err := h.Submit(ctx, sp, name, prof.Kind != "", "Read "+filepath.Base(in)+" in this folder and do what it says.")
+	var seq int64
+	for i := 0; ; i++ {
+		seq, err = h.Submit(ctx, sp, name, prof.Kind != "", "Read "+filepath.Base(in)+" in this folder and do what it says.")
+		if err == nil || !herdr.IsCode(err, "agent_not_ready") || i >= 20 {
+			break
+		}
+		time.Sleep(500 * time.Millisecond) // a just-answered harness is marked ready a moment later
+	}
 	if err != nil {
 		return "", err
 	}

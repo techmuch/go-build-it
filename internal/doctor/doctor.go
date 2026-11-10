@@ -718,11 +718,24 @@ func (d *Doctor) harnessTier(ctx context.Context, ws string, probes []*probe, ke
 			startErr = d.Sup.C.Call(ctx, herdr.MethodPaneSendText, map[string]any{"pane_id": pane, "text": cmd}, nil)
 		}
 		state, waitErr := d.waitReady(ctx, pane, limit)
+		trusted := ""
+		if herdr.IsCode(startErr, "agent_not_ready") || state == herdr.AgentStatusBlocked {
+			// go-build-it answers a folder-trust screen in its own folders (FR-07f), as it does for members.
+			if tdir, ok := sessions.AnswerTrust(ctx, d.Sup.C, d.Cfg, pane); ok {
+				trusted = tdir
+				startErr = nil
+				state, waitErr = d.waitReady(ctx, pane, limit)
+			}
+		}
 		screen, _ := d.Sup.C.Read(context.Background(), pane, "visible", 20)
+		_, trustScreen := sessions.TrustKeys(screen)
 		switch {
+		case (herdr.IsCode(startErr, "agent_not_ready") || state == herdr.AgentStatusBlocked) && trustScreen:
+			r.Status, r.Detail = Fail, p.label+" is asking you to trust its folder, and go-build-it is set not to answer it"
+			r.Fix = human(fmt.Sprintf("Turn on **Settings → Agent harnesses → Answer folder trust prompts** (`[agents] trust_folders = true`), or run `%s` once in a terminal in %s and choose \"Yes, I trust this folder\". Then run `gbi doctor --harness %s`.", p.bin, dir, p.name))
 		case herdr.IsCode(startErr, "agent_not_ready") || state == herdr.AgentStatusBlocked:
 			r.Status, r.Detail = Fail, p.label+" started but stopped at a screen that needs you (herdr state blocked)"
-			r.Fix = human(fmt.Sprintf("Run `%s` once in a terminal in %s and finish what it asks (for example signing in or trusting the folder), then run `gbi doctor --harness %s`.", p.bin, dir, p.name))
+			r.Fix = human(fmt.Sprintf("Run `%s` once in a terminal in %s and finish what it asks (for example signing in), then run `gbi doctor --harness %s`. An AI agent cannot do this for you.", p.bin, dir, p.name))
 		case startErr != nil:
 			r.Status, r.Detail = Fail, "herdr could not start "+p.label+": "+startErr.Error()
 			r.Fix = human(fmt.Sprintf("Run `%s` in a terminal to check that it starts, then run `gbi doctor --harness %s`.", p.bin, p.name))
@@ -731,6 +744,9 @@ func (d *Doctor) harnessTier(ctx context.Context, ws string, probes []*probe, ke
 			r.Fix = human(fmt.Sprintf("Open `herdr --session gbi`, workspace %s, to see %s's screen; run `%s` in a terminal to check that it starts, then run `gbi doctor --harness %s`.", WorkspaceLabel, p.label, p.bin, p.name))
 		default:
 			r.Detail = fmt.Sprintf("herdr reports it %s", state)
+			if trusted != "" {
+				r.Detail += "; go-build-it answered its folder trust prompt for " + trusted
+			}
 		}
 		r.Evidence.Exit = intp(map[bool]int{true: 0, false: 1}[r.Status == OK])
 		if r.Status != OK {
