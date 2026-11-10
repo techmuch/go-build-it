@@ -107,7 +107,8 @@ func (m *Manager) drive(ctx context.Context, r *run) {
 }
 
 // waitUnblocked records a blocked member as needing the human and waits until herdr no
-// longer reports it blocked (FR-68). go-build-it never answers the harness's dialog.
+// longer reports it blocked (FR-68). go-build-it answers only folder-trust screens in its
+// own folders (FR-07f); every other dialog is the person's.
 func (m *Manager) waitUnblocked(ctx context.Context, r *run, msg string) bool {
 	r.s.Status = "blocked"
 	r.s.ExitReason = firstNonEmpty(msg, r.mem.Name+" needs you in its terminal")
@@ -141,6 +142,9 @@ func (m *Manager) waitReady(ctx context.Context, r *run) bool {
 		a, err := r.h.Agent(ctx, r.pane)
 		if err == nil {
 			if a.AgentStatus == herdr.AgentStatusBlocked {
+				if m.answerTrust(ctx, r.h, r.s.ProjectID, r.mem.Name, r.prof.Label, r.pane) {
+					continue
+				}
 				if !m.waitUnblocked(ctx, r, r.mem.Name+" is waiting for you in its terminal") {
 					return false
 				}
@@ -263,6 +267,9 @@ func (m *Manager) follow(ctx context.Context, r *run, seq int64) {
 		}
 		switch a.AgentStatus {
 		case herdr.AgentStatusBlocked:
+			if r.state != "blocked" && m.answerTrust(ctx, r.h, r.s.ProjectID, r.mem.Name, r.prof.Label, r.pane) {
+				continue
+			}
 			if r.state != "blocked" {
 				r.s.Status, r.s.ExitReason = "blocked", r.mem.Name+" is waiting for you in its terminal"
 				_ = m.write(ctx, r.s)

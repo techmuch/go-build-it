@@ -6,6 +6,15 @@ To release, run `gbi dev changelog release YYYY.MM.DD.N`, then `VERSION=YYYY.MM.
 
 ## [Unreleased]
 
+### Changed
+
+- **Folder trust is answered for you** (FR-07f, ADR-013). Before, a harness's "Do you trust this folder?" prompt stopped every new member, helper and doctor run until you answered it in a terminal. Now go-build-it answers *Yes* for folders it created (member worktrees, helpers, the practice project), and records each answer in the history as `agent.trusted`. Sign-in and permission prompts still come to you, and folders outside `~/.go-build-it` are never answered. Turn it off in **Settings → Agent harnesses → Answer folder trust prompts**.
+- The doctor names a trust prompt when the setting is off, and tells AI agents when a fix needs the person.
+
+### Added
+
+- Windows on ARM release binary (`gbi_windows_arm64.exe`), which `install.ps1` already expects.
+
 ## [2026.11.09.1] - 2026-11-09
 
 ### Added

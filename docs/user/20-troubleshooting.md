@@ -150,10 +150,15 @@ Then sign in to it once in a terminal.
 ### `harness.starts`
 
 **What it means:** herdr could not get the harness to a ready state:
-- **Blocked:** it stopped at a screen that needs you. Usually this is signing in, trusting the folder, or a first-run question. The evidence shows that screen.
+- **Asking you to trust its folder:** go-build-it normally answers this prompt itself (the result then says *go-build-it answered its folder trust prompt*). You see this failure only when **Answer folder trust prompts** is off.
+- **Blocked:** it stopped at a screen that needs you, usually signing in or a first-run question. The evidence shows that screen.
 - **Did not become ready:** it is slow, crashed, or printed an error. The evidence shows the last lines.
 
-**Fix:** run the harness once in a terminal, in the folder the fix names (`~/.go-build-it/helpers/<harness>`), and finish what it asks. Then run `gbi doctor --harness <name>`.
+**Fix:**
+- **Trust prompt:** turn on **Settings → Agent harnesses → Answer folder trust prompts** (`[agents] trust_folders = true` in `config.toml`).
+- **Anything else:** run the harness once in a terminal, in the folder the fix names (`~/.go-build-it/helpers/<harness>`), and finish what it asks. An AI agent can't do this step for you.
+
+Then run `gbi doctor --harness <name>`.
 
 **Confirm:** `gbi doctor --harness <name>`.
 

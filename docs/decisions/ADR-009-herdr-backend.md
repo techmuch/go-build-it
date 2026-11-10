@@ -75,7 +75,7 @@ Run in an isolated session (`herdr --session gbispike server`), then deleted.
   - Before any write, it must check that `status server` answers on that socket. It must never fall back to the default session.
 - **Starting an agent.**
   - `agent start --kind claude --pane … -- --permission-mode acceptEdits` returned `agent_not_ready`, because Claude was `blocked` on its first-run "trust this folder" dialog.
-  - That's correct herdr behaviour (FR-68). Each member worktree needs this trust once. go-build-it shows it as a one-time "needs you" item linked to the live terminal, and does not answer it itself.
+  - That's correct herdr behaviour (FR-68). Each member worktree needs this trust once. go-build-it shows it as a one-time "needs you" item linked to the live terminal, and does not answer it itself. *(Superseded by [ADR-013](ADR-013-folder-trust.md): go-build-it now answers the trust prompt for its own folders.)*
   - After the trust was given, the agent reached `idle` within about 3 s.
 - **Session ID.** `agent get` exposed `agent_session = {source: herdr:claude, kind: id, value: <uuid>}` even with the outdated v7 integration. go-build-it still asks for the current version.
 - **Dispatch.**

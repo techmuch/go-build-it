@@ -18,12 +18,16 @@ It does not contain the whole project history.
 
 herdr reports each member as working, blocked, done or idle.
 
-**Blocked members.** A **blocked** member is waiting for you. Examples are its first-run "trust this folder" prompt, or a permission dialog. It appears:
+**Blocked members.** A **blocked** member is waiting for you, for example at a sign-in screen or a permission dialog. It appears:
 - at the top of the Sessions page
 - in the Questions dashboard
 - in the mobile Inbox
 
-go-build-it never answers an agent's dialog for you. Open the live terminal and answer it there, or answer in herdr itself.
+Open the live terminal and answer it there, or answer in herdr itself.
+
+**Folder trust is answered for you.** The first time a harness runs in a folder, it asks whether to trust it. Member worktrees and helpers live in go-build-it's own folder (`~/.go-build-it`), so go-build-it answers *Yes, I trust this folder* and the member starts without you. Each answer is in the history as *agent.trusted*.
+- **Turn it off:** **Settings → Agent harnesses → Answer folder trust prompts**. The prompt then shows up as a blocked member.
+- **What it never answers:** sign-in screens, permission dialogs, or anything in a folder outside `~/.go-build-it`.
 
 **Fewer prompts.** Members run in accept-edits mode, which removes most prompts.
 

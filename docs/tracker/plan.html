@@ -74,7 +74,7 @@ td:first-child { white-space: nowrap; }
 </ol></nav>
 <main>
 <h1>go-build-it — Phased delivery plan</h1>
-<p class="meta">Status: Draft · 2026-11-09 · Based on [requirements rev 5](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)</p>
+<p class="meta">Status: Draft · 2026-11-09 · Based on [requirements rev 6](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)</p>
 <h2 id="1-how-this-plan-is-built">1. How this plan is built</h2>
 <ul><li>
 <strong>Approach A is the UI baseline.</strong> Every UI task names the Approach A view it implements (desktop <code>A-v01</code>…<code>A-v14</code> plus detail views <code>02b</code>, <code>03b</code>, <code>04b</code>, <code>05b</code>, <code>12b</code>; mobile <code>A-M1</code>…<code>A-M11</code>).
@@ -92,6 +92,8 @@ td:first-child { white-space: nowrap; }
 <strong>Rev 4 (P16): change log and guided updates</strong> ([ADR-011](../decisions/ADR-011-changelog-guided-updates.md)).
 </li><li>
 <strong>Rev 5 (P17–P18): doctor, AI-agent install and Learn</strong> ([ADR-012](../decisions/ADR-012-doctor-and-learning.md)). P17 makes the doctor prove that gbi can start herdr and a harness, and explain failures to a person or an AI agent; it adds the install that works from the GitHub URL alone. P18 adds lessons with a coach panel and a practice project, driving gbi from your AI harness, and <em>How go-build-it thinks</em>.
+</li><li>
+<strong>Rev 6 (P19): folder trust</strong> ([ADR-013](../decisions/ADR-013-folder-trust.md)). go-build-it answers a harness's "trust this folder" prompt for the folders it created, so members, helpers and the doctor start without a person. Other prompts stay with the person.
 </li><li>
 <strong>Dogfooding from P4.</strong> Once Courier can branch, PR, merge and release (end of P4), go-build-it manages its own remaining phases, and this tracker's data is imported into it.
 </li><li>
@@ -118,6 +120,7 @@ td:first-child { white-space: nowrap; }
 <tr><td>P16</td><td>Change log &amp; guided updates</td><td></td><td>11</td><td>19</td><td>◆ Update UAT</td></tr>
 <tr><td>P17</td><td>Doctor &amp; AI-agent install</td><td></td><td>10</td><td>22</td><td>◆ Doctor UAT</td></tr>
 <tr><td>P18</td><td>Learn: lessons, practice project, harness control</td><td></td><td>12</td><td>33</td><td>◆ Learn UAT</td></tr>
+<tr><td>P19</td><td>Folder trust</td><td></td><td>5</td><td>9</td><td>◆ Folder trust UAT</td></tr>
 </tbody></table></div>
 <h2 id="3-critical-path">3. Critical path</h2>
 <ul><li>
@@ -552,6 +555,25 @@ How go-build-it thinks covers herdr, archetypes, worktrees, gates, questions, hi
 <tr><td><strong>P18-10</strong> scripts/docs_examples.sh runs every $ gbi example in the lessons and cookbook against a demo instance ✅</td><td>S</td><td>FR-139</td><td>—</td><td>P18-07, P18-08</td></tr>
 <tr><td><strong>P18-11</strong> web/e2e/learn.spec.ts completes every lesson in the practice project and regenerates the lesson screenshots ✅</td><td>M</td><td>FR-139, FR-133, FR-131</td><td>A-v18, A-v19, A-M13</td><td>P18-07</td></tr>
 <tr><td><strong>P18-12</strong> Docs and release notes: keyboard (g l), CLI page, README tests, CHANGELOG Unreleased; keyboard test ✅</td><td>S</td><td>FR-130, FR-06a</td><td>A-v14</td><td>P18-11, P17-10</td></tr>
+</tbody></table></div>
+<h3 id="p19-folder-trust">P19 · Folder trust</h3>
+<p><strong>Goal:</strong> Start members, helpers and the doctor without a person: go-build-it answers a harness's folder trust prompt for folders it created, records it, and leaves every other prompt to the person.</p>
+<p><strong>◆ Gate: Folder trust UAT.</strong> Passes when:</p>
+<ul><li>
+A member whose harness starts at a trust prompt in its worktree runs its task without becoming blocked; agent.trusted is in the history
+</li><li>
+The doctor's harness tier answers the trust prompt and passes; with the setting off it fails with a human fix naming the prompt
+</li><li>
+Real Claude Code and Antigravity trust prompts are recognised and answered; sign-in and permission screens are not
+</li><li>
+Folders outside ~/.go-build-it are never answered
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P19-01</strong> Requirements rev 6 (FR-07f, FR-68 amended), ADR-013 (amends ADR-009), plan and tracker ✅</td><td>S</td><td>FR-07f, FR-68</td><td>—</td><td>—</td></tr>
+<tr><td><strong>P19-02</strong> internal/sessions/trust.go: recognise the trust screen and the keys that choose Yes; only folders inside go-build-it's directory; agent.send_keys with a pane fallback ✅</td><td>M</td><td>FR-07f</td><td>—</td><td>P19-01</td></tr>
+<tr><td><strong>P19-03</strong> Answer it when a member starts, while it waits to be ready, and for helpers; agent.trusted history event ✅</td><td>M</td><td>FR-07f, FR-68</td><td>—</td><td>P19-02</td></tr>
+<tr><td><strong>P19-04</strong> Doctor harness tier answers it; names it in the human fix when the setting is off; fake member --start-trust ✅</td><td>S</td><td>FR-07f, FR-07b</td><td>A-v17</td><td>P19-02</td></tr>
+<tr><td><strong>P19-05</strong> Setting [agents] trust_folders (on by default) and the Settings toggle; docs (sessions, settings, troubleshooting), CHANGELOG ✅</td><td>S</td><td>FR-07f, FR-07e</td><td>A-v15</td><td>P19-03, P19-04</td></tr>
 </tbody></table></div>
 <h2 id="5-open-questions-schedule">5. Open questions schedule</h2>
 <div class="table-wrap"><table><thead><tr><th>Question</th><th>Answer before</th><th>Why</th></tr></thead><tbody>

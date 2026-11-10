@@ -189,7 +189,7 @@ func (m *Manager) ensureAgent(ctx context.Context, h *herdr.Client, p projects.P
 	}
 	out := launched{pane: pane, conv: mem.ConversationID}
 	if a, err := h.Agent(ctx, pane); err == nil && a.Agent != nil && agentMatches(*a.Agent, prof) {
-		if a.AgentStatus == herdr.AgentStatusBlocked {
+		if a.AgentStatus == herdr.AgentStatusBlocked && !m.answerTrust(ctx, h, p.ID, mem.Name, prof.Label, pane) {
 			out.blocked = true
 		}
 		if out.conv == "" && a.AgentSession != nil {
@@ -220,17 +220,21 @@ func (m *Manager) ensureAgent(ctx context.Context, h *herdr.Client, p projects.P
 			case <-time.After(500 * time.Millisecond):
 			}
 		}
+		notReady := herdr.IsCode(err, "agent_not_ready")
 		if err == nil {
 			// Some harnesses show a first-run prompt only after they are detected (Antigravity's folder trust).
 			time.Sleep(1500 * time.Millisecond)
 			if a, aerr := h.Agent(ctx, pane); aerr == nil && a.AgentStatus == herdr.AgentStatusBlocked {
-				out.blocked, out.message = true, prof.Label+" is waiting for you (for example a first-run trust prompt)"
+				notReady = true
 			}
 		}
 		switch {
+		case notReady:
+			// A folder-trust screen in go-build-it's own folder is answered (FR-07f); anything else waits for you.
+			if !m.answerTrust(ctx, h, p.ID, mem.Name, prof.Label, pane) {
+				out.blocked, out.message = true, prof.Label+" is waiting for you (for example a sign-in screen)"
+			}
 		case err == nil:
-		case herdr.IsCode(err, "agent_not_ready"):
-			out.blocked, out.message = true, "the harness is waiting for you (for example a first-run trust prompt)"
 		default:
 			return out, fmt.Errorf("start %s in herdr: %w", prof.Label, err)
 		}

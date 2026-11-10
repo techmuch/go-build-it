@@ -224,6 +224,29 @@ func TestBlockedHarnessNeedsAHuman(t *testing.T) {
 	}
 }
 
+// A folder trust screen in go-build-it's own folder is answered, so the harness starts (FR-07f).
+// With [agents] trust_folders off it is a human fix that names the screen.
+func TestTrustScreenAnswered(t *testing.T) {
+	for _, on := range []bool{true, false} {
+		cfg := testConfig(t, "--start-trust")
+		cfg.Agents.TrustFolders = on
+		s := herdr.TestSession(t)
+		exe, _ := os.Executable()
+		d := &Doctor{Cfg: cfg, Sup: s, Exe: exe, Version: "dev", Service: noService, StartTimeout: 20 * time.Second}
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+		rep := d.Run(ctx, Options{Through: HarnessTier})
+		cancel()
+		r := find(t, rep, "harness.starts")
+		b, _ := json.MarshalIndent(r, "", " ")
+		if on && (r.Status != OK || !strings.Contains(r.Detail, "answered its folder trust prompt")) {
+			t.Fatalf("trust on:\n%s", b)
+		}
+		if !on && (r.Status != Fail || r.Fix == nil || r.Fix.Kind != "human" || !strings.Contains(r.Detail, "trust its folder") || !strings.Contains(r.Fix.Instructions, "trust_folders")) {
+			t.Fatalf("trust off:\n%s", b)
+		}
+	}
+}
+
 // A harness the doctor's PATH has but herdr panes do not: fail with a set-binary fix, which works.
 func TestHarnessMissingInsidePanes(t *testing.T) {
 	if runtime.GOOS == "windows" {

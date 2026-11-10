@@ -31,6 +31,14 @@ type Experimental struct {
 	HandoffThreshold     float64  `toml:"handoff_threshold" json:"handoffThreshold"`
 }
 
+// Agents configures how go-build-it runs agent harnesses.
+type Agents struct {
+	// TrustFolders answers a harness's "trust this folder?" screen with yes for folders
+	// inside go-build-it's own directory: member worktrees, helpers and the practice
+	// project (FR-07f, ADR-013). On by default.
+	TrustFolders bool `toml:"trust_folders" json:"trustFolders"`
+}
+
 // Herdr configures the agent backend (FR-07, ADR-009).
 type Herdr struct {
 	Binary  string `toml:"binary" json:"binary"`   // herdr executable; default "herdr" on PATH
@@ -63,6 +71,7 @@ type Config struct {
 	Experimental  Experimental       `toml:"experimental" json:"experimental"`
 	Updates       Updates            `toml:"updates" json:"updates"`
 	Herdr         Herdr              `toml:"herdr" json:"herdr"`
+	Agents        Agents             `toml:"agents" json:"agents"`
 	dir           string
 }
 
@@ -90,6 +99,7 @@ func Default() Config {
 		Listen:        "127.0.0.1:7420",
 		DefaultUser:   name,
 		MaxConcurrent: 3,
+		Agents:        Agents{TrustFolders: true},
 		ProjectsRoot:  filepath.Join(home, "projects"),
 		Harnesses: map[string]Harness{
 			"claude":      {Enabled: true, Binary: "claude"},

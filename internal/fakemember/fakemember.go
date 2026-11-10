@@ -15,7 +15,8 @@
 //
 // The doctor's prompt ("Reply with the single word READY.") is answered with READY.
 // --start-blocked shows a sign-in screen and reports "blocked" at start, like a harness
-// that has never been signed in (doctor tests, FR-07b).
+// that has never been signed in (doctor tests, FR-07b). --start-trust shows a folder trust
+// screen with "No" selected and continues only when "down" then "enter" arrive (FR-07f).
 package fakemember
 
 import (
@@ -106,10 +107,14 @@ type agent struct {
 // chooses it, as it does for Claude Code); --resume <id> continues one.
 func Run(args []string, in io.Reader, out io.Writer) error {
 	a := &agent{h: herdr.FromEnv(), pane: os.Getenv("HERDR_PANE_ID"), out: out}
-	startBlocked := false
+	startBlocked, startTrust := false, false
 	for i := 0; i < len(args); i++ {
 		if args[i] == "--start-blocked" {
 			startBlocked = true
+			continue
+		}
+		if args[i] == "--start-trust" {
+			startTrust = true
 			continue
 		}
 		if (args[i] == "--resume" || args[i] == "--session-id") && i+1 < len(args) {
@@ -137,10 +142,24 @@ func Run(args []string, in io.Reader, out io.Writer) error {
 		_, _ = io.Copy(io.Discard, in)
 		return nil
 	}
-	fmt.Fprintf(out, "fake agent · session %s · ready\n", a.session)
-	a.report("idle", "")
 	sc := bufio.NewScanner(in)
 	sc.Buffer(make([]byte, 0, 64<<10), 4<<20)
+	if startTrust {
+		// Like Claude Code's folder trust screen: "No" is selected, so only down + enter trusts.
+		wd, _ := os.Getwd()
+		fmt.Fprintf(out, " Accessing workspace:\n\n %s\n\n Quick safety check: Is this a project you created or one you trust?\n\n ❯ No, exit\n   Yes, I trust this folder\n\n Enter to confirm · Esc to cancel\n", wd)
+		a.report("blocked", "trust this folder")
+		if !sc.Scan() || !(strings.Contains(sc.Text(), "\x1b[B") || strings.Contains(sc.Text(), "\x1bOB")) {
+			fmt.Fprintln(out, "Not trusted. Exiting.")
+			if a.h != nil {
+				_ = a.h.ReleaseAgent(context.Background(), a.pane, Source, "fake", a.seqNext())
+			}
+			return nil
+		}
+		fmt.Fprintln(out, "Trusted.")
+	}
+	fmt.Fprintf(out, "fake agent · session %s · ready\n", a.session)
+	a.report("idle", "")
 	for sc.Scan() {
 		line := strings.TrimSpace(strings.Trim(sc.Text(), "\x1b[200~\x1b[201~"))
 		if line == "" {

@@ -120,6 +120,27 @@ func TestBlockedMemberNeedsYou(t *testing.T) {
 	}
 }
 
+// FR-07f: a member whose harness starts at a folder trust screen in its worktree is
+// answered by go-build-it and runs the task; the answer is in the history.
+func TestMemberTrustScreenAnswered(t *testing.T) {
+	e := setup(t)
+	hc := e.a.Cfg.Harnesses["fake"]
+	hc.Flags = []string{"--start-trust"}
+	e.a.Cfg.Harnesses["fake"] = hc
+	tk, _ := e.a.Queue.Add(e.ctx, queue.Task{ProjectID: "demo", Title: "First run in a new worktree"})
+	if _, err := e.a.Sessions.Start(e.ctx, tk.ID, "forge@demo"); err != nil {
+		t.Fatal(err)
+	}
+	e.waitStatus(tk.ID, queue.Review)
+	evs, _ := e.a.Hist.List(e.ctx, historyQueryType("agent.trusted"))
+	if len(evs) != 1 || evs[0].Subject != "Forge" || evs[0].ProjectID != "demo" {
+		t.Fatalf("agent.trusted events: %+v", evs)
+	}
+	if blocked, _ := e.a.Hist.List(e.ctx, historyQueryType("session.blocked")); len(blocked) != 0 {
+		t.Fatalf("the trust screen should not make the member blocked: %+v", blocked)
+	}
+}
+
 // P13-08: a member keeps working while go-build-it restarts; the new process reattaches.
 func TestReattachAfterRestart(t *testing.T) {
 	e := setup(t)
