@@ -1,4 +1,4 @@
-// Mobile web UI (FR-35): Approach A mobile, screens M1–M11.
+// Mobile web UI (FR-35): Approach A mobile, screens M1–M14.
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ChangelogList, UpdatePanel } from '../pages/Changelog';
 import { api } from '../api.gen';
@@ -57,6 +57,7 @@ function ProjectStatus({ id }: { id: string }) {
     <div className="m-card"><h4>Roadmap</h4>{data.milestones?.map((m: any) => <div key={m.id} className="small" style={{ margin: '4px 0' }}>{m.status === 'done' ? '✅' : m.status === 'active' ? '▶' : '○'} {m.name} {m.total ? `${m.done}/${m.total}` : ''}{m.gateName && <span className="muted"> · ◆ {m.gateName}</span>}{m.status === 'active' && <Bar pct={m.total ? (100 * m.done) / m.total : 0} />}</div>)}{!data.milestones?.length && <span className="muted small">No roadmap yet.</span>}</div>
     {(data.project?.team || []).length > 0 && <div className="m-card"><h4>Team</h4>{data.project.team.map((m: any) => <div key={m.id} className="small" style={{ margin: '3px 0' }}>{m.name} · <span className="muted">{m.kind === 'human' ? 'human · ' + m.role : m.role + (m.tuned ? ' · tuned' : '')}</span>{m.state ? <> · <Chip c={m.state === 'blocked' ? 'red' : m.state === 'working' ? 'acc' : ''}>{m.state}</Chip></> : null}</div>)}<div className="small muted">From archetypes, tuned for this project</div></div>}
     <div className="m-card"><h4>Running</h4>{data.sessions.map((s: any) => <div key={s.id} className="small" {...clickable(() => navigate('/m/sessions/' + s.id), { role: 'link' })} style={{ margin: '4px 0' }}>{s.memberId} · {s.taskId} · {Math.round(s.fraction * 100)}%{s.compactions ? ` · compacted ${s.compactions}×` : ''}<Bar pct={s.fraction * 100} warn={70} /></div>)}{data.sessions.length === 0 && <span className="muted small">Nothing running.</span>}</div>
+    <div className="m-card" {...clickable(() => navigate(`/m/projects/${id}/docs`), { role: 'link' })}><h4>Documents ›</h4><div className="small muted">Requirements · Mockups · Plan · Tracker · Compare · Support files</div></div>
     <div className="m-card"><h4>Release & links</h4><div className="small">{p.live?.release ? <><b>{p.live.release.tag}</b> · {day(p.live.release.date)}</> : 'No stable release yet'} {p.live?.repo?.ci && p.live.repo.ci !== 'none' && <>· CI <Status s={p.live.repo.ci === 'passing' ? 'done' : 'failed'} /></>}<br />
       {p.live?.repo?.releaseUrl && <a href={p.live.repo.releaseUrl}>Notes ↗ </a>}{p.websiteUrl && <a href={p.websiteUrl}>Website ↗ </a>}{p.live?.repo?.repoUrl && <a href={p.live.repo.repoUrl}>Repo ↗</a>}</div></div>
   </Screen>;
@@ -268,11 +269,55 @@ function LearnScreen() {
   </Screen>;
 }
 
+// M14 · Project documents (FR-140, FR-141, FR-147)
+const M_DOCS: [string, string, string][] = [['requirements', '📋', 'Requirements'], ['mockups', '🎨', 'Mockups'], ['plan', '🗺', 'Plan'], ['tracker', '✅', 'Tracker']];
+function DocsScreen({ id }: { id: string }) {
+  const { data: files } = useData<any>(() => api.artifacts.files(id), [id], (e) => e.type.startsWith('artifact'));
+  const { data: cmp } = useData<any>(() => api.compare.list(id), [id], (e) => e.type.startsWith('artifact'));
+  const STATE: Record<string, [string, string]> = { 'accepted': ['grn', 'accepted'], 'drifted': ['amb', 'drifted'], 'not-reviewed': ['red', 'not reviewed'], 'task': ['blue', 'task filed'], 'no-screenshot': ['', 'no screenshot'] };
+  return <Screen title="Documents" sub={id} back={`/m/projects/${id}`} tab="projects">
+    {!files ? <Loading /> : <>
+      <div className="m-card">{M_DOCS.map(([r, i, l]) => <div key={r} className="m-row" style={{ padding: '7px 0' }} {...clickable(() => files.entries?.[r] && navigate(`/m/projects/${id}/docs/${r}`), { role: 'link' })}>
+        <span>{i} <b>{l}</b></span><span className="small muted">{files.entries?.[r] ? files.entries[r].replace(/^docs\//, '') + ' ›' : 'not set'}</span></div>)}
+        <div className="m-row" style={{ padding: '7px 0' }}><span>📁 <b>Support files</b></span><span className="small muted">{files.files?.length || 0}{files.unlabelled?.length ? ` · ${files.unlabelled.length} unlabelled` : ''}</span></div></div>
+      <div className="m-card"><h4>Compare {cmp?.toReview > 0 && <Chip c="red">{cmp.toReview} to review</Chip>}</h4>
+        {(cmp?.views || []).map((v: any) => <div key={v.id} className="m-row small" style={{ padding: '6px 0' }} {...clickable(() => navigate(`/m/projects/${id}/compare/${v.id}`), { role: 'link' })}><span>{v.title && v.title.startsWith(v.id) ? v.title : `${v.id} ${v.title || ''}`}</span><Chip c={STATE[v.state]?.[0]}>{STATE[v.state]?.[1]}</Chip></div>)}
+        {!cmp?.views?.length && <span className="small muted">No mockup views yet.</span>}</div>
+    </>}
+  </Screen>;
+}
+
+function DocScreen({ id, role }: { id: string; role: string }) {
+  const { data: files } = useData<any>(() => api.artifacts.files(id), [id]);
+  const entry = files?.entries?.[role];
+  return <Screen title={M_DOCS.find((d) => d[0] === role)?.[2] || role} sub={entry} back={`/m/projects/${id}/docs`}>
+    {!files ? <Loading /> : !entry ? <Empty>No entry point yet. Set one on desktop or with gbi artifacts entry.</Empty>
+      : <iframe className="m-docframe" src={`/raw/${id}/${entry}`} title={entry} sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox" />}
+  </Screen>;
+}
+
+function CompareScreen({ id, view }: { id: string; view: string }) {
+  const { data: cmp } = useData<any>(() => api.compare.list(id), [id], (e) => e.type.startsWith('artifact'));
+  const [side, setSide] = useState<'mock' | 'real'>('mock');
+  const [note, setNote] = useState('');
+  const { run, busy } = useAction();
+  const v = (cmp?.views || []).find((x: any) => x.id === view);
+  return <Screen title={v ? (v.title && v.title.startsWith(v.id) ? v.title : `${v.id} ${v.title || ''}`) : view} sub="Compare" back={`/m/projects/${id}/docs`}>
+    {!cmp ? <Loading /> : !v ? <Empty>No view {view}.</Empty> : <>
+      <div className="m-row" style={{ justifyContent: 'center', gap: 6, margin: '4px 0 8px' }}><button type="button" className={'btn sm ' + (side === 'mock' ? 'p' : '')} onClick={() => setSide('mock')}>Mockup</button><button type="button" className={'btn sm ' + (side === 'real' ? 'p' : '')} onClick={() => setSide('real')}>Real app</button></div>
+      {side === 'mock' ? <iframe className="m-docframe" src={`/raw/${id}/${v.file}?gbi-view=${encodeURIComponent(v.id)}`} title={`Mockup ${v.id}`} sandbox="allow-scripts" />
+        : v.screenshot ? <img src={`/raw/${id}/${v.screenshot}`} alt={`Screenshot of ${v.id}`} style={{ width: '100%', borderRadius: 10, border: '1px solid var(--line)' }} /> : <Empty>No screenshot yet.</Empty>}
+      {v.screenshot && <div className="m-card" style={{ marginTop: 8 }}><DictArea value={note} onChange={setNote} rows={2} placeholder="What is different, or why it is fine" />
+        <div className="m-row" style={{ gap: 6, marginTop: 6 }}><button type="button" className="btn" disabled={busy} onClick={() => run(() => api.compare.accept(id, v.id, { note }), 'Accepted')}>✓ Accept</button><button type="button" className="btn p" disabled={busy || !note.trim()} onClick={() => run(() => api.compare.task(id, v.id, { note }), 'Task filed')}>File a task</button></div></div>}
+    </>}
+  </Screen>;
+}
+
 export function MobileApp() {
   const path = usePath();
   useGlobalKeys();
   const routes: [string, (p: any) => JSX.Element][] = [
-    ['/m', () => <Home />], ['/m/projects/:id', (p) => <ProjectStatus id={p.id} />], ['/m/inbox', () => <Inbox />], ['/m/q/:id', (p) => <Answer id={p.id} />],
+    ['/m', () => <Home />], ['/m/projects/:id', (p) => <ProjectStatus id={p.id} />], ['/m/projects/:id/docs', (p) => <DocsScreen id={p.id} />], ['/m/projects/:id/docs/:role', (p) => <DocScreen id={p.id} role={p.role} />], ['/m/projects/:id/compare/:view', (p) => <CompareScreen id={p.id} view={p.view} />], ['/m/inbox', () => <Inbox />], ['/m/q/:id', (p) => <Answer id={p.id} />],
     ['/m/review/:id', (p) => <ReviewScreen id={p.id} />], ['/m/rehearsal/:id', (p) => <RehearsalStep id={p.id} />], ['/m/options/:id', (p) => <OptionScreen id={p.id} />],
     ['/m/sessions', () => <SessionsScreen />], ['/m/sessions/:sid', (p) => <Terminal sid={p.sid} />], ['/m/more', () => <More />], ['/m/changelog', () => <ChangelogScreen />], ['/m/learn', () => <LearnScreen />],
   ];

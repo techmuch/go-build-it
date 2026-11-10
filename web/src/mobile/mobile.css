@@ -26,3 +26,6 @@
 .m-keys { display: flex; gap: 5px; padding: 6px 8px; background: #1b252e; position: sticky; bottom: 0; }
 .m-keys span { flex: 1; text-align: center; background: #2b3a47; color: #dfe7ee; border-radius: 5px; padding: 8px 0; font: 600 11px ui-monospace, Menlo, monospace; cursor: pointer; }
 .m-termfoot { padding: 8px 10px calc(12px + env(safe-area-inset-bottom)); background: #0e1419; }
+
+/* M14 · project documents */
+.m-docframe { display: block; width: 100%; height: calc(100vh - 170px); min-height: 420px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }

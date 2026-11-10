@@ -230,6 +230,16 @@ func WriteFiles(dir, content string) ([]string, error) {
 	return written, nil
 }
 
+// EnsureBuiltin creates a standard when it does not exist yet. An existing standard,
+// including one the owner edited, is never changed. It reports whether it created it.
+func (s *Service) EnsureBuiltin(ctx context.Context, id, title, body string) (bool, error) {
+	if _, err := s.Get(ctx, id); err == nil {
+		return false, nil
+	}
+	_, err := s.Save(ctx, id, title, body, "built in to go-build-it")
+	return err == nil, err
+}
+
 // SeedFromDir loads *.md files from dir as standards when none exist yet.
 func (s *Service) SeedFromDir(ctx context.Context, dir string) (int, error) {
 	var n int

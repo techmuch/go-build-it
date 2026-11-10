@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{project}} · Tracker</title>
+<style>body{margin:0;font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1c2329;background:#fff}nav{display:flex;gap:16px;padding:10px 24px;border-bottom:1px solid #e1e5e8;font-size:13px}nav b{margin-right:8px}nav a{color:#2f6fd1;text-decoration:none}nav a.on{color:#1c2329;font-weight:600}main{max-width:900px;padding:8px 24px 40px}code{background:#f1f3f5;border-radius:4px;padding:0 4px}table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid #e1e5e8;padding:6px 8px;text-align:left;font-size:14px}:target{background:#fff8e6}</style>
+<style>.bar{height:7px;background:#e7ebee;border-radius:4px;overflow:hidden;min-width:120px}.bar i{display:block;height:100%;background:#0f9d8a}.st{font-size:12px;border-radius:999px;padding:1px 8px;background:#eef1f3}</style>
+</head><body>
+<nav><b>{{project}}</b><a href="../requirements.html">Requirements</a><a href="../mockups/index.html">Mockups</a><a href="../plan.html">Plan</a><a class="on" href="index.html">Tracker</a></nav>
+<main>
+<h1>{{project}} · Tracker</h1>
+<p id="meta">This page reads <a href="tracker.json">tracker.json</a>, a snapshot of go-build-it's milestones and tasks (<code>gbi artifacts snapshot {{project}}</code>).</p>
+<div id="out"></div>
+</main>
+<script>
+fetch('tracker.json').then((r) => r.json()).then((s) => {
+  const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  document.getElementById('meta').textContent = 'Snapshot of go-build-it · ' + s.done + ' / ' + s.total + ' tasks done · ' + s.generated;
+  let h = '<table><tr><th>Milestone</th><th>Gate</th><th>Tasks</th><th>Progress</th></tr>';
+  for (const m of s.milestones) {
+    const ts = s.tasks.filter((t) => t.milestone === m.id), done = ts.filter((t) => t.status === 'done').length;
+    h += '<tr><td><b>' + esc(m.name) + '</b></td><td><span class="st">' + esc(m.gate || '—') + '</span></td><td>' + done + ' / ' + ts.length + '</td><td><div class="bar"><i style="width:' + (ts.length ? Math.round(100 * done / ts.length) : 0) + '%"></i></div></td></tr>';
+  }
+  h += '</table><h2>Tasks</h2><table><tr><th>ID</th><th>Task</th><th>Status</th><th>Requirements</th></tr>';
+  for (const t of s.tasks) h += '<tr><td>' + esc(t.id) + '</td><td>' + esc(t.title) + '</td><td><span class="st">' + esc(t.status) + '</span></td><td>' + (t.reqs || []).map((r) => '<a href="../requirements.html#' + esc(r) + '">' + esc(r) + '</a>').join(' ') + '</td></tr>';
+  document.getElementById('out').innerHTML = h + '</table>';
+}).catch(() => { document.getElementById('out').innerHTML = '<p>No snapshot yet. Run <code>gbi artifacts snapshot {{project}}</code>.</p>'; });
+</script>
+</body></html>

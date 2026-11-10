@@ -99,6 +99,7 @@ func serve(args []string) error {
 	if n, _ := a.Standards.SeedFromDir(ctx, filepath.Join(cfg.Dir(), "standards")); n > 0 {
 		log.Info("seeded standards", "count", n)
 	}
+	_, _ = a.Standards.EnsureBuiltin(ctx, "project-documents", "Project documents", docs.ProjectDocumentsStandard()) // FR-150
 	// After an update installs, the job asks to restart: shut down cleanly, then replace
 	// this process with the new binary (FR-06d, ADR-011).
 	restart := make(chan struct{})
@@ -167,21 +168,8 @@ func listenRetry(addr string, wait time.Duration) (net.Listener, error) {
 func Handler(a *app.App) http.Handler {
 	mux := http.NewServeMux()
 	api.Mount(mux, a.Routes())
-	mux.HandleFunc("GET /raw/{id}/{path...}", func(w http.ResponseWriter, r *http.Request) {
-		p, err := a.Projects.Get(r.Context(), r.PathValue("id"))
-		if err != nil {
-			http.NotFound(w, r)
-			return
-		}
-		rel := filepath.Clean(r.PathValue("path"))
-		if strings.HasPrefix(rel, "..") || filepath.IsAbs(rel) {
-			http.Error(w, "bad path", http.StatusBadRequest)
-			return
-		}
-		// Mockups run sandboxed: scripts allowed, no access to the app origin (FR-102a).
-		w.Header().Set("Content-Security-Policy", "sandbox allow-scripts allow-forms allow-popups")
-		http.ServeFile(w, r, filepath.Join(p.Path, rel))
-	})
+	mux.HandleFunc("GET /raw/{id}/{path...}", a.RawHandler) // sandboxed document viewer (FR-144)
+	mux.Handle("GET /gbi-assets/", a.AssetsHandler())
 	mux.Handle("GET /docs-assets/", http.StripPrefix("/docs-assets/", http.FileServerFS(docs.FS())))
 	mux.Handle("GET /", spa(web.Dist()))
 	return access.Middleware(a.Cfg.DefaultUser, func() access.ExternalPolicy {

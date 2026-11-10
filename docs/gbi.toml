@@ -1,0 +1,24 @@
+# go-build-it project documents (FR-140–FR-150). Change with `gbi artifacts entry|add|label`.
+
+[entries]
+requirements = "docs/requirements.html"
+mockups      = "docs/mockups/index.html"
+plan         = "docs/tracker/plan.html"
+tracker      = "docs/tracker/index.html"
+
+[labels]
+"docs/agent-guide.md" = ["support"]
+"docs/decisions/" = ["decision"]
+"docs/embed.go" = ["support"]
+"docs/embed_test.go" = ["support"]
+"docs/index.html" = ["support"]
+"docs/learn/" = ["support"]
+"docs/mockups/" = ["mockup"]
+"docs/requirements.html" = ["requirements"]
+"docs/requirements.md" = ["requirements"]
+"docs/specs/" = ["research"]
+"docs/standards/" = ["support"]
+"docs/tracker/" = ["plan", "tracker"]
+"docs/upstream/" = ["research"]
+"docs/user/" = ["support"]
+"docs/user/screenshots/" = ["screenshot"]

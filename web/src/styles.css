@@ -273,3 +273,33 @@ pre.evi { background: var(--term); color: var(--term-t); font: 11.5px/1.45 ui-mo
 @media (prefers-reduced-motion: reduce) { .tour-pulse { animation: none; } }
 @media (max-width: 1100px) { .app.coached { grid-template-columns: 212px minmax(0, 1fr); } .app.coached .coach { position: fixed; right: 0; top: 0; width: 300px; z-index: 40; box-shadow: var(--shadow); } }
 @media (max-width: 760px) { .thinking { columns: 1; } }
+
+/* ---------- project documents (rev 7, v21–v26) ---------- */
+.subtabs { display: flex; gap: 4px; padding: 8px 20px 0; margin: -18px -20px 14px; background: var(--bg); border-bottom: 1px solid var(--line); overflow-x: auto; }
+.subtabs a { padding: 6px 12px; font-size: 12.5px; color: var(--m); text-decoration: none; border: 1px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; white-space: nowrap; }
+.subtabs a.on { background: var(--card); border-color: var(--line); color: var(--t); font-weight: 600; margin-bottom: -1px; }
+.docbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 8px 10px; border: 1px solid var(--line); border-bottom: 0; border-radius: 8px 8px 0 0; background: var(--card); font-size: 12.5px; }
+.docbar select { font-size: 12px; }
+.docframe { position: relative; border: 1px solid var(--line); border-radius: 0 0 8px 8px; overflow: hidden; background: #fff; }
+.docframe iframe { display: block; width: 100%; height: calc(100vh - 230px); min-height: 480px; border: 0; background: #fff; }
+.docframe.short { border-radius: 8px; } .docframe.short iframe { height: 420px; min-height: 0; }
+.sandboxed { position: absolute; right: 8px; bottom: 8px; background: rgba(23,33,43,.8); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 5px; pointer-events: none; }
+.lbl { display: inline-block; font: 11px ui-monospace, Menlo, monospace; border-radius: 4px; padding: 0 6px; margin-right: 3px; background: var(--blue-s); color: var(--blue); }
+.lbl.entry { background: var(--acc); color: #fff; } .lbl.none { background: var(--amb-s); color: var(--amb); }
+.idtag { font: 11px ui-monospace, Menlo, monospace; background: var(--chip); color: var(--chip-t); border-radius: 4px; padding: 0 5px; }
+.gap { display: inline-block; background: var(--red-s); color: var(--red); border-radius: 4px; padding: 0 6px; margin: 0 4px 2px 0; font-size: 11.5px; font-weight: 600; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--line); vertical-align: middle; }
+.dot.grn { background: var(--grn); } .dot.amb { background: var(--amb); } .dot.red { background: var(--red); } .dot.blue { background: var(--blue); }
+a.vi { display: block; padding: 6px 8px; border-radius: 6px; font-size: 12.5px; color: var(--t); text-decoration: none; } a.vi.on { background: var(--acc-s); font-weight: 600; }
+.compare { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; padding: 14px; border: 1px solid var(--line); border-radius: 0 0 8px 8px; background: var(--bg); }
+.compare figure { margin: 0; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.compare figcaption { font-size: 11.5px; color: var(--m); }
+.compare iframe, .compare img, .compare .noshot { width: 420px; height: 700px; border: 1px solid var(--line); border-radius: 8px; background: #fff; object-fit: contain; object-position: top; }
+.compare .noshot { display: grid; place-items: center; padding: 20px; text-align: center; color: var(--m); font-size: 12.5px; }
+.overlay-cmp { position: relative; width: 420px; height: 700px; }
+.overlay-cmp iframe, .overlay-cmp img { position: absolute; inset: 0; }
+.overlay-cmp i { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--red); pointer-events: none; }
+.labelpick { display: inline-flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12px; margin-right: 6px; } .labelpick label { display: inline-flex; gap: 3px; align-items: center; }
+select.sm { font-size: 12px; padding: 2px 4px; margin-left: 4px; }
+pre.evi { background: #0e1419; color: #d7e0e8; font: 11.5px/1.5 ui-monospace, Menlo, monospace; border-radius: 6px; padding: 8px 10px; white-space: pre-wrap; margin: 0 0 6px; }
+@media (max-width: 760px) { .compare iframe, .compare img, .compare .noshot, .overlay-cmp { width: 100%; height: 560px; } }

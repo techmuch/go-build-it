@@ -1,6 +1,6 @@
 # go-build-it — Phased delivery plan
 
-Status: Draft · 2026-11-09 · Based on [requirements rev 6](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
+Status: Draft · 2026-11-09 · Based on [requirements rev 7](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
 
 ## 1. How this plan is built
 
@@ -13,6 +13,7 @@ Status: Draft · 2026-11-09 · Based on [requirements rev 6](../requirements.md)
 - **Rev 4 (P16): change log and guided updates** ([ADR-011](../decisions/ADR-011-changelog-guided-updates.md)).
 - **Rev 5 (P17–P18): doctor, AI-agent install and Learn** ([ADR-012](../decisions/ADR-012-doctor-and-learning.md)). P17 makes the doctor prove that gbi can start herdr and a harness, and explain failures to a person or an AI agent; it adds the install that works from the GitHub URL alone. P18 adds lessons with a coach panel and a practice project, driving gbi from your AI harness, and *How go-build-it thinks*.
 - **Rev 6 (P19): folder trust** ([ADR-013](../decisions/ADR-013-folder-trust.md)). go-build-it answers a harness's "trust this folder" prompt for the folders it created, so members, helpers and the doctor start without a person. Other prompts stay with the person.
+- **Rev 7 (P20): project documents** ([ADR-014](../decisions/ADR-014-project-documents.md)). Artifacts gets six sub-tabs: HTML entry points for requirements, mockups, plan and tracker, chosen explicitly; labels for every file, set through the CLI; a sandboxed viewer that follows links; Compare for mockups and the real app; traceability.
 - **Dogfooding from P4.** Once Courier can branch, PR, merge and release (end of P4), go-build-it manages its own remaining phases, and this tracker's data is imported into it.
 - **Sizes, not dates.** S ≈ up to a day of agent work, M ≈ 2–4 days, L ≈ 1–2 weeks. Progress is weighted S=1, M=3, L=8. Dates are set once the P0 spike shows real throughput.
 
@@ -40,6 +41,7 @@ Status: Draft · 2026-11-09 · Based on [requirements rev 6](../requirements.md)
 | P17 | Doctor & AI-agent install |  | 10 | 22 | ◆ Doctor UAT |
 | P18 | Learn: lessons, practice project, harness control |  | 12 | 33 | ◆ Learn UAT |
 | P19 | Folder trust |  | 5 | 9 | ◆ Folder trust UAT |
+| P20 | Project documents |  | 12 | 31 | ◆ Documents UAT |
 
 ## 3. Critical path
 
@@ -489,6 +491,31 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 | **P19-03** Answer it when a member starts, while it waits to be ready, and for helpers; agent.trusted history event ✅ | M | FR-07f, FR-68 | — | P19-02 |
 | **P19-04** Doctor harness tier answers it; names it in the human fix when the setting is off; fake member --start-trust ✅ | S | FR-07f, FR-07b | A-v17 | P19-02 |
 | **P19-05** Setting [agents] trust_folders (on by default) and the Settings toggle; docs (sessions, settings, troubleshooting), CHANGELOG ✅ | S | FR-07f, FR-07e | A-v15 | P19-03, P19-04 |
+
+### P20 · Project documents
+
+**Goal:** Give every project the same documents: HTML entry points for requirements, mockups, plan and tracker, explicit labels for every file, a viewer that follows links, a comparison of mockups with the real app, and traceability.
+
+**◆ Gate: Documents UAT.** Passes when:
+- The six Artifacts sub-tabs show the chosen HTML entry points in a sandbox; links between documents switch tabs and keep the anchor
+- Files are labelled only by gbi artifacts add/label or the UI; unlabelled files are listed; changes are committed in docs/gbi.toml
+- Compare shows each view with its screenshot side by side and overlaid; accept and file-task are stored with the checksum and come back on change
+- gbi artifacts init, check, snapshot and gbi trace list work on a demo project and on go-build-it's own docs
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P20-01** Requirements rev 7 (FR-140–FR-150), ADR-014, mockups 21–26 and M14, plan and tracker ✅ | S | FR-140, FR-141, FR-142, FR-143, FR-144, FR-145, FR-146, FR-147, FR-148, FR-149, FR-150 | A-v21, A-v22, A-v23, A-v24, A-v25, A-v26, A-M14 | — |
+| **P20-02** internal/artifacts: docs/gbi.toml entries and labels (folder labels, fixed label list, validation), scan of docs/, Courier commits; routes and CLI artifacts list/add/label/entry ✅ | M | FR-141, FR-142, FR-143, FR-30 | A-v25 | P20-01 |
+| **P20-03** Raw serving for the viewer: sandbox CSP, CORS for the page's own files, gbi-nav.js injected into HTML, Markdown opened rendered; gbi-md.js with requirement anchors ✅ | M | FR-144, FR-145 | A-v21, A-v22 | P20-01 |
+| **P20-04** Templates and gbi artifacts init (never overwrites); gbi artifacts check (entries, unlabelled, stale labels, broken links, unknown IDs) ✅ | M | FR-149, FR-150 | A-v25, A-v26 | P20-02 |
+| **P20-05** Traceability from IDs: requirements, data-view/data-req/data-route, task reqs and text; gaps; gbi trace list ✅ | M | FR-146 | A-v24 | P20-02 |
+| **P20-06** Compare: views × screenshots, states, docs/compare.json with SHA-256, accept and file task; gbi compare list/accept/task ✅ | M | FR-147 | A-v23 | P20-05 |
+| **P20-07** Tracker snapshot docs/tracker/tracker.json from milestones and tasks; gbi artifacts snapshot ✅ | S | FR-148 | A-v26 | P20-02 |
+| **P20-08** Artifacts UI: six sub-tabs, entry viewer that follows links and keeps the address, Support files with labels and entry points, Compare side by side and overlay, Traceability, Tracker ✅ | L | FR-140, FR-141, FR-142, FR-144, FR-146, FR-147, FR-148 | A-v21, A-v22, A-v23, A-v24, A-v25, A-v26 | P20-03, P20-04, P20-06, P20-07 |
+| **P20-09** Mobile: project Documents with the sub-tabs and Compare (M14) ✅ | S | FR-140, FR-147, FR-35 | A-M14 | P20-08 |
+| **P20-10** Project documents standard, agent guide, user docs and CLI examples; go-build-it's own docs/gbi.toml ✅ | S | FR-150, FR-130, FR-139 | A-v14 | P20-04 |
+| **P20-11** Demo and UAT e2e for the documents tabs (screenshots regenerated); CHANGELOG ✅ | M | FR-133, FR-06a | A-v21, A-v23, A-v25 | P20-08, P20-10 |
+| **P20-12** Release 2026.11.09.2: signed binaries, install check ✅ | S | FR-05, FR-06 | — | P20-11 |
 
 ## 5. Open questions schedule
 

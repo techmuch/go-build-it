@@ -6,6 +6,8 @@ To release, run `gbi dev changelog release YYYY.MM.DD.N`, then `VERSION=YYYY.MM.
 
 ## [Unreleased]
 
+## [2026.11.09.2] - 2026-11-09
+
 ### Changed
 
 - **Folder trust is answered for you** (FR-07f, ADR-013). Before, a harness's "Do you trust this folder?" prompt stopped every new member, helper and doctor run until you answered it in a terminal. Now go-build-it answers *Yes* for folders it created (member worktrees, helpers, the practice project), and records each answer in the history as `agent.trusted`. Sign-in and permission prompts still come to you, and folders outside `~/.go-build-it` are never answered. Turn it off in **Settings → Agent harnesses → Answer folder trust prompts**.
@@ -13,6 +15,15 @@ To release, run `gbi dev changelog release YYYY.MM.DD.N`, then `VERSION=YYYY.MM.
 
 ### Added
 
+- **Project documents** (FR-140–FR-150, ADR-014). A project's **Artifacts** tab has six sub-tabs: **Requirements, Mockups, Plan, Tracker, Compare and Support files**.
+  - **Entry points:** each of the first four opens an HTML entry point you choose (`gbi artifacts entry`). It's shown in a sandbox, and links between documents switch tabs and keep the `#anchor`.
+  - **Markdown inside HTML:** `<gbi-md src="requirements.md">` includes Markdown in an HTML page, and turns `**FR-07**` lines into anchors.
+  - **Labels:** every file under `docs/` has labels you give it (`gbi artifacts add|label`). Nothing is guessed, and unlabelled files are listed. Entry points and labels live in `docs/gbi.toml`, and Courier commits each change.
+  - **Compare:** each mockup view (`data-view="v02"`) next to its screenshot (`v02.png`), side by side or as an overlay. Accept the real screen or file a task; decisions are kept in `docs/compare.json`, and a view comes back when its screenshot changes.
+  - **Traceability:** requirement → views → tasks → real screens, with the gaps (`gbi trace list --gaps`).
+  - **Tracker snapshot:** `gbi artifacts snapshot` writes `docs/tracker/tracker.json`, which the tracker HTML reads.
+  - **Getting started:** `gbi artifacts init` creates the standard set without overwriting anything, and `gbi artifacts check` lists what needs attention. The new **Project documents** standard describes it all for people and AI members.
+  - **Phone:** a project's **Documents** screen, with Compare.
 - Windows on ARM release binary (`gbi_windows_arm64.exe`), which `install.ps1` already expects.
 
 ## [2026.11.09.1] - 2026-11-09

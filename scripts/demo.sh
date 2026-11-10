@@ -7,6 +7,7 @@ set -euo pipefail
 : "${GBI_HOME:?set GBI_HOME to an empty directory}"
 PORT="${PORT:-7431}"
 GBI="${GBI:-$(pwd)/bin/gbi}"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 export GBI_HOME GBI_URL="http://127.0.0.1:$PORT"
 if [ -e "$GBI_HOME/gbi.db" ]; then echo "$GBI_HOME already has a database; use a fresh directory" >&2; exit 1; fi
 mkdir -p "$GBI_HOME/repos"
@@ -63,6 +64,39 @@ mockup "$TM/docs/mockups/map-layout-a.html" "A · Full-bleed map" '<div class="m
 mockup "$TM/docs/mockups/map-layout-b.html" "B · Split map / list" '<div class="map" style="height:160px"></div><div class="card">Eagle Ridge Loop · 6.2 mi</div><div class="card">Cedar Falls · 3.1 mi</div>'
 mockup "$TM/docs/mockups/map-layout-c.html" "C · Trail-first cards" '<div class="card"><div class="map" style="height:90px"></div><b>Eagle Ridge Loop</b></div><div class="card"><div class="map" style="height:90px"></div><b>Cedar Falls</b></div>'
 commit "$TM" "requirements and map layout mockups"
+# Project documents (rev 7): phone mockups with marked views, screenshots of the built app,
+# and one research file added outside gbi (it stays unlabelled until someone labels it).
+cat > "$TM/docs/mockups/index.html" <<'EOF'
+<!doctype html><html><head><meta charset="utf-8"><title>trailmap · Mockups</title>
+<style>body{margin:0;font:15px/1.6 -apple-system,sans-serif;color:#1c2329}nav{display:flex;gap:16px;padding:10px 24px;border-bottom:1px solid #e1e5e8;font-size:13px}nav a{color:#2f6fd1;text-decoration:none}main{padding:8px 24px}</style></head>
+<body><nav><b>trailmap</b><a href="../requirements.html">Requirements</a><a href="index.html"><b>Mockups</b></a><a href="../plan.html">Plan</a><a href="../tracker/index.html">Tracker</a></nav>
+<main><h1>trailmap · Mockups</h1><p>Two sets:</p><ul><li><a href="phone.html">Phone</a>: the app, view by view (v01–v04)</li><li>Map layout options from OS-0: <a href="map-layout-a.html">A</a> · <a href="map-layout-b.html">B</a> · <a href="map-layout-c.html">C</a></li></ul></main></body></html>
+EOF
+cat > "$TM/docs/mockups/phone.html" <<'EOF'
+<!doctype html><html><head><meta charset="utf-8"><title>trailmap · Phone</title>
+<style>body{margin:0;font:15px/1.6 -apple-system,sans-serif;color:#1c2329}nav{padding:10px 24px;border-bottom:1px solid #e1e5e8;font-size:13px}nav a{color:#2f6fd1}main{padding:8px 24px}section{display:flex;gap:24px;align-items:flex-start;padding:18px 0;border-bottom:1px solid #eef1f3}
+.ph{width:360px;height:660px;border:8px solid #1d1f22;border-radius:30px;overflow:hidden;position:relative;background:linear-gradient(135deg,#d6e8d9,#b5d1bd)}.tb{height:56px;background:#fff;display:flex;align-items:center;padding:0 16px;font-weight:700}
+.btn{position:absolute;left:16px;right:16px;bottom:18px;height:54px;border-radius:14px;background:#0f9d8a;color:#fff;display:grid;place-items:center;font-weight:700}.badge{position:absolute;right:14px;top:68px;background:#1f9d55;color:#fff;border-radius:999px;padding:2px 12px;font-size:13px}
+.card{background:#fff;border-radius:12px;margin:12px;padding:16px}.loop{position:absolute;left:80px;top:150px;width:200px;height:320px;border:4px dotted #c0582f;border-radius:50%}</style></head>
+<body><nav><a href="index.html">Mockups</a> › Phone</nav><main>
+<section id="v01" data-view="v01" data-route="/" data-req="FR-10"><div class="ph"><div class="tb">Trails nearby</div><div class="card"><b>Eagle Ridge Loop</b><br>6.2 mi</div><div class="card"><b>Cedar Falls</b><br>3.1 mi</div><div class="card"><b>Bear Creek</b><br>2.4 mi</div></div>
+ <div><h2>v01 · Trail list</h2><p>Nearby trails as big cards, reachable with one thumb (<a href="../requirements.html#FR-10">FR-10</a>).</p></div></section>
+<section id="v02" data-view="v02" data-route="/trail/:id" data-req="FR-07 FR-08 FR-10"><div class="ph"><div class="tb">Bear Creek Loop</div><span class="badge">offline ✓</span><div class="loop"></div><div class="btn">⬇ Download this trail · 18 MB</div></div>
+ <div><h2>v02 · Trail map</h2><p>The download button sits at the bottom in thumb reach, and shows the size first (<a href="../requirements.html#FR-08">FR-08</a>). The <i>offline ✓</i> badge shows when the trail is on the phone (<a href="../requirements.html#FR-07">FR-07</a>).</p><p>Notes: <a href="notes/v02.md">notes/v02.md</a></p></div></section>
+<section id="v03" data-view="v03" data-route="/downloads" data-req="FR-08"><div class="ph"><div class="tb">Downloads</div><div class="card">Bear Creek Loop · 18 MB ✓</div><div class="card">Eagle Ridge Loop · 34 MB ✓</div></div>
+ <div><h2>v03 · Downloads</h2><p>Everything on the phone, with sizes (<a href="../requirements.html#FR-08">FR-08</a>).</p></div></section>
+<section id="v04" data-view="v04" data-route="/settings/night" data-req="FR-22"><div class="ph" style="background:#10161b"><div class="tb" style="background:#1b252e;color:#fff">Night mode</div></div>
+ <div><h2>v04 · Night mode</h2><p>Dim red map for night hikes. Proposed; no requirement yet.</p></div></section>
+</main></body></html>
+EOF
+mkdir -p "$TM/docs/mockups/notes" "$TM/docs/screenshots" "$TM/docs/research"
+printf '# v02 notes\n\n- The size comes from the trail pack manifest.\n- Answer to Q-1 decides per trail vs per region.\n' > "$TM/docs/mockups/notes/v02.md"
+python3 "$ROOT/scripts/e2e/phone_png.py" "$TM/docs/screenshots/v01.png" list
+python3 "$ROOT/scripts/e2e/phone_png.py" "$TM/docs/screenshots/v02.png" map-v2
+python3 "$ROOT/scripts/e2e/phone_png.py" "$TM/docs/screenshots/v03.png" downloads
+printf '# Trail survey\n\n12 hikers, 3 trails. Most lose signal within 20 minutes.\n' > "$TM/docs/research/trail-survey.md"
+printf '# Interviews\n\nRaw notes from five interviews.\n' > "$TM/docs/research/interviews.md"
+commit "$TM" "phone mockups, screenshots and research"
 
 # ledgerly: implementation, task flow + review
 LG=$(mkrepo ledgerly "Personal finance ledger with bank CSV import.")
@@ -150,5 +184,16 @@ for _ in $(seq 1 100); do
   gbi sessions list --live --json | python3 -c 'import json,sys; sys.exit(0 if any(s["status"]=="blocked" for s in json.load(sys.stdin)) else 1)' && break
   sleep 0.2
 done
+
+# Project documents: the standard set (keeps requirements.md and the mockups), labels,
+# tasks that cite requirements, Compare decisions and a tracker snapshot.
+gbi artifacts init trailmap >/dev/null
+gbi artifacts add trailmap docs/research/trail-survey.md --label research >/dev/null
+gbi tasks add --project trailmap --title "Trail map screen (v02)" --role developer --reqs FR-07,FR-10 >/dev/null
+gbi tasks add --project trailmap --title "Download per trail" --role developer --reqs FR-08 >/dev/null
+gbi compare accept trailmap v01 --note "Matches the mockup." >/dev/null
+gbi compare accept trailmap v03 --note "Sizes shown; good." >/dev/null
+gbi artifacts snapshot trailmap >/dev/null
+python3 "$ROOT/scripts/e2e/phone_png.py" "$TM/docs/screenshots/v03.png" list   # a later UAT run changed it: v03 drifts
 
 echo "demo ready at $GBI_URL (server pid $(cat "$GBI_HOME/server.pid"))"

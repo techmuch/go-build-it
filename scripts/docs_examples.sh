@@ -21,6 +21,6 @@ while IFS= read -r line; do
 		if [[ "$cmd" == "gbi doctor"* ]] && [[ $code -le 2 ]] && grep -q '"results"' <<<"$out"; then continue; fi
 		echo "FAIL ($code): $cmd"; echo "$out" | tail -20; exit 1
 	fi
-done < <(grep -h '^\$ gbi ' docs/learn/*.md docs/user/19-ai-harness.md)
+done < <(grep -h '^\$ gbi ' docs/learn/*.md docs/user/04-artifacts.md docs/user/19-ai-harness.md)
 [ "$n" -gt 5 ] || { echo "FAIL: only $n examples found"; exit 1; }
 echo "PASS: $n gbi examples from the lessons and the cookbook ran against $GBI_URL"

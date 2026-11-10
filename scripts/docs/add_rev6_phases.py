@@ -65,7 +65,7 @@ for p in PHASES:
     for k in ("gateApproved", "gateApprovedBy", "gateEvidence"):
         if k in oldph.get(p["id"], {}):
             p[k] = oldph[p["id"]][k]
-keep = lambda pid: int(pid[1:]) < 19
+keep = lambda pid: int(pid[1:]) != 19  # later revisions keep their phases
 D["phases"] = [p for p in D["phases"] if keep(p["id"])] + PHASES
 D["tasks"] = [x for x in D["tasks"] if keep(x["phase"])] + T
 D["requirements"], D["questions"] = reqs, questions

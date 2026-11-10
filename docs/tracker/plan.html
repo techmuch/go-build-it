@@ -74,7 +74,7 @@ td:first-child { white-space: nowrap; }
 </ol></nav>
 <main>
 <h1>go-build-it — Phased delivery plan</h1>
-<p class="meta">Status: Draft · 2026-11-09 · Based on [requirements rev 6](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)</p>
+<p class="meta">Status: Draft · 2026-11-09 · Based on [requirements rev 7](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)</p>
 <h2 id="1-how-this-plan-is-built">1. How this plan is built</h2>
 <ul><li>
 <strong>Approach A is the UI baseline.</strong> Every UI task names the Approach A view it implements (desktop <code>A-v01</code>…<code>A-v14</code> plus detail views <code>02b</code>, <code>03b</code>, <code>04b</code>, <code>05b</code>, <code>12b</code>; mobile <code>A-M1</code>…<code>A-M11</code>).
@@ -94,6 +94,8 @@ td:first-child { white-space: nowrap; }
 <strong>Rev 5 (P17–P18): doctor, AI-agent install and Learn</strong> ([ADR-012](../decisions/ADR-012-doctor-and-learning.md)). P17 makes the doctor prove that gbi can start herdr and a harness, and explain failures to a person or an AI agent; it adds the install that works from the GitHub URL alone. P18 adds lessons with a coach panel and a practice project, driving gbi from your AI harness, and <em>How go-build-it thinks</em>.
 </li><li>
 <strong>Rev 6 (P19): folder trust</strong> ([ADR-013](../decisions/ADR-013-folder-trust.md)). go-build-it answers a harness's "trust this folder" prompt for the folders it created, so members, helpers and the doctor start without a person. Other prompts stay with the person.
+</li><li>
+<strong>Rev 7 (P20): project documents</strong> ([ADR-014](../decisions/ADR-014-project-documents.md)). Artifacts gets six sub-tabs: HTML entry points for requirements, mockups, plan and tracker, chosen explicitly; labels for every file, set through the CLI; a sandboxed viewer that follows links; Compare for mockups and the real app; traceability.
 </li><li>
 <strong>Dogfooding from P4.</strong> Once Courier can branch, PR, merge and release (end of P4), go-build-it manages its own remaining phases, and this tracker's data is imported into it.
 </li><li>
@@ -121,6 +123,7 @@ td:first-child { white-space: nowrap; }
 <tr><td>P17</td><td>Doctor &amp; AI-agent install</td><td></td><td>10</td><td>22</td><td>◆ Doctor UAT</td></tr>
 <tr><td>P18</td><td>Learn: lessons, practice project, harness control</td><td></td><td>12</td><td>33</td><td>◆ Learn UAT</td></tr>
 <tr><td>P19</td><td>Folder trust</td><td></td><td>5</td><td>9</td><td>◆ Folder trust UAT</td></tr>
+<tr><td>P20</td><td>Project documents</td><td></td><td>12</td><td>31</td><td>◆ Documents UAT</td></tr>
 </tbody></table></div>
 <h2 id="3-critical-path">3. Critical path</h2>
 <ul><li>
@@ -574,6 +577,32 @@ Folders outside ~/.go-build-it are never answered
 <tr><td><strong>P19-03</strong> Answer it when a member starts, while it waits to be ready, and for helpers; agent.trusted history event ✅</td><td>M</td><td>FR-07f, FR-68</td><td>—</td><td>P19-02</td></tr>
 <tr><td><strong>P19-04</strong> Doctor harness tier answers it; names it in the human fix when the setting is off; fake member --start-trust ✅</td><td>S</td><td>FR-07f, FR-07b</td><td>A-v17</td><td>P19-02</td></tr>
 <tr><td><strong>P19-05</strong> Setting [agents] trust_folders (on by default) and the Settings toggle; docs (sessions, settings, troubleshooting), CHANGELOG ✅</td><td>S</td><td>FR-07f, FR-07e</td><td>A-v15</td><td>P19-03, P19-04</td></tr>
+</tbody></table></div>
+<h3 id="p20-project-documents">P20 · Project documents</h3>
+<p><strong>Goal:</strong> Give every project the same documents: HTML entry points for requirements, mockups, plan and tracker, explicit labels for every file, a viewer that follows links, a comparison of mockups with the real app, and traceability.</p>
+<p><strong>◆ Gate: Documents UAT.</strong> Passes when:</p>
+<ul><li>
+The six Artifacts sub-tabs show the chosen HTML entry points in a sandbox; links between documents switch tabs and keep the anchor
+</li><li>
+Files are labelled only by gbi artifacts add/label or the UI; unlabelled files are listed; changes are committed in docs/gbi.toml
+</li><li>
+Compare shows each view with its screenshot side by side and overlaid; accept and file-task are stored with the checksum and come back on change
+</li><li>
+gbi artifacts init, check, snapshot and gbi trace list work on a demo project and on go-build-it's own docs
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P20-01</strong> Requirements rev 7 (FR-140–FR-150), ADR-014, mockups 21–26 and M14, plan and tracker ✅</td><td>S</td><td>FR-140, FR-141, FR-142, FR-143, FR-144, FR-145, FR-146, FR-147, FR-148, FR-149, FR-150</td><td>A-v21, A-v22, A-v23, A-v24, A-v25, A-v26, A-M14</td><td>—</td></tr>
+<tr><td><strong>P20-02</strong> internal/artifacts: docs/gbi.toml entries and labels (folder labels, fixed label list, validation), scan of docs/, Courier commits; routes and CLI artifacts list/add/label/entry ✅</td><td>M</td><td>FR-141, FR-142, FR-143, FR-30</td><td>A-v25</td><td>P20-01</td></tr>
+<tr><td><strong>P20-03</strong> Raw serving for the viewer: sandbox CSP, CORS for the page's own files, gbi-nav.js injected into HTML, Markdown opened rendered; gbi-md.js with requirement anchors ✅</td><td>M</td><td>FR-144, FR-145</td><td>A-v21, A-v22</td><td>P20-01</td></tr>
+<tr><td><strong>P20-04</strong> Templates and gbi artifacts init (never overwrites); gbi artifacts check (entries, unlabelled, stale labels, broken links, unknown IDs) ✅</td><td>M</td><td>FR-149, FR-150</td><td>A-v25, A-v26</td><td>P20-02</td></tr>
+<tr><td><strong>P20-05</strong> Traceability from IDs: requirements, data-view/data-req/data-route, task reqs and text; gaps; gbi trace list ✅</td><td>M</td><td>FR-146</td><td>A-v24</td><td>P20-02</td></tr>
+<tr><td><strong>P20-06</strong> Compare: views × screenshots, states, docs/compare.json with SHA-256, accept and file task; gbi compare list/accept/task ✅</td><td>M</td><td>FR-147</td><td>A-v23</td><td>P20-05</td></tr>
+<tr><td><strong>P20-07</strong> Tracker snapshot docs/tracker/tracker.json from milestones and tasks; gbi artifacts snapshot ✅</td><td>S</td><td>FR-148</td><td>A-v26</td><td>P20-02</td></tr>
+<tr><td><strong>P20-08</strong> Artifacts UI: six sub-tabs, entry viewer that follows links and keeps the address, Support files with labels and entry points, Compare side by side and overlay, Traceability, Tracker ✅</td><td>L</td><td>FR-140, FR-141, FR-142, FR-144, FR-146, FR-147, FR-148</td><td>A-v21, A-v22, A-v23, A-v24, A-v25, A-v26</td><td>P20-03, P20-04, P20-06, P20-07</td></tr>
+<tr><td><strong>P20-09</strong> Mobile: project Documents with the sub-tabs and Compare (M14) ✅</td><td>S</td><td>FR-140, FR-147, FR-35</td><td>A-M14</td><td>P20-08</td></tr>
+<tr><td><strong>P20-10</strong> Project documents standard, agent guide, user docs and CLI examples; go-build-it's own docs/gbi.toml ✅</td><td>S</td><td>FR-150, FR-130, FR-139</td><td>A-v14</td><td>P20-04</td></tr>
+<tr><td><strong>P20-11</strong> Demo and UAT e2e for the documents tabs (screenshots regenerated); CHANGELOG ✅</td><td>M</td><td>FR-133, FR-06a</td><td>A-v21, A-v23, A-v25</td><td>P20-08, P20-10</td></tr>
+<tr><td><strong>P20-12</strong> Release 2026.11.09.2: signed binaries, install check ✅</td><td>S</td><td>FR-05, FR-06</td><td>—</td><td>P20-11</td></tr>
 </tbody></table></div>
 <h2 id="5-open-questions-schedule">5. Open questions schedule</h2>
 <div class="table-wrap"><table><thead><tr><th>Question</th><th>Answer before</th><th>Why</th></tr></thead><tbody>

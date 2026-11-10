@@ -65,15 +65,26 @@ pre.tpl { background:var(--surface); border:1px solid var(--line); border-radius
 </head>
 <body>
 <main>
-  <p class="meta">go-build-it · design exploration · option set OS-0 · Nov 7, 2026 · <b>rev 2 Nov 8</b> · <b>rev 3 Nov 8 (Approach A)</b> · <b>rev 4 Nov 9 (Approach A)</b> · <b>rev 5 Nov 9 (Approach A)</b> · based on <a href="../requirements.html">docs/requirements.md</a></p>
+  <p class="meta">go-build-it · design exploration · option set OS-0 · Nov 7, 2026 · <b>rev 2 Nov 8</b> · <b>rev 3 Nov 8 (Approach A)</b> · <b>rev 4 Nov 9 (Approach A)</b> · <b>rev 5 Nov 9 (Approach A)</b> · <b>rev 7 Nov 9 (Approach A)</b> · based on <a href="../requirements.html">docs/requirements.md</a></p>
   <h1>Three ways go-build-it could look and feel</h1>
   <p class="lede">This page links to static HTML mockups of three different UI approaches. Each has desktop and mobile versions, and every view the requirements call for is drawn in all three. Please review all three and choose what to keep, mixing aspects across approaches if you like.</p>
   <ul class="toc">
     <li><a href="#how">How to review</a></li><li><a href="#approaches">The three approaches</a></li><li><a href="#compare">Side-by-side comparison</a></li>
     <li><a href="#coverage">View coverage</a></li><li><a href="#mobile">Mobile coverage</a></li><li><a href="#questions">Questions for you</a></li>
-    <li><a href="#findings">Requirement gaps found</a></li><li><a href="#feedback">Feedback template</a></li><li><a href="#rev5">What changed in rev 5</a></li><li><a href="#rev4">What changed in rev 4</a></li><li><a href="#rev3">What changed in rev 3</a></li><li><a href="#rev2">What changed in rev 2</a></li>
+    <li><a href="#findings">Requirement gaps found</a></li><li><a href="#feedback">Feedback template</a></li><li><a href="#rev7">What changed in rev 7</a></li><li><a href="#rev5">What changed in rev 5</a></li><li><a href="#rev4">What changed in rev 4</a></li><li><a href="#rev3">What changed in rev 3</a></li><li><a href="#rev2">What changed in rev 2</a></li>
   </ul>
 
+  <h2 id="rev7">What changed in rev 7</h2>
+  <p>Requirements <a href="../requirements.html">rev 7</a> add project documents (FR-140–FR-150, <a href="../decisions/ADR-014-project-documents.md">ADR-014</a>). Artifacts has six sub-tabs. Requirements, Mockups, Plan and Tracker each open an HTML entry point you choose. Every file has explicit labels (never guessed). HTML pages are how you move between documents. Approach A only:</p>
+  <ul>
+    <li><a href="a-mission-control/desktop.html#v21">21 Requirements tab</a>: the sub-tabs, an HTML entry in a sandbox, Markdown included with <span class="mono">&lt;gbi-md&gt;</span>, anchors in the address bar.</li>
+    <li><a href="a-mission-control/desktop.html#v22">22 Mockups tab</a>: the entry links to its sets; the viewer follows links; the IDs on the page.</li>
+    <li><a href="a-mission-control/desktop.html#v23">23 Compare</a>: mockup view and screenshot side by side or overlaid; accept or file a task; decisions in <span class="mono">docs/compare.json</span>.</li>
+    <li><a href="a-mission-control/desktop.html#v24">24 Traceability</a>: requirement → views → tasks → screens, with the gaps.</li>
+    <li><a href="a-mission-control/desktop.html#v25">25 Support files</a>: every file with its labels, Unlabelled first, Set as entry point, the check, and the CLI.</li>
+    <li><a href="a-mission-control/desktop.html#v26">26 Plan &amp; tracker</a>: the tracker reads a snapshot of gbi's tasks; <span class="mono">gbi artifacts init</span> creates the standard set.</li>
+    <li><a href="a-mission-control/mobile.html">M14 Project documents</a>: the sub-tabs on the phone and Compare with swipe.</li>
+  </ul>
   <h2 id="rev5">What changed in rev 5</h2>
   <p>Requirements <a href="../requirements.html">rev 5</a> add a doctor that proves herdr and each harness work and explains failures to people and AI agents (FR-07a–FR-07e), installing by giving an AI agent the GitHub URL (FR-02a–FR-02b), and lessons with a practice project, harness control and design rationale (FR-134–FR-139). See <a href="../decisions/ADR-012-doctor-and-learning.md">ADR-012</a>. Approach A only:</p>
   <ul>
@@ -198,6 +209,12 @@ pre.tpl { background:var(--surface); border:1px solid var(--line); border-radius
     <tr><td class="n">18</td><td>Learn <i>(rev 5)</i></td><td class="req">FR-134–136, 138</td><td><a href="a-mission-control/desktop.html#v18">Lessons + practice</a></td><td>—</td><td>—</td></tr>
     <tr><td class="n">19</td><td>Lesson coach <i>(rev 5)</i></td><td class="req">FR-134–135</td><td><a href="a-mission-control/desktop.html#v19">Coach panel</a></td><td>—</td><td>—</td></tr>
     <tr><td class="n">20</td><td>Drive gbi from your AI harness <i>(rev 5)</i></td><td class="req">FR-137, FR-139</td><td><a href="a-mission-control/desktop.html#v20">Cookbook</a></td><td>—</td><td>—</td></tr>
+    <tr><td class="n">21</td><td>Artifacts sub-tabs · Requirements <i>(rev 7)</i></td><td class="req">FR-140, 141, 144, 145</td><td><a href="a-mission-control/desktop.html#v21">Entry in a sandbox</a></td><td>—</td><td>—</td></tr>
+    <tr><td class="n">22</td><td>Mockups tab <i>(rev 7)</i></td><td class="req">FR-141, 144, 146</td><td><a href="a-mission-control/desktop.html#v22">Links between sets</a></td><td>—</td><td>—</td></tr>
+    <tr><td class="n">23</td><td>Compare <i>(rev 7)</i></td><td class="req">FR-147</td><td><a href="a-mission-control/desktop.html#v23">Side by side + overlay</a></td><td>—</td><td>—</td></tr>
+    <tr><td class="n">24</td><td>Traceability <i>(rev 7)</i></td><td class="req">FR-146</td><td><a href="a-mission-control/desktop.html#v24">Matrix + gaps</a></td><td>—</td><td>—</td></tr>
+    <tr><td class="n">25</td><td>Support files <i>(rev 7)</i></td><td class="req">FR-142, 143, 150</td><td><a href="a-mission-control/desktop.html#v25">Labels + check</a></td><td>—</td><td>—</td></tr>
+    <tr><td class="n">26</td><td>Plan &amp; tracker <i>(rev 7)</i></td><td class="req">FR-141, 148, 149</td><td><a href="a-mission-control/desktop.html#v26">Snapshot + init</a></td><td>—</td><td>—</td></tr>
   </table></div>
   <p class="meta">Shown throughout rather than as separate views: access identity badge (FR-15–17) in every header; live updates (FR-36); desktop/mobile split (FR-34–35); release and website links (FR-41, FR-44); rate-limit pauses (FR-65).</p>
 
@@ -216,6 +233,7 @@ pre.tpl { background:var(--surface); border:1px solid var(--line); border-radius
     <tr><td>M11 Attachment viewer <i>(new)</i></td><td class="req">FR-102a, FR-116a</td><td>Full screen + pins</td><td>⤢ on previews</td><td>⤢ on previews</td></tr>
     <tr><td>M12 Change log &amp; update <i>(rev 4)</i></td><td class="req">FR-06a–06e</td><td>Steps + change log</td><td>—</td><td>—</td></tr>
     <tr><td>M13 Learn <i>(rev 5)</i></td><td class="req">FR-134–136</td><td>Lessons + steps</td><td>—</td><td>—</td></tr>
+    <tr><td>M14 Project documents <i>(rev 7)</i></td><td class="req">FR-140, 141, 147</td><td>Sub-tabs + Compare</td><td>—</td><td>—</td></tr>
     <tr><td>M9 Everything else</td><td class="req">team, standards, history, settings, docs</td><td>"More" list (read-only)</td><td>"More" list</td><td>⌘ palette</td></tr>
   </table></div>
   <p class="meta">Creating and editing personas, standards and settings is treated as a desktop task. On mobile they're read-only apart from light actions. Tell me if you disagree.</p>

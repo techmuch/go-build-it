@@ -69,6 +69,7 @@ type App struct {
 	lessonsOnce sync.Once
 	lessonList  []learn.Lesson
 	practiceMu  sync.Mutex
+	docMu       sync.Mutex // serialises changes to docs/gbi.toml and docs/compare.json
 	doctorMu    sync.Mutex
 	lastCheck   atomic.Pointer[update.Release]
 }
