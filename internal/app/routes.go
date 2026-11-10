@@ -326,6 +326,7 @@ func (a *App) Routes() []api.Route {
 		}),
 	)
 	add(a.learnRoutes()...)
+	add(a.documentRoutes()...)
 	return rs
 }
 

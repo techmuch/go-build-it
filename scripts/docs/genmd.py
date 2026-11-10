@@ -7,7 +7,7 @@ W=D["sizes"]
 out=[]
 w=out.append
 w("# go-build-it — Phased delivery plan\n")
-w(f"Status: Draft · {D['updated']} · Based on [requirements rev 6](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)\n")
+w(f"Status: Draft · {D['updated']} · Based on [requirements rev 7](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)\n")
 w("""## 1. How this plan is built
 
 - **Approach A is the UI baseline.** Every UI task names the Approach A view it implements (desktop `A-v01`…`A-v14` plus detail views `02b`, `03b`, `04b`, `05b`, `12b`; mobile `A-M1`…`A-M11`).
@@ -19,6 +19,7 @@ w("""## 1. How this plan is built
 - **Rev 4 (P16): change log and guided updates** ([ADR-011](../decisions/ADR-011-changelog-guided-updates.md)).
 - **Rev 5 (P17–P18): doctor, AI-agent install and Learn** ([ADR-012](../decisions/ADR-012-doctor-and-learning.md)). P17 makes the doctor prove that gbi can start herdr and a harness, and explain failures to a person or an AI agent; it adds the install that works from the GitHub URL alone. P18 adds lessons with a coach panel and a practice project, driving gbi from your AI harness, and *How go-build-it thinks*.
 - **Rev 6 (P19): folder trust** ([ADR-013](../decisions/ADR-013-folder-trust.md)). go-build-it answers a harness's \"trust this folder\" prompt for the folders it created, so members, helpers and the doctor start without a person. Other prompts stay with the person.
+- **Rev 7 (P20): project documents** ([ADR-014](../decisions/ADR-014-project-documents.md)). Artifacts gets six sub-tabs: HTML entry points for requirements, mockups, plan and tracker, chosen explicitly; labels for every file, set through the CLI; a sandboxed viewer that follows links; Compare for mockups and the real app; traceability.
 - **Dogfooding from P4.** Once Courier can branch, PR, merge and release (end of P4), go-build-it manages its own remaining phases, and this tracker's data is imported into it.
 - **Sizes, not dates.** S ≈ up to a day of agent work, M ≈ 2–4 days, L ≈ 1–2 weeks. Progress is weighted S=1, M=3, L=8. Dates are set once the P0 spike shows real throughput.
 

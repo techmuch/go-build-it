@@ -17,6 +17,7 @@ const routes: R[] = [
   ['/', () => <Catalog />],
   ['/projects/:id', (p) => <ProjectOverview id={p.id} />],
   ['/projects/:id/artifacts', (p) => <Artifacts id={p.id} />],
+  ['/projects/:id/artifacts/:tab/:doc*', (p) => <Artifacts id={p.id} tab={p.tab} doc={p.doc} />],
   ['/projects/:id/edit', (p) => <ArtifactEditor id={p.id} />],
   ['/projects/:id/queue', (p) => <Queue projectId={p.id} />],
   ['/projects/:id/sessions', (p) => <Sessions projectId={p.id} />],

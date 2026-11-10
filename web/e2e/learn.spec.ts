@@ -108,6 +108,15 @@ test.describe('Learn · desktop', () => {
     await api(request, 'POST', '/api/projects/practice/milestones', { name: 'M2 · Species list', scope: 'Suggest species names.', gateName: 'Species review', gateKind: 'review' });
     await done(page, 3);
     await page.goto('/projects/practice/artifacts'); await done(page, 4);
+    await coachStep(page, 5).getByTestId('show-me').click();
+    await expect(page.locator('[data-tour=docs-init]')).toHaveClass(/tour-pulse/);
+    const init = page.waitForResponse((r) => r.url().includes('/documents/init'));
+    await page.locator('[data-tour=docs-init]').click();
+    const res = await init;
+    expect(res.status(), await res.text()).toBe(200);
+    // The new entry point opens right away.
+    await expect(page.frameLocator('.docframe iframe').locator('nav')).toContainText('Mockups');
+    await done(page, 5);
     await finished(page);
   });
 

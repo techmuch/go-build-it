@@ -14,6 +14,7 @@ go-build-it manages software projects with a team of AI members and humans. Ever
 3. **Never touch the person's default herdr session.** gbi runs every member in its own herdr session, `gbi`. Never stop or kill panes in it.
 4. **Use `--json`** when you need to read results, and quote IDs (T-12, Q-3, R-1, S-4) back to the person.
 5. **Say what you did.** After a change, name the command and the result, so it matches what they see in gbi's history.
+6. **Add documents with a label.** A file you put under a project's `docs/` must be added with `gbi artifacts add PROJECT docs/… --label LABEL`. gbi never guesses labels. Follow the **Project documents** standard (`gbi standards get project-documents`).
 
 ## Where things are
 
@@ -41,6 +42,10 @@ gbi help                               # every command; gbi help GROUP COMMAND f
 | "Who is blocked?" | `gbi sessions list --live --json`: the blocked ones need the person in the UI (Sessions → Open terminal) |
 | "What happened yesterday?" | `gbi history list --since 2026-11-08T00:00:00Z --json` |
 | "Tune Forge to always add a fixture" | `gbi members tune forge@ID --tuning "- Always add a fixture."` |
+| "What's missing in the docs?" | `gbi artifacts check ID --json` and `gbi trace list ID --gaps --json` |
+| "Which screens don't match their mockups?" | `gbi compare list ID --json`: `drifted` and `not-reviewed` need the person (accept or file a task is their call) |
+| "Add this mockup to the project" | write it under `docs/mockups/`, mark views `data-view="v05" data-req="FR-…"`, then `gbi artifacts add ID docs/mockups/… --label mockup` |
+| "Update the tracker" | `gbi artifacts snapshot ID` |
 | "Is gbi working?" | `gbi doctor --json`; give the person every fix whose `kind` is `human`, word for word |
 
 ## How gbi works (so your answers are right)
@@ -49,5 +54,6 @@ gbi help                               # every command; gbi help GROUP COMMAND f
 - **Where members run.** Every AI member runs as a long-running harness (Claude Code, Antigravity, Pi, OpenCode) in its own herdr pane and git worktree. `herdr --session gbi` shows them all.
 - **Sessions.** Tasks run as sessions. A finished task goes to review (the Lens persona assesses it, then a human approves), and Courier merges it.
 - **Questions.** Members ask instead of guessing. A blocking question pauses its task until the person answers.
+- **Documents.** Each project has HTML entry points for requirements, mockups, plan and tracker (`docs/gbi.toml`), labels on every file under `docs/`, and stable IDs: `FR-nn` requirements, `data-view` mockup views, tasks with `reqs`. Compare pairs each view with its screenshot (`docs/screenshots/v01.png`).
 - **History.** Everything is recorded in the history, including what you do through these commands.
 - **Learning.** The person can learn gbi in **Learn** (`g l` in the UI). Its lessons run in a practice project (`practice`) that uses a scripted harness and costs nothing. Suggest it when they are new.

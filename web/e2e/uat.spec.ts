@@ -34,15 +34,71 @@ test.describe('desktop · owner', () => {
 
   test('03 artifacts, values and the editor', async ({ page }) => {
     await page.goto('/projects/trailmap/artifacts');
-    await expect(page.getByText('FR-08').first()).toBeVisible();
+    // The requirements entry point renders requirements.md inside the sandbox (FR-144, FR-145).
+    await expect(page.frameLocator('.docframe iframe').getByText('FR-08').first()).toBeVisible();
     await expect(page.getByText('Glanceable in sunlight')).toBeVisible();
     await shot(page, 'artifacts');
-    await page.getByRole('link', { name: '✎ Edit' }).click();
+    await page.getByRole('link', { name: '✎ Edit source' }).click();
     await expect(page.getByText('Edit with')).toBeVisible();
     await page.getByLabel('Message').fill('Add FR-11 for sunlight readability');
     await page.getByRole('button', { name: 'Send' }).click();
     await expect(page.getByText('Proposed changes')).toBeVisible({ timeout: 20000 });
     await shot(page, 'artifact-editor');
+  });
+
+  test('03b project documents: mockups, compare, traceability, support files, tracker', async ({ page }) => {
+    // Mockups: the entry links to its sets; the viewer follows the link and keeps the address (FR-141, FR-144).
+    await page.goto('/projects/trailmap/artifacts/mockups');
+    const doc = page.frameLocator('.docframe iframe');
+    // Links are clicked inside the page (a mouse click into the sandboxed frame is unreliable in Playwright).
+    await doc.locator('a[href="phone.html"]').evaluate((a: HTMLElement) => a.click());
+    await expect(page).toHaveURL(/artifacts\/mockups\/docs\/mockups\/phone\.html/);
+    await page.goto('/projects/trailmap/artifacts/mockups/docs/mockups/phone.html#v02');
+    await expect(page.getByText('On this view')).toBeVisible();
+    await expect(page.locator('.card', { hasText: 'On this view' }).getByText('v02 · Trail map')).toBeVisible();
+    await shot(page, 'documents-mockups');
+    // A requirement link in a mockup switches to the Requirements tab at that anchor.
+    await page.frameLocator('.docframe iframe').locator('a[href="../requirements.html#FR-08"]').first().evaluate((a: HTMLElement) => a.click());
+    await expect(page).toHaveURL(/artifacts\/requirements#FR-08$/);
+
+    // Traceability (FR-146).
+    await page.goto('/projects/trailmap/artifacts/requirements?trace=1');
+    await expect(page.getByText('v04 names FR-22, which is not a requirement')).toBeVisible();
+    await shot(page, 'documents-trace');
+
+    // Compare (FR-147): side by side, overlay, then decisions.
+    await page.goto('/projects/trailmap/artifacts/compare/v02');
+    await expect(page.locator('.compare img')).toBeVisible();
+    await shot(page, 'documents-compare');
+    await page.getByRole('button', { name: 'Overlay' }).click();
+    await page.getByLabel('Overlay position').fill('60');
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await shot(page, 'documents-compare-overlay');
+    await page.getByPlaceholder('What is different, or why it is fine').fill('The offline badge is missing and the download button lost its size (FR-07, FR-08).');
+    await page.getByRole('button', { name: 'File a task' }).click();
+    await expect(page.getByText('Task filed', { exact: true })).toBeVisible();
+    await expect(page.locator('.docbar').getByText('task filed')).toBeVisible();
+    await page.goto('/projects/trailmap/artifacts/compare/v03');
+    await expect(page.locator('.docbar').getByText('drifted')).toBeVisible();
+    await page.getByRole('button', { name: '✓ Accept the real screen' }).click();
+    await expect(page.getByText('Accepted v03', { exact: true })).toBeVisible();
+    await expect(page.locator('.docbar').getByText('accepted')).toBeVisible();
+
+    // Support files (FR-142): the unlabelled file gets a label; nothing is guessed.
+    await page.goto('/projects/trailmap/artifacts/files');
+    await expect(page.getByText('1 unlabelled').first()).toBeVisible();
+    await shot(page, 'documents-files');
+    await page.getByRole('button', { name: 'Unlabelled 1' }).click();
+    await page.getByRole('row', { name: /interviews\.md/ }).getByRole('button', { name: 'Label…' }).click();
+    await page.getByRole('row', { name: /interviews\.md/ }).getByLabel('research').check();
+    await page.getByRole('row', { name: /interviews\.md/ }).getByRole('button', { name: 'Save' }).click();
+    await expect(page.getByText('Every file has a label.')).toBeVisible();
+
+    // Tracker (FR-148): the entry reads the snapshot; Write snapshot refreshes it.
+    await page.goto('/projects/trailmap/artifacts/tracker');
+    await page.getByRole('button', { name: 'Write snapshot' }).click();
+    await expect(page.frameLocator('.docframe iframe').getByText('Match v02 · Trail map to its mockup').first()).toBeVisible();
+    await shot(page, 'documents-tracker');
   });
 
   test('04 questions dashboard and viewer', async ({ page }) => {
@@ -193,6 +249,16 @@ test.describe('mobile · owner', () => {
     await page.goto('/m/options/OS-1'); await expect(page.getByText('Keep these aspects')).toBeVisible(); await shot(page, 'm-options');
     await page.goto('/m/sessions'); await expect(page.getByRole('heading', { name: 'Sessions' })).toBeVisible(); await shot(page, 'm-sessions');
     await page.goto('/m/more'); await expect(page.getByText('Docs')).toBeVisible(); await shot(page, 'm-more');
+  });
+
+  test('M14 project documents and compare', async ({ page }) => {
+    await page.goto('/m/projects/trailmap/docs');
+    await expect(page.getByText('Requirements', { exact: true })).toBeVisible();
+    await shot(page, 'm-documents');
+    await page.goto('/m/projects/trailmap/compare/v02');
+    await page.getByRole('button', { name: 'Real app' }).click();
+    await expect(page.locator('img[alt="Screenshot of v02"]')).toBeVisible();
+    await shot(page, 'm-compare');
   });
 
   test('M10 terminal with key bar', async ({ page }) => {

@@ -294,7 +294,26 @@ window.TRACKER = {
     "The doctor's harness tier answers the trust prompt and passes; with the setting off it fails with a human fix naming the prompt",
     "Real Claude Code and Antigravity trust prompts are recognised and answered; sign-in and permission screens are not",
     "Folders outside ~/.go-build-it are never answered"
-   ]
+   ],
+   "gateApproved": "2026-11-09",
+   "gateApprovedBy": "david (owner)",
+   "gateEvidence": "Folder trust: real Claude Code 2.1.321 and Antigravity 1.5.3 trust screens answered by hand and in unit tests; doctor and member tests with a fake trust screen in an isolated herdr; make test; UAT 29/29; CI green (PR #17)"
+  },
+  {
+   "id": "P20",
+   "name": "Project documents",
+   "mvp": false,
+   "goal": "Give every project the same documents: HTML entry points for requirements, mockups, plan and tracker, explicit labels for every file, a viewer that follows links, a comparison of mockups with the real app, and traceability.",
+   "gate": "Documents UAT",
+   "gateCriteria": [
+    "The six Artifacts sub-tabs show the chosen HTML entry points in a sandbox; links between documents switch tabs and keep the anchor",
+    "Files are labelled only by gbi artifacts add/label or the UI; unlabelled files are listed; changes are committed in docs/gbi.toml",
+    "Compare shows each view with its screenshot side by side and overlaid; accept and file-task are stored with the checksum and come back on change",
+    "gbi artifacts init, check, snapshot and gbi trace list work on a demo project and on go-build-it's own docs"
+   ],
+   "gateApproved": "2026-11-09",
+   "gateApprovedBy": "david (owner)",
+   "gateEvidence": "Project documents: internal/artifacts unit tests incl. go-build-it's own docs/gbi.toml passing the check; TestProjectDocuments through the real CLI (init, add, label, entry, check, compare accept/task, trace, snapshot, raw sandbox); UAT 31/31 incl. 03b documents and M14; Learn 14/14 incl. the new lesson 2 step; 19 CLI examples; update and install e2e; release 2026.11.09.2"
   }
  ],
  "tasks": [
@@ -3893,6 +3912,264 @@ window.TRACKER = {
    "status": "done",
    "done": "Settings → Agent harnesses → Answer folder trust prompts",
    "q": []
+  },
+  {
+   "id": "P20-01",
+   "phase": "P20",
+   "title": "Requirements rev 7 (FR-140–FR-150), ADR-014, mockups 21–26 and M14, plan and tracker",
+   "reqs": [
+    "FR-140",
+    "FR-141",
+    "FR-142",
+    "FR-143",
+    "FR-144",
+    "FR-145",
+    "FR-146",
+    "FR-147",
+    "FR-148",
+    "FR-149",
+    "FR-150"
+   ],
+   "views": [
+    "A-v21",
+    "A-v22",
+    "A-v23",
+    "A-v24",
+    "A-v25",
+    "A-v26",
+    "A-M14"
+   ],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "docs/requirements.md rev 7; docs/decisions/ADR-014-project-documents.md; desktop views 21–26, mobile M14",
+   "q": []
+  },
+  {
+   "id": "P20-02",
+   "phase": "P20",
+   "title": "internal/artifacts: docs/gbi.toml entries and labels (folder labels, fixed label list, validation), scan of docs/, Courier commits; routes and CLI artifacts list/add/label/entry",
+   "reqs": [
+    "FR-141",
+    "FR-142",
+    "FR-143",
+    "FR-30"
+   ],
+   "views": [
+    "A-v25"
+   ],
+   "size": "M",
+   "deps": [
+    "P20-01"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P20-03",
+   "phase": "P20",
+   "title": "Raw serving for the viewer: sandbox CSP, CORS for the page's own files, gbi-nav.js injected into HTML, Markdown opened rendered; gbi-md.js with requirement anchors",
+   "reqs": [
+    "FR-144",
+    "FR-145"
+   ],
+   "views": [
+    "A-v21",
+    "A-v22"
+   ],
+   "size": "M",
+   "deps": [
+    "P20-01"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P20-04",
+   "phase": "P20",
+   "title": "Templates and gbi artifacts init (never overwrites); gbi artifacts check (entries, unlabelled, stale labels, broken links, unknown IDs)",
+   "reqs": [
+    "FR-149",
+    "FR-150"
+   ],
+   "views": [
+    "A-v25",
+    "A-v26"
+   ],
+   "size": "M",
+   "deps": [
+    "P20-02"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P20-05",
+   "phase": "P20",
+   "title": "Traceability from IDs: requirements, data-view/data-req/data-route, task reqs and text; gaps; gbi trace list",
+   "reqs": [
+    "FR-146"
+   ],
+   "views": [
+    "A-v24"
+   ],
+   "size": "M",
+   "deps": [
+    "P20-02"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P20-06",
+   "phase": "P20",
+   "title": "Compare: views × screenshots, states, docs/compare.json with SHA-256, accept and file task; gbi compare list/accept/task",
+   "reqs": [
+    "FR-147"
+   ],
+   "views": [
+    "A-v23"
+   ],
+   "size": "M",
+   "deps": [
+    "P20-05"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P20-07",
+   "phase": "P20",
+   "title": "Tracker snapshot docs/tracker/tracker.json from milestones and tasks; gbi artifacts snapshot",
+   "reqs": [
+    "FR-148"
+   ],
+   "views": [
+    "A-v26"
+   ],
+   "size": "S",
+   "deps": [
+    "P20-02"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P20-08",
+   "phase": "P20",
+   "title": "Artifacts UI: six sub-tabs, entry viewer that follows links and keeps the address, Support files with labels and entry points, Compare side by side and overlay, Traceability, Tracker",
+   "reqs": [
+    "FR-140",
+    "FR-141",
+    "FR-142",
+    "FR-144",
+    "FR-146",
+    "FR-147",
+    "FR-148"
+   ],
+   "views": [
+    "A-v21",
+    "A-v22",
+    "A-v23",
+    "A-v24",
+    "A-v25",
+    "A-v26"
+   ],
+   "size": "L",
+   "deps": [
+    "P20-03",
+    "P20-04",
+    "P20-06",
+    "P20-07"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P20-09",
+   "phase": "P20",
+   "title": "Mobile: project Documents with the sub-tabs and Compare (M14)",
+   "reqs": [
+    "FR-140",
+    "FR-147",
+    "FR-35"
+   ],
+   "views": [
+    "A-M14"
+   ],
+   "size": "S",
+   "deps": [
+    "P20-08"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P20-10",
+   "phase": "P20",
+   "title": "Project documents standard, agent guide, user docs and CLI examples; go-build-it's own docs/gbi.toml",
+   "reqs": [
+    "FR-150",
+    "FR-130",
+    "FR-139"
+   ],
+   "views": [
+    "A-v14"
+   ],
+   "size": "S",
+   "deps": [
+    "P20-04"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P20-11",
+   "phase": "P20",
+   "title": "Demo and UAT e2e for the documents tabs (screenshots regenerated); CHANGELOG",
+   "reqs": [
+    "FR-133",
+    "FR-06a"
+   ],
+   "views": [
+    "A-v21",
+    "A-v23",
+    "A-v25"
+   ],
+   "size": "M",
+   "deps": [
+    "P20-08",
+    "P20-10"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P20-12",
+   "phase": "P20",
+   "title": "Release 2026.11.09.2: signed binaries, install check",
+   "reqs": [
+    "FR-05",
+    "FR-06"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P20-11"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
   }
  ],
  "requirements": {
@@ -4119,6 +4396,50 @@ window.TRACKER = {
   "FR-46": {
    "text": "Project artifacts SHOULD be stored in the project's git repository (e.g.",
    "section": "6.2 Project artifacts"
+  },
+  "FR-140": {
+   "text": "A project's Artifacts tab SHALL have six sub-tabs:",
+   "section": "6.3 Project documents (rev 7)"
+  },
+  "FR-141": {
+   "text": "Requirements, Mockups, Plan and Tracker SHALL each open one entry point:",
+   "section": "6.3 Project documents (rev 7)"
+  },
+  "FR-142": {
+   "text": "Every file under docs/ SHALL be reachable from Support files, with its labels.",
+   "section": "6.3 Project documents (rev 7)"
+  },
+  "FR-143": {
+   "text": "Entry points and labels SHALL be stored in the repository in docs/gbi.toml, and every change SHALL be committed by Courier and recorded in the history.",
+   "section": "6.3 Project documents (rev 7)"
+  },
+  "FR-144": {
+   "text": "HTML artifacts SHALL be shown inside go-build-it in a sandbox:",
+   "section": "6.3 Project documents (rev 7)"
+  },
+  "FR-145": {
+   "text": "go-build-it SHALL serve a helper that lets an HTML page include Markdown (<gbi-md src=\"requirements.md\">), so prose can be written in Markdown while the entry point stays HTML.",
+   "section": "6.3 Project documents (rev 7)"
+  },
+  "FR-146": {
+   "text": "Documents SHALL use stable IDs:",
+   "section": "6.3 Project documents (rev 7)"
+  },
+  "FR-147": {
+   "text": "Compare SHALL pair each mockup view with the screenshot labelled screenshot and named after the view (v03.png), side by side or as an overlay with a slider.",
+   "section": "6.3 Project documents (rev 7)"
+  },
+  "FR-148": {
+   "text": "The tracker entry point SHALL read a snapshot of the project's milestones and tasks (docs/tracker/tracker.json), which Courier writes from go-build-it's database on request (gbi ar",
+   "section": "6.3 Project documents (rev 7)"
+  },
+  "FR-149": {
+   "text": "gbi artifacts init <project> SHALL create the standard set from templates without overwriting existing files:",
+   "section": "6.3 Project documents (rev 7)"
+  },
+  "FR-150": {
+   "text": "gbi artifacts check SHALL report missing or invalid entry points, unlabelled files, labels on missing files, broken links in labelled HTML, and IDs that point to nothing.",
+   "section": "6.3 Project documents (rev 7)"
   },
   "FR-50": {
    "text": "The application SHALL maintain a set of global standards that apply to every project.",

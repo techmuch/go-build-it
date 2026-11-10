@@ -33,7 +33,8 @@ test.describe('change log & update · desktop', () => {
     await expect(articles.nth(0)).toHaveAttribute('aria-label', 'Release ' + TO);
     await expect(articles.nth(1)).toHaveAttribute('aria-label', 'Release ' + MID);
     await expect(articles.nth(0)).toContainText('Everything new in ' + TO);
-    await expect(page.locator('.clog article[aria-label="Release Unreleased"]')).toContainText('Change log in the app');
+    // The embedded change log follows: a released entry's notes are there (stable text, unlike Unreleased).
+    await expect(page.locator('.clog article[aria-label="Release 2026.11.09.1"]')).toContainText('Doctor tiers');
 
     // The check is remembered: the sidebar now says an update is ready.
     await page.goto('/');

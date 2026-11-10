@@ -1,5 +1,5 @@
 section: Reference
-reqs: FR-137, FR-30, FR-31, FR-32, FR-33
+reqs: FR-137, FR-30, FR-31, FR-32, FR-33, FR-142, FR-150
 # CLI, API and MCP
 
 Every UI action is an API call with a matching CLI command: `gbi help` lists them, and `gbi help <group>` shows flags. Add `--json` for machine-readable output.
@@ -14,6 +14,10 @@ gbi members restart forge@ledgerly --fresh
 gbi doctor                       # static and live checks, no server needed (gbi doctor --json --fix for agents)
 gbi doctor --tier harness        # also start each harness in herdr
 gbi herdr doctor                 # the same checks, run by the server
+gbi artifacts init trailmap       # the standard documents; then gbi artifacts check trailmap
+gbi artifacts add trailmap docs/research/survey.md --label research
+gbi trace list trailmap --gaps   # requirements → views → tasks → screens
+gbi compare list trailmap        # mockup views vs screenshots
 gbi changelog
 gbi learn list                   # lessons and your progress; gbi learn practice [--reset|--remove]
 gbi learn done setup --step 3    # tick off a step yourself

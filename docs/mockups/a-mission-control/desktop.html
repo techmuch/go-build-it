@@ -122,11 +122,50 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
 .lessons { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; } .lessons .card { margin:0; } .lessons .card h4 { margin:0 0 4px; font-size:13.5px; }
 .tx { background:#0e1419; color:#d7e0e8; font:11.5px/1.5 ui-monospace,Menlo,monospace; border-radius:6px; padding:10px 12px; white-space:pre-wrap; } .tx .you { color:#7fd6c8; } .tx .cmd { color:#f2d27b; } .tx .dim { color:#7c8b97; }
 .foot a.ver { color:inherit; text-decoration:underline dotted; cursor:pointer; }
+
+/* rev 7 proposal: project book, viewer, compare, traceability */
+.roles { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; }
+.role { background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:7px; min-width:0; }
+.role .rt { display:flex; align-items:center; gap:7px; font-weight:700; font-size:13.5px; }
+.role .ri { width:26px; height:26px; border-radius:6px; display:inline-grid; place-items:center; font-size:14px; background:var(--acc-s); }
+.role .rp { font:11.5px ui-monospace,Menlo,monospace; color:var(--m); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.role .rk { font-size:20px; font-weight:700; line-height:1.1; } .role .rl { font-size:11px; color:var(--m); }
+.role .thumb { height:74px; border:1px solid var(--line); border-radius:5px; background:#f7f9fa; overflow:hidden; position:relative; }
+.role.warn { border-top:3px solid var(--amb); } .role.ok { border-top:3px solid var(--grn); } .role.bad { border-top:3px solid var(--red); }
+.vbar { display:flex; gap:8px; align-items:center; padding:8px 10px; border:1px solid var(--line); border-bottom:0; border-radius:8px 8px 0 0; background:#f7f9fa; font-size:12px; flex-wrap:wrap; }
+.vframe { border:1px solid var(--line); border-radius:0 0 8px 8px; background:#fff; position:relative; overflow:hidden; }
+.sandbox { position:absolute; right:10px; top:10px; background:rgba(23,33,43,.85); color:#fff; font-size:11px; padding:3px 8px; border-radius:5px; }
+.ph { width:178px; height:330px; border:6px solid #1d1f22; border-radius:22px; overflow:hidden; position:relative; background:linear-gradient(160deg,#d6e8d9,#b5d1bd 60%,#a8c7b1); flex:none; font-size:10px; }
+.ph .tb { position:absolute; left:0; right:0; top:0; height:30px; background:#fff; display:flex; align-items:center; padding:0 8px; font-weight:700; gap:6px; border-bottom:1px solid #dfe4e7; }
+.ph .trail { position:absolute; left:28px; top:70px; width:110px; height:170px; border:3px dashed #c0582f; border-radius:40% 60% 30% 70%; border-color:#c0582f transparent #c0582f #c0582f; }
+.ph .me { position:absolute; width:12px; height:12px; border-radius:50%; background:#2f6fd1; border:2px solid #fff; box-shadow:0 0 0 5px rgba(47,111,209,.25); left:84px; top:178px; }
+.ph .cta { position:absolute; left:10px; right:10px; bottom:12px; height:38px; border-radius:10px; background:#0f9d8a; color:#fff; display:grid; place-items:center; font-weight:700; font-size:11px; }
+.ph .pill { position:absolute; top:38px; left:8px; background:#1c2329; color:#fff; border-radius:999px; padding:2px 8px; font-size:9.5px; }
+.ph .zoom { position:absolute; right:8px; top:110px; width:24px; height:50px; background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+.mk { position:absolute; width:20px; height:20px; border-radius:50%; background:#d1453b; color:#fff; font:700 11px/20px sans-serif; text-align:center; box-shadow:0 0 0 3px rgba(209,69,59,.25); z-index:2; }
+.cmp { display:flex; gap:40px; align-items:flex-start; justify-content:center; padding:16px; background:#eef1f3; border-radius:0 0 8px 8px; border:1px solid var(--line); }
+.cmp .lab { text-align:center; font-size:11.5px; color:var(--m); margin-bottom:6px; }
+.onion { position:relative; width:178px; height:330px; }
+.onion .ph { position:absolute; inset:0; } .onion .ph.top { opacity:.45; clip-path:inset(0 0 0 50%); }
+.onion .handle { position:absolute; top:-6px; bottom:-6px; left:50%; width:2px; background:#d1453b; z-index:3; }
+.onion .handle::after { content:"⇔"; position:absolute; top:46%; left:-11px; width:24px; height:24px; border-radius:50%; background:#d1453b; color:#fff; font-size:12px; display:grid; place-items:center; }
+.vlist .vi { display:flex; gap:8px; align-items:center; padding:7px 8px; border-radius:6px; font-size:12.5px; }
+.vlist .vi.on { background:var(--acc-s); } .vlist .vi .dot { width:9px; height:9px; border-radius:50%; flex:none; }
+.dot { display:inline-block; width:9px; height:9px; border-radius:50%; } .dot.g { background:var(--grn); } .dot.a { background:var(--amb); } .dot.r { background:var(--red); } .dot.n { background:#c9d0d5; }
+table.mx td, table.mx th { text-align:center; padding:6px 6px; font-size:12px; } table.mx td:first-child, table.mx th:first-child { text-align:left; }
+.c-ok { color:var(--grn); font-weight:700; } .c-gap { background:var(--red-s); color:var(--red); font-weight:700; border-radius:4px; } .c-dr { background:var(--amb-s); color:var(--amb); font-weight:700; border-radius:4px; }
+.subtabs { display:flex; gap:4px; padding:8px 20px 0; background:#f7f9fa; border-bottom:1px solid var(--line); font-size:12.5px; }
+.subtabs span { padding:6px 12px; border:1px solid transparent; border-bottom:0; border-radius:6px 6px 0 0; color:var(--m); }
+.subtabs span.on { background:var(--bg); border-color:var(--line); color:var(--t); font-weight:600; margin-bottom:-1px; }
+.lbl { font:11px ui-monospace,Menlo,monospace; border-radius:4px; padding:0 6px; background:var(--blue-s); color:var(--blue); }
+.lbl.entry { background:var(--acc); color:#fff; }
+.lbl.none { background:var(--amb-s); color:var(--amb); }
+.idtag { font:11px ui-monospace,Menlo,monospace; background:#eef1f3; border-radius:4px; padding:0 5px; color:#4a5560; }
 </style>
 </head>
 <body class="mock">
 <div class="rv-bar">
-  <span class="rv-title">Approach A: Mission Control <small>Desktop · 20 views + 9 detail views · rev 5</small></span>
+  <span class="rv-title">Approach A: Mission Control <small>Desktop · 26 views + 9 detail views · rev 7</small></span>
   <a href="../index.html">← Overview &amp; review guide</a>
   <a href="mobile.html">Approach A mobile →</a>
   <span class="rv-spacer"></span>
@@ -139,6 +178,7 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
 </div>
 <div class="rv-intro"><p style="background:#fff8e6;border:1px solid #ecd9a8;border-radius:8px;padding:8px 12px"><b>Rev 2 (from your review):</b> roadmap item detail (02b) · Edit → artifact editor with AI chat and a rich editor (03b) · attachment / mockup viewer (04b) · voice dictation on every answer box · structured/terminal session views and attachable headed sessions (05b) · smart handoffs now <i>experimental</i>, compaction is the MVP default · option set rethought around one large preview (07) · expandable mockups and multi-reviewer findings (08) · work review rebuilt as an assessment, no code diff (09) · persona coach and standards editor with AI chat (10, 11) · history event detail (12b) · Settings layout fixed, git workflow moved to Standards (13).</p></div>
 <p style="background:#e7effc;border:1px solid #b9cdf0;border-radius:8px;padding:8px 12px;margin:8px 0"><b>Rev 3 (herdr backend, per-project teams; ADR-009, ADR-010):</b> every AI team member runs in a herdr pane of the <span class="mono">gbi</span> herdr session · live members with herdr state and a <i>needs you</i> row for blocked agents (05) · live terminal streamed from herdr with take control / hand back (05b) · global <b>persona archetypes</b> replace global teams (10) · each project has its own <b>team</b> made from archetypes, with tuning and drift (10b) · herdr setup and doctor (15) · settings show herdr, integrations and transcript usage (13) · cards and overview show the project team and its state (01, 02) · queue assigns to a role or a specific member (06). Keyboard: every view follows <a class="l" href="../../user/18-keyboard.md">the keyboard conventions</a>.</p>
+<p style="background:#fff0f6;border:1px solid #efc2d6;border-radius:8px;padding:8px 12px;margin:8px 0"><b>Rev 7 (project documents; ADR-014):</b> Artifacts gets six sub-tabs. <b>Requirements, Mockups, Plan and Tracker</b> each open an HTML <b>entry point</b> you choose, shown in a sandbox that follows links between documents (21, 22, 26) · <b>Compare</b> pairs each mockup view with its screenshot, side by side or overlaid, and records accept or file-task (23) · <b>Traceability</b> from requirement to view, task and screen (24) · <b>Support files</b> lists every file with its explicit labels, the unlabelled ones, and the check (25).</p>
 <p style="background:#f3ecfb;border:1px solid #d3c1ea;border-radius:8px;padding:8px 12px;margin:8px 0"><b>Rev 5 (doctor, AI install, Learn; ADR-012):</b> the doctor runs static → live → harness → prompt tiers with evidence and fixes for people and AI agents (17) · <b>Learn</b> with lessons and a practice project (18) · a lesson coach on the real page with Show me and Pro tips (19) · driving gbi from your AI harness (20) · Learn in the sidebar (all views).</p>
 <p style="background:#e5f6ec;border:1px solid #a8dbbd;border-radius:8px;padding:8px 12px;margin:8px 0"><b>Rev 4 (change log &amp; guided updates; ADR-011):</b> the sidebar version opens the <b>change log</b> (16) · <b>Check again</b> lists every newer release · <b>Update now</b> shows eight steps completing, across the restart · Settings → Updates links to it (13).</p>
 <nav class="rv-toc">
@@ -146,6 +186,7 @@ textarea.ta { width:100%; min-height:70px; border:1px solid var(--line); border-
   <a href="#v05">05 Live members</a><a href="#v05b">05b Live terminal</a><a href="#v06">06 Task queue</a><a href="#v07">07 Option set</a><a href="#v08">08 Dress rehearsal</a>
   <a href="#v09">09 Work review</a><a href="#v10">10 Archetypes</a><a href="#v10b">10b Project team</a><a href="#v11">11 Global standards</a><a href="#v12">12 History &amp; insights</a><a href="#v12b">12b Event detail</a>
   <a href="#v13">13 Settings</a><a href="#v14">14 Docs</a><a href="#v15">15 herdr setup</a><a href="#v16">16 Change log &amp; update</a><a href="#v17">17 Doctor</a><a href="#v18">18 Learn</a><a href="#v19">19 Lesson coach</a><a href="#v20">20 AI harness</a>
+  <a href="#v21">21 Requirements tab</a><a href="#v22">22 Mockups tab</a><a href="#v23">23 Compare</a><a href="#v24">24 Traceability</a><a href="#v25">25 Support files</a><a href="#v26">26 Plan &amp; tracker</a>
 </nav>
 
 <!-- ============ 01 CATALOG ============ -->
@@ -1364,6 +1405,258 @@ exit 0 · state blocked after 3.2s · last lines of the pane:
           <div><b>Teach it the workflow</b><div class="evi">gbi agent guide > ~/.claude/skills/gbi/SKILL.md</div></div>
           <div class="tip"><b>Pro tip:</b> the guide tells your harness to ask before starting paid work. Keep that rule.</div>
           <div class="muted">Also: Antigravity, Pi and OpenCode notes</div></div></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+
+
+<!-- ============ 21 REQUIREMENTS TAB (rev 7) ============ -->
+<section class="view" id="v21">
+  <header><span class="num">21</span><h2>Artifacts sub-tabs · Requirements</h2><span class="req">FR-140</span><span class="req">FR-141</span><span class="req">FR-144</span><span class="req">FR-145</span></header>
+  <p class="look"><b>Look for:</b> <b>Rev 7:</b> Artifacts has six sub-tabs: <b>Requirements · Mockups · Plan · Tracker · Compare · Support files</b>. Each of the first four opens its <b>entry point</b>, an HTML file you chose (never guessed). It is shown inside gbi in a sandbox: its scripts run and its files load, but it cannot use gbi's API. Here the entry includes <span class="mono">requirements.md</span> with <span class="mono">&lt;gbi-md&gt;</span>, so the prose is still Markdown (<b>Edit source</b> opens it in the editor). Requirement lines become anchors (<span class="mono">#FR-08</span>), and the address bar follows you. Links in the page move between documents: a link to the mockups entry switches to the Mockups tab. The problem definition and values keep their rail.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/projects/trailmap/artifacts/requirements#FR-08</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a class="on">Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions <span class="badge n">4</span></a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot"><a class="ver">v2026.11.09.2</a> · up to date<br>2 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">Projects / trailmap /</span> Artifacts</h1><span class="search">Search, run a command…  ⌘K</span><span class="who">● Local · david</span></div>
+      <div class="tabs"><span>Overview</span><span class="on">Artifacts</span><span>Team</span><span>Queue · 23</span><span>Sessions · 2</span><span>Releases</span><span>History</span><span>Settings</span></div>
+      <div class="subtabs"><span class="on">Requirements</span><span class="">Mockups</span><span class="">Plan</span><span class="">Tracker</span><span class="">Compare <span class="chip red">2</span></span><span class="">Support files <span class="chip amb">3 unlabelled</span></span></div>
+      <div class="content" style="flex-direction:row;align-items:flex-start">
+        <div style="flex:1;min-width:0"><div class="vbar"><span class="chip acc">📋 Requirements entry</span><span class="mono">docs/requirements.html</span><span class="muted">·</span><span class="small">rev 9 · Atlas · 2 h ago</span> <span class="seg" style="margin-left:8px"><span class="on">Document</span><span>Traceability</span></span><span style="margin-left:auto"></span><span class="btn sm">History</span><span class="btn sm">✎ Edit source</span><span class="btn sm">Open raw ↗</span></div>
+          <div class="vframe" style="padding:16px 20px;min-height:430px;background:#fff">
+            <span class="sandbox">sandboxed · no access to gbi</span>
+            <div style="display:flex;gap:14px;font-size:12px;border-bottom:1px solid #e6e9ec;padding-bottom:8px;margin-bottom:10px"><b>trailmap</b><a class="l">Requirements</a><a class="l">Mockups</a><a class="l">Plan</a><a class="l">Tracker</a><span class="muted" style="margin-left:auto">links between entry points switch the tab</span></div>
+            <div style="font:700 18px Georgia,serif">trailmap · Requirements</div>
+            <div class="mono small muted" style="margin:4px 0 10px">&lt;gbi-md src="requirements.md"&gt; · rendered by gbi-md.js</div>
+            <div style="font-size:13.5px;line-height:1.65">
+              <div style="font-weight:700;margin-top:6px">3. Offline maps</div>
+              <div id="m-fr07"><b>FR-07</b>: The map SHALL remain fully usable with no network connection for any downloaded region. <a class="l small">→ view v03</a></div>
+              <div style="background:#fff8e6;margin:0 -8px;padding:0 8px;border-left:3px solid var(--amb)"><b>FR-08</b>: The user SHALL be able to download maps per trail or per region. <span class="muted small">#FR-08</span></div>
+              <div><b>FR-09</b>: Battery usage while recording a track SHOULD stay under 5% per hour.</div>
+              <div><b>FR-10</b>: All primary actions SHALL be reachable with one thumb on a 6.1" phone. <a class="l small">→ views v01–v08</a></div>
+              <div style="font-weight:700;margin-top:10px">4. Sharing</div>
+              <div><b>FR-19</b>: The user SHALL be able to share a track as a link.</div>
+            </div>
+          </div>
+          <div class="small muted" style="margin-top:6px">Address: <span class="mono">/projects/trailmap/artifacts/requirements#FR-08</span> · copy to share this exact spot</div>
+        </div>
+        <div style="width:270px;display:flex;flex-direction:column;gap:14px">
+          <div class="card"><h3>Problem definition <span class="small" style="text-transform:none">v4</span></h3><div class="small">Hikers lose signal on most trails and need a map they can trust offline, operated one-handed, without draining the phone.</div></div>
+          <div class="card"><h3>Values</h3><div class="small" style="display:flex;flex-direction:column;gap:6px"><div><b>1. Offline first.</b> <span class="muted">← OS-2</span></div><div><b>2. One-handed on trail.</b> <span class="muted">← mockup B</span></div><div><b>3. Battery over beauty.</b> <span class="muted">← Q-27</span></div></div></div>
+          <div class="card"><h3>From the CLI</h3><div class="evi" style="margin:0">gbi artifacts entry trailmap requirements \
+  docs/requirements.html
+gbi artifacts get trailmap docs/requirements.md</div></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ============ 22 MOCKUPS TAB (rev 7) ============ -->
+<section class="view" id="v22">
+  <header><span class="num">22</span><h2>Mockups: an HTML entry that links to its sets</h2><span class="req">FR-141</span><span class="req">FR-144</span><span class="req">FR-146</span></header>
+  <p class="look"><b>Look for:</b> the mockups entry <span class="mono">docs/mockups/index.html</span> links to its sets (web, phone). gbi doesn't model sets: you follow the page's links and the viewer keeps up. The breadcrumb and address show <span class="mono">phone.html#v03</span>. A Markdown link (<span class="mono">notes/03.md</span>) opens rendered. The right panel reads the IDs on the page: the view, the requirements it covers, its tasks, and whether its real screen still matches.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/projects/trailmap/artifacts/mockups/phone.html#v03</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a class="on">Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions <span class="badge n">4</span></a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot"><a class="ver">v2026.11.09.2</a> · up to date<br>2 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">Projects / trailmap /</span> Artifacts</h1><span class="search">Search, run a command…  ⌘K</span><span class="who">● Local · david</span></div>
+      <div class="tabs"><span>Overview</span><span class="on">Artifacts</span><span>Team</span><span>Queue · 23</span><span>Sessions · 2</span><span>Releases</span><span>History</span><span>Settings</span></div>
+      <div class="subtabs"><span class="">Requirements</span><span class="on">Mockups</span><span class="">Plan</span><span class="">Tracker</span><span class="">Compare <span class="chip red">2</span></span><span class="">Support files <span class="chip amb">3 unlabelled</span></span></div>
+      <div class="content" style="flex-direction:row;align-items:flex-start">
+        <div style="flex:1;min-width:0"><div class="vbar"><span class="chip acc">🎨 Mockups</span><span class="mono">docs/mockups/index.html → phone.html#v03</span><span class="muted">·</span><span class="small">rev 9 · Atlas · 2 h ago</span><span style="margin-left:auto"></span><span class="btn sm">History</span><span class="btn sm">✎ Edit source</span><span class="btn sm">Open raw ↗</span></div>
+          <div class="vframe" style="padding:14px 16px;min-height:430px;background:#fbfbf8">
+            <span class="sandbox">sandboxed · no access to gbi</span>
+            <div class="small" style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><a class="l">index.html</a> › <b>phone.html</b> <span class="muted">· the page's own links; sets live inside the HTML</span></div>
+            <div style="font:700 15px Georgia,serif">trailmap · Phone mockups</div><div class="small muted" style="margin-bottom:10px">Sets: <a class="l">Web</a> · <b>Phone</b> · <a class="l">Watch</a></div>
+            <div style="display:flex;gap:6px;margin-bottom:12px;font-size:11.5px"><span class="chip">v01 Trail list</span><span class="chip">v02 Search</span><span class="chip acc">v03 Trail map</span><span class="chip">v04 Recording</span><span class="chip">v05 Downloads</span><span class="chip">…</span></div>
+            <div style="display:flex;gap:22px;align-items:flex-start">
+              <div style="position:relative"><div class="ph"><div class="tb">⛰ Bear Creek Loop <span style="margin-left:auto" class="chip grn">offline ✓</span></div><span class="pill">2.4 km · 310 m ↑</span><div class="trail"></div><div class="me"></div><div class="zoom"></div><div class="cta">⬇ Download this trail · 18 MB</div></div></div>
+              <div style="font-size:12.5px;max-width:330px;line-height:1.55"><div class="mono small muted">&lt;section data-view="v03" data-route="/trail/:id" data-req="FR-07 FR-08 FR-10"&gt;</div>
+                <p style="margin:8px 0"><b>v03 · Trail map.</b> The download button sits at the bottom, in thumb reach (<a class="l">FR-10</a>). The <i>offline ✓</i> badge shows when the whole trail is on the phone (<a class="l">FR-07</a>).</p>
+                <div class="small muted">Image: <span class="mono">img/trail-03.png</span> · notes: <a class="l">notes/03.md</a> (opens rendered)</div></div>
+            </div>
+          </div>
+        </div>
+        <div style="width:280px;display:flex;flex-direction:column;gap:14px">
+          <div class="card"><h3>On this view</h3><div class="small" style="display:flex;flex-direction:column;gap:7px">
+            <div><span class="idtag">v03</span> <b>Trail map</b> · route <span class="mono">/trail/:id</span></div>
+            <div class="muted">Requirements</div><div><span class="idtag">FR-07</span> usable offline<br><span class="idtag">FR-08</span> download per trail<br><span class="idtag">FR-10</span> one thumb</div>
+            <div class="muted">Tasks</div><div>T-071 Trail map screen <span class="chip grn">done</span><br>T-088 Download button <span class="chip blue">review</span></div>
+            <div class="muted">Real screen</div><div><span class="dot a"></span> drifted · <a class="l" href="#v23">Compare ›</a></div></div></div>
+          <div class="card"><h3>Views in this entry</h3><div class="small muted">9 views across <span class="mono">web.html</span> and <span class="mono">phone.html</span>, found by their <span class="mono">data-view</span> marks in files labelled <span class="lbl">mockup</span>.</div></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ============ 23 COMPARE (rev 7) ============ -->
+<section class="view" id="v23">
+  <header><span class="num">23</span><h2>Compare: mockup ⇔ the real app</h2><span class="req">FR-147</span><span class="req">FR-146</span></header>
+  <p class="look"><b>Look for:</b> each mockup view (<span class="mono">data-view</span>) is paired with the screenshot labelled <span class="lbl">screenshot</span> that has the same name, here <span class="mono">screenshots/v03.png</span>, which the UAT run writes. Show them <b>side by side</b> or as an <b>overlay</b> with a slider. Pixel diffs between a mockup and real data are mostly noise, so this is your judgement: <b>accept</b> the real screen or <b>file a task</b>, with a note. The decision is stored in the repo with the screenshot's checksum, and the view comes back only when the screenshot changes.</p>
+  <p class="small muted" style="margin:6px 0">a. Side by side</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/projects/trailmap/artifacts/compare/v03</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a class="on">Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions <span class="badge n">4</span></a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot"><a class="ver">v2026.11.09.2</a> · up to date<br>2 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">Projects / trailmap /</span> Artifacts</h1><span class="chip red">2 to review</span><span class="search">Search, run a command…  ⌘K</span><span class="who">● Local · david</span></div>
+      <div class="tabs"><span>Overview</span><span class="on">Artifacts</span><span>Team</span><span>Queue · 23</span><span>Sessions · 2</span><span>Releases</span><span>History</span><span>Settings</span></div>
+      <div class="subtabs"><span class="">Requirements</span><span class="">Mockups</span><span class="">Plan</span><span class="">Tracker</span><span class="on">Compare <span class="chip red">2</span></span><span class="">Support files <span class="chip amb">3 unlabelled</span></span></div>
+      <div class="content" style="flex-direction:row;align-items:flex-start">
+        <div class="card vlist" style="width:200px;padding:8px"><h3 style="padding:4px 6px 0">Views <span class="small" style="text-transform:none">6/9 ok</span></h3>
+          <div class="vi"><span class="dot g"></span>v01 Trail list</div><div class="vi"><span class="dot g"></span>v02 Search</div>
+          <div class="vi on"><span class="dot a"></span><b>v03 Trail map</b></div><div class="vi"><span class="dot r"></span>v04 Recording</div>
+          <div class="vi"><span class="dot g"></span>v05 Downloads</div><div class="vi"><span class="dot g"></span>v06 Settings</div><div class="vi"><span class="dot b" style="background:var(--blue)"></span>v07 Share</div>
+          <div class="vi"><span class="dot g"></span>v08 Onboarding</div><div class="vi muted"><span class="dot n"></span>v09 Night mode</div>
+          <div class="small muted" style="padding:8px 6px 2px;border-top:1px solid var(--line);margin-top:6px"><span class="dot g"></span> accepted · <span class="dot a"></span> drifted · <span class="dot r"></span> not reviewed · <span class="dot" style="background:var(--blue)"></span> task filed · <span class="dot n"></span> no screenshot</div></div>
+        <div style="flex:1;min-width:0">
+          <div class="vbar"><b>v03 · Trail map</b><span class="mono muted">/trail/:id</span><span class="seg"><span class="on">Side by side</span><span>Overlay</span></span><span style="margin-left:auto" class="muted">accepted Nov 4 · screenshot changed since</span></div>
+          <div class="cmp">
+            <div><div class="lab">Mockup · phone.html#v03</div><div class="ph"><div class="tb">⛰ Bear Creek Loop <span style="margin-left:auto" class="chip grn">offline ✓</span></div><span class="pill">2.4 km · 310 m ↑</span><div class="trail"></div><div class="me"></div><div class="zoom"></div><div class="cta">⬇ Download this trail · 18 MB</div></div></div>
+            <div><div class="lab">Real app · screenshots/v03.png</div><div class="ph"><div class="tb">⛰ Bear Creek Loop</div><span class="pill">2.4 km · 310 m ↑</span><div class="trail"></div><div class="me"></div><div class="cta" style="left:auto;width:96px;height:30px;background:#2f6fd1;font-size:10px">⬇ Download</div></div></div>
+          </div>
+        </div>
+        <div style="width:280px;display:flex;flex-direction:column;gap:12px">
+          <div class="card"><h3>Decision</h3><div class="small" style="display:flex;flex-direction:column;gap:8px">
+            <textarea class="ta" style="min-height:64px">The offline badge is missing and the download button lost its size label (FR-07, FR-10).</textarea>
+            <div><span class="btn sm">✓ Accept the real screen</span> <span class="btn sm p">File a task</span></div>
+            <div class="muted">Saved to <span class="mono">docs/compare.json</span> with the screenshot's SHA-256. The view comes back if the screenshot changes.</div></div></div>
+          <div class="card"><h3>History</h3><div class="small muted">Nov 4 · david accepted (sha 3f9a…)<br>Nov 9 · screenshot changed: UAT run #41</div></div>
+          <div class="card"><h3>CLI</h3><div class="evi" style="margin:0">gbi compare list trailmap
+gbi compare task trailmap v03 --note "…"</div></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+
+  <p class="small muted" style="margin:14px 0 6px">b. Overlay with a slider</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/projects/trailmap/artifacts/compare/v03?mode=overlay</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a class="on">Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions <span class="badge n">4</span></a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot"><a class="ver">v2026.11.09.2</a> · up to date<br>2 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">Projects / trailmap /</span> Artifacts</h1><span class="chip red">2 to review</span><span class="search">Search, run a command…  ⌘K</span><span class="who">● Local · david</span></div>
+      <div class="tabs"><span>Overview</span><span class="on">Artifacts</span><span>Team</span><span>Queue · 23</span><span>Sessions · 2</span><span>Releases</span><span>History</span><span>Settings</span></div>
+      <div class="subtabs"><span class="">Requirements</span><span class="">Mockups</span><span class="">Plan</span><span class="">Tracker</span><span class="on">Compare <span class="chip red">2</span></span><span class="">Support files <span class="chip amb">3 unlabelled</span></span></div>
+      <div class="content" style="flex-direction:row;align-items:flex-start">
+        <div class="card vlist" style="width:200px;padding:8px"><h3 style="padding:4px 6px 0">Views <span class="small" style="text-transform:none">6/9 ok</span></h3>
+          <div class="vi"><span class="dot g"></span>v01 Trail list</div><div class="vi"><span class="dot g"></span>v02 Search</div>
+          <div class="vi on"><span class="dot a"></span><b>v03 Trail map</b></div><div class="vi"><span class="dot r"></span>v04 Recording</div>
+          <div class="vi"><span class="dot g"></span>v05 Downloads</div><div class="vi"><span class="dot g"></span>v06 Settings</div><div class="vi"><span class="dot b" style="background:var(--blue)"></span>v07 Share</div>
+          <div class="vi"><span class="dot g"></span>v08 Onboarding</div><div class="vi muted"><span class="dot n"></span>v09 Night mode</div>
+          <div class="small muted" style="padding:8px 6px 2px;border-top:1px solid var(--line);margin-top:6px"><span class="dot g"></span> accepted · <span class="dot a"></span> drifted · <span class="dot r"></span> not reviewed · <span class="dot" style="background:var(--blue)"></span> task filed · <span class="dot n"></span> no screenshot</div></div>
+        <div style="flex:1;min-width:0">
+          <div class="vbar"><b>v03 · Trail map</b><span class="mono muted">/trail/:id</span><span class="seg"><span>Side by side</span><span class="on">Overlay</span></span><span style="margin-left:auto" class="muted">accepted Nov 4 · screenshot changed since</span></div>
+          <div class="cmp" style="align-items:center"><div><div class="lab">Mockup left of the line · real app right · drag the line</div><div class="onion"><div class="ph"><div class="tb">⛰ Bear Creek Loop <span style="margin-left:auto" class="chip grn">offline ✓</span></div><span class="pill">2.4 km · 310 m ↑</span><div class="trail"></div><div class="me"></div><div class="zoom"></div><div class="cta">⬇ Download this trail · 18 MB</div></div><div class="ph top"><div class="tb">⛰ Bear Creek Loop</div><span class="pill">2.4 km · 310 m ↑</span><div class="trail"></div><div class="me"></div><div class="cta" style="left:auto;width:96px;height:30px;background:#2f6fd1;font-size:10px">⬇ Download</div></div><div class="handle"></div></div></div>
+            <div class="small" style="max-width:220px;line-height:1.6"><b>Overlay</b> lines the two up at the same size. Drag the line or press <kbd>←</kbd> <kbd>→</kbd>.</div></div>
+        </div>
+        <div style="width:280px;display:flex;flex-direction:column;gap:12px">
+          <div class="card"><h3>Decision</h3><div class="small" style="display:flex;flex-direction:column;gap:8px">
+            <textarea class="ta" style="min-height:64px">The offline badge is missing and the download button lost its size label (FR-07, FR-10).</textarea>
+            <div><span class="btn sm">✓ Accept the real screen</span> <span class="btn sm p">File a task</span></div>
+            <div class="muted">Saved to <span class="mono">docs/compare.json</span> with the screenshot's SHA-256. The view comes back if the screenshot changes.</div></div></div>
+          <div class="card"><h3>History</h3><div class="small muted">Nov 4 · david accepted (sha 3f9a…)<br>Nov 9 · screenshot changed: UAT run #41</div></div>
+          <div class="card"><h3>CLI</h3><div class="evi" style="margin:0">gbi compare list trailmap
+gbi compare task trailmap v03 --note "…"</div></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ============ 24 TRACEABILITY (rev 7) ============ -->
+<section class="view" id="v24">
+  <header><span class="num">24</span><h2>Traceability: requirement → view → task → screen</h2><span class="req">FR-146</span></header>
+  <p class="look"><b>Look for:</b> the Requirements tab's <b>Traceability</b> switch. Every requirement gets a row with its views, tasks and real screens. The gaps are in red: a requirement with no task, a view that names an unknown requirement, and a view whose screen drifted or was never reviewed. A requirement with no view isn't a gap, because not everything is visual.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/projects/trailmap/artifacts/requirements?trace=1</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a class="on">Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions <span class="badge n">4</span></a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot"><a class="ver">v2026.11.09.2</a> · up to date<br>2 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">Projects / trailmap /</span> Artifacts</h1><span class="chip red">3 gaps</span><span class="search">Search, run a command…  ⌘K</span><span class="who">● Local · david</span></div>
+      <div class="tabs"><span>Overview</span><span class="on">Artifacts</span><span>Team</span><span>Queue · 23</span><span>Sessions · 2</span><span>Releases</span><span>History</span><span>Settings</span></div>
+      <div class="subtabs"><span class="on">Requirements</span><span class="">Mockups</span><span class="">Plan</span><span class="">Tracker</span><span class="">Compare <span class="chip red">2</span></span><span class="">Support files <span class="chip amb">3 unlabelled</span></span></div>
+      <div class="content">
+        <div class="vbar"><span class="chip acc">📋 Requirements entry</span><span class="mono">docs/requirements.html</span><span class="muted">·</span><span class="small">rev 9 · Atlas · 2 h ago</span> <span class="seg" style="margin-left:8px"><span>Document</span><span class="on">Traceability</span></span><span style="margin-left:auto"></span><span class="btn sm">History</span><span class="btn sm">✎ Edit source</span><span class="btn sm">Open raw ↗</span></div>
+        <div class="card" style="border-radius:0 0 8px 8px;margin-top:-14px"><h3>24 requirements · 3 gaps <span class="small" style="text-transform:none"><span class="seg"><span class="on">All</span><span>Gaps only</span></span></span></h3>
+          <table class="t mx"><tr><th>Requirement</th><th>Mockup views</th><th>Tasks</th><th>Done</th><th>Real screen</th><th></th></tr>
+            <tr><td><span class="idtag">FR-07</span> Map usable offline</td><td>v03, v05</td><td>T-071, T-074</td><td class="c-ok">2/2</td><td><span class="c-dr">&nbsp;v03 drifted&nbsp;</span></td><td><a class="l" href="#v23">Compare</a></td></tr>
+            <tr><td><span class="idtag">FR-08</span> Download per trail or region</td><td>v03, v05</td><td>T-077, T-088</td><td>1/2</td><td><span class="c-dr">&nbsp;v03 drifted&nbsp;</span></td><td><a class="l">Compare</a></td></tr>
+            <tr><td><span class="idtag">FR-09</span> Battery &lt; 5%/h recording</td><td class="muted">—</td><td>T-090</td><td>0/1</td><td class="muted">—</td><td></td></tr>
+            <tr><td><span class="idtag">FR-10</span> One thumb on a 6.1" phone</td><td>v01–v08</td><td>T-071, T-088</td><td class="c-ok">2/2</td><td class="c-ok">6 accepted</td><td></td></tr>
+            <tr><td><span class="idtag">FR-12</span> Record a track</td><td>v04</td><td>T-095</td><td>0/1</td><td><span class="c-gap">&nbsp;not reviewed&nbsp;</span></td><td><a class="l">Compare</a></td></tr>
+            <tr><td><span class="idtag">FR-22</span> Night mode</td><td>v09</td><td><span class="c-gap">&nbsp;no task&nbsp;</span></td><td>—</td><td class="muted">no screenshot</td><td><a class="l">Add task</a></td></tr>
+            <tr><td class="muted">view v07 names <span class="idtag">FR-31</span></td><td>v07</td><td colspan="3"><span class="c-gap">&nbsp;unknown requirement&nbsp;</span></td><td><a class="l">Open v07</a></td></tr>
+          </table>
+          <div class="small muted" style="margin-top:8px">Read from the IDs only: <span class="mono">**FR-nn**</span> in the requirements, <span class="mono">data-view</span>/<span class="mono">data-req</span> in files labelled mockup, <span class="mono">reqs</span> on tasks, screenshots named after views. CLI: <span class="mono">gbi trace list trailmap --gaps</span></div></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ============ 25 SUPPORT FILES (rev 7) ============ -->
+<section class="view" id="v25">
+  <header><span class="num">25</span><h2>Support files: every file, its labels, the entry points</h2><span class="req">FR-142</span><span class="req">FR-143</span><span class="req">FR-150</span></header>
+  <p class="look"><b>Look for:</b> everything under <span class="mono">docs/</span> with its labels. A label on a folder covers its files ("from docs/mockups/"). Files added outside gbi go to <b>Unlabelled</b> at the top, and the only action is <b>Label…</b>. The <b>Set as entry point</b> action appears on HTML files. The check lists what needs attention. The same actions are CLI commands, which is how AI members add their files.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/projects/trailmap/artifacts/files</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a class="on">Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions <span class="badge n">4</span></a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot"><a class="ver">v2026.11.09.2</a> · up to date<br>2 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">Projects / trailmap /</span> Artifacts</h1><span class="chip amb">3 unlabelled</span><span class="search">Search, run a command…  ⌘K</span><span class="who">● Local · david</span></div>
+      <div class="tabs"><span>Overview</span><span class="on">Artifacts</span><span>Team</span><span>Queue · 23</span><span>Sessions · 2</span><span>Releases</span><span>History</span><span>Settings</span></div>
+      <div class="subtabs"><span class="">Requirements</span><span class="">Mockups</span><span class="">Plan</span><span class="">Tracker</span><span class="">Compare <span class="chip red">2</span></span><span class="on">Support files <span class="chip amb">3 unlabelled</span></span></div>
+      <div class="content" style="flex-direction:row;align-items:flex-start">
+        <div class="card" style="flex:1;min-width:0"><h3>docs/ <span class="small" style="text-transform:none"><span class="seg"><span class="on">All 41</span><span>Unlabelled 3</span><span>mockup</span><span>screenshot</span><span>decision</span></span></span></h3>
+          <table class="t small">
+            <tr style="background:#fff8e6"><td colspan="3"><b>Unlabelled</b> · <span class="muted">added outside gbi; give each a label</span></td></tr>
+            <tr><td>📄 docs/research/interviews.md</td><td><span class="lbl none">unlabelled</span></td><td style="text-align:right"><span class="btn sm">Label…</span></td></tr>
+            <tr><td>🖼 docs/mockups-old/v2.html</td><td><span class="lbl none">unlabelled</span></td><td style="text-align:right"><span class="btn sm">Label…</span></td></tr>
+            <tr><td>🖼 docs/img/logo.svg</td><td><span class="lbl none">unlabelled</span></td><td style="text-align:right"><span class="btn sm">Label…</span></td></tr>
+            <tr><td colspan="3" style="padding-top:12px"><b>Labelled</b></td></tr>
+            <tr><td>🖼 <b>docs/requirements.html</b></td><td><span class="lbl entry">entry · requirements</span> <span class="lbl">requirements</span></td><td style="text-align:right" class="muted">rev 9</td></tr>
+            <tr><td>📄 docs/requirements.md</td><td><span class="lbl">requirements</span></td><td style="text-align:right" class="muted">rev 9</td></tr>
+            <tr><td>🖼 <b>docs/mockups/index.html</b></td><td><span class="lbl entry">entry · mockups</span> <span class="lbl">mockup</span> <span class="muted">from docs/mockups/</span></td><td style="text-align:right"><span class="btn sm">⋯</span></td></tr>
+            <tr><td>🖼 docs/mockups/phone.html</td><td><span class="lbl">mockup</span> <span class="muted">from docs/mockups/</span></td><td style="text-align:right"><span class="btn sm" style="border-color:var(--acc);color:var(--acc)">Set as entry point ▾</span></td></tr>
+            <tr><td>📁 docs/screenshots/ <span class="muted">(9 files)</span></td><td><span class="lbl">screenshot</span></td><td></td></tr>
+            <tr><td>📁 docs/decisions/ <span class="muted">(4 files)</span></td><td><span class="lbl">decision</span></td><td></td></tr>
+            <tr><td>📄 docs/gbi.toml · docs/compare.json</td><td class="muted">kept by gbi</td><td></td></tr>
+          </table></div>
+        <div style="width:330px;display:flex;flex-direction:column;gap:12px">
+          <div class="card"><h3>Entry points</h3><table class="t small"><tr><td>Requirements</td><td class="mono">requirements.html</td></tr><tr><td>Mockups</td><td class="mono">mockups/index.html</td></tr><tr><td>Plan</td><td class="mono">plan.html</td></tr><tr><td>Tracker</td><td class="mono">tracker/index.html</td></tr></table></div>
+          <div class="card"><h3>Check <span class="chip amb" style="text-transform:none">5 problems</span></h3><div class="small" style="display:flex;flex-direction:column;gap:4px">
+            <div>⚠ 3 unlabelled files</div><div>⚠ <span class="mono">phone.html</span> links to <span class="mono">img/trail-09.png</span>, which is missing</div><div>⚠ view <span class="idtag">v07</span> names <span class="idtag">FR-31</span>, which doesn't exist</div></div></div>
+          <div class="card"><h3>From the CLI</h3><div class="evi" style="margin:0">gbi artifacts add trailmap docs/research/interviews.md --label research
+gbi artifacts label trailmap docs/mockups/ --label mockup
+gbi artifacts entry trailmap mockups docs/mockups/index.html
+gbi artifacts check trailmap</div><div class="small muted" style="margin-top:6px">A label is required. gbi never guesses; it lists what's unlabelled. Each change is committed by Courier in <span class="mono">docs/gbi.toml</span>.</div></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ============ 26 TRACKER (rev 7) ============ -->
+<section class="view" id="v26">
+  <header><span class="num">26</span><h2>Plan and Tracker tabs</h2><span class="req">FR-141</span><span class="req">FR-148</span><span class="req">FR-149</span></header>
+  <p class="look"><b>Look for:</b> the Tracker tab shows its HTML entry, which reads a JSON snapshot of gbi's milestones and tasks. <b>Write snapshot</b> commits a fresh one. The Plan tab works like Requirements (HTML entry with <span class="mono">&lt;gbi-md&gt;</span>). A tab without an entry point offers <b>Choose a file</b> or <b>Create the standard set</b> (<span class="mono">gbi artifacts init</span>), which writes the templates without overwriting anything.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/projects/trailmap/artifacts/tracker</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a class="on">Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions <span class="badge n">4</span></a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot"><a class="ver">v2026.11.09.2</a> · up to date<br>2 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">Projects / trailmap /</span> Artifacts</h1><span class="search">Search, run a command…  ⌘K</span><span class="who">● Local · david</span></div>
+      <div class="tabs"><span>Overview</span><span class="on">Artifacts</span><span>Team</span><span>Queue · 23</span><span>Sessions · 2</span><span>Releases</span><span>History</span><span>Settings</span></div>
+      <div class="subtabs"><span class="">Requirements</span><span class="">Mockups</span><span class="">Plan</span><span class="on">Tracker</span><span class="">Compare <span class="chip red">2</span></span><span class="">Support files <span class="chip amb">3 unlabelled</span></span></div>
+      <div class="content" style="flex-direction:row;align-items:flex-start">
+        <div style="flex:1;min-width:0"><div class="vbar"><span class="chip acc">✅ Tracker entry</span><span class="mono">docs/tracker/index.html</span><span class="muted">· reads tracker.json · snapshot 5 min ago</span><span style="margin-left:auto"></span><span class="btn sm p">Write snapshot</span><span class="btn sm">Open raw ↗</span></div>
+          <div class="vframe" style="padding:14px 18px;min-height:330px">
+            <div style="font:700 16px Georgia,serif">trailmap · Tracker</div><div class="small muted" style="margin-bottom:10px">snapshot of go-build-it · 31 / 47 tasks done</div>
+            <table class="t small"><tr><th>Milestone</th><th>Gate</th><th>Progress</th></tr>
+              <tr><td><b>M1</b> Offline map</td><td><span class="chip grn">approved</span></td><td><div class="bar"><i style="width:100%"></i></div></td></tr>
+              <tr><td><b>M2</b> Track recording</td><td><span class="chip">pending</span></td><td><div class="bar"><i style="width:62%"></i></div></td></tr>
+              <tr><td><b>M3</b> Sharing</td><td><span class="chip">pending</span></td><td><div class="bar"><i style="width:0"></i></div></td></tr></table>
+          </div></div>
+        <div style="width:280px" class="card"><h3>One source of truth</h3><div class="small">go-build-it's milestones and tasks are the truth. <b>Write snapshot</b> has Courier commit <span class="mono">docs/tracker/tracker.json</span>, which this HTML reads, so the tracker in the repo matches the app.<div class="evi">gbi artifacts snapshot trailmap</div><a class="l">Live queue ›</a></div></div>
       </div>
     </div>
   </div></div></div>

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{project}} · Mockups</title>
+<style>body{margin:0;font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1c2329;background:#fff}nav{display:flex;gap:16px;padding:10px 24px;border-bottom:1px solid #e1e5e8;font-size:13px}nav b{margin-right:8px}nav a{color:#2f6fd1;text-decoration:none}nav a.on{color:#1c2329;font-weight:600}main{max-width:900px;padding:8px 24px 40px}code{background:#f1f3f5;border-radius:4px;padding:0 4px}table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid #e1e5e8;padding:6px 8px;text-align:left;font-size:14px}:target{background:#fff8e6}</style>
+<style>.view{border:1px solid #e1e5e8;border-radius:10px;padding:14px 16px;margin:14px 0}.screen{width:240px;height:420px;border:8px solid #1d1f22;border-radius:26px;background:#f4f6f7;display:grid;place-items:center;color:#66727c}</style>
+</head><body>
+<nav><b>{{project}}</b><a href="../requirements.html">Requirements</a><a class="on" href="index.html">Mockups</a><a href="../plan.html">Plan</a><a href="../tracker/index.html">Tracker</a></nav>
+<main>
+<h1>{{project}} · Mockups</h1>
+<p>Each view is a <code>&lt;section data-view="v01"&gt;</code>. <code>data-req</code> names the requirements it covers and <code>data-route</code> the screen in the app. A screenshot of the built screen named <code>v01.png</code> in <a href="../screenshots/README.md">screenshots/</a> is compared with it in go-build-it.</p>
+<p>Several sets (for example web and phone)? Put each in its own HTML file next to this one, link to it from here, and label it <code>mockup</code>.</p>
+
+<section class="view" id="v01" data-view="v01" data-route="/" data-req="FR-01">
+  <h2>v01 · Home</h2>
+  <div class="screen">your mockup here</div>
+  <p>What this view shows and why. Covers <a href="../requirements.html#FR-01">FR-01</a>.</p>
+</section>
+</main>
+</body></html>

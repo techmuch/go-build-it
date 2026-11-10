@@ -12,7 +12,7 @@ import (
 //go:embed user
 var content embed.FS
 
-//go:embed learn agent-guide.md
+//go:embed learn agent-guide.md standards/project-documents.md
 var learnContent embed.FS
 
 // LearnFS holds the lessons (docs/learn/*.md, FR-134).
@@ -20,6 +20,12 @@ func LearnFS() fs.FS { sub, _ := fs.Sub(learnContent, "learn"); return sub }
 
 // AgentGuide is the guide for AI agents driving go-build-it (`gbi agent guide`, FR-137).
 func AgentGuide() string { b, _ := learnContent.ReadFile("agent-guide.md"); return string(b) }
+
+// ProjectDocumentsStandard is the built-in "Project documents" standard (FR-150).
+func ProjectDocumentsStandard() string {
+	b, _ := learnContent.ReadFile("standards/project-documents.md")
+	return string(b)
+}
 
 // Page is one documentation page.
 type Page struct {

@@ -21,18 +21,40 @@ export const api = {
     save: (body?: unknown) => call<any>('POST', `/api/archetypes`, body),
   },
   artifacts: {
+    /** Label a file or folder under docs/ (a label is required) and commit it */
+    add: (id: string, path: string, body?: unknown) => call<any>('POST', `/api/projects/${encodeURIComponent(id)}/documents/add/${encodeURI(path)}`, body),
     /** Ask a persona to change an artifact */
     chat: (id: string, body?: unknown) => call<any>('POST', `/api/projects/${encodeURIComponent(id)}/chat/artifact`, body),
+    /** Missing entry points, unlabelled files, stale labels, broken links and unknown IDs */
+    check: (id: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/projects/${encodeURIComponent(id)}/documents/check`, undefined, query),
+    /** Make an HTML file the entry point for requirements, mockups, plan or tracker */
+    entry: (id: string, role: string, path: string, body?: unknown) => call<any>('POST', `/api/projects/${encodeURIComponent(id)}/documents/entry/${encodeURIComponent(role)}/${encodeURI(path)}`, body),
+    /** Every file under docs/ with its labels, the entry points and the unlabelled files */
+    files: (id: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/projects/${encodeURIComponent(id)}/documents`, undefined, query),
     /** Artifact content and revisions */
     get: (id: string, path: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/projects/${encodeURIComponent(id)}/artifacts/${encodeURI(path)}`, undefined, query),
+    /** Create the standard documents from templates (never overwrites) */
+    init: (id: string, body?: unknown) => call<any>('POST', `/api/projects/${encodeURIComponent(id)}/documents/init`, body),
+    /** Set a file's or folder's labels (--remove takes the given labels away) */
+    label: (id: string, path: string, body?: unknown) => call<any>('POST', `/api/projects/${encodeURIComponent(id)}/documents/label/${encodeURI(path)}`, body),
     /** Project documents and mockups */
     list: (id: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/projects/${encodeURIComponent(id)}/artifacts`, undefined, query),
     /** Save an artifact as a new revision (Courier commits it) */
     save: (id: string, path: string, body?: unknown) => call<any>('PUT', `/api/projects/${encodeURIComponent(id)}/artifacts/${encodeURI(path)}`, body),
+    /** Write docs/tracker/tracker.json from the project's milestones and tasks */
+    snapshot: (id: string, body?: unknown) => call<any>('POST', `/api/projects/${encodeURIComponent(id)}/documents/snapshot`, body),
   },
   changelog: {
     /** go-build-it's change log, newest first, with the installed version */
     list: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/changelog`, undefined, query),
+  },
+  compare: {
+    /** Accept the real screen for a mockup view */
+    accept: (id: string, view: string, body?: unknown) => call<any>('POST', `/api/projects/${encodeURIComponent(id)}/compare/${encodeURIComponent(view)}/accept`, body),
+    /** Each mockup view with its screenshot and Compare state */
+    list: (id: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/projects/${encodeURIComponent(id)}/compare`, undefined, query),
+    /** File a task to make the real screen match a mockup view */
+    task: (id: string, view: string, body?: unknown) => call<any>('POST', `/api/projects/${encodeURIComponent(id)}/compare/${encodeURIComponent(view)}/task`, body),
   },
   diff: {
     /** Apply accepted hunks to a document */
@@ -315,6 +337,10 @@ export const api = {
     status: (tid: string, body?: unknown) => call<any>('POST', `/api/tasks/${encodeURIComponent(tid)}/status`, body),
     /** Edit a task */
     update: (tid: string, body?: unknown) => call<any>('PATCH', `/api/tasks/${encodeURIComponent(tid)}`, body),
+  },
+  trace: {
+    /** Requirements with their mockup views, tasks and real screens, and the gaps */
+    list: (id: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/projects/${encodeURIComponent(id)}/trace`, undefined, query),
   },
   updates: {
     /** Check for a newer release and list every newer release's notes */

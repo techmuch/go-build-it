@@ -30,6 +30,13 @@ Press **+ Milestone** on the roadmap. Give it a name, a scope and a gate: work p
 ## Step: Look at the artifacts
 check: visit /projects/{practice}/artifacts
 show: /projects/{practice}/artifacts
-Open **Artifacts**: the requirements and the sighting-form mockup come straight from the repository's `docs/` folder. **✎ Edit** opens an editor where you can chat with a persona to change them.
+Open **Artifacts**. It has six sub-tabs: **Requirements, Mockups, Plan, Tracker, Compare and Support files**. The first four each open one HTML **entry point** that you choose. **Support files** lists every file in the repository's `docs/` folder, with its labels.
+
+## Step: Create the standard documents
+check: event artifact.init
+show: /projects/{practice}/artifacts/requirements [data-tour=docs-init]
+The practice project has no entry points yet, so the Requirements tab offers **Create the standard set**. Press it: go-build-it writes the templates (requirements, mockups, plan, tracker), keeps every file that's already there, and records the entry points and labels in `docs/gbi.toml`. The same thing from the CLI is `gbi artifacts init {practice}`.
+
+> **Pro tip:** go-build-it never guesses where a file belongs. Add documents with a label, `gbi artifacts add {practice} docs/notes.md --label research`, and check with `gbi artifacts check {practice}`.
 
 > **Pro tip:** importing your own repository is the same thing: **+ Import project** on Projects, or `gbi projects import --path ~/code/myapp`. go-build-it adds a starter team.
