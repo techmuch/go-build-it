@@ -19,3 +19,18 @@ One global team meant one developer persona for every project. But a finance app
 A member keeps its conversation across tasks, so it remembers the project the way a colleague does. When its context nears the handoff threshold, it rotates to a fresh conversation, starting from a handoff and its notes. The reviewer persona (Lens) is the exception: it starts fresh for every review, so it judges the work rather than remembering how it was made.
 
 Decisions: [ADR-010](https://github.com/techmuch/go-build-it/blob/main/docs/decisions/ADR-010-project-team-members.md), [ADR-007](https://github.com/techmuch/go-build-it/blob/main/docs/decisions/ADR-007-handoff-graduation.md).
+
+## The starter archetypes
+
+go-build-it ships one archetype per built-in role. Each one holds only what is specific to its role. The standards, the task and the project's purpose reach the agent separately.
+
+| Archetype | Role | Holds it to |
+|---|---|---|
+| **Pilot** | Project manager | Small vertical slices with requirement IDs, ordered by value and risk; gates decided by people; honest progress. |
+| **Atlas** | Architect | Measurable quality-attribute scenarios; an option set before a costly decision and an ADR after; the simplest design that works. |
+| **Forge** | Developer | Test-first; a diff that does only what the task asks; the full suite green; never weakens a test. |
+| **Probe** | QA | Risk-based end-to-end tests with screenshots; exploratory testing (SFDPOT); reproducible findings; no flaky tests. |
+| **Lens** | Reviewer | Approves once a change improves the system and meets its requirements; checks in a fixed order; evidence for every finding. |
+| **Courier** | Release manager | Small, revertible batches; a releasable main branch; release notes written for users. go-build-it runs the git work itself, and the agent that writes release notes follows these rules. |
+
+When a new go-build-it version improves a starter, archetypes whose instructions you never edited get a new revision. Your harness and model choices are kept. Your members move to it through the change review: **Team → Archetypes**, or `gbi archetypes apply <id> --all`. Instructions you have edited are never changed.

@@ -269,7 +269,22 @@ func (a *App) releaseNotes(ctx context.Context, projectID, tag string, subjects 
 	if pm == "" {
 		return "", fmt.Errorf("no PM persona")
 	}
-	return a.Agent.Ask(ctx, pm, fmt.Sprintf("Write short release notes in Markdown for %s %s, grouped under Added / Changed / Fixed, from these commit subjects. Start with the heading '## %s'. No preamble.\n\n- %s", projectID, tag, tag, strings.Join(subjects, "\n- ")))
+	return a.Agent.Ask(ctx, pm, a.releaseRules(ctx, projectID)+fmt.Sprintf("Write short release notes in Markdown for %s %s, grouped under Added / Changed / Fixed, from these commit subjects. Start with the heading '## %s'. No preamble.\n\n- %s", projectID, tag, tag, strings.Join(subjects, "\n- ")))
+}
+
+// releaseRules returns the release manager's instructions (the project's Courier member,
+// else the git archetype) for the agent that writes release notes on its behalf.
+func (a *App) releaseRules(ctx context.Context, projectID string) string {
+	text := ""
+	if ms, _ := a.Team.ByRole(ctx, "git", projectID); len(ms) > 0 {
+		text = ms[0].Instructions
+	} else if ar, err := a.Team.Archetype(ctx, "git"); err == nil {
+		text = ar.Instructions
+	}
+	if strings.TrimSpace(text) == "" {
+		return ""
+	}
+	return "Follow the release manager's rules:\n\n" + strings.TrimSpace(text) + "\n\n---\n\n"
 }
 
 // HandoffPrompt asks an agent for a curated briefing (FR-73).

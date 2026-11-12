@@ -68,8 +68,13 @@ func (a *App) Routes() []api.Route {
 		r("GET", "/api/settings", "settings.get", "settings get", "Current settings", func(c *api.Ctx) (any, error) { return a.Cfg, nil }),
 		r("PATCH", "/api/settings", "settings.update", "settings update", "Change settings (partial JSON)", a.updateSettings, fj("data", "partial settings JSON")),
 		r("GET", "/api/harnesses", "harnesses.list", "harnesses list", "Detected harnesses and capabilities", a.harnesses),
-		r("GET", "/api/tailscale", "tailscale.status", "tailscale status", "Tailscale and Serve status", func(c *api.Ctx) (any, error) { return tailscale.Detect(c.R.Context(), a.Cfg.Listen), nil }),
-		r("POST", "/api/tailscale/setup", "tailscale.setup", "tailscale setup", "Serve go-build-it on your tailnet", func(c *api.Ctx) (any, error) { return tailscale.Setup(c.R.Context(), a.Cfg.Listen) }),
+		r("GET", "/api/tailscale", "tailscale.status", "tailscale status", "Remote access checklist: Tailscale, the Serve rule, reachable, private, other services (FR-20a)", func(c *api.Ctx) (any, error) {
+			return tailscale.Detect(c.R.Context(), a.Cfg.Listen, a.Cfg.Dir()), nil
+		}),
+		r("POST", "/api/tailscale/setup", "tailscale.setup", "tailscale setup", "Serve go-build-it on your tailnet; never takes another service's address (FR-20b)", a.tailscaleSetup,
+			fi("port", "tailnet HTTPS port (default: 443 when free, else the proposal)"), fb("confirm", "agree to serve on go-build-it's own port")),
+		r("POST", "/api/tailscale/stop", "tailscale.stop", "tailscale stop", "Stop serving go-build-it on the tailnet (removes only its own rule)", a.tailscaleStop),
+		r("GET", "/api/tailscale/qr", "tailscale.qr", "tailscale qr", "The tailnet URL as a QR code for your phone (FR-20c)", a.tailscaleQR),
 		r("GET", "/api/dispatcher", "dispatcher.status", "dispatcher status", "Dispatcher state", a.dispatcherStatus),
 		r("POST", "/api/dispatcher", "dispatcher.set", "dispatcher set", "Turn automatic dispatching on or off", a.dispatcherSet, fb("auto", "true to dispatch automatically")),
 		r("POST", "/api/dispatcher/tick", "dispatcher.tick", "dispatcher tick", "Dispatch ready tasks now", func(c *api.Ctx) (any, error) { a.Sessions.Tick(c.R.Context()); return a.dispatcherStatus(c) }),

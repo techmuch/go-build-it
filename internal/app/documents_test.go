@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/techmuch/go-build-it/docs"
 )
 
 // gbi runs the real CLI against the test server.
@@ -202,5 +204,45 @@ func TestProjectDocuments(t *testing.T) {
 	}
 	if resp, body := get("/gbi-assets/gbi-md.js"); resp.StatusCode != 200 || !strings.Contains(body, "customElements.define('gbi-md'") {
 		t.Fatalf("gbi-md.js: %d", resp.StatusCode)
+	}
+}
+
+// A new installation starts with the starter archetypes and the starter standards; an
+// installation that already has standards is not reseeded.
+func TestNewInstallationDefaults(t *testing.T) {
+	e := setup(t)
+	if _, err := e.a.DB.Exec(`DELETE FROM standards`); err != nil { // setup saves one; start empty
+		t.Fatal(err)
+	}
+	if n := e.a.SeedStandards(e.ctx); n != 14 {
+		t.Fatalf("seeded %d standards, want 13 starters + Project documents", n)
+	}
+	stds, err := e.a.Standards.List(e.ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]string{}
+	for _, s := range stds {
+		got[s.ID] = s.Title
+	}
+	for _, id := range append([]string{"project-documents"}, docs.DefaultStandardIDs...) {
+		if got[id] == "" || got[id] == id {
+			t.Errorf("standard %s missing or untitled: %q", id, got[id])
+		}
+	}
+	if got["backend"] != "" {
+		t.Error("an older standard that is not in the starter set was seeded")
+	}
+	if n := e.a.SeedStandards(e.ctx); n != 0 {
+		t.Fatalf("an existing installation was reseeded: %d", n)
+	}
+	as, _ := e.a.Team.Archetypes(e.ctx)
+	if len(as) != 6 {
+		t.Fatalf("archetypes: %d", len(as))
+	}
+	for _, ar := range as {
+		if !strings.Contains(ar.Instructions, "## Never") {
+			t.Errorf("%s does not carry the starter instructions", ar.ID)
+		}
 	}
 }

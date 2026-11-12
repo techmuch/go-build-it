@@ -212,6 +212,24 @@ test.describe('desktop · owner', () => {
     await page.goto('/settings');
     await expect(page.locator('#harnesses')).toBeVisible();
     await shot(page, 'settings');
+    // Remote access (FR-20a, FR-20b): the demo's tailnet has another app on its root address,
+    // so go-build-it proposes its own port instead of replacing it.
+    const checks = page.getByTestId('remote-checks');
+    await expect(checks.locator('[data-check="installed"][data-status="ok"]')).toBeVisible();
+    await expect(checks.locator('[data-check="conflicts"][data-status="warn"]')).toBeVisible();
+    await expect(page.getByTestId('remote-proposal')).toContainText('address taken');
+    await expect(page.getByRole('button', { name: /Serve on its own port \d+/ })).toBeVisible();
+    await page.getByTestId('remote-others').scrollIntoViewIfNeeded().catch(() => {});
+    await page.locator('#remote').scrollIntoViewIfNeeded();
+    await shot(page, 'settings-remote-conflict');
+    // Working (FR-20c): every check passes and the QR code shows the tailnet URL.
+    await page.route('**/api/tailscale', (r) => r.fulfill({ path: path.resolve(process.cwd(), 'e2e/fixtures/remote-working.json') }));
+    await page.reload();
+    await expect(page.getByTestId('remote-qr')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'https://devbox.tail3f2a.ts.net' })).toBeVisible();
+    await page.locator('#remote').scrollIntoViewIfNeeded();
+    await shot(page, 'settings-remote');
+    await page.unroute('**/api/tailscale');
     await page.goto('/docs');
     await expect(page.getByText('Contents')).toBeVisible();
     await shot(page, 'docs');

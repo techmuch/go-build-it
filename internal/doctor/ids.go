@@ -22,6 +22,7 @@ var Checks = []Check{
 	{"harness.any", Static, "At least one agent harness is installed"},
 	{"harness.installed", Static, "%s is installed"},
 	{"service.installed", Static, "The login service is installed"},
+	{"tailscale.serve", Static, "go-build-it is reachable and private on the tailnet"},
 	{"harness.on_service_path", Static, "%s is on the login service's PATH"},
 	{"session.running", Live, "The gbi herdr session is running"},
 	{"pane.roundtrip", Live, "The gbi session can open a pane and run a command"},

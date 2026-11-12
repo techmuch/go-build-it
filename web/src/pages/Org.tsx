@@ -202,12 +202,58 @@ export function HerdrSetup() {
   </Shell>;
 }
 
+// Remote access (FR-20, FR-20a–FR-20c): is go-build-it served on the tailnet, is it this
+// go-build-it, is it private, what else this machine serves, and a QR code for a phone.
+const CHECK_ICON: Record<string, string> = { ok: '✅', warn: '⚠️', fail: '✖', skip: '–' };
+
+export function QRCode({ rows, size = 168, label }: { rows: string[]; size?: number; label: string }) {
+  const n = rows.length;
+  const d = rows.map((r, y) => [...r].map((c, x) => (c === '1' ? `M${x} ${y}h1v1h-1z` : '')).join('')).join('');
+  return <svg role="img" aria-label={label} viewBox={`0 0 ${n} ${n}`} width={size} height={size} shapeRendering="crispEdges" style={{ background: '#fff', borderRadius: 6 }} data-testid="remote-qr">
+    <rect width={n} height={n} fill="#fff" /><path fill="#000" d={d} /></svg>;
+}
+
+function RemoteAccessCard({ isOwner }: { isOwner: boolean }) {
+  const { data: ts, reload } = useData<any>(() => api.tailscale.status(), []);
+  const { run, busy } = useAction();
+  const p = ts?.proposal;
+  const others = (ts?.rules || []).filter((r: any) => !r.mine);
+  const owner = isOwner ? '' : 'Only the owner can change how go-build-it is served';
+  return <Card title={<span id="remote">Remote access</span>} right={<span className="row c" style={{ gap: 6 }}>
+      {ts && <Chip c={ts.reachable && ts.private ? 'grn' : ts.serving ? 'red' : 'amb'}>{ts.reachable && ts.private ? 'working' : ts.serving ? 'needs attention' : 'not served'}</Chip>}
+      <button type="button" className="btn sm" disabled={busy} onClick={() => reload()}>Check again</button></span>}>
+    {!ts ? <Loading /> : <div className="row" style={{ gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <div className="col grow" style={{ gap: 10, minWidth: 280 }}>
+        <table className="t small" data-testid="remote-checks"><tbody>
+          {(ts.checks || []).map((c: any) => <tr key={c.id} data-check={c.id} data-status={c.status}>
+            <td style={{ width: 22 }}>{CHECK_ICON[c.status] || '·'}</td><td><b>{c.title}</b>{c.detail && <div className="muted">{c.detail}</div>}</td>
+            <td>{c.fix && c.status !== 'ok' && <code className="small">{c.fix}</code>}</td></tr>)}</tbody></table>
+        {ts.serving && <div className="row c small" style={{ gap: 8 }}>
+          <span className="mono"><a href={ts.serveUrl} target="_blank" rel="noreferrer">{ts.serveUrl}</a></span><span className="muted">· tailnet only · identity from Tailscale</span>
+          <span style={{ marginLeft: 'auto' }} /><button type="button" className="btn sm" title={owner} disabled={busy || !isOwner} onClick={() => run(() => api.tailscale.stop(), 'Stopped serving go-build-it').then(reload)}>Stop serving</button></div>}
+        {ts.loggedIn && !ts.serving && p && <div className="col small" style={{ gap: 6 }} data-testid="remote-proposal">
+          {p.needsConfirm && <div><Chip c="amb">address taken</Chip> {p.reason}</div>}
+          <div>go-build-it will run <code>{p.command}</code> and be at <b className="mono">{p.url}</b>.</div>
+          <div><button type="button" className="btn p sm" title={owner} disabled={busy || !isOwner} onClick={() => run(() => api.tailscale.setup({ port: p.port, confirm: true }), 'Serving on your tailnet').then(reload)}>{p.needsConfirm ? `Serve on its own port ${p.port}` : 'Serve on my tailnet'}</button>
+            <span className="muted"> · never replaces another service's address</span></div></div>}
+        {!ts.loggedIn && ts.guidance && <div className="small muted">{ts.guidance}</div>}
+        {others.length > 0 && <details className="small" open={(ts.conflicts || []).length > 0}><summary>Also served from this machine ({others.length})</summary>
+          <table className="t small" data-testid="remote-others"><tbody><tr><th>Tailnet address</th><th>Goes to</th><th>Program</th><th /></tr>
+            {others.map((r: any) => <tr key={r.url}><td className="mono">{r.url}</td><td className="mono">{r.target}</td><td>{r.process || <span className="muted">unknown</span>}</td>
+              <td>{r.funnel ? <Chip c="red">public (Funnel)</Chip> : <Chip>tailnet</Chip>}</td></tr>)}</tbody></table></details>}
+      </div>
+      {ts.qr?.length > 0 && <div className="col" style={{ gap: 6, alignItems: 'center', width: 190 }}>
+        <QRCode rows={ts.qr} label={'QR code for ' + ts.serveUrl} />
+        <div className="small muted" style={{ textAlign: 'center' }}>Scan with a phone signed in to the same tailnet. Terminal: <code>gbi tailscale qr</code></div></div>}
+    </div>}
+  </Card>;
+}
+
 export function Settings() {
   const { data: cfg, reload } = useData<any>(() => api.settings.get(), [], (e) => e.type.startsWith('settings'));
   const { data: harn } = useData<any[]>(() => api.harnesses.list(), []);
-  const { data: ts, reload: rts } = useData<any>(() => api.tailscale.status(), []);
   const { data: sys } = useData<any>(() => api.system.info(), []);
-  const { run, busy } = useAction();
+  const { run } = useAction();
   if (!cfg) return <Shell title="Settings"><Loading /></Shell>;
   const patch = (p: any, ok = 'Saved') => run(() => api.settings.update(p), ok).then(reload);
   const exp = cfg.experimental || {};
@@ -215,7 +261,7 @@ export function Settings() {
     <HerdrCard />
     <div className="row">
       <Card style={{ width: 180, padding: 10, alignSelf: 'flex-start' }}><div className="col small" style={{ gap: 7 }}>
-        {[['herdr', 'herdr'], ['harnesses', 'Agent harnesses'], ['access', 'Access & identity'], ['forges', 'Forge connections'], ['dispatch', 'Dispatch'], ['experimental', 'Experimental'], ['updates', 'Updates']].map(([k, l]) => <a key={k} href={'#' + k}>{l}</a>)}
+        {[['herdr', 'herdr'], ['harnesses', 'Agent harnesses'], ['remote', 'Remote access'], ['access', 'Access & identity'], ['forges', 'Forge connections'], ['dispatch', 'Dispatch'], ['experimental', 'Experimental'], ['updates', 'Updates']].map(([k, l]) => <a key={k} href={'#' + k}>{l}</a>)}
         <span className="muted" style={{ borderTop: '1px solid var(--line)', paddingTop: 6 }}>Git workflow → <A to="/standards/git-workflow">Standards</A></span></div></Card>
       <div className="col grow">
         <Card title={<span id="harnesses">Agent harnesses</span>} right={<span className="small muted">detected on this machine</span>}>
@@ -227,12 +273,11 @@ export function Settings() {
           <div className="small" style={{ marginTop: 8 }}><Toggle on={!!cfg.agents?.trustFolders} label="answer folder trust prompts" onChange={(v) => patch({ agents: { ...cfg.agents, trustFolders: v } }, v ? 'go-build-it will answer folder trust prompts' : 'Folder trust prompts will wait for you')} /> <b>Answer folder trust prompts</b> · say yes when a harness asks to trust a folder go-build-it created (member worktrees, helpers, the practice project). Sign-in and permission prompts still come to you (FR-07f).</div>
           <div className="small" style={{ marginTop: 8 }}>Every member runs in herdr. A member keeps its conversation until context reaches the threshold, then rotates (Q8) · compactions are logged · rate limits: <b>pause & auto-resume</b></div>
         </Card>
+        <RemoteAccessCard isOwner={!!sys?.isOwner} />
         <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
           <Card title={<span id="access">Access & identity</span>}><div className="col small" style={{ gap: 8 }}>
             <div><Toggle on label="local" onChange={() => {}} /> <b>Local</b> {cfg.listen} · no challenge · user <b>{cfg.defaultUser}</b></div>
-            <div><Toggle on={!!ts?.serving} label="tailscale" onChange={() => run(() => api.tailscale.setup(), 'Tailscale Serve configured').then(rts)} /> <b>Tailscale Serve</b> {ts?.loggedIn ? <Chip c="grn">logged in</Chip> : <Chip c="amb">{ts?.installed ? 'not logged in' : 'not installed'}</Chip>}
-              {ts?.serveUrl && <div className="mono"><a href={ts.serveUrl} target="_blank" rel="noreferrer">{ts.serveUrl}</a> · identity from Tailscale headers</div>}
-              {ts?.guidance && <div className="muted">{ts.guidance}</div>}{ts?.loggedIn && !ts?.serving && <button type="button" className="btn sm" disabled={busy} onClick={() => run(() => api.tailscale.setup(), 'Serving on your tailnet').then(rts)}>Set up Tailscale Serve</button>}</div>
+            <div><b>Tailscale</b> · people on your tailnet are identified by Tailscale's headers. <a href="#remote">Remote access ›</a></div>
             <div><Toggle on={false} label="external" onChange={() => {}} /> <b>External interfaces</b> off · <span className="muted">refused in the MVP (ADR-005)</span></div>
             <div className="muted">You are: {sys?.actor?.name} via {sys?.actor?.origin}</div></div></Card>
           <Card title={<span id="forges">Forge connections</span>}><div className="col small" style={{ gap: 8 }}>

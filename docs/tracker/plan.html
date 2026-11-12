@@ -74,7 +74,7 @@ td:first-child { white-space: nowrap; }
 </ol></nav>
 <main>
 <h1>go-build-it — Phased delivery plan</h1>
-<p class="meta">Status: Draft · 2026-11-11 · Based on [requirements rev 8](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)</p>
+<p class="meta">Status: Draft · 2026-11-12 · Based on [requirements rev 9](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)</p>
 <h2 id="1-how-this-plan-is-built">1. How this plan is built</h2>
 <ul><li>
 <strong>Approach A is the UI baseline.</strong> Every UI task names the Approach A view it implements (desktop <code>A-v01</code>…<code>A-v14</code> plus detail views <code>02b</code>, <code>03b</code>, <code>04b</code>, <code>05b</code>, <code>12b</code>; mobile <code>A-M1</code>…<code>A-M11</code>).
@@ -98,6 +98,8 @@ td:first-child { white-space: nowrap; }
 <strong>Rev 7 (P20): project documents</strong> ([ADR-014](../decisions/ADR-014-project-documents.md)). Artifacts gets six sub-tabs: HTML entry points for requirements, mockups, plan and tracker, chosen explicitly; labels for every file, set through the CLI; a sandboxed viewer that follows links; Compare for mockups and the real app; traceability.
 </li><li>
 <strong>Rev 8 (P21): tabs from docs/gbi.toml</strong> ([ADR-014](../decisions/ADR-014-project-documents.md), amended). Each project decides its Artifacts sub-tabs: its own roles such as vision, their order, their names, and leaving out roles it doesn't use.
+</li><li>
+<strong>Rev 9 (P22–P23): starter personas and standards; remote access</strong> ([ADR-015](../decisions/ADR-015-remote-access.md)). P22 gives the six starter archetypes full role instructions, upgrades them in place when never edited, and preloads the starter standards on new installations. P23 proves go-build-it is served on the tailnet, is this go-build-it and is private, never takes another service's address, and shows a QR code for a phone.
 </li><li>
 <strong>Dogfooding from P4.</strong> Once Courier can branch, PR, merge and release (end of P4), go-build-it manages its own remaining phases, and this tracker's data is imported into it.
 </li><li>
@@ -127,6 +129,8 @@ td:first-child { white-space: nowrap; }
 <tr><td>P19</td><td>Folder trust</td><td></td><td>5</td><td>9</td><td>◆ Folder trust UAT</td></tr>
 <tr><td>P20</td><td>Project documents</td><td></td><td>12</td><td>31</td><td>◆ Documents UAT</td></tr>
 <tr><td>P21</td><td>Tabs from docs/gbi.toml</td><td></td><td>3</td><td>5</td><td>◆ Tabs UAT</td></tr>
+<tr><td>P22</td><td>Starter archetypes &amp; standards</td><td></td><td>4</td><td>6</td><td>◆ Personas review</td></tr>
+<tr><td>P23</td><td>Remote access</td><td></td><td>6</td><td>10</td><td>◆ Remote access UAT</td></tr>
 </tbody></table></div>
 <h2 id="3-critical-path">3. Critical path</h2>
 <ul><li>
@@ -621,6 +625,40 @@ gbi keeps order, tabs and titles when it rewrites the file; init creates only th
 <tr><td><strong>P21-01</strong> Requirements rev 8 (FR-151; FR-140 amended), ADR-014 amendment, mockup 25 ✅</td><td>S</td><td>FR-151, FR-140</td><td>A-v25</td><td>—</td></tr>
 <tr><td><strong>P21-02</strong> Manifest: any role, [entries] order, tabs, titles; kept on rewrite; check and init follow the file ✅</td><td>M</td><td>FR-151, FR-141, FR-149, FR-150</td><td>A-v25</td><td>P21-01</td></tr>
 <tr><td><strong>P21-03</strong> Sub-tabs on desktop and phone from the manifest; docs, standard, changelog ✅</td><td>S</td><td>FR-151, FR-140, FR-130</td><td>A-v21, A-M14</td><td>P21-02</td></tr>
+</tbody></table></div>
+<h3 id="p22-starter-archetypes-standards">P22 · Starter archetypes &amp; standards</h3>
+<p><strong>Goal:</strong> Give every new installation strong starter personas and standards: full role instructions for the six archetypes, upgraded in place when never edited, and the owner's standards preloaded.</p>
+<p><strong>◆ Gate: Personas review.</strong> Passes when:</p>
+<ul><li>
+Each starter archetype states its mission, what good looks like, how it works with gbi commands, when it hands back and what it never does
+</li><li>
+An unedited starter is upgraded as a new revision, keeping the owner's harness and model; edited ones are untouched; members move through the change review
+</li><li>
+A fresh installation has the six archetypes and the starter standards; an existing one is not reseeded
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P22-01</strong> Requirements rev 9 (FR-12f, FR-50a); mockup 10 note ✅</td><td>S</td><td>FR-12f, FR-50a</td><td>A-v10</td><td>—</td></tr>
+<tr><td><strong>P22-02</strong> Starter archetype instructions for PM, architect, developer, QA, reviewer and release manager; upgrade unedited starters; role descriptions; release notes follow the release manager ✅</td><td>M</td><td>FR-12f, FR-12, FR-12b, FR-93</td><td>A-v10</td><td>P22-01</td></tr>
+<tr><td><strong>P22-03</strong> New installations start with the starter standards from docs/standards; never reseed ✅</td><td>S</td><td>FR-50a, FR-50</td><td>—</td><td>P22-01</td></tr>
+<tr><td><strong>P22-04</strong> User docs (starter archetypes table) and CHANGELOG ✅</td><td>S</td><td>FR-12f, FR-130</td><td>—</td><td>P22-02, P22-03</td></tr>
+</tbody></table></div>
+<h3 id="p23-remote-access">P23 · Remote access</h3>
+<p><strong>Goal:</strong> Prove go-build-it is served on the tailnet, is this go-build-it and is private; show what else the machine serves; never take another service's address; a QR code for a phone.</p>
+<p><strong>◆ Gate: Remote access UAT.</strong> Passes when:</p>
+<ul><li>
+The checklist matches the Serve rule exactly, proves the round trip reaches this go-build-it, and fails when Funnel is on
+</li><li>
+With another service on 443, setup names it, proposes go-build-it's own port and runs only after confirmation; stop removes only go-build-it's rule
+</li><li>
+A QR code of the working URL appears in Settings and in gbi tailscale qr; gbi doctor reports tailscale.serve
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P23-01</strong> Requirements rev 9 (FR-20a-FR-20d), ADR-015, mockup 27 ✅</td><td>S</td><td>FR-20a, FR-20b, FR-20c, FR-20d</td><td>A-v27</td><td>—</td></tr>
+<tr><td><strong>P23-02</strong> Serve detection: exact rule, round trip to this go-build-it, Funnel, other services and their programs; setup never replaces an address; stop removes only its own rule; owner only; history ✅</td><td>M</td><td>FR-20, FR-20a, FR-20b</td><td>A-v27</td><td>P23-01</td></tr>
+<tr><td><strong>P23-03</strong> Settings: Remote access card with the checklist, other services, proposal and confirm, stop, and the QR code; gbi tailscale qr ✅</td><td>M</td><td>FR-20a, FR-20b, FR-20c</td><td>A-v27, A-v13</td><td>P23-02</td></tr>
+<tr><td><strong>P23-04</strong> Doctor check tailscale.serve and its troubleshooting section ✅</td><td>S</td><td>FR-20d, FR-07c</td><td>—</td><td>P23-02</td></tr>
+<tr><td><strong>P23-05</strong> Scripted tailscale in the demo; UAT steps and screenshots; user docs; CHANGELOG ✅</td><td>S</td><td>FR-133, FR-130, FR-06a</td><td>A-v27</td><td>P23-03, P23-04</td></tr>
+<tr><td><strong>P23-06</strong> Release 2026.11.12.1: signed binaries, install check ✅</td><td>S</td><td>FR-05, FR-06</td><td>—</td><td>P22-04, P23-05</td></tr>
 </tbody></table></div>
 <h2 id="5-open-questions-schedule">5. Open questions schedule</h2>
 <div class="table-wrap"><table><thead><tr><th>Question</th><th>Answer before</th><th>Why</th></tr></thead><tbody>

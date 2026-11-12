@@ -24,22 +24,23 @@ import (
 
 // Built-in roles (FR-25).
 var BuiltinRoles = []Role{
-	{ID: "pm", Name: "Project Manager", Description: "Plans the roadmap, sizes and splits tasks, keeps the queue healthy.", Builtin: true},
-	{ID: "architect", Name: "Architect", Description: "Owns design decisions, option sets and ADRs.", Builtin: true},
-	{ID: "developer", Name: "Developer", Description: "Implements one task at a time, tests first.", Builtin: true},
-	{ID: "qa", Name: "QA", Description: "Writes e2e tests and hosts dress rehearsals.", Builtin: true},
-	{ID: "reviewer", Name: "Reviewer", Description: "Assesses completed work against standards, requirements and feedback.", Builtin: true},
-	{ID: "git", Name: "Git / Release Manager", Description: "Runs every git and forge operation; releases and publishes the website.", Builtin: true},
+	{ID: "pm", Name: "Project Manager", Description: "Turns goals into small, ordered, demonstrable slices; keeps the plan, queue and gates honest.", Builtin: true},
+	{ID: "architect", Name: "Architect", Description: "Owns the system's shape and costly decisions: quality attributes, option sets and ADRs.", Builtin: true},
+	{ID: "developer", Name: "Developer", Description: "Turns one task into a small, test-first change that is easy to review.", Builtin: true},
+	{ID: "qa", Name: "QA", Description: "Finds how the software really behaves: risk-based e2e tests, exploration and dress rehearsals.", Builtin: true},
+	{ID: "reviewer", Name: "Reviewer", Description: "Independent second eyes: approves changes that meet the requirements and leave the system healthier.", Builtin: true},
+	{ID: "git", Name: "Git / Release Manager", Description: "Runs every git and forge operation; merges, releases and release notes, in small revertible batches.", Builtin: true},
 }
 
-// StarterArchetypes ship with go-build-it, one per built-in role (FR-12).
+// StarterArchetypes ship with go-build-it, one per built-in role (FR-12). Their
+// instructions are in starters.go.
 var StarterArchetypes = []Archetype{
-	{ID: "pm", Name: "Pilot", Role: "pm", Harness: "claude", Instructions: "## How you work\n- Keep the roadmap and the queue honest: small tasks, clear done-when, explicit dependencies.\n- Split any task that needed more than one handoff or compaction.\n- Ask the human only what blocks progress; give your recommendation with every question.\n"},
-	{ID: "architect", Name: "Atlas", Role: "architect", Harness: "claude", Instructions: "## How you work\n- Present significant decisions as an option set of 2–3 approaches with tradeoffs.\n- Record decisions as ADRs; keep designs within the global standards.\n- Prefer simple, boring technology; explain any new dependency.\n"},
-	{ID: "developer", Name: "Forge", Role: "developer", Harness: "claude", Instructions: "## How you work\n- One task at a time; tests first.\n- Ask a blocking question if the task is ambiguous.\n- No remote git commands; Courier owns git.\n\n## Hand back when\n- tests pass and done-when is met, or\n- you are stuck after 3 attempts on one problem.\n"},
-	{ID: "qa", Name: "Probe", Role: "qa", Harness: "claude", Instructions: "## How you work\n- Write end-to-end tests for every feature in scope, with screenshots.\n- Host dress rehearsals step by step and record findings per step.\n"},
-	{ID: "reviewer", Name: "Lens", Role: "reviewer", Harness: "claude", Instructions: "## How you work\n- Assess finished work against requirements, standards, values and earlier feedback.\n- Cite evidence for every verdict. Start every review fresh; do not defend earlier work.\n"},
-	{ID: "git", Name: "Courier", Role: "git", Harness: "courier", Instructions: "Built in: go-build-it runs git and forge operations directly (FR-93) and calls an agent only for judgment (merge conflicts, release notes).\n"},
+	{ID: "pm", Name: "Pilot", Role: "pm", Harness: "claude", Instructions: pmInstructions},
+	{ID: "architect", Name: "Atlas", Role: "architect", Harness: "claude", Instructions: architectInstructions},
+	{ID: "developer", Name: "Forge", Role: "developer", Harness: "claude", Instructions: developerInstructions},
+	{ID: "qa", Name: "Probe", Role: "qa", Harness: "claude", Instructions: qaInstructions},
+	{ID: "reviewer", Name: "Lens", Role: "reviewer", Harness: "claude", Instructions: reviewerInstructions},
+	{ID: "git", Name: "Courier", Role: "git", Harness: "courier", Instructions: releaseInstructions},
 }
 
 // StarterTeam lists the archetypes a newly imported project gets as members.
@@ -115,15 +116,26 @@ type Service struct {
 // New returns a team service and makes sure built-in roles and starter archetypes exist.
 func New(db *sql.DB, h *history.Recorder) *Service {
 	for _, r := range BuiltinRoles {
-		_, _ = db.Exec(`INSERT OR IGNORE INTO roles(id,name,description,builtin) VALUES(?,?,?,1)`, r.ID, r.Name, r.Description)
+		_, _ = db.Exec(`INSERT INTO roles(id,name,description,builtin) VALUES(?,?,?,1)
+			ON CONFLICT(id) DO UPDATE SET description=excluded.description WHERE roles.builtin=1`, r.ID, r.Name, r.Description)
 	}
 	s := &Service{db: db, hist: h}
+	ctx := context.Background()
 	for _, a := range StarterArchetypes {
-		var n int
-		_ = db.QueryRow(`SELECT COUNT(*) FROM archetypes WHERE id=?`, a.ID).Scan(&n)
-		if n == 0 {
+		cur, err := s.Archetype(ctx, a.ID)
+		if err != nil {
 			a.Builtin = true
-			_ = s.insertArchetype(context.Background(), a, 1, "go-build-it", "starter archetype")
+			_ = s.insertArchetype(ctx, a, 1, "go-build-it", "starter archetype")
+			continue
+		}
+		// Upgrade instructions nobody edited; keep the owner's harness, model, name and standards.
+		if cur.Builtin && unedited(a.ID, cur.Instructions) {
+			cur.Instructions = a.Instructions
+			if err := s.insertArchetype(ctx, cur, cur.Rev+1, "go-build-it", "starter instructions updated"); err == nil {
+				s.hist.Must(ctx, history.Event{Type: "archetype.saved", Subject: cur.ID,
+					Summary: fmt.Sprintf("go-build-it updated the starter instructions of %s (rev %d)", cur.Name, cur.Rev+1),
+					Why:     "the instructions were never edited; members move to it through the archetype change review"})
+			}
 		}
 	}
 	return s
