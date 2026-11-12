@@ -82,8 +82,14 @@ func TestChangelogAndUpdateRoutes(t *testing.T) {
 	if job["status"] != "failed" || job["canRetry"] != true || steps[0].(map[string]any)["status"] != "failed" || len(steps) != 8 {
 		t.Fatalf("job: %v", job)
 	}
+	// The failed event is recorded just after the job's status is saved; wait for it
+	// (slow Windows runners read the history in between).
 	for _, typ := range []string{"update.started", "update.failed"} {
 		evs, _ := a.Hist.List(t.Context(), history.Query{Type: typ})
+		for deadline := time.Now().Add(5 * time.Second); len(evs) == 0 && time.Now().Before(deadline); {
+			time.Sleep(50 * time.Millisecond)
+			evs, _ = a.Hist.List(t.Context(), history.Query{Type: typ})
+		}
 		if len(evs) != 1 {
 			t.Fatalf("%s events: %d", typ, len(evs))
 		}

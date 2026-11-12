@@ -21,6 +21,7 @@ To release, run `gbi dev changelog release YYYY.MM.DD.N`, then `VERSION=YYYY.MM.
 
 - **Desktop pages fit a phone's width.** Wide tables and long paths on Questions, Queue, Settings and History stretched the page sideways. They now scroll inside it.
 - **Lessons started on the phone tick off their steps.** Opening the screens a lesson asks for now counts on the phone too.
+- **A test of failed updates no longer flakes on Windows.** It now waits for the `update.failed` event, which is recorded just after the job is marked failed.
 
 ## [2026.11.12.2] - 2026-11-12
 
