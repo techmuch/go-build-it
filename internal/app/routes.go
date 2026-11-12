@@ -68,6 +68,7 @@ func (a *App) Routes() []api.Route {
 		r("GET", "/api/settings", "settings.get", "settings get", "Current settings", func(c *api.Ctx) (any, error) { return a.Cfg, nil }),
 		r("PATCH", "/api/settings", "settings.update", "settings update", "Change settings (partial JSON)", a.updateSettings, fj("data", "partial settings JSON")),
 		r("GET", "/api/harnesses", "harnesses.list", "harnesses list", "Detected harnesses and capabilities", a.harnesses),
+		r("GET", "/api/harnesses/{name}/models", "harnesses.models", "harnesses models", "Models a harness offers, for the model picker (FR-63a)", a.harnessModels, fb("refresh", "ask the harness again now instead of using the cached list")),
 		r("GET", "/api/tailscale", "tailscale.status", "tailscale status", "Remote access checklist: Tailscale, the Serve rule, reachable, private, other services (FR-20a)", func(c *api.Ctx) (any, error) {
 			return tailscale.Detect(c.R.Context(), a.Cfg.Listen, a.Cfg.Dir()), nil
 		}),

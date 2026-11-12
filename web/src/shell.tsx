@@ -53,7 +53,7 @@ export function Shell({ title, crumb, right, tabs, children, noPad }: { title: R
   return <div className={'app' + (learn.active && !learn.hidden ? ' coached' : '')}>
     <a className="skip" href="#main" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>Skip to content</a>
     <aside className="side" aria-label="Main navigation">
-      <div className="brand"><b>gb</b>go-build-it</div>
+      <A to="/" className="brand"><b>gb</b>go-build-it</A>
       {NAV.map(link)}
       <div className="sep">Organization</div>{ORG.map(link)}
       <div className="sep">System</div>{SYS.map(link)}

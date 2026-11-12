@@ -1,5 +1,5 @@
 section: How go-build-it thinks
-reqs: FR-10, FR-12, FR-138
+reqs: FR-10, FR-12, FR-12f, FR-63a, FR-138
 # Archetypes and project members
 
 **In short:** roles are defined once, globally, as **persona archetypes**. Each project gets its own **members** made from them, and can tune each one.
@@ -34,3 +34,16 @@ go-build-it ships one archetype per built-in role. Each one holds only what is s
 | **Courier** | Release manager | Small, revertible batches; a releasable main branch; release notes written for users. go-build-it runs the git work itself, and the agent that writes release notes follows these rules. |
 
 When a new go-build-it version improves a starter, archetypes whose instructions you never edited get a new revision. Your harness and model choices are kept. Your members move to it through the change review: **Team → Archetypes**, or `gbi archetypes apply <id> --all`. Instructions you have edited are never changed.
+
+## Choosing a model
+
+An archetype's **Default model**, and a member's **Model** override, are chosen from the models the harness offers. Type to search the list, or type any name the harness accepts. A name that isn't in the list gets a warning, not a refusal, because lists can lag behind new models.
+
+| Harness | Where the list comes from |
+|---|---|
+| Antigravity | `agy models` (IDs include the effort, for example `claude-opus-5-5-high`) |
+| Pi | `pi --list-models`, with the context window and capabilities of each model |
+| OpenCode | `opencode models` |
+| Claude Code | built in to go-build-it: the aliases `opus`, `sonnet`, `haiku` and `fable`, which pick the latest model of that family, and the current model IDs. Claude Code has no list command. |
+
+go-build-it keeps each list for a day and refreshes it in the background. Press **↻** next to the field to ask the harness again now. If a refresh fails, the last good list stays. From the CLI: `gbi harnesses models <harness>`, with `--refresh` to ask again now.
