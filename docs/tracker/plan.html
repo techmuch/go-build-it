@@ -134,6 +134,7 @@ td:first-child { white-space: nowrap; }
 <tr><td>P22</td><td>Starter archetypes &amp; standards</td><td></td><td>4</td><td>6</td><td>◆ Personas review</td></tr>
 <tr><td>P23</td><td>Remote access</td><td></td><td>6</td><td>10</td><td>◆ Remote access UAT</td></tr>
 <tr><td>P24</td><td>Model discovery &amp; landing link</td><td></td><td>6</td><td>8</td><td>◆ Model picker review</td></tr>
+<tr><td>P25</td><td>Phones get the mobile UI</td><td></td><td>7</td><td>7</td><td>◆ Phone review</td></tr>
 </tbody></table></div>
 <h2 id="3-critical-path">3. Critical path</h2>
 <ul><li>
@@ -680,6 +681,25 @@ Clicking or pressing Enter on the logo or title opens the project catalog
 <tr><td><strong>P24-04</strong> Logo and title link to the landing page ✅</td><td>S</td><td>FR-34a, FR-34</td><td>A-v01</td><td>—</td></tr>
 <tr><td><strong>P24-05</strong> Tests, UAT step, docs and CHANGELOG ✅</td><td>S</td><td>FR-133, FR-130, FR-06a</td><td>A-v10</td><td>P24-03, P24-04</td></tr>
 <tr><td><strong>P24-06</strong> Release 2026.11.12.2: signed binaries, install check ✅</td><td>S</td><td>FR-05, FR-06</td><td>—</td><td>P24-05</td></tr>
+</tbody></table></div>
+<h3 id="p25-phones-get-the-mobile-ui">P25 · Phones get the mobile UI</h3>
+<p><strong>Goal:</strong> A phone always reaches a usable screen: the QR code and any desktop link open the mobile UI; the desktop site stays usable on a narrow screen.</p>
+<p><strong>◆ Gate: Phone review.</strong> Passes when:</p>
+<ul><li>
+Scanning the Remote access QR code opens /m/; the address is written under the code and gbi tailscale qr prints it
+</li><li>
+On a phone, a desktop link (question, project, documents, session) opens the matching mobile screen; Desktop site sticks per device until Mobile UI
+</li><li>
+On a narrow screen the desktop UI has a ☰ menu (closes on a choice, a tap outside, Esc) and no page is wider than the screen
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P25-01</strong> Requirements rev 11 (FR-35a, FR-20c); mockups M9, M15, 27 ✅</td><td>S</td><td>FR-35a, FR-20c</td><td>A-M9, A-M15, A-v27</td><td>—</td></tr>
+<tr><td><strong>P25-02</strong> QR code opens the mobile UI: PhoneURL in the status, written under the code, gbi tailscale qr ✅</td><td>S</td><td>FR-20c</td><td>A-v27</td><td>P25-01</td></tr>
+<tr><td><strong>P25-03</strong> Phone redirect to the matching mobile screen; Desktop site per device; Mobile UI clears it ✅</td><td>S</td><td>FR-35a, FR-35</td><td>A-M9, A-M15</td><td>P25-01</td></tr>
+<tr><td><strong>P25-04</strong> ☰ drawer for the desktop UI on narrow screens; desktop pages fit the width ✅</td><td>S</td><td>FR-35a, FR-34</td><td>A-M15</td><td>P25-01</td></tr>
+<tr><td><strong>P25-05</strong> Lessons started on the phone tick their visit steps ✅</td><td>S</td><td>FR-134, FR-35</td><td>A-M13</td><td>P25-03</td></tr>
+<tr><td><strong>P25-06</strong> Tests, UAT and keyboard steps, docs and CHANGELOG ✅</td><td>S</td><td>FR-133, FR-130, FR-06a</td><td>A-M15</td><td>P25-02, P25-03, P25-04, P25-05</td></tr>
+<tr><td><strong>P25-07</strong> Release 2026.11.12.3: signed binaries, install check ✅</td><td>S</td><td>FR-05, FR-06</td><td>—</td><td>P25-06</td></tr>
 </tbody></table></div>
 <h2 id="5-open-questions-schedule">5. Open questions schedule</h2>
 <div class="table-wrap"><table><thead><tr><th>Question</th><th>Answer before</th><th>Why</th></tr></thead><tbody>

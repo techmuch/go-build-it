@@ -190,17 +190,19 @@ textarea.ta { width:100%; min-height:64px; border:1px solid var(--line); border-
 
   
 <!-- M9 -->
-  <div class="phone-wrap"><h3>M9 · More</h3><p class="look">The desktop-first areas (team, standards, history, settings, docs) open read-only on mobile, with light actions such as pausing a project or rolling back an update. <b>Rev 4:</b> tap the version to open the change log (M12). <b>Rev 5:</b> Learn opens the lessons (M13).</p>
+  <div class="phone-wrap"><h3>M9 · More</h3><p class="look">The desktop-first areas (team, standards, history, settings, docs) open read-only on mobile, with light actions such as pausing a project or rolling back an update. <b>Rev 4:</b> tap the version to open the change log (M12). <b>Rev 5:</b> Learn opens the lessons (M13). <b>Rev 11:</b> the desktop-only pages are grouped under <i>On the desktop site</i>, and <i>Desktop site</i> keeps this phone on the desktop UI until it chooses Mobile UI again (M15, FR-35a).</p>
   <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
     <div class="hdr"><h1>More</h1><div class="sub"><u style="text-decoration-style:dotted">v2026.11.07.1</u> · <b style="color:#7fd6c8">update ready ›</b></div></div>
     <div class="body" style="padding:0;gap:0">
-      <div class="li"><span>👥 Team &amp; personas</span><span class="muted">8 ›</span></div>
-      <div class="li"><span>📐 Global standards</span><span class="muted">9 ›</span></div>
-      <div class="li"><span>☰ Task queue</span><span class="muted">23 ready ›</span></div>
-      <div class="li"><span>🕘 History &amp; insights</span><span class="muted">2 proposals ›</span></div>
       <div class="li"><span>🎓 Learn</span><span class="muted">4 of 11 ›</span></div>
+      <div class="small muted" style="padding:8px 12px 4px;text-transform:uppercase;letter-spacing:.05em;font-size:10px">On the desktop site</div>
+      <div class="li"><span>👥 Team &amp; personas</span><span class="muted">↗</span></div>
+      <div class="li"><span>📐 Global standards</span><span class="muted">↗</span></div>
+      <div class="li"><span>☰ Task queue</span><span class="muted">↗</span></div>
+      <div class="li"><span>🕘 History &amp; insights</span><span class="muted">↗</span></div>
+      <div class="li"><span>⚙ Settings</span><span class="muted">↗</span></div>
+      <div class="li"><span>🖥 Desktop site <span class="small muted">· this phone stays on it until you choose Mobile UI from ☰</span></span><span class="muted">↗</span></div>
       <div class="li"><span>📖 Docs &amp; UAT walkthrough</span><span class="muted">›</span></div>
-      <div class="li"><span>⚙ Settings</span><span class="muted">read-only ›</span></div>
       <div style="padding:12px" class="small muted">Access: Tailnet (david@github), trusted like local. Personas, standards and artifacts can be changed on mobile by chatting with an agent (🎙 works too). The rich editor is desktop-first.</div>
     </div>
     <div class="tabbar"><span><b>▦</b>Projects</span><span><b>✉</b>Inbox<span class="dot">5</span></span><span><b>◉</b>Members</span><span class="on"><b>⋯</b>More</span></div>
@@ -292,6 +294,23 @@ textarea.ta { width:100%; min-height:64px; border:1px solid var(--line); border-
         <div style="display:flex;gap:6px;justify-content:center"><span class="btn sm">✓ Accept</span><span class="btn sm p">File a task</span><span class="btn sm">🎙</span></div></div>
     </div>
     <div class="tabbar"><span class="on"><b>▦</b>Projects</span><span><b>✉</b>Inbox<span class="dot">5</span></span><span><b>◉</b>Members</span><span><b>⋯</b>More</span></div>
+  </div></div>
+
+
+  <!-- M15 -->
+  <div class="phone-wrap"><h3>M15 · Desktop site on a phone (rev 11)</h3><p class="look">Covers FR-35a. A phone that opens a desktop link (a question, a project) lands on the matching mobile screen. After <i>Desktop site</i>, the desktop UI shows, fitted to the width, and its navigation is behind <b>☰</b>: the sidebar opens as a drawer and closes on a choice, a tap outside or Esc. <i>Mobile UI ↗</i> at its foot switches back.</p>
+  <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+    <div style="display:flex;flex:1;min-height:0;position:relative">
+      <div style="position:absolute;inset:0;background:#fff;padding:0"><div style="height:44px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;padding:0 10px"><b style="font-size:18px">☰</b><b>Questions</b></div><div style="padding:10px" class="small muted">ledgerly · Fake agent needs a decision…</div></div>
+      <div style="position:absolute;inset:0;background:rgba(0,0,0,.35)"></div>
+      <div style="position:absolute;top:0;bottom:0;left:0;width:64%;background:#17212b;color:#c9d6df;padding:10px 8px;display:flex;flex-direction:column;gap:2px;font-size:12px">
+        <b style="color:#fff;padding:2px 6px 10px">gb go-build-it</b>
+        <span style="padding:5px 6px">Projects</span><span style="padding:5px 6px;background:#243241;border-radius:5px;color:#fff">Questions <span class="chip red" style="float:right">3</span></span><span style="padding:5px 6px">Sessions</span><span style="padding:5px 6px">Queue</span><span style="padding:5px 6px">Reviews</span>
+        <span style="padding:10px 6px 2px;font-size:9.5px;text-transform:uppercase;color:#6f8190">Organization</span><span style="padding:5px 6px">Archetypes</span><span style="padding:5px 6px">Standards</span><span style="padding:5px 6px">History</span>
+        <span style="padding:10px 6px 2px;font-size:9.5px;text-transform:uppercase;color:#6f8190">System</span><span style="padding:5px 6px">Settings</span><span style="padding:5px 6px">Learn</span>
+        <span style="margin-top:auto;border-top:1px solid #2b3a47;padding:8px 6px;font-size:11px">v2026.11.12.3<br>2 live · dispatch auto<br><u>Mobile UI ↗</u></span>
+      </div>
+    </div>
   </div></div>
 
   </div>

@@ -204,8 +204,16 @@ table.t tr.sel td { background: var(--acc-s); }
   .viewer-b { grid-template-columns: 1fr; } .viewer-strip, .viewer-side { display: none; }
   .search { width: 180px; }
 }
+.menu-btn { display: none; background: none; border: 0; font-size: 20px; line-height: 1; padding: 6px 8px; margin-left: -6px; color: var(--t); cursor: pointer; }
 @media (max-width: 760px) {
   .app { grid-template-columns: 1fr; } .side { display: none; }
+  /* FR-35a: the sidebar opens as a drawer from ☰, so every page keeps its navigation. */
+  .menu-btn { display: inline-block; }
+  .side.open { display: flex; position: fixed; top: 0; left: 0; bottom: 0; width: 248px; height: 100%; z-index: 60; box-shadow: var(--shadow); }
+  .side-scrim { position: fixed; inset: 0; background: rgba(0, 0, 0, .35); z-index: 59; }
+  /* Wide content (tables, long paths) scrolls inside the page instead of widening it. */
+  .main { min-width: 0; } .content { overflow-x: auto; }
+  .topbar { overflow: hidden; } .topbar h1 { flex: 1; min-width: 0; }
   .content { padding: 14px 12px 40px; } .topbar { padding: 0 12px; } .search { display: none; }
   .row { flex-direction: column; } .row.c { flex-direction: row; flex-wrap: wrap; }
   .pgrid { grid-template-columns: 1fr; }

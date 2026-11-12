@@ -65,7 +65,8 @@ type Status struct {
 	Rules     []Rule    `json:"rules"`     // everything this machine serves
 	Conflicts []Rule    `json:"conflicts"` // other services on the address go-build-it would use
 	Proposal  *Proposal `json:"proposal,omitempty"`
-	QR        []string  `json:"qr,omitempty"` // the ServeURL as QR modules, one string of 0/1 per row
+	PhoneURL  string    `json:"phoneUrl,omitempty"` // ServeURL + "/m/": the mobile UI, what a phone should open
+	QR        []string  `json:"qr,omitempty"`       // the PhoneURL as QR modules, one string of 0/1 per row
 }
 
 // Env is what Detect needs from the outside world; tests replace it.
@@ -241,7 +242,8 @@ func (e Env) Detect(ctx context.Context, listen, dataDir string) Status {
 	}
 	add("conflicts", "No other service on go-build-it's address", "ok", fmt.Sprintf("%d other services served from this machine, none on %s", others, s.ServeURL), "")
 	if s.Reachable && s.Private {
-		s.QR = QR(s.ServeURL)
+		s.PhoneURL = s.ServeURL + "/m/" // a phone scans this, so open the mobile UI (FR-20c)
+		s.QR = QR(s.PhoneURL)
 	} else {
 		s.Guidance = "go-build-it has a Serve rule but it is not working yet: see the checks."
 	}

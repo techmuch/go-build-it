@@ -362,6 +362,18 @@ window.TRACKER = {
     "Lists are cached per harness, refresh on request or daily in the background, and a failed refresh keeps the last good list; gbi harnesses models returns the same",
     "Clicking or pressing Enter on the logo or title opens the project catalog"
    ]
+  },
+  {
+   "id": "P25",
+   "name": "Phones get the mobile UI",
+   "mvp": false,
+   "goal": "A phone always reaches a usable screen: the QR code and any desktop link open the mobile UI; the desktop site stays usable on a narrow screen.",
+   "gate": "Phone review",
+   "gateCriteria": [
+    "Scanning the Remote access QR code opens /m/; the address is written under the code and gbi tailscale qr prints it",
+    "On a phone, a desktop link (question, project, documents, session) opens the matching mobile screen; Desktop site sticks per device until Mobile UI",
+    "On a narrow screen the desktop UI has a ☰ menu (closes on a choice, a tap outside, Esc) and no page is wider than the screen"
+   ]
   }
  ],
  "tasks": [
@@ -4577,6 +4589,141 @@ window.TRACKER = {
    "status": "done",
    "done": "",
    "q": []
+  },
+  {
+   "id": "P25-01",
+   "phase": "P25",
+   "title": "Requirements rev 11 (FR-35a, FR-20c); mockups M9, M15, 27",
+   "reqs": [
+    "FR-35a",
+    "FR-20c"
+   ],
+   "views": [
+    "A-M9",
+    "A-M15",
+    "A-v27"
+   ],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "docs/requirements.md rev 11",
+   "q": []
+  },
+  {
+   "id": "P25-02",
+   "phase": "P25",
+   "title": "QR code opens the mobile UI: PhoneURL in the status, written under the code, gbi tailscale qr",
+   "reqs": [
+    "FR-20c"
+   ],
+   "views": [
+    "A-v27"
+   ],
+   "size": "S",
+   "deps": [
+    "P25-01"
+   ],
+   "status": "done",
+   "done": "internal/tailscale; Org.tsx RemoteAccessCard",
+   "q": []
+  },
+  {
+   "id": "P25-03",
+   "phase": "P25",
+   "title": "Phone redirect to the matching mobile screen; Desktop site per device; Mobile UI clears it",
+   "reqs": [
+    "FR-35a",
+    "FR-35"
+   ],
+   "views": [
+    "A-M9",
+    "A-M15"
+   ],
+   "size": "S",
+   "deps": [
+    "P25-01"
+   ],
+   "status": "done",
+   "done": "web/src/phone.ts; App.tsx; Mobile.tsx More",
+   "q": []
+  },
+  {
+   "id": "P25-04",
+   "phase": "P25",
+   "title": "☰ drawer for the desktop UI on narrow screens; desktop pages fit the width",
+   "reqs": [
+    "FR-35a",
+    "FR-34"
+   ],
+   "views": [
+    "A-M15"
+   ],
+   "size": "S",
+   "deps": [
+    "P25-01"
+   ],
+   "status": "done",
+   "done": "shell.tsx; styles.css",
+   "q": []
+  },
+  {
+   "id": "P25-05",
+   "phase": "P25",
+   "title": "Lessons started on the phone tick their visit steps",
+   "reqs": [
+    "FR-134",
+    "FR-35"
+   ],
+   "views": [
+    "A-M13"
+   ],
+   "size": "S",
+   "deps": [
+    "P25-03"
+   ],
+   "status": "done",
+   "done": "Mobile.tsx LearnScreen",
+   "q": []
+  },
+  {
+   "id": "P25-06",
+   "phase": "P25",
+   "title": "Tests, UAT and keyboard steps, docs and CHANGELOG",
+   "reqs": [
+    "FR-133",
+    "FR-130",
+    "FR-06a"
+   ],
+   "views": [
+    "A-M15"
+   ],
+   "size": "S",
+   "deps": [
+    "P25-02",
+    "P25-03",
+    "P25-04",
+    "P25-05"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P25-07",
+   "phase": "P25",
+   "title": "Release 2026.11.12.3: signed binaries, install check",
+   "reqs": [
+    "FR-05",
+    "FR-06"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P25-06"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
   }
  ],
  "requirements": {
@@ -4741,7 +4888,7 @@ window.TRACKER = {
    "section": "4.2 Access and identity"
   },
   "FR-20c": {
-   "text": "(rev 9) When go-build-it is reachable and private, Remote access SHALL show its tailnet URL as a QR code, generated inside go-build-it, with a reminder that the phone must be signe",
+   "text": "(rev 9; rev 11) When go-build-it is reachable and private, Remote access SHALL show its tailnet URL as a QR code that opens the mobile UI (<tailnet URL>/m/), with that address writ",
    "section": "4.2 Access and identity"
   },
   "FR-20d": {
@@ -4782,6 +4929,10 @@ window.TRACKER = {
   },
   "FR-35": {
    "text": "The application SHALL provide a separate mobile web UI designed for phones.",
+   "section": "5. User interfaces"
+  },
+  "FR-35a": {
+   "text": "(rev 11) A phone (a narrow touch screen) that opens a desktop address SHALL be taken to the matching mobile screen (for example /questions/Q-1 to /m/q/Q-1, a project to its mobile ",
    "section": "5. User interfaces"
   },
   "FR-36": {

@@ -247,9 +247,10 @@ test.describe('Learn · phone', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
 
   test('lesson 8 on the phone: More → Learn', async ({ page }) => {
-    await page.goto('/learn');
-    await page.locator('[data-lesson=phone] button').first().click();
-    await expect(page.getByTestId('coach')).toBeVisible();
+    await page.goto('/learn'); // a phone is sent to the mobile Learn screen (FR-35a)
+    await expect(page).toHaveURL(/\/m\/learn$/);
+    await page.locator('.m-li[data-lesson=phone]').click();
+    await expect(page.getByTestId('m-lesson')).toContainText('gbi on your phone');
     await page.goto('/m');
     await page.goto('/m/more');
     await page.getByTestId('m-learn').click();

@@ -49,6 +49,7 @@ Status: Draft · 2026-11-12 · Based on [requirements rev 10](../requirements.md
 | P22 | Starter archetypes & standards |  | 4 | 6 | ◆ Personas review |
 | P23 | Remote access |  | 6 | 10 | ◆ Remote access UAT |
 | P24 | Model discovery & landing link |  | 6 | 8 | ◆ Model picker review |
+| P25 | Phones get the mobile UI |  | 7 | 7 | ◆ Phone review |
 
 ## 3. Critical path
 
@@ -590,6 +591,25 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 | **P24-04** Logo and title link to the landing page ✅ | S | FR-34a, FR-34 | A-v01 | — |
 | **P24-05** Tests, UAT step, docs and CHANGELOG ✅ | S | FR-133, FR-130, FR-06a | A-v10 | P24-03, P24-04 |
 | **P24-06** Release 2026.11.12.2: signed binaries, install check ✅ | S | FR-05, FR-06 | — | P24-05 |
+
+### P25 · Phones get the mobile UI
+
+**Goal:** A phone always reaches a usable screen: the QR code and any desktop link open the mobile UI; the desktop site stays usable on a narrow screen.
+
+**◆ Gate: Phone review.** Passes when:
+- Scanning the Remote access QR code opens /m/; the address is written under the code and gbi tailscale qr prints it
+- On a phone, a desktop link (question, project, documents, session) opens the matching mobile screen; Desktop site sticks per device until Mobile UI
+- On a narrow screen the desktop UI has a ☰ menu (closes on a choice, a tap outside, Esc) and no page is wider than the screen
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P25-01** Requirements rev 11 (FR-35a, FR-20c); mockups M9, M15, 27 ✅ | S | FR-35a, FR-20c | A-M9, A-M15, A-v27 | — |
+| **P25-02** QR code opens the mobile UI: PhoneURL in the status, written under the code, gbi tailscale qr ✅ | S | FR-20c | A-v27 | P25-01 |
+| **P25-03** Phone redirect to the matching mobile screen; Desktop site per device; Mobile UI clears it ✅ | S | FR-35a, FR-35 | A-M9, A-M15 | P25-01 |
+| **P25-04** ☰ drawer for the desktop UI on narrow screens; desktop pages fit the width ✅ | S | FR-35a, FR-34 | A-M15 | P25-01 |
+| **P25-05** Lessons started on the phone tick their visit steps ✅ | S | FR-134, FR-35 | A-M13 | P25-03 |
+| **P25-06** Tests, UAT and keyboard steps, docs and CHANGELOG ✅ | S | FR-133, FR-130, FR-06a | A-M15 | P25-02, P25-03, P25-04, P25-05 |
+| **P25-07** Release 2026.11.12.3: signed binaries, install check ✅ | S | FR-05, FR-06 | — | P25-06 |
 
 ## 5. Open questions schedule
 
