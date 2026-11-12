@@ -4,9 +4,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -21,13 +21,36 @@ type Problem struct {
 // Check reports what needs attention in a project's documents.
 func Check(root string, m Manifest) []Problem {
 	out := []Problem{}
-	for _, r := range Roles {
+	// Missing entry points: only for tabs the file asks for, or, with no tabs and no
+	// entries at all, once for the whole project. A role left out is a choice.
+	if len(m.Tabs) > 0 {
+		for _, t := range m.Tabs {
+			if t != TabCompare && t != TabFiles && m.Entries[t] == "" {
+				out = append(out, Problem{Kind: "entry.missing", Detail: fmt.Sprintf("tabs lists %s but [entries] has no %s entry point: gbi artifacts entry <project> %s docs/<file>.html", t, t, t)})
+			}
+		}
+	} else if len(m.EntryRoles()) == 0 {
+		out = append(out, Problem{Kind: "entry.missing", Detail: "no entry points yet: gbi artifacts init <project>, or gbi artifacts entry <project> <role> docs/<file>.html"})
+	}
+	for _, r := range m.EntryRoles() {
 		e := m.Entries[r]
 		switch {
-		case e == "":
-			out = append(out, Problem{Kind: "entry.missing", Detail: fmt.Sprintf("no %s entry point: gbi artifacts entry <project> %s docs/<file>.html", r, r)})
+		case !ValidRole(r):
+			out = append(out, Problem{Kind: "entry.invalid", Path: e, Detail: fmt.Sprintf("%q is not a valid role name (short lowercase; compare and files are built in)", r)})
 		case !exists(root, e):
 			out = append(out, Problem{Kind: "entry.invalid", Path: e, Detail: fmt.Sprintf("the %s entry point %s does not exist", r, e)})
+		case Kind(e) != "html":
+			out = append(out, Problem{Kind: "entry.invalid", Path: e, Detail: fmt.Sprintf("the %s entry point %s is not an HTML file", r, e)})
+		}
+	}
+	for _, t := range m.Tabs {
+		if t != TabCompare && t != TabFiles && !ValidRole(t) {
+			out = append(out, Problem{Kind: "tab.unknown", Detail: fmt.Sprintf("tabs lists %q, which is not a valid tab", t)})
+		}
+	}
+	for l := range labelSet(m) {
+		if !ValidLabel(l) {
+			out = append(out, Problem{Kind: "label.unknown", Detail: fmt.Sprintf("unknown label %q (labels: %s)", l, strings.Join(Labels, ", "))})
 		}
 	}
 	keys := make([]string, 0, len(m.Labels))
@@ -101,42 +124,58 @@ var templates embed.FS
 // never overwritten. Entry points and labels are added to the manifest only for roles
 // that have none yet. It returns the files it wrote and the ones it kept.
 func Init(root, project string, m *Manifest) (written, kept []string, err error) {
-	err = fs.WalkDir(templates, "templates", func(p string, d fs.DirEntry, err error) error {
-		if err != nil || d.IsDir() {
-			return err
-		}
-		rel := strings.TrimPrefix(p, "templates/")
-		full := filepath.Join(root, filepath.FromSlash(rel))
-		if _, err := os.Stat(full); err == nil {
-			kept = append(kept, rel)
-			return nil
-		}
-		b, err := templates.ReadFile(p)
-		if err != nil {
-			return err
-		}
-		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
-			return err
-		}
-		if err := os.WriteFile(full, []byte(strings.ReplaceAll(string(b), "{{project}}", project)), 0o644); err != nil {
-			return err
-		}
-		written = append(written, rel)
-		return nil
-	})
-	if err != nil {
-		return nil, nil, err
+	files := map[string][]string{ // role → template files it brings
+		"requirements": {"docs/requirements.html", "docs/requirements.md"},
+		"mockups":      {"docs/mockups/index.html", "docs/screenshots/README.md"},
+		"plan":         {"docs/plan.html", "docs/plan.md"},
+		"tracker":      {"docs/tracker/index.html"},
 	}
-	for role, rel := range map[string]string{"requirements": "docs/requirements.html", "mockups": "docs/mockups/index.html", "plan": "docs/plan.html", "tracker": "docs/tracker/index.html"} {
-		if m.Entries[role] == "" && exists(root, rel) {
-			if _, err := m.SetEntry(root, role, rel); err != nil {
+	entry := map[string]string{"requirements": "docs/requirements.html", "mockups": "docs/mockups/index.html", "plan": "docs/plan.html", "tracker": "docs/tracker/index.html"}
+	want := map[string]bool{}
+	for _, r := range m.WantedRoles() {
+		want[r] = true
+	}
+	// Links in the templates to entry points the project does not use are removed.
+	var drop []*regexp.Regexp
+	for _, r := range Roles {
+		if !want[r] {
+			drop = append(drop, regexp.MustCompile(`<a[^>]*href="(\.\./)?`+regexp.QuoteMeta(strings.TrimPrefix(entry[r], "docs/"))+`"[^>]*>[^<]*</a>`))
+		}
+	}
+	for _, r := range Roles {
+		if !want[r] {
+			continue
+		}
+		for _, rel := range files[r] {
+			full := filepath.Join(root, filepath.FromSlash(rel))
+			if _, err := os.Stat(full); err == nil {
+				kept = append(kept, rel)
+				continue
+			}
+			b, err := templates.ReadFile("templates/" + rel)
+			if err != nil {
+				return nil, nil, err
+			}
+			body := strings.ReplaceAll(string(b), "{{project}}", project)
+			for _, re := range drop {
+				body = re.ReplaceAllString(body, "")
+			}
+			if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+				return nil, nil, err
+			}
+			if err := os.WriteFile(full, []byte(body), 0o644); err != nil {
+				return nil, nil, err
+			}
+			written = append(written, rel)
+		}
+		if m.Entries[r] == "" && exists(root, entry[r]) {
+			if _, err := m.SetEntry(root, r, entry[r]); err != nil {
 				return nil, nil, err
 			}
 		}
 	}
 	for rel, labels := range map[string][]string{"docs/requirements.md": {"requirements"}, "docs/plan.md": {"plan"}, "docs/mockups/": {"mockup"}, "docs/screenshots/": {"screenshot"}, "docs/tracker/": {"tracker"}} {
-		key := rel
-		if _, has := m.Labels[key]; !has && exists(root, strings.TrimSuffix(rel, "/")) {
+		if _, has := m.Labels[rel]; !has && exists(root, strings.TrimSuffix(rel, "/")) {
 			if _, err := m.SetLabels(root, rel, labels); err != nil {
 				return nil, nil, err
 			}
@@ -161,4 +200,14 @@ type Snapshot struct {
 func EncodeSnapshot(s Snapshot) string {
 	b, _ := json.MarshalIndent(s, "", "  ")
 	return string(b) + "\n"
+}
+
+func labelSet(m Manifest) map[string]bool {
+	out := map[string]bool{}
+	for _, ls := range m.Labels {
+		for _, l := range ls {
+			out[l] = true
+		}
+	}
+	return out
 }

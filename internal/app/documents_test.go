@@ -144,6 +144,40 @@ func TestProjectDocuments(t *testing.T) {
 		}
 	}
 
+	// FR-151: a project's own role gets a tab, and gbi keeps the order when it rewrites the file.
+	os.WriteFile(filepath.Join(e.repo, "docs/vision.html"), []byte("<html><body>Vision</body></html>"), 0o644)
+	if out, err := e.gbi("artifacts", "entry", "demo", "vision", "docs/vision.html"); err != nil {
+		t.Fatalf("vision entry: %v %s", err, out)
+	}
+	var tabs struct{ Tabs []struct{ ID, Title string } }
+	e.gbiJSON(&tabs, "artifacts", "files", "demo")
+	var order []string
+	for _, x := range tabs.Tabs {
+		order = append(order, x.ID)
+	}
+	if strings.Join(order, ",") != "requirements,mockups,plan,tracker,vision,compare,files" {
+		t.Fatalf("tabs: %v", order)
+	}
+	// Vision first, no mockups: edit the file by hand, as the owner would.
+	man, _ := os.ReadFile(filepath.Join(e.repo, "docs/gbi.toml"))
+	edited := strings.Replace(strings.Replace(string(man), "vision       = \"docs/vision.html\"\n", "", 1), "[entries]\n", "[entries]\nvision = \"docs/vision.html\"\n", 1)
+	edited = strings.Replace(edited, "mockups      = \"docs/mockups/index.html\"\n", "", 1)
+	os.WriteFile(filepath.Join(e.repo, "docs/gbi.toml"), []byte(edited), 0o644)
+	e.gbiJSON(&tabs, "artifacts", "files", "demo")
+	order = nil
+	for _, x := range tabs.Tabs {
+		order = append(order, x.ID)
+	}
+	if strings.Join(order, ",") != "vision,requirements,plan,tracker,files" {
+		t.Fatalf("tabs after the hand edit: %v\n%s", order, edited)
+	}
+	if out, err := e.gbi("artifacts", "label", "demo", "docs/research/", "--label", "research"); err != nil {
+		t.Fatalf("label: %v %s", err, out)
+	}
+	if b, _ := os.ReadFile(filepath.Join(e.repo, "docs/gbi.toml")); !strings.Contains(string(b), "[entries]\nvision ") || strings.Contains(string(b), "mockups      =") {
+		t.Fatalf("gbi lost the owner's layout when it rewrote the file:\n%s", b)
+	}
+
 	// The viewer's raw files: sandboxed, fetchable by the page, HTML gets gbi-nav.js.
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /raw/{id}/{path...}", e.a.RawHandler)

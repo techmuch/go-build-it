@@ -2,7 +2,7 @@
 // (todo | in-progress | blocked | done) and update "updated". The page reads this file.
 window.TRACKER = {
  "project": "go-build-it",
- "updated": "2026-11-09",
+ "updated": "2026-11-11",
  "sizes": {
   "S": 1,
   "M": 3,
@@ -314,6 +314,18 @@ window.TRACKER = {
    "gateApproved": "2026-11-09",
    "gateApprovedBy": "david (owner)",
    "gateEvidence": "Project documents: internal/artifacts unit tests incl. go-build-it's own docs/gbi.toml passing the check; TestProjectDocuments through the real CLI (init, add, label, entry, check, compare accept/task, trace, snapshot, raw sandbox); UAT 31/31 incl. 03b documents and M14; Learn 14/14 incl. the new lesson 2 step; 19 CLI examples; update and install e2e; release 2026.11.09.2"
+  },
+  {
+   "id": "P21",
+   "name": "Tabs from docs/gbi.toml",
+   "mvp": false,
+   "goal": "Let each project decide its Artifacts sub-tabs in docs/gbi.toml: its own roles (e.g. vision), their order, their names, and leaving out roles such as mockups.",
+   "gate": "Tabs UAT",
+   "gateCriteria": [
+    "A vision entry listed first in [entries] is the first sub-tab; tabs = [...] sets order and presence, titles rename",
+    "A project without a mockups entry has no Mockups or Compare tab, and check does not report it",
+    "gbi keeps order, tabs and titles when it rewrites the file; init creates only the roles used"
+   ]
   }
  ],
  "tasks": [
@@ -4170,6 +4182,65 @@ window.TRACKER = {
    "status": "done",
    "done": "",
    "q": []
+  },
+  {
+   "id": "P21-01",
+   "phase": "P21",
+   "title": "Requirements rev 8 (FR-151; FR-140 amended), ADR-014 amendment, mockup 25",
+   "reqs": [
+    "FR-151",
+    "FR-140"
+   ],
+   "views": [
+    "A-v25"
+   ],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "docs/requirements.md rev 8; ADR-014 amendment",
+   "q": []
+  },
+  {
+   "id": "P21-02",
+   "phase": "P21",
+   "title": "Manifest: any role, [entries] order, tabs, titles; kept on rewrite; check and init follow the file",
+   "reqs": [
+    "FR-151",
+    "FR-141",
+    "FR-149",
+    "FR-150"
+   ],
+   "views": [
+    "A-v25"
+   ],
+   "size": "M",
+   "deps": [
+    "P21-01"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P21-03",
+   "phase": "P21",
+   "title": "Sub-tabs on desktop and phone from the manifest; docs, standard, changelog",
+   "reqs": [
+    "FR-151",
+    "FR-140",
+    "FR-130"
+   ],
+   "views": [
+    "A-v21",
+    "A-M14"
+   ],
+   "size": "S",
+   "deps": [
+    "P21-02"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
   }
  ],
  "requirements": {
@@ -4398,7 +4469,7 @@ window.TRACKER = {
    "section": "6.2 Project artifacts"
   },
   "FR-140": {
-   "text": "A project's Artifacts tab SHALL have six sub-tabs:",
+   "text": "A project's Artifacts tab SHALL have sub-tabs for its documents.",
    "section": "6.3 Project documents (rev 7)"
   },
   "FR-141": {
@@ -4435,6 +4506,10 @@ window.TRACKER = {
   },
   "FR-149": {
    "text": "gbi artifacts init <project> SHALL create the standard set from templates without overwriting existing files:",
+   "section": "6.3 Project documents (rev 7)"
+  },
+  "FR-151": {
+   "text": "(rev 8) docs/gbi.toml SHALL control the sub-tabs completely:",
    "section": "6.3 Project documents (rev 7)"
   },
   "FR-150": {

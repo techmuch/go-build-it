@@ -1597,7 +1597,7 @@ gbi compare task trailmap v03 --note "…"</div></div>
 
 <!-- ============ 25 SUPPORT FILES (rev 7) ============ -->
 <section class="view" id="v25">
-  <header><span class="num">25</span><h2>Support files: every file, its labels, the entry points</h2><span class="req">FR-142</span><span class="req">FR-143</span><span class="req">FR-150</span></header>
+  <header><span class="num">25</span><h2>Support files: every file, its labels, the tabs</h2><span class="req">FR-151</span><span class="req">FR-142</span><span class="req">FR-143</span><span class="req">FR-150</span></header>
   <p class="look"><b>Look for:</b> everything under <span class="mono">docs/</span> with its labels. A label on a folder covers its files ("from docs/mockups/"). Files added outside gbi go to <b>Unlabelled</b> at the top, and the only action is <b>Label…</b>. The <b>Set as entry point</b> action appears on HTML files. The check lists what needs attention. The same actions are CLI commands, which is how AI members add their files.</p>
   <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">devbox.tail3f2a.ts.net/projects/trailmap/artifacts/files</span></div>
   <div class="app">
@@ -1623,7 +1623,13 @@ gbi compare task trailmap v03 --note "…"</div></div>
             <tr><td>📄 docs/gbi.toml · docs/compare.json</td><td class="muted">kept by gbi</td><td></td></tr>
           </table></div>
         <div style="width:330px;display:flex;flex-direction:column;gap:12px">
-          <div class="card"><h3>Entry points</h3><table class="t small"><tr><td>Requirements</td><td class="mono">requirements.html</td></tr><tr><td>Mockups</td><td class="mono">mockups/index.html</td></tr><tr><td>Plan</td><td class="mono">plan.html</td></tr><tr><td>Tracker</td><td class="mono">tracker/index.html</td></tr></table></div>
+          <div class="card"><h3>Tabs <span class="small" style="text-transform:none">from docs/gbi.toml</span></h3><table class="t small"><tr><td>1 · Product vision</td><td class="mono">vision.html</td></tr><tr><td>2 · Requirements</td><td class="mono">requirements.html</td></tr><tr><td>3 · Mockups</td><td class="mono">mockups/index.html</td></tr><tr><td>4 · Plan</td><td class="mono">plan.html</td></tr><tr><td>5 · Tracker</td><td class="mono">tracker/index.html</td></tr><tr><td class="muted">6 · Compare · 7 · Support files</td><td class="muted">built in</td></tr></table>
+            <div class="evi" style="margin:6px 0 0">[entries]             # order = tab order
+vision = "docs/vision.html"
+requirements = "docs/requirements.html"
+…
+[titles]
+vision = "Product vision"</div><div class="small muted" style="margin-top:6px"><b>Rev 8:</b> the file decides which tabs exist, their order and names. No mockups entry → no Mockups or Compare tab. <span class="mono">tabs = [...]</span> gives full control.</div></div>
           <div class="card"><h3>Check <span class="chip amb" style="text-transform:none">5 problems</span></h3><div class="small" style="display:flex;flex-direction:column;gap:4px">
             <div>⚠ 3 unlabelled files</div><div>⚠ <span class="mono">phone.html</span> links to <span class="mono">img/trail-09.png</span>, which is missing</div><div>⚠ view <span class="idtag">v07</span> names <span class="idtag">FR-31</span>, which doesn't exist</div></div></div>
           <div class="card"><h3>From the CLI</h3><div class="evi" style="margin:0">gbi artifacts add trailmap docs/research/interviews.md --label research

@@ -51,8 +51,10 @@ func TestLabelsAndEntries(t *testing.T) {
 	if _, err := m.SetEntry(root, "mockups", "docs/mockups/index.html"); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := m.SetEntry(root, "roadmap", "docs/mockups/index.html"); err == nil {
-		t.Fatal("unknown role accepted")
+	for _, bad := range []string{"Road Map", "compare", "files", ""} {
+		if _, err := m.SetEntry(root, bad, "docs/mockups/index.html"); err == nil {
+			t.Fatalf("role %q accepted", bad)
+		}
 	}
 	// Round trip through TOML.
 	write(t, root, ManifestPath, m.Encode())
@@ -180,5 +182,90 @@ func TestTraceCompareAndCheck(t *testing.T) {
 	if k["link.broken"] != 2 || k["id.unknown"] != 1 || k["file.unlabelled"] != 1 || k["label.stale"] != 1 || k["entry.missing"] != 0 {
 		// link.broken: img/missing.png and tracker.json (no snapshot yet)
 		t.Fatalf("check: %v\n%+v", k, Check(root, m))
+	}
+}
+
+// FR-141: docs/gbi.toml controls the sub-tabs: which exist, their order and their names.
+func TestTabsFollowTheManifest(t *testing.T) {
+	root := t.TempDir()
+	for _, f := range []string{"docs/vision.html", "docs/requirements.html", "docs/plan.html"} {
+		write(t, root, f, "<html></html>")
+	}
+	ids := func(m Manifest) string {
+		var out []string
+		for _, tb := range m.TabList() {
+			out = append(out, tb.ID+"="+tb.Title)
+		}
+		return strings.Join(out, " ")
+	}
+	// The order of [entries] is the order of the tabs; no mockups entry → no Mockups and no Compare.
+	write(t, root, ManifestPath, "[entries]\nvision = \"docs/vision.html\"\nrequirements = \"docs/requirements.html\"\nplan = \"docs/plan.html\"\n")
+	m, err := Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := ids(m); got != "vision=Vision requirements=Requirements plan=Plan files=Support files" {
+		t.Fatalf("tabs from [entries]: %s", got)
+	}
+	if k := kinds(Check(root, m)); k["entry.missing"] != 0 {
+		t.Fatalf("leaving roles out is a choice, not a problem: %+v", Check(root, m))
+	}
+	// gbi keeps the order (and a new role goes last) when it rewrites the file.
+	if _, err := m.SetEntry(root, "tracker", "docs/plan.html"); err != nil {
+		t.Fatal(err)
+	}
+	write(t, root, ManifestPath, m.Encode())
+	m2, _ := Load(root)
+	if got := strings.Join(m2.EntryRoles(), ","); got != "vision,requirements,plan,tracker" {
+		t.Fatalf("order after a rewrite: %s\n%s", got, m.Encode())
+	}
+	// tabs decides order and presence, including the built-in tabs; titles rename.
+	write(t, root, ManifestPath, "tabs = [\"files\", \"plan\", \"vision\", \"compare\"]\n[entries]\nvision = \"docs/vision.html\"\nplan = \"docs/plan.html\"\nrequirements = \"docs/requirements.html\"\n[titles]\nvision = \"Product vision\"\n")
+	m3, _ := Load(root)
+	if got := ids(m3); got != "files=Support files plan=Plan vision=Product vision compare=Compare" {
+		t.Fatalf("tabs list: %s", got)
+	}
+	write(t, root, ManifestPath, m3.Encode())
+	m4, _ := Load(root)
+	if ids(m4) != ids(m3) {
+		t.Fatalf("tabs and titles lost in a rewrite:\n%s", m3.Encode())
+	}
+	// A tab listed without an entry point is reported.
+	m4.Tabs = append(m4.Tabs, "mockups")
+	if k := kinds(Check(root, m4)); k["entry.missing"] != 1 {
+		t.Fatalf("missing listed entry: %+v", Check(root, m4))
+	}
+	// A project with nothing chosen yet offers the standard set.
+	empty, _ := Load(t.TempDir())
+	if got := ids(empty); !strings.HasPrefix(got, "requirements=Requirements mockups=Mockups plan=Plan tracker=Tracker compare") {
+		t.Fatalf("empty project: %s", got)
+	}
+}
+
+// Init creates only the documents for the roles the project uses.
+func TestInitRespectsTabs(t *testing.T) {
+	root := t.TempDir()
+	write(t, root, ManifestPath, "tabs = [\"requirements\", \"plan\", \"files\"]\n")
+	m, _ := Load(root)
+	written, _, err := Init(root, "p", &m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, w := range written {
+		if strings.Contains(w, "mockups") || strings.Contains(w, "tracker") || strings.Contains(w, "screenshots") {
+			t.Fatalf("wrote %s for a role the project does not use", w)
+		}
+	}
+	if m.Entries["mockups"] != "" || m.Entries["requirements"] == "" || m.Entries["plan"] == "" {
+		t.Fatalf("entries: %+v", m.Entries)
+	}
+	b, _ := os.ReadFile(filepath.Join(root, "docs/requirements.html"))
+	if strings.Contains(string(b), "mockups/index.html") || !strings.Contains(string(b), "plan.html") {
+		t.Fatalf("links to unused entry points should be removed:\n%s", b)
+	}
+	write(t, root, ManifestPath, m.Encode())
+	m2, _ := Load(root)
+	if k := kinds(Check(root, m2)); len(k) != 0 {
+		t.Fatalf("check after init: %+v", Check(root, m2))
 	}
 }

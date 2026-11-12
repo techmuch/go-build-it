@@ -27,7 +27,7 @@ export const api = {
     chat: (id: string, body?: unknown) => call<any>('POST', `/api/projects/${encodeURIComponent(id)}/chat/artifact`, body),
     /** Missing entry points, unlabelled files, stale labels, broken links and unknown IDs */
     check: (id: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/projects/${encodeURIComponent(id)}/documents/check`, undefined, query),
-    /** Make an HTML file the entry point for requirements, mockups, plan or tracker */
+    /** Make an HTML file the entry point for a role (requirements, mockups, plan, tracker, or your own, e.g. vision); the role gets a sub-tab */
     entry: (id: string, role: string, path: string, body?: unknown) => call<any>('POST', `/api/projects/${encodeURIComponent(id)}/documents/entry/${encodeURIComponent(role)}/${encodeURI(path)}`, body),
     /** Every file under docs/ with its labels, the entry points and the unlabelled files */
     files: (id: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/projects/${encodeURIComponent(id)}/documents`, undefined, query),

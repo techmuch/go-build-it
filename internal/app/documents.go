@@ -26,7 +26,7 @@ func (a *App) documentRoutes() []api.Route {
 		r("GET", "/api/projects/{id}/documents", "artifacts.files", "artifacts files", "Every file under docs/ with its labels, the entry points and the unlabelled files", a.docFiles, f("label", "only files with this label")),
 		r("POST", "/api/projects/{id}/documents/add/{path...}", "artifacts.add", "artifacts add", "Label a file or folder under docs/ (a label is required) and commit it", a.docAdd, f("label", "labels, comma-separated: "+strings.Join(artifacts.Labels, ", "))),
 		r("POST", "/api/projects/{id}/documents/label/{path...}", "artifacts.label", "artifacts label", "Set a file's or folder's labels (--remove takes the given labels away)", a.docLabel, f("label", "labels, comma-separated"), fb("remove", "remove these labels instead of setting them")),
-		r("POST", "/api/projects/{id}/documents/entry/{role}/{path...}", "artifacts.entry", "artifacts entry", "Make an HTML file the entry point for requirements, mockups, plan or tracker", a.docEntry),
+		r("POST", "/api/projects/{id}/documents/entry/{role}/{path...}", "artifacts.entry", "artifacts entry", "Make an HTML file the entry point for a role (requirements, mockups, plan, tracker, or your own, e.g. vision); the role gets a sub-tab", a.docEntry),
 		r("GET", "/api/projects/{id}/documents/check", "artifacts.check", "artifacts check", "Missing entry points, unlabelled files, stale labels, broken links and unknown IDs", a.docCheck),
 		r("POST", "/api/projects/{id}/documents/init", "artifacts.init", "artifacts init", "Create the standard documents from templates (never overwrites)", a.docInit),
 		r("POST", "/api/projects/{id}/documents/snapshot", "artifacts.snapshot", "artifacts snapshot", "Write docs/tracker/tracker.json from the project's milestones and tasks", a.docSnapshot),
@@ -122,7 +122,13 @@ func (a *App) docFiles(c *api.Ctx) (any, error) {
 	if un == nil {
 		un = []artifacts.File{}
 	}
-	return map[string]any{"entries": m.Entries, "labels": m.Labels, "files": files, "unlabelled": un, "roles": artifacts.Roles, "allLabels": artifacts.Labels, "manifest": artifacts.ManifestPath}, nil
+	roles := m.EntryRoles()
+	for _, r := range artifacts.Roles {
+		if m.Entries[r] == "" {
+			roles = append(roles, r)
+		}
+	}
+	return map[string]any{"tabs": m.TabList(), "entries": m.Entries, "labels": m.Labels, "files": files, "unlabelled": un, "roles": roles, "allLabels": artifacts.Labels, "manifest": artifacts.ManifestPath}, nil
 }
 
 func (a *App) labelDoc(c *api.Ctx, add bool) (any, error) {

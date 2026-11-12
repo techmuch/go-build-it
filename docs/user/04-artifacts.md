@@ -1,5 +1,5 @@
 section: Using go-build-it
-reqs: FR-45, FR-45a, FR-46, FR-123, FR-140, FR-141, FR-142, FR-143, FR-144, FR-145, FR-146, FR-147, FR-148, FR-149, FR-150
+reqs: FR-45, FR-45a, FR-46, FR-123, FR-151, FR-140, FR-141, FR-142, FR-143, FR-144, FR-145, FR-146, FR-147, FR-148, FR-149, FR-150
 # Project documents
 
 Every project keeps the same documents in its repository under `docs/`: requirements, mockups, a plan and a tracker. go-build-it shows them on the project's **Artifacts** tab, which has six sub-tabs:
@@ -14,6 +14,28 @@ Every project keeps the same documents in its repository under `docs/`: requirem
 | **Support files** | every file under `docs/`, with its labels |
 
 The rules are in the global standard **Project documents** (Standards), which AI members follow too.
+
+## Choosing your tabs
+
+`docs/gbi.toml` decides which sub-tabs a project has, in what order, and what they're called:
+
+```toml
+[entries]                       # each role gets a tab, in this order
+vision       = "docs/vision.html"
+requirements = "docs/requirements.html"
+plan         = "docs/plan.html"
+
+[titles]                        # optional names
+vision = "Product vision"
+```
+
+- **Your own roles:** any short lowercase name works, such as `vision`, `research` or `roadmap`.
+- **Leave out what you don't use:** with no `mockups` entry there is no Mockups tab and no Compare tab. Support files is always there.
+- **A fixed list:** for full control, add `tabs = ["vision", "requirements", "plan", "compare", "files"]` at the top. Only those tabs show, in that order. `compare` and `files` are the built-in tabs.
+- **gbi keeps your layout:** your order, `tabs` and `[titles]` survive when gbi updates the file.
+- **From the CLI:** `gbi artifacts entry <project> vision docs/vision.html` adds a role.
+
+After a hand edit, reload the page (gbi reads the file on every request), commit the file yourself, and run `gbi artifacts check <project>`.
 
 ## Entry points are HTML
 

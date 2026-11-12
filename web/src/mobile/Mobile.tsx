@@ -270,19 +270,20 @@ function LearnScreen() {
 }
 
 // M14 · Project documents (FR-140, FR-141, FR-147)
-const M_DOCS: [string, string, string][] = [['requirements', '📋', 'Requirements'], ['mockups', '🎨', 'Mockups'], ['plan', '🗺', 'Plan'], ['tracker', '✅', 'Tracker']];
+const M_ICON: Record<string, string> = { requirements: '📋', mockups: '🎨', plan: '🗺', tracker: '✅', compare: '⇔', files: '📁' };
 function DocsScreen({ id }: { id: string }) {
   const { data: files } = useData<any>(() => api.artifacts.files(id), [id], (e) => e.type.startsWith('artifact'));
   const { data: cmp } = useData<any>(() => api.compare.list(id), [id], (e) => e.type.startsWith('artifact'));
   const STATE: Record<string, [string, string]> = { 'accepted': ['grn', 'accepted'], 'drifted': ['amb', 'drifted'], 'not-reviewed': ['red', 'not reviewed'], 'task': ['blue', 'task filed'], 'no-screenshot': ['', 'no screenshot'] };
   return <Screen title="Documents" sub={id} back={`/m/projects/${id}`} tab="projects">
     {!files ? <Loading /> : <>
-      <div className="m-card">{M_DOCS.map(([r, i, l]) => <div key={r} className="m-row" style={{ padding: '7px 0' }} {...clickable(() => files.entries?.[r] && navigate(`/m/projects/${id}/docs/${r}`), { role: 'link' })}>
-        <span>{i} <b>{l}</b></span><span className="small muted">{files.entries?.[r] ? files.entries[r].replace(/^docs\//, '') + ' ›' : 'not set'}</span></div>)}
-        <div className="m-row" style={{ padding: '7px 0' }}><span>📁 <b>Support files</b></span><span className="small muted">{files.files?.length || 0}{files.unlabelled?.length ? ` · ${files.unlabelled.length} unlabelled` : ''}</span></div></div>
-      <div className="m-card"><h4>Compare {cmp?.toReview > 0 && <Chip c="red">{cmp.toReview} to review</Chip>}</h4>
+      <div className="m-card">{(files.tabs || []).filter((t: any) => t.kind !== 'compare').map((t: any) => t.kind === 'files'
+        ? <div key={t.id} className="m-row" style={{ padding: '7px 0' }}><span>{M_ICON.files} <b>{t.title}</b></span><span className="small muted">{files.files?.length || 0}{files.unlabelled?.length ? ` · ${files.unlabelled.length} unlabelled` : ''}</span></div>
+        : <div key={t.id} className="m-row" style={{ padding: '7px 0' }} {...clickable(() => t.path && navigate(`/m/projects/${id}/docs/${t.id}`), { role: 'link' })}>
+          <span>{M_ICON[t.id] || '📄'} <b>{t.title}</b></span><span className="small muted">{t.path ? t.path.replace(/^docs\//, '') + ' ›' : 'not set'}</span></div>)}</div>
+      {(files.tabs || []).some((t: any) => t.kind === 'compare') && <div className="m-card"><h4>Compare {cmp?.toReview > 0 && <Chip c="red">{cmp.toReview} to review</Chip>}</h4>
         {(cmp?.views || []).map((v: any) => <div key={v.id} className="m-row small" style={{ padding: '6px 0' }} {...clickable(() => navigate(`/m/projects/${id}/compare/${v.id}`), { role: 'link' })}><span>{v.title && v.title.startsWith(v.id) ? v.title : `${v.id} ${v.title || ''}`}</span><Chip c={STATE[v.state]?.[0]}>{STATE[v.state]?.[1]}</Chip></div>)}
-        {!cmp?.views?.length && <span className="small muted">No mockup views yet.</span>}</div>
+        {!cmp?.views?.length && <span className="small muted">No mockup views yet.</span>}</div>}
     </>}
   </Screen>;
 }
@@ -290,7 +291,7 @@ function DocsScreen({ id }: { id: string }) {
 function DocScreen({ id, role }: { id: string; role: string }) {
   const { data: files } = useData<any>(() => api.artifacts.files(id), [id]);
   const entry = files?.entries?.[role];
-  return <Screen title={M_DOCS.find((d) => d[0] === role)?.[2] || role} sub={entry} back={`/m/projects/${id}/docs`}>
+  return <Screen title={(files?.tabs || []).find((t: any) => t.id === role)?.title || role} sub={entry} back={`/m/projects/${id}/docs`}>
     {!files ? <Loading /> : !entry ? <Empty>No entry point yet. Set one on desktop or with gbi artifacts entry.</Empty>
       : <iframe className="m-docframe" src={`/raw/${id}/${entry}`} title={entry} sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox" />}
   </Screen>;

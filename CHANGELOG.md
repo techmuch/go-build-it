@@ -6,6 +6,18 @@ To release, run `gbi dev changelog release YYYY.MM.DD.N`, then `VERSION=YYYY.MM.
 
 ## [Unreleased]
 
+## [2026.11.11.1] - 2026-11-11
+
+### Changed
+
+- **`docs/gbi.toml` controls the Artifacts sub-tabs** (FR-151):
+  - **Your own roles:** add any role (for example `vision = "docs/vision.html"`), and it gets a tab.
+  - **Order:** tabs follow the order of `[entries]`, or an explicit `tabs = [...]`.
+  - **Only what you use:** a role you leave out has no tab, so a project without mockups has no Mockups or Compare tab.
+  - **Names:** `[titles]` renames tabs.
+  - **Kept:** gbi keeps your order, `tabs` and titles when it rewrites the file. Before, it dropped roles it didn't know.
+  - **Check and init:** `gbi artifacts check` no longer reports standard roles you left out, and `gbi artifacts init` only creates the roles you use.
+
 ## [2026.11.09.2] - 2026-11-09
 
 ### Changed
