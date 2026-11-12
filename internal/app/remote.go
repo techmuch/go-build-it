@@ -59,5 +59,5 @@ func (a *App) tailscaleQR(c *api.Ctx) (any, error) {
 	if len(s.QR) == 0 {
 		return nil, api.BadRequest("no working tailnet address yet: %s", firstNonEmpty(s.Guidance, "see gbi tailscale status"))
 	}
-	return fmt.Sprintf("%s\nOpen %s on a phone signed in to the same tailnet.", tailscale.Terminal(s.QR), s.ServeURL), nil
+	return fmt.Sprintf("%s\nOpen %s on a phone signed in to the same tailnet.", tailscale.Terminal(s.QR), s.PhoneURL), nil
 }

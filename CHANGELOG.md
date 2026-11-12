@@ -6,6 +6,22 @@ To release, run `gbi dev changelog release YYYY.MM.DD.N`, then `VERSION=YYYY.MM.
 
 ## [Unreleased]
 
+## [2026.11.12.3] - 2026-11-12
+
+### Added
+
+- **Phones get the mobile UI** (FR-35a). Open any go-build-it address on a phone, such as a link to a question or a project, and you land on the matching mobile screen. **More → Desktop site** keeps that phone on the desktop UI until you choose **Mobile UI** again.
+- **☰ menu on narrow screens** (FR-35a). The desktop UI used to hide its sidebar on narrow screens and leave no way to move around. Now ☰ opens it as a drawer, which closes when you choose, tap outside or press Esc.
+
+### Changed
+
+- **The Remote access QR code opens the mobile UI** (FR-20c). It encodes `…ts.net/m/`, and that address is written under the code. `gbi tailscale qr` does the same.
+
+### Fixed
+
+- **Desktop pages fit a phone's width.** Wide tables and long paths on Questions, Queue, Settings and History stretched the page sideways. They now scroll inside it.
+- **Lessons started on the phone tick off their steps.** Opening the screens a lesson asks for now counts on the phone too.
+
 ## [2026.11.12.2] - 2026-11-12
 
 ### Added

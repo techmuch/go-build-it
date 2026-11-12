@@ -62,6 +62,9 @@ func TestServedAndReachable(t *testing.T) {
 			t.Errorf("check %s: %s %s", c.ID, c.Status, c.Detail)
 		}
 	}
+	if s.PhoneURL != "https://"+dns+"/m/" {
+		t.Fatalf("the QR code should open the mobile UI: %q", s.PhoneURL)
+	}
 	if len(s.QR) < 21 || len(s.QR[0]) != len(s.QR) || !strings.Contains(Terminal(s.QR), "█") {
 		t.Fatalf("qr: %d rows", len(s.QR))
 	}

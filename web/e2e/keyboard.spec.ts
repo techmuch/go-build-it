@@ -154,3 +154,22 @@ test.describe('keyboard · desktop', () => {
     }
   });
 });
+
+test.describe('keyboard · narrow window', () => {
+  test.use({ viewport: { width: 700, height: 900 } });
+
+  test('a narrow desktop window keeps the desktop UI; ☰ opens the navigation and Esc closes it', async ({ page }) => {
+    await page.goto('/questions');
+    await expect(page).toHaveURL(/\/questions$/); // no touch screen: not redirected
+    const nav = page.locator('#main-nav');
+    await expect(nav).toBeHidden();
+    const menu = page.getByRole('button', { name: 'Menu' });
+    await menu.focus();
+    await page.keyboard.press('Enter');
+    await expect(nav).toBeVisible();
+    await expect(menu).toHaveAttribute('aria-expanded', 'true');
+    await page.keyboard.press('Escape');
+    await expect(nav).toBeHidden();
+    await expect(menu).toBeFocused();
+  });
+});

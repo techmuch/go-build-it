@@ -243,8 +243,8 @@ function RemoteAccessCard({ isOwner }: { isOwner: boolean }) {
               <td>{r.funnel ? <Chip c="red">public (Funnel)</Chip> : <Chip>tailnet</Chip>}</td></tr>)}</tbody></table></details>}
       </div>
       {ts.qr?.length > 0 && <div className="col" style={{ gap: 6, alignItems: 'center', width: 190 }}>
-        <QRCode rows={ts.qr} label={'QR code for ' + ts.serveUrl} />
-        <div className="small muted" style={{ textAlign: 'center' }}>Scan with a phone signed in to the same tailnet. Terminal: <code>gbi tailscale qr</code></div></div>}
+        <QRCode rows={ts.qr} label={'QR code for ' + (ts.phoneUrl || ts.serveUrl)} />
+        <div className="small muted" style={{ textAlign: 'center' }}>Opens the mobile UI, <a href={ts.phoneUrl} className="mono" style={{ overflowWrap: 'anywhere' }}>{ts.phoneUrl}</a>. Scan with a phone signed in to the same tailnet. Terminal: <code>gbi tailscale qr</code></div></div>}
     </div>}
   </Card>;
 }

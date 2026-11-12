@@ -9,7 +9,7 @@ The phone UI at `/m` is built for what you do away from your desk: answer questi
 ## Step: Open the phone UI
 check: visit /m
 show: /m
-Open `/m` (on a phone, or narrow your browser window). **Projects**, **Inbox**, **Members** and **More** are the four tabs.
+Open `/m` (on a phone, any go-build-it address takes you there; scan the QR code in **Settings → Remote access**). **Projects**, **Inbox**, **Members** and **More** are the four tabs.
 
 ## Step: Find Learn on the phone
 check: visit /m/learn

@@ -5,6 +5,7 @@ import { navigate, usePath } from './router';
 import { A } from './ui';
 import { GOTO, clickable, useDialog, useGlobalKeys, useShortcuts } from './keys';
 import { Coach, useLearn } from './learn';
+import { setWantsDesktop } from './phone';
 
 export type SystemInfo = { version: string; actor: { name: string; kind: string; origin: string; login?: string }; owner: string; liveSessions: number; autoDispatch: boolean; experimental: any; dataDir: string; listen: string; update?: { updating: boolean; latest?: string; newer?: boolean; checkedAt?: string } };
 const SysCtx = createContext<SystemInfo | undefined>(undefined);
@@ -33,6 +34,13 @@ export function Shell({ title, crumb, right, tabs, children, noPad }: { title: R
   const sys = useSystem();
   const [pal, setPal] = useState(false);
   const [help, setHelp] = useState(false);
+  const [menu, setMenu] = useState(false); // the sidebar as a drawer on narrow screens (FR-35a)
+  useEffect(() => setMenu(false), [path]);
+  useEffect(() => {
+    if (!menu) return;
+    const k = (e: KeyboardEvent) => { if (e.key === 'Escape') { setMenu(false); document.getElementById('menu-btn')?.focus(); } };
+    window.addEventListener('keydown', k); return () => window.removeEventListener('keydown', k);
+  }, [menu]);
   useGlobalKeys();
   const learn = useLearn();
   useShortcuts({ search: () => setPal(true), help: () => setHelp(true), go: (to) => { if (to === '/learn' && learn.active && learn.hidden && path !== '/learn') { learn.hide(false); return; } navigate(to); } });
@@ -52,15 +60,16 @@ export function Shell({ title, crumb, right, tabs, children, noPad }: { title: R
   };
   return <div className={'app' + (learn.active && !learn.hidden ? ' coached' : '')}>
     <a className="skip" href="#main" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>Skip to content</a>
-    <aside className="side" aria-label="Main navigation">
+    {menu && <div className="side-scrim" onClick={() => setMenu(false)} />}
+    <aside className={'side' + (menu ? ' open' : '')} id="main-nav" aria-label="Main navigation">
       <A to="/" className="brand"><b>gb</b>go-build-it</A>
       {NAV.map(link)}
       <div className="sep">Organization</div>{ORG.map(link)}
       <div className="sep">System</div>{SYS.map(link)}
-      <div className="foot">{sys ? <><VersionLink sys={sys} /><br />{sys.liveSessions} live · dispatch {sys.autoDispatch ? 'auto' : 'manual'}<br /><a href="/m/" style={{ color: 'inherit' }}>Mobile UI ↗</a></> : '…'}</div>
+      <div className="foot">{sys ? <><VersionLink sys={sys} /><br />{sys.liveSessions} live · dispatch {sys.autoDispatch ? 'auto' : 'manual'}<br /><a href="/m/" style={{ color: 'inherit' }} onClick={() => setWantsDesktop(false)}>Mobile UI ↗</a></> : '…'}</div>
     </aside>
     <div className="main" id="main" tabIndex={-1}>
-      <div className="topbar"><h1>{crumb && <span className="crumb">{crumb} / </span>}{title}</h1>{right}
+      <div className="topbar"><button type="button" id="menu-btn" className="menu-btn" aria-label="Menu" aria-controls="main-nav" aria-expanded={menu} onClick={() => setMenu(!menu)}>☰</button><h1>{crumb && <span className="crumb">{crumb} / </span>}{title}</h1>{right}
         <button type="button" className="search" onClick={() => setPal(true)} aria-keyshortcuts="Meta+K /">Search, run a command…  ⌘K</button>
         <button type="button" className="lnk small" onClick={() => setHelp(true)} title="Keyboard shortcuts (?)" aria-keyshortcuts="?">Keys <kbd>?</kbd></button><Identity /></div>
       {tabs}

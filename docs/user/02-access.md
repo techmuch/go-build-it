@@ -29,7 +29,7 @@ Under the checklist, **Also served from this machine** lists every other address
 
 **Stop serving** (`gbi tailscale stop`) removes go-build-it's own rule and nothing else. Only owners can set up or stop serving, and each change is recorded in the history.
 
-**On your phone:** once every check passes, Remote access shows a QR code of the address. Scan it with a phone that is signed in to the same tailnet. In a terminal, `gbi tailscale qr` draws the same code.
+**On your phone:** once every check passes, Remote access shows a QR code that opens the mobile UI (the address followed by `/m/`, written under the code). Scan it with a phone that is signed in to the same tailnet. In a terminal, `gbi tailscale qr` draws the same code.
 
 `gbi doctor` checks this too (`tailscale.serve`). It skips the check if you don't use Tailscale.
 

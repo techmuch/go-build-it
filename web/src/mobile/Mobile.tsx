@@ -10,7 +10,8 @@ import { attachmentsFor } from '../pages/Artifacts';
 import './mobile.css';
 import { clickable, useGlobalKeys } from '../keys';
 import { LiveTerminal } from '../terminal';
-import { LessonSteps, useLessons, useLesson, type Lesson } from '../learn';
+import { LessonSteps, useLearn, useLessons, useLesson, type Lesson } from '../learn';
+import { setWantsDesktop } from '../phone';
 
 function Tabbar({ on }: { on: string }) {
   const { data: inbox } = useData<any[]>(() => api.inbox.list(), [], (e) => /^(question|review|rehearsal|options|value)\./.test(e.type));
@@ -228,7 +229,9 @@ function More() {
   return <Screen title="More" sub={<button type="button" className="lnk m-sub" style={{ color: 'inherit', padding: 0 }} onClick={() => navigate('/m/changelog')} data-testid="version-link">v{sys?.version || ''}{upd} ›</button>} tab="more">
     <div className="m-flush">
       <div className="m-li" {...clickable(() => navigate('/m/learn'))} data-testid="m-learn"><span>🎓 Learn</span><span className="muted">›</span></div>
-      {[['👥 Team & personas', '/team'], ['📐 Global standards', '/standards'], ['☰ Task queue', '/queue'], ['🕘 History & insights', '/history'], ['⚙ Settings', '/settings'], ['🖥 Desktop UI', '/']].map(([l, to]) => <a key={to} className="m-li" href={to}><span>{l}</span><span className="muted">›</span></a>)}
+      <div className="m-label">On the desktop site</div>
+      {[['👥 Team & personas', '/team'], ['📐 Global standards', '/standards'], ['☰ Task queue', '/queue'], ['🕘 History & insights', '/history'], ['⚙ Settings', '/settings']].map(([l, to]) => <a key={to} className="m-li" href={to} onClick={() => setWantsDesktop(true)}><span>{l}</span><span className="muted">↗</span></a>)}
+      <a className="m-li" href="/" data-testid="desktop-site" onClick={(e) => { e.preventDefault(); setWantsDesktop(true); location.assign('/'); }}><span>🖥 Desktop site <span className="small muted">· this device stays on it until you choose Mobile UI from the ☰ menu</span></span><span className="muted">↗</span></a>
       <div className="m-label">Docs</div>{(docs || []).map((d) => <div key={d.slug} className="m-li" {...clickable(() => setDoc(d.slug))}><span>📖 {d.title}</span><span className="muted">›</span></div>)}
       <div className="m-label">Theme</div><div className="m-li"><span className="seg"><button type="button" onClick={() => setTheme('light')}>Light</button><button type="button" onClick={() => setTheme('dark')}>Dark</button></span></div>
       <div style={{ padding: 12 }} className="small muted">Access: {sys?.actor?.origin} ({sys?.actor?.login || sys?.actor?.name}). Personas, standards and artifacts can be changed by chatting with an agent on desktop; the rich editor is desktop-first. Add this page to your home screen to install it.</div>
@@ -254,7 +257,9 @@ function LearnScreen() {
   const { run } = useAction();
   const ls = data?.lessons || [];
   const done = ls.filter((l) => l.total > 0 && l.done === l.total).length;
-  const start = async (l: Lesson) => { if (!l.started) await run(() => api.learn.start(l.slug)); setOpen(l.slug); reload(); };
+  const coach = useLearn();
+  // The started lesson is the active one, so the screens you open tick its visit steps off.
+  const start = async (l: Lesson) => { if (!l.started) await run(() => api.learn.start(l.slug)); coach.open(l.slug); setOpen(l.slug); reload(); };
   const l = one?.lesson;
   return <Screen title="Learn" sub={data ? `${done} of ${ls.length} done${data.practice ? ' · practice project: ' + data.practice.name : ''}` : ''} back="/m/more" tab="more">
     {!data ? <Loading what="the lessons" /> : <>

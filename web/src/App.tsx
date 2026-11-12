@@ -11,6 +11,7 @@ import { MobileApp } from './mobile/Mobile';
 import { Changelog } from './pages/Changelog';
 import { Learn, LessonPage } from './pages/Learn';
 import { LearnProvider } from './learn';
+import { isPhone, mobilePath, wantsDesktop } from './phone';
 
 type R = [string, (p: Record<string, string>) => JSX.Element];
 const routes: R[] = [
@@ -54,8 +55,17 @@ const routes: R[] = [
   ['/docs/:slug', (p) => <Docs slug={p.slug} />],
 ];
 
+// A phone that opens a desktop address goes to the matching mobile screen (FR-35a).
+function phoneRedirect(path: string): string {
+  const mobile = path === '/m' || path.startsWith('/m/') || path.startsWith('/m?');
+  if (mobile || !isPhone() || wantsDesktop()) return path;
+  const to = mobilePath(path);
+  history.replaceState(null, '', to);
+  return to;
+}
+
 export function App() {
-  const path = usePath();
+  const path = phoneRedirect(usePath());
   let el: JSX.Element | null = null;
   if (path === '/m' || path.startsWith('/m/') || path.startsWith('/m?')) el = <MobileApp />;
   else for (const [pat, render] of routes) { const m = match(pat, path); if (m) { el = render(m); break; } }

@@ -237,7 +237,8 @@ test.describe('desktop · owner', () => {
     await page.route('**/api/tailscale', (r) => r.fulfill({ path: path.resolve(process.cwd(), 'e2e/fixtures/remote-working.json') }));
     await page.reload();
     await expect(page.getByTestId('remote-qr')).toBeVisible();
-    await expect(page.getByRole('link', { name: 'https://devbox.tail3f2a.ts.net' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'https://devbox.tail3f2a.ts.net/m/' })).toBeVisible(); // the QR code opens the mobile UI (FR-20c)
+    await expect(page.getByRole('link', { name: 'https://devbox.tail3f2a.ts.net', exact: true })).toBeVisible();
     await page.locator('#remote').scrollIntoViewIfNeeded();
     await shot(page, 'settings-remote');
     await page.unroute('**/api/tailscale');
@@ -288,6 +289,41 @@ test.describe('mobile · owner', () => {
     await page.getByRole('button', { name: 'Real app' }).click();
     await expect(page.locator('img[alt="Screenshot of v02"]')).toBeVisible();
     await shot(page, 'm-compare');
+  });
+
+  test('a phone opening a desktop address gets the mobile screen; Desktop site sticks until Mobile UI', async ({ page }) => {
+    await page.goto('/questions');
+    await expect(page).toHaveURL(/\/m\/inbox$/);
+    await page.goto('/projects/trailmap/artifacts');
+    await expect(page).toHaveURL(/\/m\/projects\/trailmap\/docs$/);
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/m\/$/);
+    await expect(page.locator('.m-tabbar')).toBeVisible();
+    // Desktop site: the desktop UI, with its navigation behind ☰.
+    await page.goto('/m/more');
+    await page.getByTestId('desktop-site').click();
+    await expect(page.locator('.pcard').first()).toBeVisible();
+    // Desktop pages fit the phone's width; wide tables scroll inside the page.
+    for (const url of ['/questions', '/queue', '/settings', '/history']) {
+      await page.goto(url);
+      await page.waitForTimeout(300);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth), url).toBeLessThanOrEqual(390);
+    }
+    await page.goto('/questions');
+    await expect(page).toHaveURL(/\/questions$/);
+    const nav = page.locator('#main-nav');
+    await expect(nav).toBeHidden();
+    await page.getByRole('button', { name: 'Menu' }).click();
+    await expect(nav).toBeVisible();
+    await shot(page, 'm-desktop-menu');
+    await nav.getByRole('link', { name: /^Sessions/ }).click();
+    await expect(page).toHaveURL(/\/sessions$/);
+    await expect(nav).toBeHidden(); // the drawer closes after a choice
+    await page.getByRole('button', { name: 'Menu' }).click();
+    await nav.getByRole('link', { name: /Mobile UI/ }).click();
+    await expect(page.locator('.m-tabbar')).toBeVisible();
+    await page.goto('/queue');
+    await expect(page).toHaveURL(/\/m\/$/);
   });
 
   test('M10 terminal with key bar', async ({ page }) => {
