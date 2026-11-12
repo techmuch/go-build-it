@@ -16,6 +16,10 @@ To release, run `gbi dev changelog release YYYY.MM.DD.N`, then `VERSION=YYYY.MM.
 
 - **The logo and title lead home** (FR-34a). Clicking the logo or *go-build-it* in the sidebar, or pressing Enter on it, opens the project catalog.
 
+### Fixed
+
+- **The end of a turn is no longer lost.** When a member finished, go-build-it read the transcript one last time but kept only the text and result. A compaction, tool call or error in those last lines was dropped: the compaction wasn't counted or recorded in the history, and the lines were missing from the session output. Found by a flaky macOS test.
+
 ## [2026.11.12.1] - 2026-11-12
 
 ### Added
