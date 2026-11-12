@@ -4,7 +4,7 @@ Every project keeps the same documents, so people, AI members and go-build-it fi
 
 ## Entry points
 
-Four HTML files under `docs/`, one per kind. Each is chosen explicitly and recorded in `docs/gbi.toml`:
+HTML files under `docs/`, one per role. Each is chosen explicitly and recorded in `docs/gbi.toml`. The standard roles are:
 
 | Role | Default file | What it holds |
 |---|---|---|
@@ -13,7 +13,8 @@ Four HTML files under `docs/`, one per kind. Each is chosen explicitly and recor
 | plan | `docs/plan.html` | renders `docs/plan.md` |
 | tracker | `docs/tracker/index.html` | reads `tracker.json`, a snapshot of go-build-it's tasks |
 
-- Start a project with `gbi artifacts init <project>`. It writes the templates and never overwrites a file.
+- **The file controls the tabs.** Each role in `[entries]` gets an Artifacts sub-tab, in the order written. Add your own roles (for example `vision = "docs/vision.html"`), and leave out the ones you don't use: no mockups entry means no Mockups or Compare tab. `tabs = ["vision", "requirements", "plan", "files"]` sets the order and which tabs show (`compare` and `files` are built in), and `[titles]` renames them.
+- Start a project with `gbi artifacts init <project>`. It writes the templates for the roles the project uses and never overwrites a file.
 - Change an entry point with `gbi artifacts entry <project> <role> docs/<file>.html`. It must be HTML.
 - Several sets of one kind go *inside* the entry HTML, as links. HTML links are how you and the viewer move between documents.
 

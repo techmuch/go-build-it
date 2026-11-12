@@ -1,6 +1,6 @@
 # ADR-014: Project documents: HTML entry points, explicit labels, compare and traceability
 
-Status: Accepted · decided by the owner 2026-11-09 · Tracker: P20-01 · Requirements: FR-140–FR-150 · Builds on FR-45, FR-46
+Status: Accepted · decided by the owner 2026-11-09, amended 2026-11-11 · Tracker: P20-01, P21-01 · Requirements: FR-140–FR-151 · Builds on FR-45, FR-46
 
 ## Context
 
@@ -26,3 +26,15 @@ The Artifacts tab listed every `.md`, `.html` and image under `docs/` and groupe
 - A project imported without `docs/gbi.toml` shows empty tabs that offer **Choose a file** or `gbi artifacts init`. Nothing appears by itself.
 - Hand-written HTML works as long as it uses the IDs. The templates show how.
 - The viewer depends on `postMessage` from `gbi-nav.js`. Pages opened outside go-build-it still work as plain HTML, except that `<gbi-md>` needs go-build-it to render.
+
+## Amendment (2026-11-11): the manifest controls the tabs
+
+The owner wanted a **Vision** tab before Requirements, and the choice to leave mockups out of a project. Fixed tabs couldn't do either. Now `docs/gbi.toml` decides (FR-151):
+
+- **Any role:** `[entries]` takes any short lowercase role name. Each role with an entry point gets a sub-tab, in the order the entries are written. A role without one has no tab. Compare appears only with a mockups entry, and Support files always.
+- **Explicit list:** `tabs = [...]` lists the sub-tabs, in order, and only those are shown. `compare` and `files` name the built-in tabs.
+- **Names:** `[titles]` renames tabs.
+- **Order is kept:** go-build-it reads the `[entries]` order from the file, and keeps it, along with `tabs` and `[titles]`, when it rewrites the file. Before this, a rewrite dropped roles it didn't know.
+- **Check and init:** `artifacts check` reports only what the file asks for. `artifacts init` creates only the roles the project uses, and removes template links to the others.
+
+Labels stay a fixed list, so labelling remains predictable. A custom role's file gets `support` unless it already has a label.

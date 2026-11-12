@@ -9,23 +9,27 @@ import { usePersonas } from './Team';
 
 // v21–v26 · Project documents (FR-140–FR-150, ADR-014). Six sub-tabs: four HTML entry
 // points shown in a sandboxed viewer that follows links, Compare, and Support files.
-const DOC_TABS: [string, string, string][] = [['requirements', 'Requirements', 'requirements'], ['mockups', 'Mockups', 'mockups'], ['plan', 'Plan', 'plan'], ['tracker', 'Tracker', 'tracker'], ['compare', 'Compare', ''], ['files', 'Support files', '']];
+type DocTab = { id: string; title: string; kind: 'entry' | 'compare' | 'files'; path?: string };
 const STATE: Record<string, [string, string]> = { 'accepted': ['grn', 'accepted'], 'drifted': ['amb', 'drifted'], 'not-reviewed': ['red', 'not reviewed'], 'task': ['blue', 'task filed'], 'no-screenshot': ['', 'no screenshot'] };
 const docEvent = (e: any) => e.type.startsWith('artifact') || e.type.startsWith('task');
 
 export function Artifacts({ id, tab: tabIn, doc }: { id: string; tab?: string; doc?: string }) {
-  const tab = tabIn || (query('path') ? 'files' : 'requirements');
   const { data: files, error, reload } = useData<any>(() => api.artifacts.files(id), [id], docEvent);
   const { data: cmp } = useData<any>(() => api.compare.list(id), [id], docEvent);
+  // docs/gbi.toml decides which sub-tabs exist, their order and their names (FR-151).
+  const tabs: DocTab[] = files?.tabs || [];
+  const tab = tabIn || (query('path') ? 'files' : tabs[0]?.id || 'files');
+  const cur = tabs.find((t) => t.id === tab);
   const unl = files?.unlabelled?.length || 0;
   return <Shell title="Artifacts" crumb={<A to={`/projects/${id}`}>{id}</A>} tabs={<ProjectTabs id={id} on="artifacts" />}
     right={unl > 0 ? <Chip c="amb">{unl} unlabelled</Chip> : undefined}>
     <Err msg={error} />
-    <nav className="subtabs" aria-label="Project documents">{DOC_TABS.map(([k, l]) => <A key={k} to={`/projects/${id}/artifacts/${k}`} className={tab === k ? 'on' : ''}>{l}
-      {k === 'compare' && cmp?.toReview > 0 && <> <Chip c="red">{cmp.toReview}</Chip></>}{k === 'files' && unl > 0 && <> <Chip c="amb">{unl}</Chip></>}</A>)}</nav>
+    <nav className="subtabs" aria-label="Project documents">{tabs.map((t) => <A key={t.id} to={`/projects/${id}/artifacts/${t.id}`} className={tab === t.id ? 'on' : ''}>{t.title}
+      {t.kind === 'compare' && cmp?.toReview > 0 && <> <Chip c="red">{cmp.toReview}</Chip></>}{t.kind === 'files' && unl > 0 && <> <Chip c="amb">{unl}</Chip></>}</A>)}</nav>
     {!files ? <Loading /> : tab === 'compare' ? <CompareTab id={id} view={doc || ''} data={cmp} />
       : tab === 'files' ? <SupportFiles id={id} files={files} reload={reload} />
-        : <EntryTab key={tab + ':' + (files.entries?.[tab] || '')} id={id} role={tab} doc={doc || ''} files={files} reload={reload} />}
+        : !cur && !files.entries?.[tab] ? <Card title="No such tab"><div className="small">This project has no <b>{tab}</b> tab. The sub-tabs come from <span className="mono">docs/gbi.toml</span>: each role in <span className="mono">[entries]</span> gets one, in the order written, or as listed in <span className="mono">tabs = [...]</span>. <A to={`/projects/${id}/artifacts/files`}>Support files ›</A></div></Card>
+          : <EntryTab key={tab + ':' + (files.entries?.[tab] || '')} id={id} role={tab} title={cur?.title || tab} doc={doc || ''} files={files} reload={reload} />}
   </Shell>;
 }
 
@@ -34,7 +38,7 @@ function relFromRaw(id: string, pathname: string) {
   return pathname.startsWith(pre) ? decodeURIComponent(pathname.slice(pre.length)) : '';
 }
 
-function EntryTab({ id, role, doc, files, reload }: { id: string; role: string; doc: string; files: any; reload: () => void }) {
+function EntryTab({ id, role, title, doc, files, reload }: { id: string; role: string; title: string; doc: string; files: any; reload: () => void }) {
   const entries: Record<string, string> = files.entries || {};
   const entry = entries[role];
   const start = doc || entry || '';
@@ -63,8 +67,8 @@ function EntryTab({ id, role, doc, files, reload }: { id: string; role: string; 
     window.addEventListener('hashchange', onHash);
     return () => { window.removeEventListener('message', on); window.removeEventListener('hashchange', onHash); };
   }, [id, role, entries]);
-  if (!entry) return <NoEntry id={id} role={role} files={files} reload={reload} />;
-  const label = DOC_TABS.find((t) => t[0] === role)?.[1];
+  if (!entry) return <NoEntry id={id} role={role} title={title} files={files} reload={reload} />;
+  const label = title;
   const md = (art?.content || '').match(/<gbi-md[^>]*\bsrc="([^"]+)"/);
   const source = here.path.endsWith('.md') ? here.path : md ? joinRel(here.path, md[1]) : here.path;
   const frameSrc = rev ? `/raw/${id}/${here.path}?rev=${rev}` : src;
@@ -93,17 +97,17 @@ function joinRel(from: string, link: string) {
   return parts.join('/');
 }
 
-function NoEntry({ id, role, files, reload }: { id: string; role: string; files: any; reload: () => void }) {
+function NoEntry({ id, role, title, files, reload }: { id: string; role: string; title: string; files: any; reload: () => void }) {
   const { run, busy } = useAction();
   const html = (files.files || []).filter((f: any) => f.kind === 'html');
   const [pick, setPick] = useState('');
-  return <Card title={`No ${role} entry point yet`}>
+  return <Card title={`No ${title} entry point yet`}>
     <div className="col small" style={{ gap: 10 }}>
-      <div>Each tab opens one HTML file you choose. go-build-it never picks one for you.</div>
+      <div>Each tab opens one HTML file you choose. go-build-it never picks one for you. <span className="muted">CLI: <code>gbi artifacts entry {id} {role} docs/&lt;file&gt;.html</code></span></div>
       {html.length > 0 && <div className="row c"><select value={pick} onChange={(e) => setPick(e.target.value)} aria-label="HTML file"><option value="">Choose an HTML file…</option>{html.map((f: any) => <option key={f.path} value={f.path}>{f.path}</option>)}</select>
         <button type="button" className="btn p" disabled={!pick || busy} onClick={() => run(() => api.artifacts.entry(id, role, pick), `The ${role} entry point is ${pick}`).then(reload)}>Set as entry point</button></div>}
-      <div className="row c"><button type="button" className="btn" data-tour="docs-init" disabled={busy} onClick={() => run(() => api.artifacts.init(id), 'Created the standard documents').then(reload)}>Create the standard set</button>
-        <span className="muted">writes templates for every missing document; never overwrites · <code>gbi artifacts init {id}</code></span></div>
+      {['requirements', 'mockups', 'plan', 'tracker'].includes(role) && <div className="row c"><button type="button" className="btn" data-tour="docs-init" disabled={busy} onClick={() => run(() => api.artifacts.init(id), 'Created the standard documents').then(reload)}>Create the standard set</button>
+        <span className="muted">writes templates for every missing document; never overwrites · <code>gbi artifacts init {id}</code></span></div>}
     </div>
   </Card>;
 }

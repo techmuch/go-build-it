@@ -1,6 +1,6 @@
 # go-build-it — Phased delivery plan
 
-Status: Draft · 2026-11-09 · Based on [requirements rev 7](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
+Status: Draft · 2026-11-11 · Based on [requirements rev 8](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
 
 ## 1. How this plan is built
 
@@ -14,6 +14,7 @@ Status: Draft · 2026-11-09 · Based on [requirements rev 7](../requirements.md)
 - **Rev 5 (P17–P18): doctor, AI-agent install and Learn** ([ADR-012](../decisions/ADR-012-doctor-and-learning.md)). P17 makes the doctor prove that gbi can start herdr and a harness, and explain failures to a person or an AI agent; it adds the install that works from the GitHub URL alone. P18 adds lessons with a coach panel and a practice project, driving gbi from your AI harness, and *How go-build-it thinks*.
 - **Rev 6 (P19): folder trust** ([ADR-013](../decisions/ADR-013-folder-trust.md)). go-build-it answers a harness's "trust this folder" prompt for the folders it created, so members, helpers and the doctor start without a person. Other prompts stay with the person.
 - **Rev 7 (P20): project documents** ([ADR-014](../decisions/ADR-014-project-documents.md)). Artifacts gets six sub-tabs: HTML entry points for requirements, mockups, plan and tracker, chosen explicitly; labels for every file, set through the CLI; a sandboxed viewer that follows links; Compare for mockups and the real app; traceability.
+- **Rev 8 (P21): tabs from docs/gbi.toml** ([ADR-014](../decisions/ADR-014-project-documents.md), amended). Each project decides its Artifacts sub-tabs: its own roles such as vision, their order, their names, and leaving out roles it doesn't use.
 - **Dogfooding from P4.** Once Courier can branch, PR, merge and release (end of P4), go-build-it manages its own remaining phases, and this tracker's data is imported into it.
 - **Sizes, not dates.** S ≈ up to a day of agent work, M ≈ 2–4 days, L ≈ 1–2 weeks. Progress is weighted S=1, M=3, L=8. Dates are set once the P0 spike shows real throughput.
 
@@ -42,6 +43,7 @@ Status: Draft · 2026-11-09 · Based on [requirements rev 7](../requirements.md)
 | P18 | Learn: lessons, practice project, harness control |  | 12 | 33 | ◆ Learn UAT |
 | P19 | Folder trust |  | 5 | 9 | ◆ Folder trust UAT |
 | P20 | Project documents |  | 12 | 31 | ◆ Documents UAT |
+| P21 | Tabs from docs/gbi.toml |  | 3 | 5 | ◆ Tabs UAT |
 
 ## 3. Critical path
 
@@ -516,6 +518,21 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 | **P20-10** Project documents standard, agent guide, user docs and CLI examples; go-build-it's own docs/gbi.toml ✅ | S | FR-150, FR-130, FR-139 | A-v14 | P20-04 |
 | **P20-11** Demo and UAT e2e for the documents tabs (screenshots regenerated); CHANGELOG ✅ | M | FR-133, FR-06a | A-v21, A-v23, A-v25 | P20-08, P20-10 |
 | **P20-12** Release 2026.11.09.2: signed binaries, install check ✅ | S | FR-05, FR-06 | — | P20-11 |
+
+### P21 · Tabs from docs/gbi.toml
+
+**Goal:** Let each project decide its Artifacts sub-tabs in docs/gbi.toml: its own roles (e.g. vision), their order, their names, and leaving out roles such as mockups.
+
+**◆ Gate: Tabs UAT.** Passes when:
+- A vision entry listed first in [entries] is the first sub-tab; tabs = [...] sets order and presence, titles rename
+- A project without a mockups entry has no Mockups or Compare tab, and check does not report it
+- gbi keeps order, tabs and titles when it rewrites the file; init creates only the roles used
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P21-01** Requirements rev 8 (FR-151; FR-140 amended), ADR-014 amendment, mockup 25 ✅ | S | FR-151, FR-140 | A-v25 | — |
+| **P21-02** Manifest: any role, [entries] order, tabs, titles; kept on rewrite; check and init follow the file ✅ | M | FR-151, FR-141, FR-149, FR-150 | A-v25 | P21-01 |
+| **P21-03** Sub-tabs on desktop and phone from the manifest; docs, standard, changelog ✅ | S | FR-151, FR-140, FR-130 | A-v21, A-M14 | P21-02 |
 
 ## 5. Open questions schedule
 
