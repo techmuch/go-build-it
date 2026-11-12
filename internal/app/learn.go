@@ -325,3 +325,25 @@ func (a *App) purgeProjectRows(ctx context.Context, id string) error {
 	}
 	return nil
 }
+
+// SeedStandards gives a new installation its standards: *.md files in ~/.go-build-it/standards
+// when that folder has any, otherwise the starter set shipped in docs/standards. An
+// installation that already has standards is left alone. Project documents (FR-150) is
+// always ensured. It returns how many standards it created.
+func (a *App) SeedStandards(ctx context.Context) int {
+	n := 0
+	if a.Standards.Empty(ctx) {
+		n, _ = a.Standards.SeedFromDir(ctx, filepath.Join(a.Cfg.Dir(), "standards"))
+		if n == 0 {
+			for _, d := range docs.DefaultStandards() {
+				if _, err := a.Standards.Save(ctx, d.ID, d.Title, d.Body, "starter standard shipped with go-build-it"); err == nil {
+					n++
+				}
+			}
+		}
+	}
+	if ok, _ := a.Standards.EnsureBuiltin(ctx, "project-documents", "Project documents", docs.ProjectDocumentsStandard()); ok {
+		n++
+	}
+	return n
+}

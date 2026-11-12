@@ -317,10 +317,14 @@ export const api = {
     routes: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/routes`, undefined, query),
   },
   tailscale: {
-    /** Serve go-build-it on your tailnet */
+    /** The tailnet URL as a QR code for your phone (FR-20c) */
+    qr: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/tailscale/qr`, undefined, query),
+    /** Serve go-build-it on your tailnet; never takes another service's address (FR-20b) */
     setup: (body?: unknown) => call<any>('POST', `/api/tailscale/setup`, body),
-    /** Tailscale and Serve status */
+    /** Remote access checklist: Tailscale, the Serve rule, reachable, private, other services (FR-20a) */
     status: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/tailscale`, undefined, query),
+    /** Stop serving go-build-it on the tailnet (removes only its own rule) */
+    stop: (body?: unknown) => call<any>('POST', `/api/tailscale/stop`, body),
   },
   tasks: {
     /** Queue a task */

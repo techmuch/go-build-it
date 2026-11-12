@@ -2,7 +2,7 @@
 // (todo | in-progress | blocked | done) and update "updated". The page reads this file.
 window.TRACKER = {
  "project": "go-build-it",
- "updated": "2026-11-11",
+ "updated": "2026-11-12",
  "sizes": {
   "S": 1,
   "M": 3,
@@ -325,6 +325,30 @@ window.TRACKER = {
     "A vision entry listed first in [entries] is the first sub-tab; tabs = [...] sets order and presence, titles rename",
     "A project without a mockups entry has no Mockups or Compare tab, and check does not report it",
     "gbi keeps order, tabs and titles when it rewrites the file; init creates only the roles used"
+   ]
+  },
+  {
+   "id": "P22",
+   "name": "Starter archetypes & standards",
+   "mvp": false,
+   "goal": "Give every new installation strong starter personas and standards: full role instructions for the six archetypes, upgraded in place when never edited, and the owner's standards preloaded.",
+   "gate": "Personas review",
+   "gateCriteria": [
+    "Each starter archetype states its mission, what good looks like, how it works with gbi commands, when it hands back and what it never does",
+    "An unedited starter is upgraded as a new revision, keeping the owner's harness and model; edited ones are untouched; members move through the change review",
+    "A fresh installation has the six archetypes and the starter standards; an existing one is not reseeded"
+   ]
+  },
+  {
+   "id": "P23",
+   "name": "Remote access",
+   "mvp": false,
+   "goal": "Prove go-build-it is served on the tailnet, is this go-build-it and is private; show what else the machine serves; never take another service's address; a QR code for a phone.",
+   "gate": "Remote access UAT",
+   "gateCriteria": [
+    "The checklist matches the Serve rule exactly, proves the round trip reaches this go-build-it, and fails when Funnel is on",
+    "With another service on 443, setup names it, proposes go-build-it's own port and runs only after confirmation; stop removes only go-build-it's rule",
+    "A QR code of the working URL appears in Settings and in gbi tailscale qr; gbi doctor reports tailscale.serve"
    ]
   }
  ],
@@ -4241,6 +4265,195 @@ window.TRACKER = {
    "status": "done",
    "done": "",
    "q": []
+  },
+  {
+   "id": "P22-01",
+   "phase": "P22",
+   "title": "Requirements rev 9 (FR-12f, FR-50a); mockup 10 note",
+   "reqs": [
+    "FR-12f",
+    "FR-50a"
+   ],
+   "views": [
+    "A-v10"
+   ],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "docs/requirements.md rev 9",
+   "q": []
+  },
+  {
+   "id": "P22-02",
+   "phase": "P22",
+   "title": "Starter archetype instructions for PM, architect, developer, QA, reviewer and release manager; upgrade unedited starters; role descriptions; release notes follow the release manager",
+   "reqs": [
+    "FR-12f",
+    "FR-12",
+    "FR-12b",
+    "FR-93"
+   ],
+   "views": [
+    "A-v10"
+   ],
+   "size": "M",
+   "deps": [
+    "P22-01"
+   ],
+   "status": "done",
+   "done": "internal/team/starters.go; TestStarterInstructionsUpgrade",
+   "q": []
+  },
+  {
+   "id": "P22-03",
+   "phase": "P22",
+   "title": "New installations start with the starter standards from docs/standards; never reseed",
+   "reqs": [
+    "FR-50a",
+    "FR-50"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P22-01"
+   ],
+   "status": "done",
+   "done": "SeedStandards; TestNewInstallationDefaults",
+   "q": []
+  },
+  {
+   "id": "P22-04",
+   "phase": "P22",
+   "title": "User docs (starter archetypes table) and CHANGELOG",
+   "reqs": [
+    "FR-12f",
+    "FR-130"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P22-02",
+    "P22-03"
+   ],
+   "status": "done",
+   "done": "docs/user/22-archetypes-and-members.md",
+   "q": []
+  },
+  {
+   "id": "P23-01",
+   "phase": "P23",
+   "title": "Requirements rev 9 (FR-20a-FR-20d), ADR-015, mockup 27",
+   "reqs": [
+    "FR-20a",
+    "FR-20b",
+    "FR-20c",
+    "FR-20d"
+   ],
+   "views": [
+    "A-v27"
+   ],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "ADR-015; mockup v27",
+   "q": []
+  },
+  {
+   "id": "P23-02",
+   "phase": "P23",
+   "title": "Serve detection: exact rule, round trip to this go-build-it, Funnel, other services and their programs; setup never replaces an address; stop removes only its own rule; owner only; history",
+   "reqs": [
+    "FR-20",
+    "FR-20a",
+    "FR-20b"
+   ],
+   "views": [
+    "A-v27"
+   ],
+   "size": "M",
+   "deps": [
+    "P23-01"
+   ],
+   "status": "done",
+   "done": "internal/tailscale; tailscale_test.go",
+   "q": []
+  },
+  {
+   "id": "P23-03",
+   "phase": "P23",
+   "title": "Settings: Remote access card with the checklist, other services, proposal and confirm, stop, and the QR code; gbi tailscale qr",
+   "reqs": [
+    "FR-20a",
+    "FR-20b",
+    "FR-20c"
+   ],
+   "views": [
+    "A-v27",
+    "A-v13"
+   ],
+   "size": "M",
+   "deps": [
+    "P23-02"
+   ],
+   "status": "done",
+   "done": "Org.tsx RemoteAccessCard; gbi tailscale qr",
+   "q": []
+  },
+  {
+   "id": "P23-04",
+   "phase": "P23",
+   "title": "Doctor check tailscale.serve and its troubleshooting section",
+   "reqs": [
+    "FR-20d",
+    "FR-07c"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P23-02"
+   ],
+   "status": "done",
+   "done": "doctor tailscale.serve; troubleshooting",
+   "q": []
+  },
+  {
+   "id": "P23-05",
+   "phase": "P23",
+   "title": "Scripted tailscale in the demo; UAT steps and screenshots; user docs; CHANGELOG",
+   "reqs": [
+    "FR-133",
+    "FR-130",
+    "FR-06a"
+   ],
+   "views": [
+    "A-v27"
+   ],
+   "size": "S",
+   "deps": [
+    "P23-03",
+    "P23-04"
+   ],
+   "status": "done",
+   "done": "demo.sh scripted tailscale; UAT 13; 31+14+3 e2e passed",
+   "q": []
+  },
+  {
+   "id": "P23-06",
+   "phase": "P23",
+   "title": "Release 2026.11.12.1: signed binaries, install check",
+   "reqs": [
+    "FR-05",
+    "FR-06"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P22-04",
+    "P23-05"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
   }
  ],
  "requirements": {
@@ -4364,6 +4577,10 @@ window.TRACKER = {
    "text": "Human users SHALL remain global identities (§4.2).",
    "section": "4.1 Team members"
   },
+  "FR-12f": {
+   "text": "(rev 9) Each starter archetype SHALL carry complete role instructions:",
+   "section": "4.1 Team members"
+  },
   "FR-13": {
    "text": "Archetypes and project members' tuning SHALL be edited in the artifact editor (FR-45a).",
    "section": "4.1 Team members"
@@ -4390,6 +4607,22 @@ window.TRACKER = {
   },
   "FR-20": {
    "text": "The application SHALL help the user set up Tailscale Serve, for example by detecting whether Tailscale is installed and logged in and then offering to configure tailscale serve.",
+   "section": "4.2 Access and identity"
+  },
+  "FR-20a": {
+   "text": "(rev 9) Settings → Remote access and gbi tailscale status SHALL show a checklist, each line with its evidence and, when it fails, the fix:",
+   "section": "4.2 Access and identity"
+  },
+  "FR-20b": {
+   "text": "(rev 9) Setting up Serve SHALL NEVER replace another service's address.",
+   "section": "4.2 Access and identity"
+  },
+  "FR-20c": {
+   "text": "(rev 9) When go-build-it is reachable and private, Remote access SHALL show its tailnet URL as a QR code, generated inside go-build-it, with a reminder that the phone must be signe",
+   "section": "4.2 Access and identity"
+  },
+  "FR-20d": {
+   "text": "(rev 9) The doctor SHALL check remote access (tailscale.serve):",
    "section": "4.2 Access and identity"
   },
   "FR-25": {
@@ -4518,6 +4751,10 @@ window.TRACKER = {
   },
   "FR-50": {
    "text": "The application SHALL maintain a set of global standards that apply to every project.",
+   "section": "7. Global standards"
+  },
+  "FR-50a": {
+   "text": "(rev 9) A new installation SHALL start with go-build-it's starter standards, shipped in the binary from docs/standards/ (access control, AI layer security, code design, development",
    "section": "7. Global standards"
   },
   "FR-51": {

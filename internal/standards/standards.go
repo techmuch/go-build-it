@@ -240,6 +240,12 @@ func (s *Service) EnsureBuiltin(ctx context.Context, id, title, body string) (bo
 	return err == nil, err
 }
 
+// Empty reports whether no standard exists yet (a new installation).
+func (s *Service) Empty(ctx context.Context) bool {
+	var n int
+	return s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM standards`).Scan(&n) == nil && n == 0
+}
+
 // SeedFromDir loads *.md files from dir as standards when none exist yet.
 func (s *Service) SeedFromDir(ctx context.Context, dir string) (int, error) {
 	var n int

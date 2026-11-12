@@ -105,6 +105,19 @@ Then sign in to it once in a terminal.
 
 **Confirm:** `gbi doctor` shows the service file.
 
+### `tailscale.serve`
+
+**What it means:** go-build-it has a Tailscale Serve rule, but something is wrong with it. Not using Tailscale is fine: the check is then skipped.
+
+- **Failure: Funnel is on.** go-build-it is on the public internet. It trusts Tailscale identity, so it must stay on your tailnet.
+- **Warning: not reachable.** The rule exists, but the address did not answer, or another program or another copy of go-build-it answered.
+
+**Fix:**
+- For Funnel: run the command the doctor prints, for example `tailscale funnel --https=443 off`.
+- For reachability: open **Settings → Remote access**, or run `gbi tailscale status`, and follow the failing line. If go-build-it is not running, start it with `gbi service install`.
+
+**Confirm:** `gbi doctor` shows the URL, tailnet only.
+
 ### `harness.on_service_path`
 
 **What it means (warning):** the login service starts go-build-it with a fixed PATH, which was copied from your shell when you ran `gbi service install`. The harness is not on that PATH. This usually means you installed the harness after installing the service. Members may still find it if your login shell adds its folder; the live tier's `harness.on_pane_path` check says for sure.

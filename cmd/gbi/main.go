@@ -96,10 +96,9 @@ func serve(args []string) error {
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	if n, _ := a.Standards.SeedFromDir(ctx, filepath.Join(cfg.Dir(), "standards")); n > 0 {
+	if n := a.SeedStandards(ctx); n > 0 {
 		log.Info("seeded standards", "count", n)
 	}
-	_, _ = a.Standards.EnsureBuiltin(ctx, "project-documents", "Project documents", docs.ProjectDocumentsStandard()) // FR-150
 	// After an update installs, the job asks to restart: shut down cleanly, then replace
 	// this process with the new binary (FR-06d, ADR-011).
 	restart := make(chan struct{})

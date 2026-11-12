@@ -20,6 +20,7 @@ import (
 	"github.com/techmuch/go-build-it/internal/herdr"
 	"github.com/techmuch/go-build-it/internal/service"
 	"github.com/techmuch/go-build-it/internal/sessions"
+	"github.com/techmuch/go-build-it/internal/tailscale"
 )
 
 // Tier is a group of checks. Each tier runs only when the tiers before it had no failure.
@@ -116,6 +117,8 @@ type Doctor struct {
 	Version string
 	// Service returns the login service plan; nil uses service.Build. Tests replace it.
 	Service func() (service.Plan, error)
+	// Tailscale is the machine the remote access check reads; nil uses the real one. Tests replace it.
+	Tailscale *tailscale.Env
 	// StartTimeout bounds how long a harness may take to become ready (default 45s).
 	StartTimeout time.Duration
 }
@@ -408,7 +411,55 @@ func (d *Doctor) static(ctx context.Context, rep *Report, probes []*probe) []Res
 			}
 		}
 	}
+	out = append(out, d.tailscaleServe(ctx))
 	return out
+}
+
+// tailscaleServe checks remote access (FR-20d). Not using Tailscale is fine: it is skipped.
+func (d *Doctor) tailscaleServe(ctx context.Context) Result {
+	t0 := time.Now()
+	env := tailscale.System
+	if d.Tailscale != nil {
+		env = *d.Tailscale
+	}
+	s := env.Detect(ctx, d.Cfg.Listen, d.Cfg.Dir())
+	var r Result
+	switch {
+	case !s.LoggedIn || !s.Serving:
+		r = res("tailscale.serve", Skipped, "not used: "+firstNonEmpty(s.Guidance, "go-build-it is not served on a tailnet"), nil)
+	case !s.Private:
+		r = res("tailscale.serve", Fail, "Funnel is on for "+s.ServeURL+": anyone on the internet can reach go-build-it", nil)
+		r.Fix = human("Turn Funnel off for go-build-it: run `" + checkFix(s, "private") + "`. go-build-it trusts Tailscale identity and must stay on your tailnet.")
+	case !s.Reachable:
+		r = res("tailscale.serve", Warn, checkDetail(s, "reachable"), nil)
+		r.Fix = human("Open Settings → Remote access, or run `gbi tailscale status`, and follow the failing check. If go-build-it is not running, start it with `gbi service install`.")
+	default:
+		r = res("tailscale.serve", OK, s.ServeURL+" answers, tailnet only", nil)
+	}
+	r.Evidence = &Evidence{Command: "tailscale serve status --json"}
+	for _, c := range s.Checks {
+		r.Evidence.Output += fmt.Sprintf("%s: %s %s\n", c.ID, c.Status, c.Detail)
+	}
+	r.Ms = since(t0)
+	return r
+}
+
+func checkDetail(s tailscale.Status, id string) string {
+	for _, c := range s.Checks {
+		if c.ID == id {
+			return c.Detail
+		}
+	}
+	return ""
+}
+
+func checkFix(s tailscale.Status, id string) string {
+	for _, c := range s.Checks {
+		if c.ID == id {
+			return c.Fix
+		}
+	}
+	return ""
 }
 
 func (d *Doctor) servicePlan() (service.Plan, error) {

@@ -1,6 +1,6 @@
 # go-build-it — Phased delivery plan
 
-Status: Draft · 2026-11-11 · Based on [requirements rev 8](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
+Status: Draft · 2026-11-12 · Based on [requirements rev 9](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
 
 ## 1. How this plan is built
 
@@ -15,6 +15,7 @@ Status: Draft · 2026-11-11 · Based on [requirements rev 8](../requirements.md)
 - **Rev 6 (P19): folder trust** ([ADR-013](../decisions/ADR-013-folder-trust.md)). go-build-it answers a harness's "trust this folder" prompt for the folders it created, so members, helpers and the doctor start without a person. Other prompts stay with the person.
 - **Rev 7 (P20): project documents** ([ADR-014](../decisions/ADR-014-project-documents.md)). Artifacts gets six sub-tabs: HTML entry points for requirements, mockups, plan and tracker, chosen explicitly; labels for every file, set through the CLI; a sandboxed viewer that follows links; Compare for mockups and the real app; traceability.
 - **Rev 8 (P21): tabs from docs/gbi.toml** ([ADR-014](../decisions/ADR-014-project-documents.md), amended). Each project decides its Artifacts sub-tabs: its own roles such as vision, their order, their names, and leaving out roles it doesn't use.
+- **Rev 9 (P22–P23): starter personas and standards; remote access** ([ADR-015](../decisions/ADR-015-remote-access.md)). P22 gives the six starter archetypes full role instructions, upgrades them in place when never edited, and preloads the starter standards on new installations. P23 proves go-build-it is served on the tailnet, is this go-build-it and is private, never takes another service's address, and shows a QR code for a phone.
 - **Dogfooding from P4.** Once Courier can branch, PR, merge and release (end of P4), go-build-it manages its own remaining phases, and this tracker's data is imported into it.
 - **Sizes, not dates.** S ≈ up to a day of agent work, M ≈ 2–4 days, L ≈ 1–2 weeks. Progress is weighted S=1, M=3, L=8. Dates are set once the P0 spike shows real throughput.
 
@@ -44,6 +45,8 @@ Status: Draft · 2026-11-11 · Based on [requirements rev 8](../requirements.md)
 | P19 | Folder trust |  | 5 | 9 | ◆ Folder trust UAT |
 | P20 | Project documents |  | 12 | 31 | ◆ Documents UAT |
 | P21 | Tabs from docs/gbi.toml |  | 3 | 5 | ◆ Tabs UAT |
+| P22 | Starter archetypes & standards |  | 4 | 6 | ◆ Personas review |
+| P23 | Remote access |  | 6 | 10 | ◆ Remote access UAT |
 
 ## 3. Critical path
 
@@ -533,6 +536,40 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 | **P21-01** Requirements rev 8 (FR-151; FR-140 amended), ADR-014 amendment, mockup 25 ✅ | S | FR-151, FR-140 | A-v25 | — |
 | **P21-02** Manifest: any role, [entries] order, tabs, titles; kept on rewrite; check and init follow the file ✅ | M | FR-151, FR-141, FR-149, FR-150 | A-v25 | P21-01 |
 | **P21-03** Sub-tabs on desktop and phone from the manifest; docs, standard, changelog ✅ | S | FR-151, FR-140, FR-130 | A-v21, A-M14 | P21-02 |
+
+### P22 · Starter archetypes & standards
+
+**Goal:** Give every new installation strong starter personas and standards: full role instructions for the six archetypes, upgraded in place when never edited, and the owner's standards preloaded.
+
+**◆ Gate: Personas review.** Passes when:
+- Each starter archetype states its mission, what good looks like, how it works with gbi commands, when it hands back and what it never does
+- An unedited starter is upgraded as a new revision, keeping the owner's harness and model; edited ones are untouched; members move through the change review
+- A fresh installation has the six archetypes and the starter standards; an existing one is not reseeded
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P22-01** Requirements rev 9 (FR-12f, FR-50a); mockup 10 note ✅ | S | FR-12f, FR-50a | A-v10 | — |
+| **P22-02** Starter archetype instructions for PM, architect, developer, QA, reviewer and release manager; upgrade unedited starters; role descriptions; release notes follow the release manager ✅ | M | FR-12f, FR-12, FR-12b, FR-93 | A-v10 | P22-01 |
+| **P22-03** New installations start with the starter standards from docs/standards; never reseed ✅ | S | FR-50a, FR-50 | — | P22-01 |
+| **P22-04** User docs (starter archetypes table) and CHANGELOG ✅ | S | FR-12f, FR-130 | — | P22-02, P22-03 |
+
+### P23 · Remote access
+
+**Goal:** Prove go-build-it is served on the tailnet, is this go-build-it and is private; show what else the machine serves; never take another service's address; a QR code for a phone.
+
+**◆ Gate: Remote access UAT.** Passes when:
+- The checklist matches the Serve rule exactly, proves the round trip reaches this go-build-it, and fails when Funnel is on
+- With another service on 443, setup names it, proposes go-build-it's own port and runs only after confirmation; stop removes only go-build-it's rule
+- A QR code of the working URL appears in Settings and in gbi tailscale qr; gbi doctor reports tailscale.serve
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P23-01** Requirements rev 9 (FR-20a-FR-20d), ADR-015, mockup 27 ✅ | S | FR-20a, FR-20b, FR-20c, FR-20d | A-v27 | — |
+| **P23-02** Serve detection: exact rule, round trip to this go-build-it, Funnel, other services and their programs; setup never replaces an address; stop removes only its own rule; owner only; history ✅ | M | FR-20, FR-20a, FR-20b | A-v27 | P23-01 |
+| **P23-03** Settings: Remote access card with the checklist, other services, proposal and confirm, stop, and the QR code; gbi tailscale qr ✅ | M | FR-20a, FR-20b, FR-20c | A-v27, A-v13 | P23-02 |
+| **P23-04** Doctor check tailscale.serve and its troubleshooting section ✅ | S | FR-20d, FR-07c | — | P23-02 |
+| **P23-05** Scripted tailscale in the demo; UAT steps and screenshots; user docs; CHANGELOG ✅ | S | FR-133, FR-130, FR-06a | A-v27 | P23-03, P23-04 |
+| **P23-06** Release 2026.11.12.1: signed binaries, install check ✅ | S | FR-05, FR-06 | — | P22-04, P23-05 |
 
 ## 5. Open questions schedule
 

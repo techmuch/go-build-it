@@ -1,6 +1,6 @@
 # go-build-it — Requirements
 
-Status: Draft · Last updated: 2026-11-11 (rev. 8: docs/gbi.toml controls the Artifacts sub-tabs, which ones exist, their order and their names, including your own roles such as vision, FR-151. Rev. 7: project documents with HTML entry points, explicit labels, a viewer that follows links, mockup-to-app comparison and traceability, FR-140–FR-150, see [ADR-014](decisions/ADR-014-project-documents.md). Rev. 6: go-build-it answers a harness's folder trust prompt for folders it created, FR-07f, see [ADR-013](decisions/ADR-013-folder-trust.md). Rev. 5: a doctor that proves gbi can start herdr and a harness and explains failures to people and AI agents, FR-07a–FR-07e; install by giving an AI agent the GitHub URL, FR-02a–FR-02b; lessons, a practice project, harness control and design rationale, FR-134–FR-139; see [ADR-012](decisions/ADR-012-doctor-and-learning.md). Rev. 4: in-app change log and guided updates, FR-06a–FR-06e, see [ADR-011](decisions/ADR-011-changelog-guided-updates.md). Rev. 3: herdr as the only agent backend; per-project team members from global archetypes, see [ADR-009](decisions/ADR-009-herdr-backend.md) and [ADR-010](decisions/ADR-010-project-team-members.md))
+Status: Draft · Last updated: 2026-11-12 (rev. 9: starter archetypes with full role instructions that upgrade when unedited, FR-12f; new installations start with the starter standards, FR-50a; a remote access checklist that proves go-build-it is served, private and not clashing with other services, with a QR code, FR-20a–FR-20d, see [ADR-015](decisions/ADR-015-remote-access.md). Rev. 8: docs/gbi.toml controls the Artifacts sub-tabs, which ones exist, their order and their names, including your own roles such as vision, FR-151. Rev. 7: project documents with HTML entry points, explicit labels, a viewer that follows links, mockup-to-app comparison and traceability, FR-140–FR-150, see [ADR-014](decisions/ADR-014-project-documents.md). Rev. 6: go-build-it answers a harness's folder trust prompt for folders it created, FR-07f, see [ADR-013](decisions/ADR-013-folder-trust.md). Rev. 5: a doctor that proves gbi can start herdr and a harness and explains failures to people and AI agents, FR-07a–FR-07e; install by giving an AI agent the GitHub URL, FR-02a–FR-02b; lessons, a practice project, harness control and design rationale, FR-134–FR-139; see [ADR-012](decisions/ADR-012-doctor-and-learning.md). Rev. 4: in-app change log and guided updates, FR-06a–FR-06e, see [ADR-011](decisions/ADR-011-changelog-guided-updates.md). Rev. 3: herdr as the only agent backend; per-project team members from global archetypes, see [ADR-009](decisions/ADR-009-herdr-backend.md) and [ADR-010](decisions/ADR-010-project-team-members.md))
 
 ## 1. Overview
 
@@ -118,6 +118,7 @@ go-build-it is a Go application with an embedded React frontend that manages lon
 - **FR-12c**: Tuning made in a project MAY be promoted back to the archetype, through the artifact editor's normal accept or reject flow.
 - **FR-12d**: Each AI team member SHALL be bound to exactly one harness and model, one current harness conversation, one long-lived git worktree, and one herdr pane in the gbi herdr session (§8.1). One member works on one task at a time; more parallel work means more members.
 - **FR-12e**: Human users SHALL remain global identities (§4.2). A human SHALL hold a role per project.
+- **FR-12f**: *(rev 9)* Each starter archetype SHALL carry complete role instructions: its mission, what good work looks like, how it works (naming the gbi commands it uses), when it hands back, and what it never does. They SHALL hold only what is specific to the role, because the standards, the task and the project reach the agent separately (FR-53). They draw on established practice: small vertical slices tied to requirement IDs (PM); quality-attribute scenarios, option sets and ADRs (architect); test-first, small diffs, never weakening a test (developer); risk-based and exploratory testing (QA); approving changes that improve the system, with evidence (reviewer); small revertible batches and release notes written for users (release manager). When go-build-it ships improved starter instructions, an archetype whose instructions were never edited SHALL get them as a new revision, keeping the owner's harness, model, name and standards; members SHALL move to it through the change review (FR-12b). The agent that writes release notes SHALL follow the release manager's instructions.
 - **FR-13**: Archetypes and project members' tuning SHALL be edited in the artifact editor (FR-45a). The user can write the definition directly, or chat with an AI agent that helps develop it (e.g. interviews the user, suggests instructions, checks for conflicts with global standards).
 
 ### 4.2 Access and identity
@@ -133,6 +134,16 @@ Authentication is delegated to Tailscale. go-build-it does not run its own login
 - **FR-18**: **External interface** requests SHALL be challenged before access is granted. See open question Q1.
 - **FR-19**: By default the application SHALL listen only on loopback. Listening on external interfaces SHALL require explicit configuration.
 - **FR-20**: The application SHALL help the user set up Tailscale Serve, for example by detecting whether Tailscale is installed and logged in and then offering to configure `tailscale serve`. It SHALL show clear guidance when Tailscale is missing.
+- **FR-20a**: *(rev 9)* **Settings → Remote access** and `gbi tailscale status` SHALL show a checklist, each line with its evidence and, when it fails, the fix:
+  - Tailscale is installed, and running and logged in, with this machine's tailnet name;
+  - a Serve rule points at go-build-it's own address (matched exactly, not by searching text);
+  - the tailnet URL answers, and the answer comes from this go-build-it (same data folder), not another program or copy;
+  - go-build-it is private: Funnel is off for its address;
+  - no other service is on go-build-it's address.
+  It SHALL also list everything else this machine serves, with the program behind each address when known.
+- **FR-20b**: *(rev 9)* Setting up Serve SHALL NEVER replace another service's address. When the root of port 443 is free or already go-build-it's, setup MAY serve there without asking. When another service holds it, go-build-it SHALL name that service, propose its own HTTPS port, show the exact `tailscale serve` command, and run it only after the person confirms. **Stop serving** SHALL remove only go-build-it's own rules. Only the owner MAY set up or stop serving, and each change SHALL be recorded in the history.
+- **FR-20c**: *(rev 9)* When go-build-it is reachable and private, Remote access SHALL show its tailnet URL as a QR code, generated inside go-build-it, with a reminder that the phone must be signed in to the same tailnet. `gbi tailscale qr` SHALL draw the same code in a terminal.
+- **FR-20d**: *(rev 9)* The doctor SHALL check remote access (`tailscale.serve`): skipped when go-build-it is not served on a tailnet, a failure when Funnel makes it public, and a warning when its rule exists but the URL does not reach this go-build-it.
 
 ### 4.3 Roles
 
@@ -222,6 +233,7 @@ Every project keeps the same kinds of documents, so people, AI members and gbi c
   - unit tests required
   - end-to-end tests required
   - documentation requirements
+- **FR-50a**: *(rev 9)* A new installation SHALL start with go-build-it's starter standards, shipped in the binary from `docs/standards/` (access control, AI layer security, code design, development loop, the DoD application security, ATO readiness, audit logging and secure supply chain standards, Go backend, operational resilience, planning and alignment, React frontend, software hardening), plus the built-in Project documents standard (FR-150). Markdown files in `~/.go-build-it/standards/` SHALL be used instead when present. An installation that already has standards SHALL NOT be reseeded.
 - **FR-51**: Standards SHALL be authored as Markdown and managed in the UI and the CLI. They SHALL be edited in the artifact editor (FR-45a), so an AI agent can help draft or change them.
 - **FR-52**: A project MAY override or extend a global standard. Every override SHALL be recorded with its reason.
 - **FR-53**: Standards SHALL be supplied to every agent session automatically, for example by generating the harness's instruction file (`CLAUDE.md`, `AGENTS.md` or equivalent), or by injecting them into the session context.
@@ -425,4 +437,4 @@ By default, an AI team member's conversation relies on the harness's built-in au
 - Consuming go-build-it as a Go module
 - Agent process hosts other than herdr (tmux, a built-in PTY, headless `-p` / `stream-json` runs)
 - Driving herdr on remote machines (herdr's saved SSH machines); go-build-it uses the local gbi session only
-- Parsing harness dialogs from the screen to answer them on the user's behalf
+- Parsing harness dialogs from the screen to answer them on the user's behalf, except the folder trust prompt for folders go-build-it created (FR-07f)

@@ -6,6 +6,33 @@ To release, run `gbi dev changelog release YYYY.MM.DD.N`, then `VERSION=YYYY.MM.
 
 ## [Unreleased]
 
+## [2026.11.12.1] - 2026-11-12
+
+### Added
+
+- **Remote access in Settings** (FR-20a–FR-20d, ADR-015). A checklist proves go-build-it works on your tailnet:
+  - **Tailscale:** installed, running and logged in.
+  - **The Serve rule:** a rule points at go-build-it's own port, matched exactly. Before, a text search counted any mention of the port.
+  - **The round trip:** the tailnet URL answers, and the answer comes from *this* go-build-it.
+  - **Private:** Funnel is off.
+  - **Other services:** everything else the machine serves is listed, with the program behind each address.
+- **QR code** of the working tailnet URL, for your phone, in Settings and in the terminal (`gbi tailscale qr`).
+- **Doctor check `tailscale.serve`**, skipped when you don't use Tailscale.
+
+### Changed
+
+- **Setting up Tailscale Serve never takes another service's address.** If another app owns `https://<machine>.ts.net`, go-build-it names it, proposes its own port, shows the command, and serves there only when you confirm (`gbi tailscale setup --confirm`). Before, setup silently replaced whatever was there.
+- **Stop serving** (`gbi tailscale stop`) removes only go-build-it's rule. Only owners can set up or stop serving, and each change is recorded in the history.
+- **New installations start with the starter standards:** access control, AI layer security, code design, development loop, the four DoD standards, Go backend, operational resilience, planning and alignment, React frontend and software hardening, plus Project documents. Existing installations are not reseeded.
+- **Stronger starter personas.** The six starter archetypes now carry full role instructions: what good looks like, how the role works with gbi's commands, when to hand back, and what it never does.
+  - **Pilot (PM):** small vertical slices tied to requirement IDs, ordered by value and risk, with gates decided by people.
+  - **Atlas (architect):** measurable quality-attribute scenarios, option sets before costly decisions, ADRs after.
+  - **Forge (developer):** test-first, small diffs, the full suite green, and never weakens a test.
+  - **Probe (QA):** risk-based end-to-end tests, exploratory testing (SFDPOT), and reproducible findings.
+  - **Lens (reviewer):** approves changes that improve the system, in a fixed order of checks, with evidence for each finding.
+  - **Courier (release manager):** small revertible batches, a releasable main branch, and release notes written for users. The agent that writes release notes now follows these rules.
+- **Upgrades:** starter instructions you never edited are upgraded to a new revision. Your harness and model choices are kept. Members move to the new revision through the archetype change review (`gbi archetypes apply <id> --all`). Instructions you edited are never touched.
+
 ## [2026.11.11.1] - 2026-11-11
 
 ### Changed

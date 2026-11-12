@@ -48,6 +48,61 @@ func TestStarterArchetypesAndTeam(t *testing.T) {
 	}
 }
 
+// Starter instructions nobody edited are upgraded when go-build-it ships new ones; edited
+// ones, and the owner's harness choice, are left alone. Members follow through the change review.
+func TestStarterInstructionsUpgrade(t *testing.T) {
+	db, err := store.Open(filepath.Join(t.TempDir(), "t.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	s := New(db, history.New(db))
+	ctx := access.WithActor(context.Background(), access.Actor{Name: "david", Kind: "human", Origin: access.Local})
+	// Put the install back to what an earlier release shipped, then let the owner edit two.
+	for id, old := range starterV1 {
+		if _, err := db.Exec(`UPDATE archetypes SET instructions=? WHERE id=?`, old, id); err != nil {
+			t.Fatal(err)
+		}
+	}
+	rev, _ := s.Archetype(ctx, "reviewer")
+	rev.Harness = "antigravity" // the owner changed only the harness
+	if _, err := s.SaveArchetype(ctx, rev); err != nil {
+		t.Fatal(err)
+	}
+	arch, _ := s.Archetype(ctx, "architect")
+	arch.Instructions = "## Mine\n- My own rules.\n"
+	if _, err := s.SaveArchetype(ctx, arch); err != nil {
+		t.Fatal(err)
+	}
+	m, _ := s.AddFromArchetype(ctx, "p1", "developer", "Forge")
+
+	s = New(db, history.New(db)) // the next start of the upgraded binary
+	dev, _ := s.Archetype(ctx, "developer")
+	if dev.Rev != 2 || !strings.Contains(dev.Instructions, "Never weaken, skip or delete a test") {
+		t.Fatalf("developer not upgraded: rev %d\n%s", dev.Rev, dev.Instructions)
+	}
+	if r, _ := s.Archetype(ctx, "reviewer"); r.Rev != 3 || r.Harness != "antigravity" || !strings.Contains(r.Instructions, "independent second pair of eyes") {
+		t.Fatalf("reviewer: rev %d harness %s", r.Rev, r.Harness)
+	}
+	if a, _ := s.Archetype(ctx, "architect"); a.Rev != 2 || !strings.Contains(a.Instructions, "My own rules") {
+		t.Fatalf("an edited archetype was changed: rev %d\n%s", a.Rev, a.Instructions)
+	}
+	if again := New(db, history.New(db)); again != nil {
+		if d, _ := again.Archetype(ctx, "developer"); d.Rev != 2 {
+			t.Fatalf("upgrade ran twice: rev %d", d.Rev)
+		}
+	}
+	cs, _ := s.Changes(ctx, "developer")
+	if len(cs) != 1 || cs[0].Member.ID != m.ID || !cs[0].CanApplyClean {
+		t.Fatalf("the member should be offered the new revision: %+v", cs)
+	}
+	var roleDesc string
+	db.QueryRow(`SELECT description FROM roles WHERE id='qa'`).Scan(&roleDesc)
+	if !strings.Contains(roleDesc, "risk-based") {
+		t.Fatalf("built-in role description not refreshed: %s", roleDesc)
+	}
+}
+
 func TestTuningChangesPromote(t *testing.T) {
 	s, ctx := setup(t)
 	forge, err := s.AddFromArchetype(ctx, "p1", "developer", "Forge")

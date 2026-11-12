@@ -28,7 +28,19 @@ config_home = "$GBI_HOME/h"
 ${GBI_EXTRA_CONFIG:-}
 EOF
 
-"$GBI" serve > "$GBI_HOME/server.log" 2>&1 &
+# A scripted tailscale: the demo's tailnet is made up (devbox.tail3f2a.ts.net), another app
+# already owns its root address, and nothing on this machine's real tailnet is read or shown.
+mkdir -p "$GBI_HOME/fakebin"
+cat > "$GBI_HOME/fakebin/tailscale" <<'TS'
+#!/bin/sh
+case "$*" in
+  "status --json") echo '{"BackendState":"Running","Self":{"DNSName":"devbox.tail3f2a.ts.net."}}' ;;
+  "serve status --json") echo '{"TCP":{"443":{"HTTPS":true},"5999":{"TCPForward":"127.0.0.1:5999"}},"Web":{"devbox.tail3f2a.ts.net:443":{"Handlers":{"/":{"Proxy":"http://127.0.0.1:3999"}}}}}' ;;
+  *) echo "Serve started and running in the background." ;;
+esac
+TS
+chmod +x "$GBI_HOME/fakebin/tailscale"
+PATH="$GBI_HOME/fakebin:$PATH" "$GBI" serve > "$GBI_HOME/server.log" 2>&1 &
 echo $! > "$GBI_HOME/server.pid"
 for _ in $(seq 1 50); do curl -sf "$GBI_URL/api/system" >/dev/null && break; sleep 0.2; done
 

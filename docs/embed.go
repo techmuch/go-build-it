@@ -12,8 +12,36 @@ import (
 //go:embed user
 var content embed.FS
 
-//go:embed learn agent-guide.md standards/project-documents.md
+//go:embed learn agent-guide.md standards/*.md
 var learnContent embed.FS
+
+// DefaultStandardIDs are the global standards a new installation starts with
+// (docs/standards/<id>.md). Project documents is built in separately (FR-150).
+var DefaultStandardIDs = []string{
+	"access-control", "ai-layer-security", "code-design", "development-loop",
+	"dod-application-security", "dod-ato-readiness", "dod-audit-logging", "dod-secure-supply-chain",
+	"go-backend", "operational-resilience", "planning-and-alignment", "react-frontend", "software-hardening",
+}
+
+// DefaultStandard is one standard a new installation starts with.
+type DefaultStandard struct{ ID, Title, Body string }
+
+// DefaultStandards returns the starter standards, titled by their first "# " heading.
+func DefaultStandards() []DefaultStandard {
+	out := make([]DefaultStandard, 0, len(DefaultStandardIDs))
+	for _, id := range DefaultStandardIDs {
+		b, err := learnContent.ReadFile("standards/" + id + ".md")
+		if err != nil {
+			continue
+		}
+		title := id
+		if first, _, ok := strings.Cut(string(b), "\n"); ok && strings.HasPrefix(first, "# ") {
+			title = strings.TrimPrefix(first, "# ")
+		}
+		out = append(out, DefaultStandard{ID: id, Title: title, Body: string(b)})
+	}
+	return out
+}
 
 // LearnFS holds the lessons (docs/learn/*.md, FR-134).
 func LearnFS() fs.FS { sub, _ := fs.Sub(learnContent, "learn"); return sub }
