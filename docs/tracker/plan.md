@@ -1,6 +1,6 @@
 # go-build-it — Phased delivery plan
 
-Status: Draft · 2026-11-12 · Based on [requirements rev 9](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
+Status: Draft · 2026-11-12 · Based on [requirements rev 10](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
 
 ## 1. How this plan is built
 
@@ -16,6 +16,7 @@ Status: Draft · 2026-11-12 · Based on [requirements rev 9](../requirements.md)
 - **Rev 7 (P20): project documents** ([ADR-014](../decisions/ADR-014-project-documents.md)). Artifacts gets six sub-tabs: HTML entry points for requirements, mockups, plan and tracker, chosen explicitly; labels for every file, set through the CLI; a sandboxed viewer that follows links; Compare for mockups and the real app; traceability.
 - **Rev 8 (P21): tabs from docs/gbi.toml** ([ADR-014](../decisions/ADR-014-project-documents.md), amended). Each project decides its Artifacts sub-tabs: its own roles such as vision, their order, their names, and leaving out roles it doesn't use.
 - **Rev 9 (P22–P23): starter personas and standards; remote access** ([ADR-015](../decisions/ADR-015-remote-access.md)). P22 gives the six starter archetypes full role instructions, upgrades them in place when never edited, and preloads the starter standards on new installations. P23 proves go-build-it is served on the tailnet, is this go-build-it and is private, never takes another service's address, and shows a QR code for a phone.
+- **Rev 10 (P24): model discovery and the landing link.** Archetypes and members choose their model from the list each harness offers (asked from the harness, or built in for Claude Code), and the logo and title lead to the landing page.
 - **Dogfooding from P4.** Once Courier can branch, PR, merge and release (end of P4), go-build-it manages its own remaining phases, and this tracker's data is imported into it.
 - **Sizes, not dates.** S ≈ up to a day of agent work, M ≈ 2–4 days, L ≈ 1–2 weeks. Progress is weighted S=1, M=3, L=8. Dates are set once the P0 spike shows real throughput.
 
@@ -47,6 +48,7 @@ Status: Draft · 2026-11-12 · Based on [requirements rev 9](../requirements.md)
 | P21 | Tabs from docs/gbi.toml |  | 3 | 5 | ◆ Tabs UAT |
 | P22 | Starter archetypes & standards |  | 4 | 6 | ◆ Personas review |
 | P23 | Remote access |  | 6 | 10 | ◆ Remote access UAT |
+| P24 | Model discovery & landing link |  | 6 | 8 | ◆ Model picker review |
 
 ## 3. Critical path
 
@@ -570,6 +572,24 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 | **P23-04** Doctor check tailscale.serve and its troubleshooting section ✅ | S | FR-20d, FR-07c | — | P23-02 |
 | **P23-05** Scripted tailscale in the demo; UAT steps and screenshots; user docs; CHANGELOG ✅ | S | FR-133, FR-130, FR-06a | A-v27 | P23-03, P23-04 |
 | **P23-06** Release 2026.11.12.1: signed binaries, install check ✅ | S | FR-05, FR-06 | — | P22-04, P23-05 |
+
+### P24 · Model discovery & landing link
+
+**Goal:** Choose models from what each harness actually offers, in a searchable list that still accepts any name; the logo and title lead to the landing page.
+
+**◆ Gate: Model picker review.** Passes when:
+- Archetype and member model fields list the harness's models (agy, pi, opencode asked; Claude Code built in); any name can be typed, with a warning when unknown
+- Lists are cached per harness, refresh on request or daily in the background, and a failed refresh keeps the last good list; gbi harnesses models returns the same
+- Clicking or pressing Enter on the logo or title opens the project catalog
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P24-01** Requirements rev 10 (FR-63a, FR-34a); mockup 10 ✅ | S | FR-63a, FR-34a | A-v10 | — |
+| **P24-02** Model lists per harness profile: agy models, pi --list-models, opencode models, Claude Code built in; cached route gbi harnesses models ✅ | M | FR-63a, FR-61, FR-30 | — | P24-01 |
+| **P24-03** ModelPicker for archetype default model and member override ✅ | S | FR-63a, FR-12, FR-12a | A-v10, A-v10b | P24-02 |
+| **P24-04** Logo and title link to the landing page ✅ | S | FR-34a, FR-34 | A-v01 | — |
+| **P24-05** Tests, UAT step, docs and CHANGELOG ✅ | S | FR-133, FR-130, FR-06a | A-v10 | P24-03, P24-04 |
+| **P24-06** Release 2026.11.12.2: signed binaries, install check ✅ | S | FR-05, FR-06 | — | P24-05 |
 
 ## 5. Open questions schedule
 

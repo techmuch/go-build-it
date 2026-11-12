@@ -26,6 +26,14 @@ test.describe('keyboard · desktop', () => {
     expect((await focused(page)).text).toBe(first);
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(/\/projects\//);
+    // The logo and title lead back to the landing page, by mouse and by keyboard.
+    await page.locator('.side a.brand').click();
+    await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/$/);
+    await expect(page.locator('.pcard').first()).toBeVisible();
+    await page.goto('/settings');
+    await page.locator('.side a.brand').focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('.pcard').first()).toBeVisible();
   });
 
   test('g-shortcuts, list arrows, Enter opens, ? help restores focus', async ({ page }) => {

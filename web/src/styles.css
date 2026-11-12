@@ -58,6 +58,8 @@ code, .mono { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
 .side a { color: var(--side-t); text-decoration: none; padding: 7px 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
 .side a:hover { background: var(--side-2); }
 .side a.on { background: var(--side-2); color: #fff; }
+.side a.brand { justify-content: flex-start; color: #fff; padding: 4px 10px 14px; } /* logo and title go to the landing page */
+.side a.brand:hover { background: none; opacity: .85; }
 .badge { background: var(--red); color: #fff; border-radius: 999px; font-size: 11px; padding: 0 7px; min-width: 18px; text-align: center; }
 .badge.n { background: #3b4b58; }
 .side .sep { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: #6f8190; padding: 14px 10px 4px; }

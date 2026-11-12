@@ -179,7 +179,51 @@ func (m *Manager) follow(ctx context.Context, r *run, seq int64) {
 	var resultText, lastText string
 	sawChange, lastSave := false, time.Now()
 	submitted := time.Now()
-	handoffAsked := false
+	handoffAsked, settled := false, false
+	// handle applies one transcript event; the last read after the member settles uses it too,
+	// so nothing at the end of a turn (a compaction, a tool call, an error) is lost.
+	handle := func(e harness.Event) {
+		switch e.Kind {
+		case harness.KUser:
+			m.appendLine(ctx, r, "input", e.Text)
+		case harness.KText:
+			m.appendLine(ctx, r, "text", e.Text)
+			lastText = e.Text
+			if hb := handoffRe.FindStringSubmatch(e.Text); hb != nil && r.s.Handoff == "" {
+				r.s.Handoff = strings.TrimSpace(hb[1])
+			}
+		case harness.KTool:
+			m.appendLine(ctx, r, "tool", e.Text)
+		case harness.KError:
+			m.appendLine(ctx, r, "error", e.Text)
+		case harness.KCompacted:
+			r.s.Compactions++
+			m.appendLine(ctx, r, "system", "⟲ "+e.Text)
+			_, _ = m.queue.Bump(ctx, r.t.ID, "compactions")
+			m.hist.Must(ctx, history.Event{ProjectID: r.s.ProjectID, Type: "session.compacted", Subject: r.s.ID,
+				Summary: fmt.Sprintf("Context compacted in %s (%s)", r.s.ID, r.t.ID), Why: "harness auto-compaction (default)",
+				Data: history.Data(map[string]any{"task": r.t.ID, "usedBefore": r.s.Used})})
+		case harness.KLimit:
+			limited = e.Limit
+			m.appendLine(ctx, r, "system", "subscription limit until "+e.Limit.ResetsAt.Local().Format("15:04"))
+		case harness.KResult:
+			resultErr, resultText = e.IsError, e.Text
+			m.appendLine(ctx, r, "result", firstNonEmpty(e.Text, "turn finished"))
+		}
+		if e.Usage != nil {
+			r.s.Used, r.s.Measured = e.Usage.Used, e.Usage.Measured
+			if r.s.Window > 0 {
+				r.s.Fraction = float64(r.s.Used) / float64(r.s.Window)
+			}
+			// Experimental smart handoff: ask for a briefing before the harness compacts (FR-72).
+			if !handoffAsked && !settled && m.cfg.HandoffsEnabledFor(r.s.ProjectID) && r.s.Fraction >= m.cfg.Experimental.HandoffThreshold && m.Hooks.Handoff != nil {
+				handoffAsked = true
+				if msg := m.Hooks.Handoff(ctx, r.s, r.t); msg != "" {
+					_, _ = r.h.Submit(ctx, r.pane, agentName(r.mem), r.prof.Kind != "", msg)
+				}
+			}
+		}
+	}
 	for {
 		select {
 		case <-ctx.Done():
@@ -205,46 +249,7 @@ func (m *Manager) follow(ctx context.Context, r *run, seq int64) {
 		if r.reader != nil && r.path != "" {
 			evs, _ := r.reader.Read(r.path)
 			for _, e := range evs {
-				switch e.Kind {
-				case harness.KUser:
-					m.appendLine(ctx, r, "input", e.Text)
-				case harness.KText:
-					m.appendLine(ctx, r, "text", e.Text)
-					lastText = e.Text
-					if hb := handoffRe.FindStringSubmatch(e.Text); hb != nil && r.s.Handoff == "" {
-						r.s.Handoff = strings.TrimSpace(hb[1])
-					}
-				case harness.KTool:
-					m.appendLine(ctx, r, "tool", e.Text)
-				case harness.KError:
-					m.appendLine(ctx, r, "error", e.Text)
-				case harness.KCompacted:
-					r.s.Compactions++
-					m.appendLine(ctx, r, "system", "⟲ "+e.Text)
-					_, _ = m.queue.Bump(ctx, r.t.ID, "compactions")
-					m.hist.Must(ctx, history.Event{ProjectID: r.s.ProjectID, Type: "session.compacted", Subject: r.s.ID,
-						Summary: fmt.Sprintf("Context compacted in %s (%s)", r.s.ID, r.t.ID), Why: "harness auto-compaction (default)",
-						Data: history.Data(map[string]any{"task": r.t.ID, "usedBefore": r.s.Used})})
-				case harness.KLimit:
-					limited = e.Limit
-					m.appendLine(ctx, r, "system", "subscription limit until "+e.Limit.ResetsAt.Local().Format("15:04"))
-				case harness.KResult:
-					resultErr, resultText = e.IsError, e.Text
-					m.appendLine(ctx, r, "result", firstNonEmpty(e.Text, "turn finished"))
-				}
-				if e.Usage != nil {
-					r.s.Used, r.s.Measured = e.Usage.Used, e.Usage.Measured
-					if r.s.Window > 0 {
-						r.s.Fraction = float64(r.s.Used) / float64(r.s.Window)
-					}
-					// Experimental smart handoff: ask for a briefing before the harness compacts (FR-72).
-					if !handoffAsked && m.cfg.HandoffsEnabledFor(r.s.ProjectID) && r.s.Fraction >= m.cfg.Experimental.HandoffThreshold && m.Hooks.Handoff != nil {
-						handoffAsked = true
-						if msg := m.Hooks.Handoff(ctx, r.s, r.t); msg != "" {
-							_, _ = r.h.Submit(ctx, r.pane, agentName(r.mem), r.prof.Kind != "", msg)
-						}
-					}
-				}
+				handle(e)
 			}
 			if time.Since(lastSave) > time.Second {
 				_ = m.write(ctx, r.s)
@@ -297,22 +302,11 @@ func (m *Manager) follow(ctx context.Context, r *run, seq int64) {
 			continue
 		}
 		// Settled (idle or done) after the prompt. Read the transcript once more.
+		settled = true // the turn is over: never ask for a handoff now
 		if r.reader != nil && r.path != "" {
 			if evs, _ := r.reader.Read(r.path); len(evs) > 0 {
 				for _, e := range evs {
-					if e.Kind == harness.KText {
-						m.appendLine(ctx, r, "text", e.Text)
-						lastText = e.Text
-					}
-					if e.Kind == harness.KResult {
-						resultErr, resultText = e.IsError, e.Text
-					}
-					if e.Kind == harness.KLimit {
-						limited = e.Limit
-					}
-					if e.Usage != nil {
-						r.s.Used = e.Usage.Used
-					}
+					handle(e)
 				}
 			}
 		}

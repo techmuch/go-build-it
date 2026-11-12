@@ -38,6 +38,29 @@ function lineDiff(a: string, b: string): string {
 
 const harnessOptions = (harn: any[] | undefined) => (harn || []).map((h) => h.name).concat(['fake']);
 
+/** Model picker (FR-63a): the harness's own list, searchable, and any name can still be typed. */
+export function ModelPicker({ harness, value, onChange, placeholder, width = 200 }: { harness: string; value: string; onChange: (v: string) => void; placeholder: string; width?: number }) {
+  const [list, setList] = useState<any>(null);
+  const [busy, setBusy] = useState(false);
+  const load = (refresh = false) => {
+    if (!harness) return;
+    setBusy(true);
+    api.harnesses.models(harness, refresh ? { refresh: true } : undefined).then(setList).catch((e) => setList({ models: [], error: e.message })).finally(() => setBusy(false));
+  };
+  useEffect(() => { setList(null); load(); }, [harness]);
+  const models: any[] = list?.models || [];
+  const id = 'models-' + harness;
+  const known = !value || models.some((m) => m.id === value);
+  const title = list ? (list.error ? list.error : `${models.length} models · ${list.source}`) : 'loading models…';
+  return <span className="row c" style={{ gap: 4 }} data-testid="model-picker">
+    <input aria-label="Model" list={id} value={value} onChange={(e) => onChange(e.target.value)} placeholder={busy && !list ? 'loading models…' : placeholder} style={{ width }} title={title} />
+    <datalist id={id}>{models.map((m) => <option key={m.id} value={m.id}>{[m.name, m.detail].filter(Boolean).join(' · ')}</option>)}</datalist>
+    <button type="button" className="btn sm" aria-label="Refresh the model list" title={'Ask ' + harness + ' again · ' + title} disabled={busy} onClick={() => load(true)}>{busy ? '…' : '↻'}</button>
+    {list && !known && <Chip c="amb">not in {harness}'s list</Chip>}
+    {list?.error && !models.length && <span className="small muted" title={list.error}>type a name</span>}
+  </span>;
+}
+
 // v10 · Persona archetypes (global) with change review and coach (FR-12, FR-12b, FR-12c, FR-13, FR-25, FR-26)
 export function Archetypes({ aid }: { aid?: string }) {
   const { data: list } = useData<any[]>(() => api.archetypes.list(), [], (e) => /^(archetype|member)\./.test(e.type));
@@ -88,7 +111,7 @@ function ArchetypeEditor({ id, roles }: { id: string; roles: any[] }) {
         <input aria-label="Name" placeholder="Name" value={a.name} onChange={(e) => setA({ ...a, name: e.target.value })} style={{ width: 120, fontWeight: 700 }} />
         {field('Role', <select value={a.role} onChange={(e) => setA({ ...a, role: e.target.value })}>{roles.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}</select>)}
         {a.harness === 'courier' ? <Chip>built-in Courier</Chip> : <>{field('Default harness', <select value={a.harness} onChange={(e) => setA({ ...a, harness: e.target.value })}>{harnessOptions(harn).map((h) => <option key={h}>{h}</option>)}</select>)}
-          {field('Default model', <input value={a.model} onChange={(e) => setA({ ...a, model: e.target.value })} placeholder="harness default" style={{ width: 140 }} />)}</>}
+          {field('Default model', <ModelPicker harness={a.harness} value={a.model || ''} onChange={(v) => setA({ ...a, model: v })} placeholder="harness default" />)}</>}
         {!isNew && <span className="small muted">rev {a.rev} · used by {a.usedBy} member{a.usedBy === 1 ? '' : 's'}</span>}
       </div></Card>
       {prop && <><Proposals hunks={prop.hunks} accepted={acc} setAccepted={setAcc} /><div className="row c"><span className="right" /><button type="button" className="btn" onClick={() => setProp(null)}>Discard</button>
@@ -197,7 +220,7 @@ function MemberDetail({ id, projectId }: { id: string; projectId: string }) {
           <Av name={m.name} role={m.role} /><input aria-label="Name" value={t.name} onChange={(e) => setT({ ...t, name: e.target.value })} style={{ width: 120, fontWeight: 700 }} />
           <span className="small">from <A to={`/archetypes/${m.archetypeId}`}>{data.archetype?.name} rev {m.archetypeRev}</A>{behind && <> <Chip c="blue">rev {m.archetypeLatest} available</Chip></>}</span>
           {field('Harness', <select value={t.harness} onChange={(e) => setT({ ...t, harness: e.target.value })}><option value="">{data.archetype?.harness} (archetype)</option>{harnessOptions(harn).map((h) => <option key={h} value={h}>{h}</option>)}</select>)}
-          {field('Model', <input value={t.model} onChange={(e) => setT({ ...t, model: e.target.value })} placeholder={data.archetype?.model || 'archetype default'} style={{ width: 130 }} />)}
+          {field('Model', <ModelPicker harness={t.harness || data.archetype?.harness || ''} value={t.model || ''} onChange={(v) => setT({ ...t, model: v })} placeholder={data.archetype?.model || 'archetype default'} width={170} />)}
         </div>
         <div className="small muted" style={{ marginTop: 6 }}>Worktree <span className="mono">{m.worktree || `~/.go-build-it/worktrees/${projectId}/${m.id.split('@')[0]}`}</span> · branch per task · herdr pane <span className="mono">{m.paneId || 'starts with the first task'}</span>
           {m.conversationId && <> · conversation <span className="mono">{m.conversationId.slice(0, 8)}…</span> ({m.conversationTasks} task{m.conversationTasks === 1 ? '' : 's'})</>}

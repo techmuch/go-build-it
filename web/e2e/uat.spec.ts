@@ -165,6 +165,17 @@ test.describe('desktop · owner', () => {
     await page.goto('/archetypes/developer');
     await expect(page.getByText('Persona coach')).toBeVisible();
     await expect(page.getByText(/Change review/)).toBeVisible();
+    // FR-63a: the model picker offers the harness's models, and any name can still be typed.
+    const picker = page.getByTestId('model-picker').first();
+    const option = picker.locator('datalist option').first();
+    await expect(option).toBeAttached();
+    const listed = (await option.getAttribute('value')) || '';
+    const model = picker.getByLabel('Model', { exact: true });
+    await model.fill(listed);
+    await expect(picker.getByText(/not in .* list/)).toHaveCount(0);
+    await model.fill('my-custom-model');
+    await expect(picker.getByText(/not in .* list/)).toBeVisible();
+    await model.fill('');
     await shot(page, 'archetypes');
   });
 
@@ -292,8 +303,9 @@ test.describe('owner actions', () => {
     await page.goto('/questions/Q-1');
     await page.getByRole('button', { name: 'Answer & resume work' }).click();
     await expect(page.getByText(/Answered/)).toBeVisible();
-    const t = await (await request.get('/api/tasks/T-2')).json();
-    expect(['queued', 'running', 'review']).toContain(t.task.status);
+    // The task is requeued just after the answer is saved: wait for it, same expectation.
+    await expect.poll(async () => (await (await request.get('/api/tasks/T-2')).json()).task.status, { timeout: 10_000 })
+      .toMatch(/^(queued|running|review)$/);
   });
 });
 

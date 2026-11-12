@@ -72,6 +72,7 @@ type App struct {
 	docMu       sync.Mutex // serialises changes to docs/gbi.toml and docs/compare.json
 	doctorMu    sync.Mutex
 	lastCheck   atomic.Pointer[update.Release]
+	models      modelCache // per-harness model lists (FR-63a)
 }
 
 // New opens the database and connects all services.

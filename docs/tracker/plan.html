@@ -74,7 +74,7 @@ td:first-child { white-space: nowrap; }
 </ol></nav>
 <main>
 <h1>go-build-it — Phased delivery plan</h1>
-<p class="meta">Status: Draft · 2026-11-12 · Based on [requirements rev 9](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)</p>
+<p class="meta">Status: Draft · 2026-11-12 · Based on [requirements rev 10](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)</p>
 <h2 id="1-how-this-plan-is-built">1. How this plan is built</h2>
 <ul><li>
 <strong>Approach A is the UI baseline.</strong> Every UI task names the Approach A view it implements (desktop <code>A-v01</code>…<code>A-v14</code> plus detail views <code>02b</code>, <code>03b</code>, <code>04b</code>, <code>05b</code>, <code>12b</code>; mobile <code>A-M1</code>…<code>A-M11</code>).
@@ -100,6 +100,8 @@ td:first-child { white-space: nowrap; }
 <strong>Rev 8 (P21): tabs from docs/gbi.toml</strong> ([ADR-014](../decisions/ADR-014-project-documents.md), amended). Each project decides its Artifacts sub-tabs: its own roles such as vision, their order, their names, and leaving out roles it doesn't use.
 </li><li>
 <strong>Rev 9 (P22–P23): starter personas and standards; remote access</strong> ([ADR-015](../decisions/ADR-015-remote-access.md)). P22 gives the six starter archetypes full role instructions, upgrades them in place when never edited, and preloads the starter standards on new installations. P23 proves go-build-it is served on the tailnet, is this go-build-it and is private, never takes another service's address, and shows a QR code for a phone.
+</li><li>
+<strong>Rev 10 (P24): model discovery and the landing link.</strong> Archetypes and members choose their model from the list each harness offers (asked from the harness, or built in for Claude Code), and the logo and title lead to the landing page.
 </li><li>
 <strong>Dogfooding from P4.</strong> Once Courier can branch, PR, merge and release (end of P4), go-build-it manages its own remaining phases, and this tracker's data is imported into it.
 </li><li>
@@ -131,6 +133,7 @@ td:first-child { white-space: nowrap; }
 <tr><td>P21</td><td>Tabs from docs/gbi.toml</td><td></td><td>3</td><td>5</td><td>◆ Tabs UAT</td></tr>
 <tr><td>P22</td><td>Starter archetypes &amp; standards</td><td></td><td>4</td><td>6</td><td>◆ Personas review</td></tr>
 <tr><td>P23</td><td>Remote access</td><td></td><td>6</td><td>10</td><td>◆ Remote access UAT</td></tr>
+<tr><td>P24</td><td>Model discovery &amp; landing link</td><td></td><td>6</td><td>8</td><td>◆ Model picker review</td></tr>
 </tbody></table></div>
 <h2 id="3-critical-path">3. Critical path</h2>
 <ul><li>
@@ -659,6 +662,24 @@ A QR code of the working URL appears in Settings and in gbi tailscale qr; gbi do
 <tr><td><strong>P23-04</strong> Doctor check tailscale.serve and its troubleshooting section ✅</td><td>S</td><td>FR-20d, FR-07c</td><td>—</td><td>P23-02</td></tr>
 <tr><td><strong>P23-05</strong> Scripted tailscale in the demo; UAT steps and screenshots; user docs; CHANGELOG ✅</td><td>S</td><td>FR-133, FR-130, FR-06a</td><td>A-v27</td><td>P23-03, P23-04</td></tr>
 <tr><td><strong>P23-06</strong> Release 2026.11.12.1: signed binaries, install check ✅</td><td>S</td><td>FR-05, FR-06</td><td>—</td><td>P22-04, P23-05</td></tr>
+</tbody></table></div>
+<h3 id="p24-model-discovery-landing-link">P24 · Model discovery &amp; landing link</h3>
+<p><strong>Goal:</strong> Choose models from what each harness actually offers, in a searchable list that still accepts any name; the logo and title lead to the landing page.</p>
+<p><strong>◆ Gate: Model picker review.</strong> Passes when:</p>
+<ul><li>
+Archetype and member model fields list the harness's models (agy, pi, opencode asked; Claude Code built in); any name can be typed, with a warning when unknown
+</li><li>
+Lists are cached per harness, refresh on request or daily in the background, and a failed refresh keeps the last good list; gbi harnesses models returns the same
+</li><li>
+Clicking or pressing Enter on the logo or title opens the project catalog
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P24-01</strong> Requirements rev 10 (FR-63a, FR-34a); mockup 10 ✅</td><td>S</td><td>FR-63a, FR-34a</td><td>A-v10</td><td>—</td></tr>
+<tr><td><strong>P24-02</strong> Model lists per harness profile: agy models, pi --list-models, opencode models, Claude Code built in; cached route gbi harnesses models ✅</td><td>M</td><td>FR-63a, FR-61, FR-30</td><td>—</td><td>P24-01</td></tr>
+<tr><td><strong>P24-03</strong> ModelPicker for archetype default model and member override ✅</td><td>S</td><td>FR-63a, FR-12, FR-12a</td><td>A-v10, A-v10b</td><td>P24-02</td></tr>
+<tr><td><strong>P24-04</strong> Logo and title link to the landing page ✅</td><td>S</td><td>FR-34a, FR-34</td><td>A-v01</td><td>—</td></tr>
+<tr><td><strong>P24-05</strong> Tests, UAT step, docs and CHANGELOG ✅</td><td>S</td><td>FR-133, FR-130, FR-06a</td><td>A-v10</td><td>P24-03, P24-04</td></tr>
+<tr><td><strong>P24-06</strong> Release 2026.11.12.2: signed binaries, install check ✅</td><td>S</td><td>FR-05, FR-06</td><td>—</td><td>P24-05</td></tr>
 </tbody></table></div>
 <h2 id="5-open-questions-schedule">5. Open questions schedule</h2>
 <div class="table-wrap"><table><thead><tr><th>Question</th><th>Answer before</th><th>Why</th></tr></thead><tbody>

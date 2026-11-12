@@ -109,6 +109,8 @@ export const api = {
   harnesses: {
     /** Detected harnesses and capabilities */
     list: (query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/harnesses`, undefined, query),
+    /** Models a harness offers, for the model picker (FR-63a) */
+    models: (name: string, query?: Record<string, string | number | boolean | undefined>) => call<any>('GET', `/api/harnesses/${encodeURIComponent(name)}/models`, undefined, query),
   },
   herdr: {
     /** The supervised gbi herdr session (FR-07) */

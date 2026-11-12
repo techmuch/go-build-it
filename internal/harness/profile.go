@@ -39,6 +39,7 @@ type Profile struct {
 	transcript func(cwd, conv string) string
 	newReader  func() Reader
 	findNewer  func(since time.Time) string
+	models     func(ctx context.Context, bin string) ([]Model, string, error)
 }
 
 // Args returns the harness arguments (after the executable) to start a new conversation
@@ -115,6 +116,7 @@ func withModel(args []string, flag, model string) []string {
 
 func init() {
 	register(Profile{Name: "claude", Label: "Claude Code", Kind: "claude", Binary: "claude", Integration: "claude", ChoosesID: true, Window: 200_000, UsageMeasured: true, Verified: true,
+		models: fixed("built in to go-build-it (Claude Code has no list command)", claudeModels),
 		launch: func(model string, flags []string, conv string, resume bool) []string {
 			args := []string{"--permission-mode", "acceptEdits"}
 			args = withModel(args, "--model", model)
@@ -139,6 +141,7 @@ func init() {
 		newReader: func() Reader { return &claudeReader{} },
 	})
 	register(Profile{Name: "antigravity", Label: "Antigravity", Kind: "agy", Binary: "agy", Integration: "antigravity_cli", Window: 1_000_000, UsageMeasured: true,
+		models: listCommand([]string{"models"}, parseAgy),
 		launch: func(model string, flags []string, conv string, resume bool) []string {
 			args := []string{"--mode", "accept-edits"}
 			args = withModel(args, "--model", model)
@@ -155,6 +158,7 @@ func init() {
 		findNewer: func(since time.Time) string { return newestDir(filepath.Join(agyRoot(), "brain"), since) },
 	})
 	register(Profile{Name: "pi", Label: "Pi", Kind: "pi", Binary: "pi", Integration: "pi", ChoosesID: true, Window: 200_000, UsageMeasured: true,
+		models: listCommand([]string{"--list-models"}, parsePi),
 		launch: func(model string, flags []string, conv string, resume bool) []string {
 			args := withModel(nil, "--model", model)
 			if resume {
@@ -183,6 +187,7 @@ func init() {
 		newReader: func() Reader { return &piReader{} },
 	})
 	register(Profile{Name: "opencode", Label: "OpenCode", Kind: "opencode", Binary: "opencode", Integration: "opencode", Window: 200_000,
+		models: listCommand([]string{"models"}, parseLines),
 		launch: func(model string, flags []string, conv string, resume bool) []string {
 			args := withModel(nil, "--model", model)
 			if resume && conv != "" {
@@ -193,6 +198,7 @@ func init() {
 		// OpenCode keeps sessions in a SQLite database, not a transcript file: usage is unavailable.
 	})
 	register(Profile{Name: "fake", Label: "Fake (scripted)", Binary: "", ChoosesID: true, Window: 200_000, UsageMeasured: true, Verified: true,
+		models: fixed("built in (scripted harness)", []Model{{ID: "fake-fast", Name: "Fake fast"}, {ID: "fake-smart", Name: "Fake smart", Detail: "scripted"}}),
 		launch: func(model string, flags []string, conv string, resume bool) []string {
 			if resume {
 				return append([]string{"dev", "fake-member", "--resume", conv}, flags...)

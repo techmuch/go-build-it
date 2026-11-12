@@ -350,6 +350,18 @@ window.TRACKER = {
     "With another service on 443, setup names it, proposes go-build-it's own port and runs only after confirmation; stop removes only go-build-it's rule",
     "A QR code of the working URL appears in Settings and in gbi tailscale qr; gbi doctor reports tailscale.serve"
    ]
+  },
+  {
+   "id": "P24",
+   "name": "Model discovery & landing link",
+   "mvp": false,
+   "goal": "Choose models from what each harness actually offers, in a searchable list that still accepts any name; the logo and title lead to the landing page.",
+   "gate": "Model picker review",
+   "gateCriteria": [
+    "Archetype and member model fields list the harness's models (agy, pi, opencode asked; Claude Code built in); any name can be typed, with a warning when unknown",
+    "Lists are cached per harness, refresh on request or daily in the background, and a failed refresh keeps the last good list; gbi harnesses models returns the same",
+    "Clicking or pressing Enter on the logo or title opens the project catalog"
+   ]
   }
  ],
  "tasks": [
@@ -4454,6 +4466,117 @@ window.TRACKER = {
    "status": "done",
    "done": "",
    "q": []
+  },
+  {
+   "id": "P24-01",
+   "phase": "P24",
+   "title": "Requirements rev 10 (FR-63a, FR-34a); mockup 10",
+   "reqs": [
+    "FR-63a",
+    "FR-34a"
+   ],
+   "views": [
+    "A-v10"
+   ],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "docs/requirements.md rev 10",
+   "q": []
+  },
+  {
+   "id": "P24-02",
+   "phase": "P24",
+   "title": "Model lists per harness profile: agy models, pi --list-models, opencode models, Claude Code built in; cached route gbi harnesses models",
+   "reqs": [
+    "FR-63a",
+    "FR-61",
+    "FR-30"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P24-01"
+   ],
+   "status": "done",
+   "done": "internal/harness/models.go; internal/app/models.go",
+   "q": []
+  },
+  {
+   "id": "P24-03",
+   "phase": "P24",
+   "title": "ModelPicker for archetype default model and member override",
+   "reqs": [
+    "FR-63a",
+    "FR-12",
+    "FR-12a"
+   ],
+   "views": [
+    "A-v10",
+    "A-v10b"
+   ],
+   "size": "S",
+   "deps": [
+    "P24-02"
+   ],
+   "status": "done",
+   "done": "Team.tsx ModelPicker",
+   "q": []
+  },
+  {
+   "id": "P24-04",
+   "phase": "P24",
+   "title": "Logo and title link to the landing page",
+   "reqs": [
+    "FR-34a",
+    "FR-34"
+   ],
+   "views": [
+    "A-v01"
+   ],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "shell.tsx; keyboard e2e",
+   "q": []
+  },
+  {
+   "id": "P24-05",
+   "phase": "P24",
+   "title": "Tests, UAT step, docs and CHANGELOG",
+   "reqs": [
+    "FR-133",
+    "FR-130",
+    "FR-06a"
+   ],
+   "views": [
+    "A-v10"
+   ],
+   "size": "S",
+   "deps": [
+    "P24-03",
+    "P24-04"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P24-06",
+   "phase": "P24",
+   "title": "Release 2026.11.12.2: signed binaries, install check",
+   "reqs": [
+    "FR-05",
+    "FR-06"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P24-05"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
   }
  ],
  "requirements": {
@@ -4653,6 +4776,10 @@ window.TRACKER = {
    "text": "The application SHALL provide a desktop web UI designed for laptop and desktop screens.",
    "section": "5. User interfaces"
   },
+  "FR-34a": {
+   "text": "(rev 10) In the desktop UI, the logo and the application title SHALL link to the landing page (the project catalog), by mouse and by keyboard.",
+   "section": "5. User interfaces"
+  },
   "FR-35": {
    "text": "The application SHALL provide a separate mobile web UI designed for phones.",
    "section": "5. User interfaces"
@@ -4787,6 +4914,10 @@ window.TRACKER = {
   },
   "FR-63": {
    "text": "Harnesses and their settings (binary path, model, flags, permission mode) SHALL be configurable in the UI and the CLI.",
+   "section": "8.1 Harness integration"
+  },
+  "FR-63a": {
+   "text": "(rev 10) go-build-it SHALL discover the models each harness offers and offer them wherever a model is chosen:",
    "section": "8.1 Harness integration"
   },
   "FR-66": {

@@ -41,8 +41,18 @@ func TestMemberConversationContinuityAndRotation(t *testing.T) {
 	if m1.ConversationID == "" || m1.ConversationTasks != 1 || m1.PaneID == "" {
 		t.Fatalf("after task 1: %+v", m1)
 	}
-	// Labels in herdr: name and role, idle after the task (FR-67).
-	if p, err := e.a.Herdr.C.Pane(e.ctx, m1.PaneID); err != nil || p.DisplayAgent == nil || *p.DisplayAgent != "Forge (developer)" || p.Title == nil || *p.Title != "idle" {
+	// Labels in herdr: name and role, idle after the task (FR-67). The idle label is set just
+	// after the task reaches review, so wait for it (it raced on slow CI runners).
+	labelled := func() (herdr.PaneInfo, error, bool) {
+		p, err := e.a.Herdr.C.Pane(e.ctx, m1.PaneID)
+		return p, err, err == nil && p.DisplayAgent != nil && *p.DisplayAgent == "Forge (developer)" && p.Title != nil && *p.Title == "idle"
+	}
+	for deadline := time.Now().Add(10 * time.Second); time.Now().Before(deadline); time.Sleep(100 * time.Millisecond) {
+		if _, _, ok := labelled(); ok {
+			break
+		}
+	}
+	if p, err, ok := labelled(); !ok {
 		t.Fatalf("pane labels: %+v %v", p, err)
 	}
 	t2, _ := e.a.Queue.Add(e.ctx, queue.Task{ProjectID: "demo", Title: "Second task, big", Description: "FAKE:big"})
