@@ -17,8 +17,8 @@ func TestNpmTestsCounted(t *testing.T) {
 	}
 	// The fake test command is a Node script, so it runs the same under sh and cmd.exe.
 	for name, out := range map[string]string{
-		"node":   `ℹ tests 3\nℹ pass 2\nℹ fail 1`,
-		"vitest": ` Tests  1 failed | 2 passed (3)`,
+		"node":   "ℹ tests 3\nℹ pass 2\nℹ fail 1",
+		"vitest": " Tests  1 failed | 2 passed (3)",
 	} {
 		dir := t.TempDir()
 		js := "process.stdout.write(" + strconv.Quote(out+"\n") + "); process.exit(1);\n"
