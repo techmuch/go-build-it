@@ -82,7 +82,7 @@ td:first-child { white-space: nowrap; }
 </ol></nav>
 <main>
 <h1>go-build-it — Requirements</h1>
-<p class="meta">Status: Draft · Last updated: 2026-11-12 (rev. 11: a phone that opens a desktop address gets the matching mobile screen, with a per-device Desktop site choice, and the desktop UI keeps its navigation behind ☰ on narrow screens, FR-35a; the remote access QR code opens the mobile UI, FR-20c. Rev. 10: each harness reports its models, and archetypes and members choose one from a searchable list, FR-63a; the logo and title lead to the landing page, FR-34a. Rev. 9: starter archetypes with full role instructions that upgrade when unedited, FR-12f; new installations start with the starter standards, FR-50a; a remote access checklist that proves go-build-it is served, private and not clashing with other services, with a QR code, FR-20a–FR-20d, see [ADR-015](decisions/ADR-015-remote-access.md). Rev. 8: docs/gbi.toml controls the Artifacts sub-tabs, which ones exist, their order and their names, including your own roles such as vision, FR-151. Rev. 7: project documents with HTML entry points, explicit labels, a viewer that follows links, mockup-to-app comparison and traceability, FR-140–FR-150, see [ADR-014](decisions/ADR-014-project-documents.md). Rev. 6: go-build-it answers a harness's folder trust prompt for folders it created, FR-07f, see [ADR-013](decisions/ADR-013-folder-trust.md). Rev. 5: a doctor that proves gbi can start herdr and a harness and explains failures to people and AI agents, FR-07a–FR-07e; install by giving an AI agent the GitHub URL, FR-02a–FR-02b; lessons, a practice project, harness control and design rationale, FR-134–FR-139; see [ADR-012](decisions/ADR-012-doctor-and-learning.md). Rev. 4: in-app change log and guided updates, FR-06a–FR-06e, see [ADR-011](decisions/ADR-011-changelog-guided-updates.md). Rev. 3: herdr as the only agent backend; per-project team members from global archetypes, see [ADR-009](decisions/ADR-009-herdr-backend.md) and [ADR-010](decisions/ADR-010-project-team-members.md))</p>
+<p class="meta">Status: Draft · Last updated: 2026-11-20 (rev. 13: user management follows Take 1, the admin console (Q13); a <strong>dev mode</strong> with a user switcher for trying multi-user work on one machine; a <strong>personal Assistant</strong> for every user, always running while they are signed in and the one you talk to in every side chat; shared or per-user <strong>harness credentials</strong>; <strong>warm harnesses</strong> started ahead of need; a <strong>harness check</strong> before every release; evidence gaps need a reason to approve, FR-190–FR-206, FR-112a, NFR-23–NFR-24. rev. 12: users, sign-in and per-project access control for one shared server: local accounts first and OIDC next, a loopback-trust setting, statuses, groups, custom roles, AI members under the same rules, sign-off routing and access reviews, FR-160–FR-189; answers Q1 and Q4; three takes are in the [user management mockups](mockups/user-management.html). Rev. 11: a phone that opens a desktop address gets the matching mobile screen, with a per-device Desktop site choice, and the desktop UI keeps its navigation behind ☰ on narrow screens, FR-35a; the remote access QR code opens the mobile UI, FR-20c. Rev. 10: each harness reports its models, and archetypes and members choose one from a searchable list, FR-63a; the logo and title lead to the landing page, FR-34a. Rev. 9: starter archetypes with full role instructions that upgrade when unedited, FR-12f; new installations start with the starter standards, FR-50a; a remote access checklist that proves go-build-it is served, private and not clashing with other services, with a QR code, FR-20a–FR-20d, see [ADR-015](decisions/ADR-015-remote-access.md). Rev. 8: docs/gbi.toml controls the Artifacts sub-tabs, which ones exist, their order and their names, including your own roles such as vision, FR-151. Rev. 7: project documents with HTML entry points, explicit labels, a viewer that follows links, mockup-to-app comparison and traceability, FR-140–FR-150, see [ADR-014](decisions/ADR-014-project-documents.md). Rev. 6: go-build-it answers a harness's folder trust prompt for folders it created, FR-07f, see [ADR-013](decisions/ADR-013-folder-trust.md). Rev. 5: a doctor that proves gbi can start herdr and a harness and explains failures to people and AI agents, FR-07a–FR-07e; install by giving an AI agent the GitHub URL, FR-02a–FR-02b; lessons, a practice project, harness control and design rationale, FR-134–FR-139; see [ADR-012](decisions/ADR-012-doctor-and-learning.md). Rev. 4: in-app change log and guided updates, FR-06a–FR-06e, see [ADR-011](decisions/ADR-011-changelog-guided-updates.md). Rev. 3: herdr as the only agent backend; per-project team members from global archetypes, see [ADR-009](decisions/ADR-009-herdr-backend.md) and [ADR-010](decisions/ADR-010-project-team-members.md))</p>
 <h2 id="1-overview">1. Overview</h2>
 <p>go-build-it is a Go application with an embedded React frontend that manages long-running software project development. It is installed globally on a machine and provides a web UI and a CLI. A team of AI personas and humans works through it to take projects from problem definition to released software. The app coordinates external agent harnesses such as Claude Code, Antigravity and OpenCode. Every harness runs interactively inside [herdr](https://herdr.dev), a terminal workspace manager for coding agents, in a herdr session that go-build-it owns. Opening that session in any terminal shows everything go-build-it is doing, organized by project and team member.</p>
 <h3 id="conventions">Conventions</h3>
@@ -274,7 +274,7 @@ reconnect to the gbi herdr session and the members' running work
 <strong class="rid" id="FR-13">FR-13</strong>: Archetypes and project members' tuning <span class="kw kw-SHALL">SHALL</span> be edited in the artifact editor (FR-45a). The user can write the definition directly, or chat with an AI agent that helps develop it (e.g. interviews the user, suggests instructions, checks for conflicts with global standards).
 </li></ul>
 <h3 id="4-2-access-and-identity">4.2 Access and identity</h3>
-<p>Authentication is delegated to Tailscale. go-build-it does not run its own login system for local or tailnet access.</p>
+<p>In <strong>solo mode</strong> (one owner, the default for a new installation), authentication is delegated to the machine and to Tailscale, as below. In <strong>multi-user mode</strong> (§4.4, rev 12), everyone signs in and FR-16 and FR-17 change as noted.</p>
 <ul><li>
 <strong class="rid" id="FR-15">FR-15</strong>: The application <span class="kw kw-SHALL">SHALL</span> detect how each request reaches it and classify it as one of:
 <ol><li>
@@ -285,11 +285,11 @@ reconnect to the gbi herdr session and the members' running work
 <strong>External interface</strong>: a direct connection on a non-loopback network interface.
 </li></ol>
 </li><li>
-<strong class="rid" id="FR-16">FR-16</strong>: <strong>Local</strong> requests <span class="kw kw-SHALLNOT">SHALL NOT</span> be challenged. They <span class="kw kw-SHALL">SHALL</span> be attributed to a configurable default local user.
+<strong class="rid" id="FR-16">FR-16</strong>: <strong>Local</strong> requests <span class="kw kw-SHALLNOT">SHALL NOT</span> be challenged. They <span class="kw kw-SHALL">SHALL</span> be attributed to a configurable default local user. <em>(rev 12)</em> In multi-user mode this applies only when loopback trust is on (FR-164).
 </li><li>
-<strong class="rid" id="FR-17">FR-17</strong>: <strong>Tailscale Serve</strong> requests <span class="kw kw-SHALL">SHALL</span> be treated as trusted, the same as local requests, because the user has already authenticated with Tailscale. When Tailscale identity headers are present (e.g. <code>Tailscale-User-Login</code>), the request <span class="kw kw-SHOULD">SHOULD</span> be attributed to that Tailscale user, so actions in the history show who performed them.
+<strong class="rid" id="FR-17">FR-17</strong>: <strong>Tailscale Serve</strong> requests <span class="kw kw-SHALL">SHALL</span> be treated as trusted, the same as local requests, because the user has already authenticated with Tailscale. When Tailscale identity headers are present (e.g. <code>Tailscale-User-Login</code>), the request <span class="kw kw-SHOULD">SHOULD</span> be attributed to that Tailscale user, so actions in the history show who performed them. <em>(rev 12)</em> In multi-user mode a Tailscale identity only finds its linked user (FR-165); it <span class="kw kw-SHALLNOT">SHALL NOT</span> grant access on its own.
 </li><li>
-<strong class="rid" id="FR-18">FR-18</strong>: <strong>External interface</strong> requests <span class="kw kw-SHALL">SHALL</span> be challenged before access is granted. See open question Q1.
+<strong class="rid" id="FR-18">FR-18</strong>: <strong>External interface</strong> requests <span class="kw kw-SHALL">SHALL</span> be challenged before access is granted. <em>(rev 12)</em> The challenge is the sign-in of §4.4 (Q1 answered).
 </li><li>
 <strong class="rid" id="FR-19">FR-19</strong>: By default the application <span class="kw kw-SHALL">SHALL</span> listen only on loopback. Listening on external interfaces <span class="kw kw-SHALL">SHALL</span> require explicit configuration.
 </li><li>
@@ -329,7 +329,104 @@ no other service is on go-build-it's address.
 <tr><td><strong>Git / Release Manager</strong></td><td>Handles all git and forge operations (see §9), so other personas don't spend tokens on them.</td></tr>
 </tbody></table></div>
 <ul><li>
-<strong class="rid" id="FR-26">FR-26</strong>: Users <span class="kw kw-SHOULD">SHOULD</span> be able to define additional custom roles.
+<strong class="rid" id="FR-26">FR-26</strong>: Users <span class="kw kw-SHOULD">SHOULD</span> be able to define additional custom roles. <em>(rev 12)</em> These are <strong>team roles</strong> (the job someone does). What someone may do is set by <strong>access roles</strong> (FR-174), which <span class="kw kw-SHALL">SHALL</span> also be customizable.
+</li></ul>
+<h3 id="4-4-users-sign-in-and-access-control-rev-12">4.4 Users, sign-in and access control (rev 12)</h3>
+<p>go-build-it runs as <strong>one shared server</strong> for a team (decided 2026-11-12). Two ideas are kept apart: a <strong>team role</strong> (§4.3) is the job someone does on a project, filled by a person or an AI; an <strong>access role</strong> is what someone may do. A person can be a project's reviewer and hold Approver access. Three takes on the screens are in the [user management mockups](mockups/user-management.html). <strong>Take 1, the admin console, was chosen on 2026-11-20 (Q13)</strong>: People &amp; access is a system area with Users, Groups and Roles, and each project has an Access tab with "Check access". Dev mode (§4.5) comes first, so multi-user work can be tried on one machine before sign-in exists.</p>
+<h4 id="modes-and-sign-in">Modes and sign-in</h4>
+<ul><li>
+<strong class="rid" id="FR-160">FR-160</strong>: Every person <span class="kw kw-SHALL">SHALL</span> be a <strong>user</strong>: a stable ID, display name, email (unique), status, and the time they were created and last seen. History events, comments, answers and sign-offs <span class="kw kw-SHALL">SHALL</span> point at the user ID, so renaming someone does not rewrite the record.
+</li><li>
+<strong class="rid" id="FR-161">FR-161</strong>: go-build-it <span class="kw kw-SHALL">SHALL</span> support <strong>local accounts</strong> first: a password (at least 12 characters, hashed with a memory-hard algorithm such as Argon2id, and checked against a list of known leaked passwords) and a <strong>second step</strong>, a passkey (WebAuthn) or a one-time code (TOTP). Whether the second step is required <span class="kw kw-SHALL">SHALL</span> be a setting, per installation, with a stricter setting allowed for admins and approvers. Forgotten passwords <span class="kw kw-SHALL">SHALL</span> be reset by an admin, or by email once email is configured.
+</li><li>
+<strong class="rid" id="FR-162">FR-162</strong>: go-build-it <span class="kw kw-SHALL">SHALL</span> support <strong>single sign-on with OIDC</strong> (for example Entra ID, Okta, Google Workspace or Keycloak) as the next sign-in method; it is <strong>required</strong>, though the provider is not chosen yet. Settings <span class="kw kw-SHALL">SHALL</span> take the issuer URL, client ID and secret, test the connection, and show the redirect URL. Users <span class="kw kw-SHALL">SHALL</span> be matched by verified email. Group membership <span class="kw kw-MAY">MAY</span> come from a claim (FR-170). Local accounts <span class="kw kw-MAY">MAY</span> be turned off once OIDC works, keeping at least one break-glass account (FR-167).
+</li><li>
+<strong class="rid" id="FR-163">FR-163</strong>: An installation <span class="kw kw-SHALL">SHALL</span> run in <strong>solo mode</strong> (one owner, today's behaviour, no sign-in from this machine) or <strong>multi-user mode</strong>. Switching to multi-user mode <span class="kw kw-SHALL">SHALL</span> be an explicit action by the owner that first creates the owner's own account, and <span class="kw kw-SHALL">SHALL</span> be recorded in the history.
+</li><li>
+<strong class="rid" id="FR-164">FR-164</strong>: In multi-user mode, <strong>loopback requests <span class="kw kw-SHALLNOT">SHALL NOT</span> be trusted by default</strong>. A setting <span class="kw kw-SHALL">SHALL</span> allow trusting loopback <strong>as a named user</strong> (typically a service account). Untokened loopback requests then act as that user, with that user's access and never more, and are recorded under that user's name. Settings <span class="kw kw-SHALL">SHALL</span> warn that anything running on the machine, including agents, gets that access.
+</li><li>
+<strong class="rid" id="FR-165">FR-165</strong>: In multi-user mode, a <strong>Tailscale identity</strong> <span class="kw kw-SHALL">SHALL</span> only identify a user that is linked to it (by an admin, or by the user after signing in). An unlinked Tailscale login <span class="kw kw-SHALL">SHALL</span> get the sign-in page.
+</li><li>
+<strong class="rid" id="FR-166">FR-166</strong>: The <strong>CLI</strong> <span class="kw kw-SHALL">SHALL</span> sign in with <code>gbi login</code> (a device-code flow in the browser) and keep a token that expires (default 30 days) and can be revoked. The <strong>MCP server</strong> <span class="kw kw-SHALL">SHALL</span> use the same tokens.
+</li><li>
+<strong class="rid" id="FR-167">FR-167</strong>: <strong>Agent sessions</strong> <span class="kw kw-SHALL">SHALL</span> get their own short-lived token, bound to the session and its task and ending with it, in place of the <code>X-GBI-Persona</code> header that any local process can send. In multi-user mode the header <span class="kw kw-SHALL">SHALL</span> be ignored. A break-glass command run on the server (<code>gbi users recover</code>) <span class="kw kw-SHALL">SHALL</span> restore an owner when every owner is locked out, and <span class="kw kw-SHALL">SHALL</span> be recorded.
+</li><li>
+<strong class="rid" id="FR-168">FR-168</strong>: Web sessions <span class="kw kw-SHALL">SHALL</span> expire (default 12 hours, 30 minutes idle; both settings), use secure, HTTP-only, same-site cookies, and be protected against cross-site request forgery. Repeated failed sign-ins <span class="kw kw-SHALL">SHALL</span> lock the account for a while (default 5 tries, 15 minutes) and be recorded.
+</li></ul>
+<h4 id="users-and-groups">Users and groups</h4>
+<ul><li>
+<strong class="rid" id="FR-169">FR-169</strong>: A user <span class="kw kw-SHALL">SHALL</span> have one status: <strong>Invited</strong> (an invitation link, which expires), <strong>Active</strong>, <strong>Suspended</strong> (temporarily blocked, everything kept), <strong>Locked</strong> (after failed sign-ins; clears by itself or by an admin) or <strong>Deactivated</strong> (can't sign in; history stays attributed). Suspending or deactivating <span class="kw kw-SHALL">SHALL</span> end that user's sessions and tokens at once. Every status change <span class="kw kw-SHALL">SHALL</span> be recorded with who did it and why.
+</li><li>
+<strong class="rid" id="FR-170">FR-170</strong>: Admins <span class="kw kw-SHALL">SHALL</span> invite users by email, choosing their first groups or project access. A user's page <span class="kw kw-SHALL">SHALL</span> show their status, sign-in methods, projects and access roles (with where each came from), live sessions and tokens (each can be ended), and their access history. <code>gbi users …</code> <span class="kw kw-SHALL">SHALL</span> do the same from the CLI.
+</li><li>
+<strong class="rid" id="FR-171">FR-171</strong>: go-build-it <span class="kw kw-SHALL">SHALL</span> support <strong>groups</strong> (for example the stakeholder kinds: Product owners, Cybersecurity, DevSecOps, UI/UX, Transformation, Sponsors, Developers). Access <span class="kw kw-SHOULD">SHOULD</span> be granted to groups rather than to people one by one. With OIDC, a group <span class="kw kw-MAY">MAY</span> follow a claim from the identity provider. <strong>Service accounts</strong> (users that can't sign in interactively, only use tokens) <span class="kw kw-SHALL">SHALL</span> be supported for automation and loopback trust.
+</li></ul>
+<h4 id="access-roles-and-grants">Access roles and grants</h4>
+<ul><li>
+<strong class="rid" id="FR-172">FR-172</strong>: Access <span class="kw kw-SHALL">SHALL</span> be built from <strong>permissions</strong>. <strong>Project permissions</strong>: view; comment and mark up artifacts; answer questions; queue tasks and file findings; start agent work (spends money); edit artifacts; manage the team, tuning and members; approve gates (optionally limited to gate types); merge and release; project settings; manage project access. <strong>System permissions</strong>: manage users and groups; manage roles; manage archetypes and standards; server settings, remote access and updates; view all projects; run access reviews and export.
+</li><li>
+<strong class="rid" id="FR-173">FR-173</strong>: An <strong>access role</strong> <span class="kw kw-SHALL">SHALL</span> be a named set of permissions with a scope (project or system). go-build-it <span class="kw kw-SHALL">SHALL</span> ship built-in roles: <strong>Owner</strong> and <strong>Admin</strong> (system); <strong>Viewer</strong>, <strong>Commenter</strong>, <strong>Contributor</strong>, <strong>Approver</strong>, <strong>Maintainer</strong> and <strong>Project admin</strong> (project). Built-in roles can be copied but not edited.
+</li><li>
+<strong class="rid" id="FR-174">FR-174</strong>: Admins <span class="kw kw-SHALL">SHALL</span> be able to create <strong>custom access roles</strong> from the start, as flexible as custom artifact tabs (FR-151): pick permissions, optionally start from another role, limit approval to gate types. Roles <span class="kw kw-SHALL">SHALL</span> be versioned. Saving a role <span class="kw kw-SHALL">SHALL</span> show who it affects, and <span class="kw kw-SHALL">SHALL</span> be recorded.
+</li><li>
+<strong class="rid" id="FR-175">FR-175</strong>: Permissions that spend money (start agent work) or can't be undone (merge and release) <span class="kw kw-SHALL">SHALL</span> be marked wherever roles are edited or granted.
+</li><li>
+<strong class="rid" id="FR-176">FR-176</strong>: Projects <span class="kw kw-MAY">MAY</span> define their own roles in the repository (for example <code>[roles]</code> in <code>docs/gbi.toml</code>), within a <strong>ceiling</strong> the server admin sets: a project file <span class="kw kw-SHALLNOT">SHALL NOT</span> be able to grant a permission the ceiling doesn't allow, and <em>who</em> holds a role <span class="kw kw-SHALL">SHALL</span> be kept only in go-build-it, never in the repository. (Take 2. <strong>Not planned</strong>: Take 1 was chosen (Q13); roles live in go-build-it. Kept here in case a project needs roles in its repository later.)
+</li><li>
+<strong class="rid" id="FR-177">FR-177</strong>: A <strong>grant</strong> <span class="kw kw-SHALL">SHALL</span> give a user, a group or an AI member an access role on one project, or on all projects. A grant <span class="kw kw-MAY">MAY</span> expire. Each project <span class="kw kw-SHALL">SHALL</span> have a default for signed-in users without a grant (none, or a role), and <span class="kw kw-MAY">MAY</span> be <strong>private</strong>: hidden, name included, from people without access. One person <span class="kw kw-SHALL">SHALL</span> be able to hold different roles in different projects. Projects that declare compatibility with each other <span class="kw kw-SHALLNOT">SHALL NOT</span> share access.
+</li><li>
+<strong class="rid" id="FR-178">FR-178</strong>: A project's access list <span class="kw kw-SHALL">SHALL</span> show every grant with where it came from (direct, a group, the project default, an archetype) and <span class="kw kw-SHALL">SHALL</span> answer <strong>"can this person do this, and why?"</strong> for any user, AI member and permission.
+</li></ul>
+<h4 id="ai-members-separation-of-duties-and-sign-off">AI members, separation of duties and sign-off</h4>
+<ul><li>
+<strong class="rid" id="FR-179">FR-179</strong>: <strong>AI members</strong> <span class="kw kw-SHALL">SHALL</span> be subject to the same permission checks as people. Each AI member <span class="kw kw-SHALL">SHALL</span> have an access role (by default from its archetype) that acts as its <strong>ceiling</strong>. When an AI member acts for a person, it <span class="kw kw-SHALL">SHALL</span> get only the permissions both of them hold. By default AI members <span class="kw kw-SHALLNOT">SHALL NOT</span> answer questions, approve gates, change access, or merge and release, except Courier, which may merge and release when a person with that permission has signed off (Q16).
+</li><li>
+<strong class="rid" id="FR-180">FR-180</strong>: <strong>Nobody signs off their own work</strong>: the author of a change, and the person who directed the AI member that made it, <span class="kw kw-SHALLNOT">SHALL NOT</span> approve a gate on it. A project <span class="kw kw-MAY">MAY</span> require more than one approver.
+</li><li>
+<strong class="rid" id="FR-181">FR-181</strong>: Someone who opens a link to a project they can't see <span class="kw kw-SHALL">SHALL</span> be offered <strong>Request access</strong> with a reason. Requests <span class="kw kw-SHALL">SHALL</span> go to the inbox of the project's access managers (desktop and phone), where they can be granted with a role or declined. Private projects <span class="kw kw-SHALLNOT">SHALL NOT</span> reveal their name.
+</li><li>
+<strong class="rid" id="FR-182">FR-182</strong>: A gate type <span class="kw kw-MAY">MAY</span> name the groups or roles that must sign it off, in order or side by side, with how many from each (a <strong>sign-off route</strong>). go-build-it <span class="kw kw-SHALL">SHALL</span> route the request to those people's inboxes and show the route's progress on the gate. <em>(This builds on the review gates of §10.3, FR-115–FR-118, and the sign-off workflow decided 2026-11-11.)</em>
+</li><li>
+<strong class="rid" id="FR-183">FR-183</strong>: A sign-off <span class="kw kw-SHALL">SHALL</span> record who, when, which version of the artifact or release, and the comment. Changing what was signed <span class="kw kw-SHALL">SHALL</span> withdraw the sign-off and say so.
+</li><li>
+<strong class="rid" id="FR-184">FR-184</strong>: A signer <span class="kw kw-MAY">MAY</span> <strong>delegate</strong> a step for a period (for example during leave); the delegation <span class="kw kw-SHALL">SHALL</span> be recorded and shown on the route.
+</li></ul>
+<h4 id="enforcement-and-audit">Enforcement and audit</h4>
+<ul><li>
+<strong class="rid" id="FR-185">FR-185</strong>: Every API route <span class="kw kw-SHALL">SHALL</span> declare the permission it needs, in the route table (FR-31), so the web UIs, CLI and MCP server are all checked in the same place. The UIs <span class="kw kw-SHALL">SHALL</span> hide what someone can't do but <span class="kw kw-SHALLNOT">SHALL NOT</span> rely on hiding. A denied request <span class="kw kw-SHALL">SHALL</span> say which permission is missing.
+</li><li>
+<strong class="rid" id="FR-186">FR-186</strong>: The history <span class="kw kw-SHALL">SHALL</span> record sign-ins, failed sign-ins and sign-outs; status changes; grants added, changed, expired and removed; role changes; token creation and revocation; loopback-trust and sign-in setting changes; and denials of sensitive actions. <em>(A tamper-evident log stays out of scope; see §15.)</em>
+</li><li>
+<strong class="rid" id="FR-187">FR-187</strong>: An admin or auditor <span class="kw kw-SHALL">SHALL</span> be able to run an <strong>access review</strong>: who can do what in each project, with findings to decide on (accounts unused for 60 days, direct grants, expiring access, people who could both build and sign off the same work, loopback trust), each kept with a reason or removed. The finished review <span class="kw kw-SHALL">SHALL</span> be exportable (CSV) and recorded.
+</li><li>
+<strong class="rid" id="FR-188">FR-188</strong>: There <span class="kw kw-SHALL">SHALL</span> always be at least one active Owner; the last one <span class="kw kw-SHALLNOT">SHALL NOT</span> be suspended, deactivated or demoted.
+</li><li>
+<strong class="rid" id="FR-189">FR-189</strong>: Temporary elevation <span class="kw kw-MAY">MAY</span> be requested (a role on a project for a set time, with a reason) and approved by someone who manages that project's access; it <span class="kw kw-SHALL">SHALL</span> end by itself and be recorded. <em>(Later phase.)</em>
+</li></ul>
+<h3 id="4-5-dev-mode-rev-13">4.5 Dev mode (rev 13)</h3>
+<p>Dev mode is for evaluating and iterating on go-build-it itself: one person on one machine plays several users to try multi-user work, without sign-in.</p>
+<ul><li>
+<strong class="rid" id="FR-190">FR-190</strong>: go-build-it <span class="kw kw-SHALL">SHALL</span> have a <strong>dev mode</strong>, turned on by starting the server with <code>gbi serve --dev</code> (or <code>dev = true</code> in config.toml). Dev mode <span class="kw kw-SHALL">SHALL</span> be refused, with the reason, while go-build-it is reachable from other machines (external interfaces or Tailscale Serve, §4.2), and <span class="kw kw-SHALL">SHALL</span> be shown in <code>gbi doctor</code> and Settings.
+</li><li>
+<strong class="rid" id="FR-191">FR-191</strong>: In dev mode a <strong>dev bar</strong> <span class="kw kw-SHALL">SHALL</span> be fixed at the top of every desktop and phone screen, in a warning colour that no other part of the UI uses. It <span class="kw kw-SHALL">SHALL</span> show the user you are acting as, and <span class="kw kw-SHALL">SHALL</span> switch to any other user in one click (or <code>gbi dev as USER</code> from the CLI) without signing in. The switch <span class="kw kw-SHALL">SHALL</span> apply at once to every open screen of that browser.
+</li><li>
+<strong class="rid" id="FR-192">FR-192</strong>: On the first start in dev mode go-build-it <span class="kw kw-SHALL">SHALL</span> offer to create <strong>two dev users</strong> (an owner and a second person, for example <code>david</code> and <code>maria</code>) with their Assistants (§4.6), so multi-user work can be tried at once. Further dev users <span class="kw kw-MAY">MAY</span> be added from the dev bar.
+</li><li>
+<strong class="rid" id="FR-193">FR-193</strong>: Every action taken in dev mode <span class="kw kw-SHALL">SHALL</span> be recorded as the user acted as, marked <strong>dev</strong> with the person who switched; and the dev bar <span class="kw kw-SHALL">SHALL</span> show why the last request was allowed or denied (the permission and where it came from, FR-178), so access rules can be checked as you click.
+</li></ul>
+<h3 id="4-6-the-personal-assistant-rev-13">4.6 The personal Assistant (rev 13)</h3>
+<ul><li>
+<strong class="rid" id="FR-194">FR-194</strong>: Every user <span class="kw kw-SHALL">SHALL</span> have a personal <strong>Assistant</strong>: an AI that works only with that user and operates go-build-it for them. It is not a project team member (§4.1): team members do the project's work, the Assistant talks with its person. Every side chat in the UI (the "Edit with" chat beside artifacts, archetypes and standards, the persona coach, Learn's helper) <span class="kw kw-SHALL">SHALL</span> be a conversation with your Assistant, which makes the change or asks the right team member.
+</li><li>
+<strong class="rid" id="FR-195">FR-195</strong>: An <strong>Assistant archetype</strong> <span class="kw kw-SHALL">SHALL</span> be defined system-wide (instructions, harness, model), like the other archetypes (FR-12). Every user's Assistant <span class="kw kw-SHALL">SHALL</span> be made from it automatically. Each user <span class="kw kw-SHALL">SHALL</span> be able to <strong>tune their own Assistant</strong> in their profile (added instructions, and the harness and model where the admin allows a choice); archetype changes <span class="kw kw-SHALL">SHALL</span> reach Assistants as FR-12b describes.
+</li><li>
+<strong class="rid" id="FR-196">FR-196</strong>: A user's Assistant <span class="kw kw-SHALL">SHALL</span> be <strong>always running while the user is signed in</strong>: it starts at sign-in (or when dev mode switches to the user), runs in its own herdr pane in that user's workspace, and stops after the user signs out or has been idle for a set time (default 2 hours). Its conversation <span class="kw kw-SHALL">SHALL</span> be resumed next time.
+</li><li>
+<strong class="rid" id="FR-197">FR-197</strong>: The Assistant's <strong>status</strong> <span class="kw kw-SHALL">SHALL</span> be shown on every screen (desktop top bar and phone header): starting, ready, working, waiting for you, or offline, with its context use. Clicking it <span class="kw kw-SHALL">SHALL</span> open the Assistant panel; a stopped or blocked Assistant <span class="kw kw-SHALL">SHALL</span> say why (FR-205).
+</li><li>
+<strong class="rid" id="FR-198">FR-198</strong>: The Assistant <span class="kw kw-SHALL">SHALL</span> act with <strong>its user's permissions</strong> and never more (FR-179). It <span class="kw kw-MAY">MAY</span> read anything its user can, and queue work, ask members and draft changes. It <span class="kw kw-SHALLNOT">SHALL NOT</span> submit a decision on its own: answers, verdicts, gate sign-offs, choices between options and access changes <span class="kw kw-SHALL">SHALL</span> be drafted for the user to confirm. Its actions <span class="kw kw-SHALL">SHALL</span> be recorded as "Assistant for USER".
+</li><li>
+<strong class="rid" id="FR-199">FR-199</strong>: The Assistant <span class="kw kw-SHALL">SHALL</span> use go-build-it through the CLI and MCP server with a token bound to its user and to itself (FR-167), so its access can be checked and ended like any token.
 </li></ul>
 <h2 id="5-user-interfaces">5. User interfaces</h2>
 <ul><li>
@@ -580,6 +677,22 @@ assignment of tasks to roles or to specific AI team members
 </li><li>
 <strong class="rid" id="NFR-32">NFR-32</strong>: go-build-it's herdr client types <span class="kw kw-SHALL">SHALL</span> be generated from herdr's published API schema, so an incompatible change fails the build. The supported herdr version range <span class="kw kw-SHALL">SHALL</span> be declared in one place and tested in CI.
 </li></ul>
+<h3 id="8-5-harness-credentials-and-warm-harnesses-rev-13">8.5 Harness credentials and warm harnesses (rev 13)</h3>
+<ul><li>
+<strong class="rid" id="FR-200">FR-200</strong>: A system setting <span class="kw kw-SHALL">SHALL</span> choose how harnesses are paid for: <strong>Shared</strong>, where every harness runs on the server's own sign-in or key, or <strong>Per user</strong>, where a user's Assistant and the agent work that user starts run on that user's own credentials. Both <span class="kw kw-SHALL">SHALL</span> be supported equally well.
+</li><li>
+<strong class="rid" id="FR-201">FR-201</strong>: A harness credential <span class="kw kw-SHALL">SHALL</span> be one of: a harness that is <strong>already signed in</strong> before go-build-it starts (in Per user mode, signed in inside that user's own harness configuration folder, guided step by step in a herdr pane); or an <strong>API key</strong> for the harness, optionally one per model. Keys <span class="kw kw-SHALL">SHALL</span> be stored encrypted, never shown again after saving, and never written to logs, the history or a repository (NFR-22).
+</li><li>
+<strong class="rid" id="FR-202">FR-202</strong>: Settings, and each user's profile in Per user mode, <span class="kw kw-SHALL">SHALL</span> show which credential each harness and model uses, and <span class="kw kw-SHALL">SHALL</span> test it with the doctor (FR-07b) without starting project work.
+</li><li>
+<strong class="rid" id="FR-203">FR-203</strong>: In Per user mode, agent work <span class="kw kw-SHALL">SHALL</span> run on the credentials of the user who started it. Automatic dispatch <span class="kw kw-SHALL">SHALL</span> use the credentials of a user named for the project; with none named, it <span class="kw kw-SHALL">SHALL</span> not start paid work.
+</li><li>
+<strong class="rid" id="FR-204">FR-204</strong>: go-build-it <span class="kw kw-SHALL">SHALL</span> keep <strong>warm harnesses</strong> started ahead of need: every signed-in user's Assistant, and the members of projects with queued or running work, within limits set in Settings (how many, and how much memory). Others <span class="kw kw-SHALL">SHALL</span> start on demand, and idle ones <span class="kw kw-SHALL">SHALL</span> stop after a set time. Settings <span class="kw kw-SHALL">SHALL</span> show each warm harness with its state and memory.
+</li><li>
+<strong class="rid" id="FR-205">FR-205</strong>: When a harness stops at a screen go-build-it does not answer (a model or plan menu, a sign-in, a permission), the reason the person sees <span class="kw kw-SHALL">SHALL</span> be that screen's text, and the doctor's prompt tier <span class="kw kw-SHALL">SHALL</span> check that the configured model starts without such a screen.
+</li><li>
+<strong class="rid" id="FR-206">FR-206</strong>: A short-lived harness used for one question (a reviewer's assessment, release notes) <span class="kw kw-SHALL">SHALL</span> get the same care as a member: folder trust answered (FR-07f), and a prompt that the harness dropped while starting sent again.
+</li></ul>
 <h2 id="9-git-github-and-gitlab-workflow">9. Git, GitHub and GitLab workflow</h2>
 <ul><li>
 <strong class="rid" id="FR-90">FR-90</strong>: The application <span class="kw kw-SHALL">SHALL</span> work with both GitHub (<code>gh</code>) and GitLab (<code>glab</code>), and <span class="kw kw-SHALL">SHALL</span> detect which one each project uses and whether its CLI is authenticated.
@@ -649,7 +762,7 @@ the approved mockup next to the built result (screenshots captured by the e2e te
 </li><li>
 a summary of the tests run: unit and end-to-end, passed, failed and coverage
 </li><li>
-an assessment against the global and project standards
+an assessment against the global and project standards (a standard that does not apply to the change is marked so, with the reason, and is not counted)
 </li><li>
 an assessment against the feedback given during mockup reviews and dress rehearsals: addressed or not
 </li><li>
@@ -657,6 +770,8 @@ an assessment against the requirements in scope: met, partly met or not met, wit
 </li><li>
 a link to the pull or merge request, where the code diff remains available
 </li></ul>
+</li><li>
+<strong class="rid" id="FR-112a">FR-112a</strong>: <em>(rev 13)</em> The reviewer <span class="kw kw-SHALL">SHALL</span> be given the whole change (the task, the diff since the branch left the main line, the worktree to read) and the tests go-build-it ran. The review <span class="kw kw-SHALL">SHALL</span> list its <strong>evidence gaps</strong> (no tests ran, tests failed, requirements not met or not assessed, feedback not addressed, a mockup without a screenshot). No verdict <span class="kw kw-SHALL">SHALL</span> be selected in advance, and approving with gaps <span class="kw kw-SHALL">SHALL</span> need a stated reason.
 </li></ul>
 <h3 id="10-3-review-gates-and-dress-rehearsals">10.3 Review gates and dress rehearsals</h3>
 <ul><li>
@@ -769,14 +884,20 @@ Each lesson's steps <span class="kw kw-SHALL">SHALL</span> be completed and chec
 <ul><li>
 <strong class="rid" id="NFR-20">NFR-20</strong>: Agents <span class="kw kw-MAY">MAY</span> run arbitrary code on the development machine. Container or VM sandboxing is explicitly <strong>not</strong> required.
 </li><li>
-<strong class="rid" id="NFR-21">NFR-21</strong>: Access control relies on network exposure and Tailscale (§4.2). The application <span class="kw kw-SHALLNOT">SHALL NOT</span> expose itself on external interfaces without the challenge required by FR-18.
+<strong class="rid" id="NFR-21">NFR-21</strong>: Access control relies on network exposure and Tailscale (§4.2) in solo mode, and on sign-in and per-project permissions (§4.4) in multi-user mode. The application <span class="kw kw-SHALLNOT">SHALL NOT</span> expose itself on external interfaces without the challenge required by FR-18.
+</li><li>
+<strong class="rid" id="NFR-23">NFR-23</strong>: <em>(rev 13)</em> Before every release, the <strong>harness check</strong> (<code>scripts/harness_e2e.sh</code>) <span class="kw kw-SHALL">SHALL</span> pass for each harness marked verified. It <span class="kw kw-SHALL">SHALL</span> run in its own data folder and herdr session, prove that a member works a task without stopping, that a one-question helper answers, that answering a blocking question resumes the task, and that a member takes a second task in its conversation, and <span class="kw kw-SHALL">SHALL</span> print the screen of any harness that stopped.
+</li><li>
+<strong class="rid" id="NFR-24">NFR-24</strong>: <em>(rev 13)</em> With warm harnesses (FR-204), a user's Assistant <span class="kw kw-SHALL">SHALL</span> begin replying within 5 seconds, and a member <span class="kw kw-SHALL">SHALL</span> begin a task within 10 seconds of it being started.
+</li><li>
+<strong class="rid" id="NFR-22">NFR-22</strong>: <em>(rev 12)</em> Passwords, tokens and OIDC secrets <span class="kw kw-SHALL">SHALL</span> never be written to logs, the history or the repository. Tokens <span class="kw kw-SHALL">SHALL</span> be stored hashed. Security-relevant settings <span class="kw kw-SHALL">SHALL</span> be changeable only by an Owner or Admin, and each change <span class="kw kw-SHALL">SHALL</span> be recorded.
 </li></ul>
 <h2 id="14-open-questions">14. Open questions</h2>
 <div class="table-wrap"><table><thead><tr><th>#</th><th>Question</th></tr></thead><tbody>
-<tr><td>Q1</td><td>For access through an external network interface (FR-18), what should the challenge be: a local password or token, an OAuth/OIDC provider, or refusing external access completely and requiring Tailscale Serve?</td></tr>
+<tr><td>Q1</td><td>~~For access through an external network interface (FR-18), what should the challenge be?~~ <strong>Answered 2026-11-12:</strong> sign-in (§4.4): local accounts with a second step first, OIDC required next (provider not chosen yet).</td></tr>
 <tr><td>Q2</td><td>Check that each target harness supports headless operation <strong>and</strong> reports context-window usage. Claude Code reports usage in its streaming JSON output. OpenCode offers a non-interactive mode (<code>opencode run</code>) and a server mode; how it reports context usage needs to be confirmed. Antigravity's headless and CLI support needs to be confirmed.</td></tr>
 <tr><td>Q3</td><td>When smart handoffs graduate from experimental, what is the default context threshold, and should it be configurable per harness or model? What evidence (rework rate, handoff quality vs. compaction) decides that they are ready?</td></tr>
-<tr><td>Q4</td><td>Can multiple humans collaborate on the same projects (e.g. different Tailscale users with different roles), or is it single-user with optional reviewers?</td></tr>
+<tr><td>Q4</td><td>~~Can multiple humans collaborate on the same projects?~~ <strong>Answered 2026-11-11/12:</strong> yes, on one shared server, with their own accounts, statuses and per-project access roles (§4.4).</td></tr>
 <tr><td>Q5</td><td>What is the exact default git workflow (branch naming, PR/MR requirements, merge strategy)?</td></tr>
 <tr><td>Q6</td><td>~~What is the mechanism and channel for auto-updates?~~ <strong>Answered:</strong> GitHub Releases with signed checksums (ADR-004). Rev 4 adds the in-app change log and guided updates with step progress (ADR-011).</td></tr>
 <tr><td>Q7</td><td>~~How should attachable (headed) sessions work?~~ <strong>Answered (rev 3):</strong> every session runs in herdr; see ADR-009.</td></tr>
@@ -785,6 +906,11 @@ Each lesson's steps <span class="kw kw-SHALL">SHALL</span> be completed and chec
 <tr><td>Q10</td><td>~~Archetype change propagation (FR-12b)?~~ <strong>Answered 2026-11-08:</strong> a proposal per affected member, plus one action to apply the change to every member that has not overridden the changed fields. See ADR-010.</td></tr>
 <tr><td>Q11</td><td>~~Should the doctor's prompt tier (FR-07b) ever run on its own?~~ <strong>Answered 2026-11-09:</strong> no. It runs only when asked for, because it uses tokens. See ADR-012.</td></tr>
 <tr><td>Q12</td><td>~~Should lessons use a sandbox or a real project?~~ <strong>Answered 2026-11-09:</strong> a practice project with the scripted fake harness by default (FR-136); the last lesson moves to a real project. Claude Code is the main harness example (FR-137). See ADR-012.</td></tr>
+<tr><td>Q13</td><td>~~Which user management take?~~ <strong>Answered 2026-11-20:</strong> Take 1, the admin console. Dev mode first (§4.5), then the personal Assistant (§4.6). Project-defined roles (FR-176) are not planned.</td></tr>
+<tr><td>Q14</td><td>Which OIDC provider will be used first (FR-162)?</td></tr>
+<tr><td>Q15</td><td>Is the second sign-in step required for everyone, or only for admins and approvers (FR-161)? May project admins invite people who have no account yet?</td></tr>
+<tr><td>Q16</td><td>May an AI member ever approve a gate (for example the AI reviewer on a low-risk gate), or never (FR-179)? <em>(Rev 13: the personal Assistant never decides on its own; it drafts for its user, FR-198.)</em></td></tr>
+<tr><td>Q17</td><td>How much memory may warm harnesses use by default (FR-204)? To be set from measurements in dev mode.</td></tr>
 </tbody></table></div>
 <h2 id="15-out-of-scope-for-now">15. Out of scope (for now)</h2>
 <ul><li>

@@ -95,6 +95,9 @@ type Manager struct {
 	GbiBin string
 	// Poll is how often a running session is checked (tests shorten it).
 	Poll time.Duration
+	// ResubmitAfter is how long an idle member that has not read its task waits before the
+	// task is sent again; zero means 12 seconds.
+	ResubmitAfter time.Duration
 
 	mu         sync.Mutex
 	running    map[string]*run

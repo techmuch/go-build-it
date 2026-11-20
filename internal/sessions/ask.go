@@ -12,6 +12,7 @@ import (
 
 	"github.com/techmuch/go-build-it/internal/harness"
 	"github.com/techmuch/go-build-it/internal/herdr"
+	"github.com/techmuch/go-build-it/internal/history"
 	"github.com/techmuch/go-build-it/internal/team"
 )
 
@@ -44,7 +45,7 @@ func (m *Manager) Ask(ctx context.Context, mem team.Member, prompt string) (stri
 	defer os.Remove(in)
 	defer os.Remove(out)
 	brief := "You are " + mem.Name + ", the " + mem.Role + " on this team.\n" + strings.TrimSpace(mem.Instructions) + "\n\n---\n\n" + prompt +
-		"\n\n---\nWrite your complete answer to the file " + filepath.Base(out) + " in this folder (create it), then reply DONE. Do not use other tools.\n"
+		"\n\n---\nWrite your complete answer to the file " + filepath.Base(out) + " in this folder (create it), then reply DONE. Do not create or change any other file.\n"
 	if err := os.WriteFile(in, []byte(brief), 0o644); err != nil {
 		return "", err
 	}
@@ -82,8 +83,27 @@ func (m *Manager) Ask(ctx context.Context, mem team.Member, prompt string) (stri
 		}
 	}
 	var seq int64
+	trusted := false
+	// A harness that is started by typing its command reports a trust screen only as
+	// "blocked": answer it before the question is typed into it.
+	if ag, e := h.Agent(ctx, sp); e == nil && ag.AgentStatus == herdr.AgentStatusBlocked {
+		trusted = true
+		if !m.answerTrust(ctx, h, mem.ProjectID, mem.Name, prof.Label, sp) {
+			return "", fmt.Errorf("%s is waiting for you in herdr (workspace %s); answer it there, then try again", mem.Name, HelpersWorkspace)
+		}
+		m.waitNotBlocked(ctx, h, sp)
+	}
 	for i := 0; ; i++ {
-		seq, err = h.Submit(ctx, sp, name, prof.Kind != "", "Read "+filepath.Base(in)+" in this folder and do what it says.")
+		seq, err = h.Submit(ctx, sp, name, prof.Kind != "", "Read "+filepath.Base(in)+" in this folder and do what it says.") // see prompt below
+		// The folder-trust screen can appear after the harness reports it has started: answer
+		// it once (FR-07f) and send the question again.
+		if err != nil && herdr.IsCode(err, "agent_blocked") && !trusted {
+			trusted = true
+			if m.answerTrust(ctx, h, mem.ProjectID, mem.Name, prof.Label, sp) {
+				m.waitNotBlocked(ctx, h, sp)
+				continue
+			}
+		}
 		if err == nil || !herdr.IsCode(err, "agent_not_ready") || i >= 20 {
 			break
 		}
@@ -92,8 +112,25 @@ func (m *Manager) Ask(ctx context.Context, mem team.Member, prompt string) (stri
 	if err != nil {
 		return "", err
 	}
-	a, err := h.WaitSettled(ctx, sp, seq, 45*time.Second)
-	if err != nil {
+	// A harness that has only just started can drop the prompt and stay idle. Send it again,
+	// twice at most, before giving up (the same rule as for members).
+	question := "Read " + filepath.Base(in) + " in this folder and do what it says."
+	a, err := h.WaitSettled(ctx, sp, seq, 30*time.Second)
+	for retry := 0; errors.Is(err, herdr.ErrPromptStalled) && retry < 2; retry++ {
+		if _, statErr := os.Stat(out); statErr == nil {
+			break // it answered without the state change being seen
+		}
+		if seq, err = h.Submit(ctx, sp, name, prof.Kind != "", question); err != nil {
+			break
+		}
+		m.hist.Must(ctx, history.Event{ProjectID: mem.ProjectID, Type: "helper.resubmitted", Subject: mem.ID,
+			Summary: "Asked " + mem.Name + " again", Why: mem.Name + " was idle and had not read the question", Data: history.Data(map[string]any{"attempt": retry + 2})})
+		a, err = h.WaitSettled(ctx, sp, seq, 30*time.Second)
+	}
+	if err != nil && !errors.Is(err, herdr.ErrPromptStalled) {
+		return "", fmt.Errorf("%s did not answer: %w", mem.Name, err)
+	}
+	if _, statErr := os.Stat(out); err != nil && statErr != nil {
 		return "", fmt.Errorf("%s did not answer: %w", mem.Name, err)
 	}
 	if a.AgentStatus == herdr.AgentStatusBlocked {
@@ -104,6 +141,17 @@ func (m *Manager) Ask(ctx context.Context, mem team.Member, prompt string) (stri
 		return "", errors.New(mem.Name + " finished without writing an answer")
 	}
 	return strings.TrimSpace(string(b)), nil
+}
+
+// waitNotBlocked waits up to ten seconds for a harness to leave a screen that was just
+// answered, so the next text is not read as part of the answer.
+func (m *Manager) waitNotBlocked(ctx context.Context, h *herdr.Client, pane string) {
+	for j := 0; j < 40; j++ {
+		if ag, err := h.Agent(ctx, pane); err == nil && ag.AgentStatus != herdr.AgentStatusBlocked {
+			return
+		}
+		time.Sleep(250 * time.Millisecond)
+	}
 }
 
 func (m *Manager) helpersWorkspace(ctx context.Context, h *herdr.Client) (string, error) {

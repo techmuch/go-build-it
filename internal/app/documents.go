@@ -52,6 +52,7 @@ func (a *App) docProject(ctx context.Context, c *api.Ctx) (projects.Project, art
 // commitDocs writes files (path → content; nil content means the file is already on disk)
 // and commits them through Courier as one revision each.
 func (a *App) commitDocs(ctx context.Context, p projects.Project, actor, msg string, files map[string]*string) error {
+	changed := map[string]string{}
 	for rel, content := range files {
 		if content == nil && a.unchanged(ctx, p, rel) {
 			continue // already committed as it is
@@ -60,20 +61,29 @@ func (a *App) commitDocs(ctx context.Context, p projects.Project, actor, msg str
 			if b, err := os.ReadFile(filepath.Join(p.Path, filepath.FromSlash(rel))); err == nil && string(b) == *content && a.unchanged(ctx, p, rel) {
 				continue
 			}
+			changed[rel] = *content
+			continue
 		}
-		var body string
-		if content != nil {
-			body = *content
-		} else {
-			b, err := os.ReadFile(filepath.Join(p.Path, filepath.FromSlash(rel)))
-			if err != nil {
-				return err
-			}
-			body = string(b)
-		}
-		if _, err := a.Courier.CommitArtifact(ctx, p, rel, body, msg+"\n\nBy "+actor+" in go-build-it", actor); err != nil && !strings.Contains(err.Error(), "no changes") {
+		b, err := os.ReadFile(filepath.Join(p.Path, filepath.FromSlash(rel)))
+		if err != nil {
 			return err
 		}
+		changed[rel] = string(b)
+	}
+	// One action is one commit, however many files it touches.
+	var err error
+	switch len(changed) {
+	case 0:
+		return nil
+	case 1:
+		for rel, body := range changed {
+			_, err = a.Courier.CommitArtifact(ctx, p, rel, body, msg+"\n\nBy "+actor+" in go-build-it", actor)
+		}
+	default:
+		_, err = a.Courier.CommitArtifacts(ctx, p, changed, msg+"\n\nBy "+actor+" in go-build-it", actor)
+	}
+	if err != nil && !strings.Contains(err.Error(), "no changes") {
+		return err
 	}
 	return nil
 }

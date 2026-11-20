@@ -7,7 +7,7 @@ W=D["sizes"]
 out=[]
 w=out.append
 w("# go-build-it — Phased delivery plan\n")
-w(f"Status: Draft · {D['updated']} · Based on [requirements rev 10](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)\n")
+w(f"Status: Draft · {D['updated']} · Based on [requirements rev 10](../requirements.md) and [Approach A mockups, archived](../mockups/archive/a-mission-control/desktop.html) · [screens as built](../mockups/index.html) · Live status: [tracker](index.html)\n")
 w("""## 1. How this plan is built
 
 - **Approach A is the UI baseline.** Every UI task names the Approach A view it implements (desktop `A-v01`…`A-v14` plus detail views `02b`, `03b`, `04b`, `05b`, `12b`; mobile `A-M1`…`A-M11`).

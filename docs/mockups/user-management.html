@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Management Mockups</title>
+<link rel="stylesheet" href="archive/frame.css">
+<style>
+/* Approach A (Mission Control) app styles, the same as a-mission-control/desktop.html */
+.app { --side:#17212b; --side-2:#22303c; --side-t:#a9b7c3; --acc:#0f9d8a; --acc-s:#e3f4f1; --bg:#f4f6f7;
+  --card:#fff; --line:#e1e5e8; --t:#1c2329; --m:#66727c; --red:#d1453b; --red-s:#fdecea; --amb:#c47f00; --amb-s:#fff4dc;
+  --blue:#2f6fd1; --blue-s:#e7effc; --grn:#1f9d55; --grn-s:#e5f6ec; --vio:#7c5cd6; --vio-s:#efeafb;
+  display:grid; grid-template-columns:212px 1fr; min-height:700px; background:var(--bg); color:var(--t);
+  font:13.5px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.app * { box-sizing:border-box; }
+.side { background:var(--side); color:var(--side-t); padding:14px 10px; display:flex; flex-direction:column; gap:2px; }
+.brand { color:#fff; font-weight:700; font-size:15px; padding:4px 10px 14px; display:flex; gap:8px; align-items:center; }
+.brand b { width:22px; height:22px; border-radius:6px; background:var(--acc); display:inline-grid; place-items:center; font-size:12px; }
+.side a { color:var(--side-t); text-decoration:none; padding:7px 10px; border-radius:6px; display:flex; justify-content:space-between; }
+.side a.on { background:var(--side-2); color:#fff; }
+.side .badge { background:var(--red); color:#fff; border-radius:999px; font-size:11px; padding:0 7px; }
+.side .badge.n { background:#3b4b58; }
+.side .sep { font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:#6f8190; padding:14px 10px 4px; }
+.side .foot { margin-top:auto; font-size:11.5px; padding:10px; border-top:1px solid #2b3a47; }
+.main { display:flex; flex-direction:column; min-width:0; }
+.topbar { height:52px; background:var(--card); border-bottom:1px solid var(--line); display:flex; align-items:center; gap:14px; padding:0 20px; }
+.topbar h1 { font-size:16px; margin:0; }
+.crumb { color:var(--m); font-weight:400; }
+.search { margin-left:auto; width:260px; height:30px; border:1px solid var(--line); border-radius:6px; padding:0 10px; color:var(--m); line-height:28px; font-size:12.5px; }
+.me { display:flex; gap:8px; align-items:center; font-size:12.5px; white-space:nowrap; }
+.content { padding:18px 20px; display:flex; flex-direction:column; gap:14px; }
+.row { display:flex; gap:14px; } .row.c { align-items:center; } .wrap { flex-wrap:wrap; }
+.grow { flex:1; min-width:0; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:14px; min-width:0; }
+.card h3 { margin:0 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--m); display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.chip { display:inline-block; font-size:11px; padding:1px 8px; border-radius:999px; background:#eef1f3; color:#4a5560; white-space:nowrap; }
+.chip.red { background:var(--red-s); color:var(--red); } .chip.amb { background:var(--amb-s); color:var(--amb); }
+.chip.grn { background:var(--grn-s); color:var(--grn); } .chip.blue { background:var(--blue-s); color:var(--blue); }
+.chip.acc { background:var(--acc-s); color:var(--acc); } .chip.vio { background:var(--vio-s); color:var(--vio); }
+.btn { display:inline-block; font-size:12.5px; padding:5px 12px; border-radius:6px; border:1px solid var(--line); background:#fff; color:var(--t); white-space:nowrap; }
+.btn.p { background:var(--acc); border-color:var(--acc); color:#fff; } .btn.d { color:var(--red); border-color:#f0c4c0; } .btn.sm { padding:2px 8px; font-size:11.5px; }
+.muted { color:var(--m); } .small { font-size:12px; } .mono { font-family:ui-monospace, Menlo, monospace; font-size:12px; }
+a.l { color:var(--blue); text-decoration:none; }
+table.t { width:100%; border-collapse:collapse; }
+table.t th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--m); padding:6px 8px; border-bottom:1px solid var(--line); font-weight:600; }
+table.t td { padding:8px; border-bottom:1px solid var(--line); vertical-align:middle; }
+table.t tr:last-child td { border-bottom:0; }
+table.t tr.sel td { background:var(--acc-s); }
+.tabs { display:flex; gap:2px; border-bottom:1px solid var(--line); background:var(--card); padding:0 20px; }
+.tabs span { padding:10px 14px; font-size:13px; color:var(--m); border-bottom:2px solid transparent; }
+.tabs span.on { color:var(--t); border-color:var(--acc); font-weight:600; }
+.av { width:26px; height:26px; border-radius:50%; display:inline-grid; place-items:center; font-size:11px; font-weight:700; color:#fff; flex:none; background:#1c2329; }
+.av.ai { border-radius:7px; } .av.a1{background:#7c5cd6}.av.a2{background:#2f6fd1}.av.a3{background:#0f9d8a}.av.a4{background:#c47f00}.av.a5{background:#d1453b}.av.a6{background:#4a5560}
+.av.h1{background:#334155}.av.h2{background:#9d4b8b}.av.h3{background:#56708a}.av.h4{background:#8a6d3b}.av.h5{background:#3f7d5a}
+.who { display:flex; gap:8px; align-items:center; }
+.who b { font-weight:600; } .who .small { line-height:1.2; }
+.toggle { display:inline-block; width:30px; height:17px; border-radius:999px; background:var(--acc); position:relative; vertical-align:middle; flex:none; }
+.toggle::after { content:""; position:absolute; right:2px; top:2px; width:13px; height:13px; border-radius:50%; background:#fff; }
+.toggle.off { background:#c9d0d5; } .toggle.off::after { left:2px; right:auto; }
+.seg { display:inline-flex; border:1px solid var(--line); border-radius:6px; overflow:hidden; font-size:12px; vertical-align:middle; }
+.seg span { white-space:nowrap; padding:4px 10px; background:#fff; color:var(--m); border-right:1px solid var(--line); font-weight:500; }
+.seg span:last-child { border-right:0; } .seg span.on { background:var(--acc-s); color:var(--acc); font-weight:600; }
+.field { display:flex; flex-direction:column; gap:4px; font-size:12.5px; }
+.field label { color:var(--m); font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; font-weight:600; }
+.inp { border:1px solid var(--line); border-radius:6px; padding:6px 9px; background:#fff; font-size:13px; min-height:31px; }
+.inp.dis { background:#f5f7f8; color:var(--m); }
+.sel::after { content:" ▾"; color:var(--m); }
+.opt { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+.opt.on { border:2px solid var(--acc); padding:9px 11px; }
+.radio { width:15px; height:15px; border-radius:50%; border:2px solid #b8c1c8; flex:none; margin-top:2px; }
+.radio.on { border-color:var(--acc); box-shadow:inset 0 0 0 3px #fff; background:var(--acc); }
+.cb { display:inline-grid; place-items:center; width:15px; height:15px; border-radius:4px; border:1.5px solid #b8c1c8; font-size:10px; flex:none; vertical-align:-2px; }
+.cb.on { background:var(--acc); border-color:var(--acc); color:#fff; } .cb.on::after { content:"✓"; }
+.cb.inh { background:var(--acc-s); border-color:#9fd6cd; color:var(--acc); } .cb.inh::after { content:"✓"; }
+.cb.no { background:#f5f7f8; border-color:#dde2e6; }
+.note { background:var(--amb-s); border:1px solid #f1d9a3; border-radius:8px; padding:8px 12px; font-size:12.5px; }
+.note.blue { background:var(--blue-s); border-color:#c7d9f5; }
+.note.red { background:var(--red-s); border-color:#f0c4c0; }
+.code { font:12px/1.6 ui-monospace, Menlo, monospace; background:#0f1720; color:#cdd8e1; border-radius:8px; padding:12px 14px; white-space:pre; overflow:hidden; }
+.code .k { color:#7fb2ff; } .code .s { color:#9fe0b8; } .code .c { color:#6f8190; } .code .a { background:#1f3a2c; display:block; margin:0 -14px; padding:0 14px; }
+.matrix th, .matrix td { text-align:center !important; }
+.matrix td:first-child, .matrix th:first-child { text-align:left !important; }
+.lvl { display:inline-block; min-width:24px; font:700 11px ui-monospace, Menlo, monospace; padding:2px 6px; border-radius:5px; }
+.lvl.A { background:#1c2329; color:#fff; } .lvl.S { background:#7c5cd6; color:#fff; } .lvl.C { background:#0f9d8a; color:#fff; } .lvl.R { background:#e7effc; color:#2f6fd1; } .lvl.V { background:#eef1f3; color:#4a5560; } .lvl.N { background:#fff; color:#b8c1c8; border:1px dashed #d4dade; }
+.route { display:flex; align-items:stretch; gap:0; }
+.route .stp { flex:1; border:1px solid var(--line); border-radius:8px; background:#fff; padding:10px 12px; font-size:12.5px; position:relative; }
+.route .arr { width:28px; display:grid; place-items:center; color:var(--m); font-size:18px; }
+.route .stp.done { border-color:#a8dcc0; background:#f3fbf6; } .route .stp.now { border:2px solid var(--amb); padding:9px 11px; }
+.kv { display:grid; grid-template-columns:130px 1fr; gap:6px 12px; font-size:12.5px; } .kv dt { color:var(--m); } .kv dd { margin:0; }
+.login { min-height:640px; display:grid; place-items:center; background:linear-gradient(160deg,#17212b,#22303c 60%,#1b2a36); font:13.5px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.login .box { width:380px; background:#fff; border-radius:12px; padding:26px 28px; box-shadow:0 20px 60px rgba(0,0,0,.35); display:flex; flex-direction:column; gap:12px; color:#1c2329; }
+.login .brand { color:#1c2329; padding:0; }
+.login .inp { width:100%; }
+.login .btn { text-align:center; padding:8px; font-size:13.5px; }
+.or { display:flex; align-items:center; gap:10px; color:#8a949c; font-size:12px; } .or::before, .or::after { content:""; flex:1; height:1px; background:#e1e5e8; }
+.take { max-width:1290px; margin:64px auto 0; padding:0 24px; }
+.take h2 { font-size:26px; margin:0 0 4px; }
+.take .tag { font:700 12px ui-monospace, Menlo, monospace; letter-spacing:.06em; text-transform:uppercase; }
+.take.t1 .tag { color:#0f9d8a; } .take.t2 .tag { color:#c2562f; } .take.t3 .tag { color:#7c5cd6; }
+.devbar { display:flex; align-items:center; gap:12px; background:#c2410c; color:#fff; padding:6px 14px; font:12.5px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; flex-wrap:wrap; }
+.devbar b { letter-spacing:.08em; } .devbar .grow { flex:1; }
+.devwho { background:rgba(255,255,255,.18); border-radius:999px; padding:2px 10px 2px 2px; display:inline-flex; align-items:center; gap:6px; font-weight:600; }
+.devwho .chip { background:#fff3; color:#fff; } .devwho .av, .devalt .av { width:20px; height:20px; font-size:9px; }
+.devalt { display:inline-flex; align-items:center; gap:5px; text-decoration:underline; opacity:.9; }
+.devwhy { opacity:.95; } .devx { opacity:.8; font-size:11.5px; }
+.ast { display:inline-flex; align-items:center; gap:6px; font-size:12px; border:1px solid var(--line); border-radius:999px; padding:3px 10px; white-space:nowrap; }
+.ast .dot { width:8px; height:8px; border-radius:50%; background:#c9d0d5; } .ast .dot.grn { background:var(--grn); } .ast .dot.acc { background:var(--acc); box-shadow:0 0 0 3px var(--acc-s); } .ast .dot.amb { background:var(--amb); }
+.take p { max-width:100ch; color:#4a4e55; }
+.pc { display:grid; grid-template-columns:1fr 1fr; gap:10px 24px; max-width:1240px; font-size:14px; }
+.pc ul { margin:4px 0 0; padding-left:18px; } .pc b { font-size:13px; text-transform:uppercase; letter-spacing:.05em; }
+.cmp { max-width:1240px; border-collapse:collapse; background:#fffdf8; border:1px solid #d8d4cb; font-size:14px; }
+.cmp th, .cmp td { padding:9px 12px; border-bottom:1px solid #e2ddd2; text-align:left; vertical-align:top; }
+.cmp th { font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:#6b6f76; background:#f3f0e9; }
+</style>
+</head>
+<body class="mock">
+
+<div class="rv-bar"><span class="rv-title">go-build-it · User management <small>Take 1 chosen · dev mode and the Assistant · static mockups · Nov 20, 2026</small></span>
+  <a href="index.html">← All mockups</a><span class="rv-spacer"></span>
+  <a href="#shared">Shared: sign-in</a><a href="#take1">Take 1 · Admin console ✓</a><a href="#dev">D · Dev mode &amp; the Assistant</a><a href="#take2">Take 2 · Project-first</a><a href="#take3">Take 3 · Stakeholders &amp; sign-off</a><a href="#compare">Compare</a><a href="#questions">Questions</a>
+</div>
+
+<div class="rv-intro">
+  <p style="background:#e5f6ec;border:1px solid #a8dcc0;border-radius:8px;padding:10px 14px"><b>Decided Nov 20 (Q13, <a href="../decisions/ADR-016-users-dev-mode-assistant.md">ADR-016</a>):</b> <b>Take 1, the admin console</b>, is the design. <b>Section D</b> adds what comes first: <b>dev mode</b> with a user switcher, and a <b>personal Assistant</b> for every user. Takes 2 and 3 are kept as a record; Take 3's sign-off routes and access review return in a later phase on top of Take 1. Requirements <a href="../requirements.html">rev 13</a>, FR-190–FR-206.</p>
+  <p><b>What this is.</b> Requirements rev 12 add users, sign-in and per-project access control (<a href="../requirements.html">§4.4, FR-160–FR-189</a>). These are three takes on how it could look in Approach A. The two screens every take needs, signing in and the sign-in settings, are drawn once at the top. Each take then shows four screens. Pick one, or mix parts of them.</p>
+  <p><b>Decisions already made (Nov 12):</b> one <b>shared go-build-it server</b> for everyone · <b>local accounts first</b>, OIDC required next (provider not chosen) · in multi-user mode <b>loopback is not trusted</b> unless a setting says so, and the setting names the user it signs in as · <b>custom roles</b> from the start, as flexible as custom artifact tabs.</p>
+  <p><b>One idea runs through all three:</b> a <b>team role</b> is the job someone does on a project (PM, developer, QA…), filled by a person or an AI. An <b>access role</b> is what they're allowed to do (view, comment, approve, release…). Maria can be the project's <i>reviewer</i> and hold <i>Approver</i> access. AI members get access roles too, and can never hold more than the person who directs them.</p>
+  <p><b>Look for:</b> can you tell, at a glance, who can approve the release of <i>ledgerly</i>, and why? Could you set up a new kind of project (say, a regulated one) without asking a developer?</p>
+</div>
+
+<!-- ================= SHARED ================= -->
+<section class="view" id="shared"><a id="um-S1"></a>
+  <header><span class="num">S1</span><h2>Signing in (all takes)</h2><span class="req">FR-160</span><span class="req">FR-161</span><span class="req">FR-165</span><span class="req">FR-166</span><span class="req">FR-168</span></header>
+  <p class="look"><b>Look for:</b> local accounts work today; <b>Sign in with SSO</b> appears once an OIDC provider is configured (shown greyed, as on a server where it isn't yet). Passkey or a one-time code is the second step. The page says which server you're signing in to, so a copied link can't fool you. The CLI and agents never see this page: <span class="mono">gbi login</span> uses a device code, and agent sessions get their own short-lived tokens.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/login?next=/projects/ledgerly</span></div>
+  <div class="login"><div class="row" style="gap:28px;align-items:center">
+    <div class="box">
+      <div class="brand"><b style="color:#fff">gb</b>go-build-it</div>
+      <div><div style="font-size:19px;font-weight:700">Sign in</div><div class="small muted">to <b>gbi.acme.internal</b> · Acme software factory</div></div>
+      <div class="field"><label>Email or username</label><div class="inp">maria@acme.com</div></div>
+      <div class="field"><label>Password</label><div class="inp">••••••••••••</div></div>
+      <div class="row c small" style="justify-content:space-between"><span><span class="cb on"></span> Keep me signed in for 12 hours</span><a class="l" href="#">Forgot password?</a></div>
+      <span class="btn p">Continue</span>
+      <div class="or">or</div>
+      <span class="btn" style="opacity:.55">🔐 Sign in with SSO <span class="small muted">· not set up yet</span></span>
+      <div class="small muted" style="text-align:center">New here? Ask an admin for an invitation.</div>
+    </div>
+    <div class="box" style="width:330px">
+      <div style="font-size:17px;font-weight:700">Second step</div>
+      <div class="small muted">Signed in as <b>maria@acme.com</b> · password ok</div>
+      <span class="btn p">🔑 Use your passkey</span>
+      <div class="or">or a code from your authenticator app</div>
+      <div class="row" style="gap:6px;justify-content:center">
+        <span class="inp mono" style="width:38px;text-align:center">4</span><span class="inp mono" style="width:38px;text-align:center">8</span><span class="inp mono" style="width:38px;text-align:center">1</span><span class="inp mono" style="width:38px;text-align:center">_</span><span class="inp mono" style="width:38px;text-align:center"> </span><span class="inp mono" style="width:38px;text-align:center"> </span></div>
+      <div class="note small">5 wrong tries lock the account for 15 minutes. An admin can unlock it sooner.</div>
+    </div>
+  </div></div>
+  </div></div>
+</section>
+
+<section class="view" id="um-S2">
+  <header><span class="num">S2</span><h2>Settings → Sign-in (all takes)</h2><span class="req">FR-162</span><span class="req">FR-163</span><span class="req">FR-164</span><span class="req">FR-167</span><span class="req">FR-168</span></header>
+  <p class="look"><b>Look for:</b> <b>Multi-user mode</b> is a deliberate switch: solo installs keep today's no-login behaviour. <b>Loopback trust</b> is off by default in multi-user mode. When it's on, it names the user loopback requests act as, and that user's access applies, not the owner's. OIDC has its fields ready but stays off until a provider is chosen. Agent tokens replace the <span class="mono">X-GBI-Persona</span> header that any local process could send.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/settings#sign-in</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>People &amp; access</a><a>History</a><div class="sep">System</div><a class="on">Settings</a><a>Learn</a><a>Docs</a><div class="foot">v2026.12.01.1<br>4 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1>Settings</h1><span class="search">Search, run a command…  ⌘K</span><span class="me"><span class="av h1">DF</span>david · <span class="chip">Owner</span></span></div>
+      <div class="tabs"><span>General</span><span>Harnesses</span><span>Remote access</span><span class="on">Sign-in</span><span>Updates</span><span>Doctor</span></div>
+      <div class="content">
+        <div class="row">
+          <div class="col grow" style="display:flex;flex-direction:column;gap:14px">
+            <div class="card"><h3>Mode <span class="chip grn">multi-user · since Dec 1</span></h3>
+              <div class="row">
+                <div class="opt grow"><span class="radio"></span><div><b>Solo</b><div class="small muted">One owner, no sign-in on this machine (today's behaviour).</div></div></div>
+                <div class="opt on grow"><span class="radio on"></span><div><b>Multi-user</b><div class="small muted">Everyone signs in, and access is checked on every request: web, phone, CLI and MCP.</div></div></div>
+              </div></div>
+            <div class="card"><h3>Sign-in methods</h3>
+              <table class="t">
+                <tr><td style="width:36px"><span class="toggle"></span></td><td><b>Local accounts</b> <span class="chip grn">on · 14 users</span><div class="small muted">Password (12+ characters, checked against known leaked passwords) plus a passkey or one-time code.</div><div class="row c small" style="gap:8px;margin-top:6px"><span class="muted">Second step</span><span class="seg"><span>optional</span><span>admins &amp; approvers</span><span class="on">everyone</span></span></div></td></tr>
+                <tr><td><span class="toggle off"></span></td><td><b>Single sign-on (OIDC)</b> <span class="chip amb">provider not chosen</span><div class="small muted">Entra ID, Okta, Google, Keycloak… Users are matched by verified email; groups can come from a claim.</div>
+                  <div class="row small" style="gap:8px;margin-top:6px"><span class="inp dis" style="flex:3">Issuer URL</span><span class="inp dis" style="flex:2">Client ID</span><span class="inp dis" style="flex:2">Client secret</span><span class="btn sm" style="align-self:center">Test</span></div><div class="small muted" style="margin-top:4px">Redirect URL: <span class="mono">https://gbi.acme.internal/auth/oidc/callback</span></div></td></tr>
+                <tr><td><span class="toggle"></span></td><td><b>Tailscale identity</b> <span class="chip">6 linked</span><div class="small muted">A Tailscale login <i>finds</i> its user (maria@github → maria@acme.com). It no longer grants access on its own.</div></td></tr>
+              </table></div>
+            <div class="card"><h3>Loopback connections <span class="chip red">not trusted</span></h3>
+              <div class="small muted" style="margin-bottom:8px">Requests from this machine itself: the CLI, scripts, agents in worktrees, a browser on the server.</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div class="opt on"><span class="radio on"></span><div><b>Sign in like everyone else</b> <span class="chip">default</span><div class="small muted">The CLI uses <span class="mono">gbi login</span>; agents use their session tokens. Nothing is trusted because of where it comes from.</div></div></div>
+                <div class="opt"><span class="radio"></span><div class="grow"><b>Trust loopback as a user</b><div class="small muted">Requests from this machine with no token act as:</div>
+                  <div class="row c small" style="gap:8px;margin-top:6px"><span class="inp sel" style="width:240px">ops-bot (Service account)</span><span class="muted">with that user's access, never more · each request is still recorded under that name</span></div></div></div>
+              </div>
+              <div class="note red small" style="margin-top:10px">Anything that runs on this machine, including agents in worktrees, gets this user's access. Pick a service account with only what loopback needs, not an admin.</div></div>
+          </div>
+          <div class="col" style="width:330px;display:flex;flex-direction:column;gap:14px">
+            <div class="card"><h3>Sessions</h3><dl class="kv"><dt>Web session</dt><dd>12 h, 30 min idle</dd><dt>CLI token</dt><dd>30 days, revocable</dd><dt>Agent token</dt><dd>one task, ends with the session</dd><dt>Lockout</dt><dd>5 tries → 15 min</dd></dl></div>
+            <div class="card"><h3>Break-glass</h3><div class="small">If every owner is locked out, run on the server:<div class="mono" style="margin:6px 0;background:#f5f7f8;padding:6px 8px;border-radius:5px">gbi users recover</div><span class="muted">It needs the server's shell and is always recorded in the history.</span></div></div>
+            <div class="card"><h3>Recent sign-in events</h3><div class="small" style="display:flex;flex-direction:column;gap:5px"><div>09:12 · maria · passkey <span class="chip grn">ok</span></div><div>09:03 · ext. 10.4.2.19 · tom <span class="chip red">wrong code ×2</span></div><div>08:47 · CLI · priya · device code <span class="chip grn">ok</span></div><div>08:30 · Forge@ledgerly · agent token issued</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ================= TAKE 1 ================= -->
+<div class="take t1" id="take1"><span class="tag">Take 1</span><h2>Admin console</h2>
+  <p>The familiar enterprise shape (GitHub organisations, Okta, Jira admin). <b>People &amp; access</b> is a system area with three lists: <b>Users</b>, <b>Groups</b> and <b>Roles</b>. Each project has an <b>Access</b> tab. Custom roles are made by ticking permissions. Everything is in one place and easy to audit, but access lives away from the work, so a project lead has to go to an admin page to add someone.</p>
+</div>
+
+<section class="view" id="um-1a">
+  <header><span class="num">1a</span><h2>People &amp; access → Users</h2><span class="req">FR-169</span><span class="req">FR-170</span><span class="req">FR-171</span></header>
+  <p class="look"><b>Look for:</b> status is a first-class column with filters (<b>Invited · Active · Suspended · Locked · Deactivated</b>). Each row shows how they sign in and how many projects they're in. Service accounts and AI members are on their own tabs, so people aren't lost among bots. Bulk actions are suspend, resend invitation and export for an access review.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/people</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a class="on">People &amp; access</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot">v2026.12.01.1<br>4 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1>People &amp; access</h1><span class="search">Search, run a command…  ⌘K</span><span class="me"><span class="av h1">DF</span>david · <span class="chip">Owner</span></span></div>
+      <div class="tabs"><span class="on">Users · 14</span><span>Groups · 7</span><span>Roles · 9</span><span>Service accounts · 2</span><span>AI members · 23</span><span>Access review</span></div>
+      <div class="content">
+        <div class="row c wrap" style="gap:8px"><span class="inp" style="width:240px">Filter by name, email, group…</span><span class="seg"><span class="on">All 14</span><span>Active 10</span><span>Invited 2</span><span>Suspended 1</span><span>Locked 1</span><span>Deactivated 3</span></span><span class="grow"></span><span class="btn">Export CSV</span><span class="btn p">+ Invite people</span></div>
+        <div class="card" style="padding:0"><table class="t">
+          <tr><th style="width:28px"></th><th>Person</th><th>Status</th><th>Groups</th><th>System role</th><th>Projects</th><th>Sign-in</th><th>Last seen</th><th></th></tr>
+          <tr><td><span class="cb"></span></td><td><div class="who"><span class="av h1">DF</span><div><b>David F.</b><div class="small muted">david@acme.com</div></div></div></td><td><span class="chip grn">Active</span></td><td class="small">Sponsors</td><td><span class="chip vio">Owner</span></td><td class="small">all 7</td><td class="small">password + passkey</td><td class="small muted">now</td><td class="small muted">⋯</td></tr>
+          <tr class="sel"><td><span class="cb on"></span></td><td><div class="who"><span class="av h2">MR</span><div><b>Maria R.</b><div class="small muted">maria@acme.com · maria@github</div></div></div></td><td><span class="chip grn">Active</span></td><td class="small">Product owners</td><td class="small muted">—</td><td class="small">ledgerly · trailmap · inkwell</td><td class="small">password + passkey · Tailscale</td><td class="small muted">2 min</td><td class="small muted">⋯</td></tr>
+          <tr><td><span class="cb"></span></td><td><div class="who"><span class="av h3">PK</span><div><b>Priya K.</b><div class="small muted">priya@acme.com</div></div></div></td><td><span class="chip grn">Active</span></td><td class="small">Cybersecurity</td><td><span class="chip">Auditor</span></td><td class="small">all 7 (view)</td><td class="small">password + code</td><td class="small muted">1 h</td><td class="small muted">⋯</td></tr>
+          <tr><td><span class="cb"></span></td><td><div class="who"><span class="av h4">TO</span><div><b>Tom O.</b><div class="small muted">tom@acme.com</div></div></div></td><td><span class="chip red">Locked</span> <span class="small muted">5 wrong codes</span></td><td class="small">Developers</td><td class="small muted">—</td><td class="small">ledgerly · go-build-it</td><td class="small">password + code</td><td class="small muted">9 min</td><td><span class="btn sm">Unlock</span></td></tr>
+          <tr><td><span class="cb"></span></td><td><div class="who"><span class="av h5">LN</span><div><b>Lena N.</b><div class="small muted">lena@acme.com</div></div></div></td><td><span class="chip amb">Invited</span> <span class="small muted">expires in 5 d</span></td><td class="small">UI/UX</td><td class="small muted">—</td><td class="small">trailmap</td><td class="small muted">—</td><td class="small muted">never</td><td><span class="btn sm">Resend</span></td></tr>
+          <tr><td><span class="cb"></span></td><td><div class="who"><span class="av h3">JS</span><div><b>Jon S.</b><div class="small muted">jon@acme.com</div></div></div></td><td><span class="chip">Suspended</span> <span class="small muted">by david · leave until Jan 4</span></td><td class="small">DevSecOps</td><td><span class="chip">Admin</span></td><td class="small">4 projects</td><td class="small">password + passkey</td><td class="small muted">3 w</td><td><span class="btn sm">Reactivate</span></td></tr>
+          <tr style="opacity:.6"><td><span class="cb"></span></td><td><div class="who"><span class="av">AB</span><div><b>Alex B.</b><div class="small muted">left Nov 20 · history kept</div></div></div></td><td><span class="chip">Deactivated</span></td><td class="small muted">—</td><td class="small muted">—</td><td class="small muted">—</td><td class="small muted">sessions ended</td><td class="small muted">Nov 20</td><td class="small muted">⋯</td></tr>
+        </table></div>
+        <div class="row c small muted" style="gap:10px">1 selected <span class="btn sm">Suspend</span><span class="btn sm">Add to group</span><span class="btn sm">Sign out everywhere</span><span class="btn sm d">Deactivate</span></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="um-1b">
+  <header><span class="num">1b</span><h2>People &amp; access → Roles: a custom role</h2><span class="req">FR-173</span><span class="req">FR-174</span><span class="req">FR-175</span></header>
+  <p class="look"><b>Look for:</b> a role is a named set of permissions, ticked from one list, split into <b>project</b> and <b>system</b> scope. You can start from a built-in role ("based on Approver"), and inherited ticks are shown lighter. Risky permissions are marked ($ spends money, ⚑ can't be undone). The side panel shows where the role is used and what saving would change. Built-in roles can be copied but not edited.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/people/roles/security-approver</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a class="on">People &amp; access</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot">v2026.12.01.1<br>4 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">People &amp; access / Roles / </span>Security approver</h1><span class="search">Search, run a command…  ⌘K</span><span class="me"><span class="av h1">DF</span>david · <span class="chip">Owner</span></span></div>
+      <div class="content"><div class="row">
+        <div class="card" style="width:220px;padding:8px 0"><div class="small muted" style="padding:2px 12px 6px;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Built in</div>
+          <div class="small" style="padding:5px 12px">Owner</div><div class="small" style="padding:5px 12px">Admin</div><div class="small" style="padding:5px 12px">Viewer</div><div class="small" style="padding:5px 12px">Commenter</div><div class="small" style="padding:5px 12px">Contributor</div><div class="small" style="padding:5px 12px">Approver</div><div class="small" style="padding:5px 12px">Maintainer</div><div class="small" style="padding:5px 12px">Project admin</div>
+          <div class="small muted" style="padding:10px 12px 6px;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Custom</div>
+          <div class="small" style="padding:5px 12px;background:var(--acc-s);font-weight:600">Security approver</div><div class="small" style="padding:5px 12px">Release captain</div><div class="small" style="padding:5px 12px">Design reviewer</div><div class="small" style="padding:5px 12px">Auditor <span class="chip">system</span></div>
+          <div style="padding:8px 12px"><span class="btn sm">+ Role</span></div></div>
+        <div class="card grow">
+          <div class="row c wrap" style="gap:10px;margin-bottom:12px"><span class="inp" style="width:220px;font-weight:600">Security approver</span><span class="small muted">based on</span><span class="inp sel" style="width:150px">Commenter</span><span class="small muted">scope</span><span class="seg"><span class="on">Project</span><span>System</span></span><span class="grow"></span><span class="chip">rev 3</span></div>
+          <div class="small muted" style="margin-bottom:8px">Reviews everything, signs off security gates, can't change code or spend.</div>
+          <table class="t">
+            <tr><th>Project permission</th><th style="width:70px">Allowed</th><th>Notes</th></tr>
+            <tr><td>View project, artifacts, sessions, history</td><td><span class="cb inh"></span></td><td class="small muted">from Commenter</td></tr>
+            <tr><td>Comment and mark up artifacts</td><td><span class="cb inh"></span></td><td class="small muted">from Commenter</td></tr>
+            <tr><td>Answer questions</td><td><span class="cb on"></span></td><td></td></tr>
+            <tr><td>Queue tasks · file findings</td><td><span class="cb on"></span></td><td class="small muted">security findings become tasks</td></tr>
+            <tr><td>Start agent work <span class="chip amb">$ spends</span></td><td><span class="cb no"></span></td><td></td></tr>
+            <tr><td>Edit artifacts</td><td><span class="cb no"></span></td><td></td></tr>
+            <tr><td>Approve gates of type…</td><td><span class="cb on"></span></td><td class="small"><span class="chip acc">security</span> <span class="chip acc">threat model</span> <span class="muted">+ add type</span></td></tr>
+            <tr><td>Merge and release <span class="chip red">⚑ can't undo</span></td><td><span class="cb no"></span></td><td></td></tr>
+            <tr><td>Manage team, tuning and members</td><td><span class="cb no"></span></td><td></td></tr>
+            <tr><td>Project settings</td><td><span class="cb no"></span></td><td></td></tr>
+          </table>
+          <div class="row c" style="margin-top:12px"><span class="btn d">Delete role</span><span class="grow"></span><span class="btn">Duplicate</span><span class="btn p">Save rev 4</span></div>
+        </div>
+        <div class="col" style="width:280px;display:flex;flex-direction:column;gap:14px">
+          <div class="card"><h3>Used by</h3><div class="small" style="display:flex;flex-direction:column;gap:6px"><div><b>Cybersecurity</b> group · 4 projects</div><div><span class="av h3" style="width:18px;height:18px;font-size:9px">PK</span> Priya · inkwell (direct)</div><div><span class="av ai a5" style="width:18px;height:18px;font-size:9px">Le</span> Lens@ledgerly <span class="chip vio">AI</span></div></div></div>
+          <div class="card"><h3>Saving rev 4 would</h3><div class="small">+ <b>Answer questions</b> for 5 people and 1 AI member in 4 projects.<div class="muted" style="margin-top:6px">Recorded in the history as an access change.</div></div></div>
+        </div>
+      </div></div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="um-1c">
+  <header><span class="num">1c</span><h2>Project → Access tab</h2><span class="req">FR-177</span><span class="req">FR-178</span><span class="req">FR-179</span><span class="req">FR-180</span></header>
+  <p class="look"><b>Look for:</b> one list of grants for this project, mixing <b>groups</b>, <b>people</b> and <b>AI members</b>, each with an access role and where it came from (direct, a group, the project default). <b>Check access</b> answers "can Tom release ledgerly?" with the reason. AI members show their ceiling: the most they can do even when someone with more access directs them.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/projects/ledgerly/access</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a class="on">Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>People &amp; access</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot">v2026.12.01.1<br>4 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">Projects / </span>ledgerly</h1><span class="search">Search, run a command…  ⌘K</span><span class="me"><span class="av h2">MR</span>maria · <span class="chip">Project admin</span></span></div>
+      <div class="tabs"><span>Overview</span><span>Artifacts</span><span>Team</span><span>Queue</span><span>Sessions</span><span>Releases</span><span class="on">Access</span><span>History</span><span>Settings</span></div>
+      <div class="content"><div class="row">
+        <div class="card grow" style="padding:0">
+          <div class="row c" style="padding:10px 14px;gap:8px;border-bottom:1px solid var(--line)"><b>Who can do what in ledgerly</b><span class="grow"></span><span class="small muted">Default for signed-in users:</span><span class="inp sel" style="width:120px">No access</span><span class="btn p">+ Grant access</span></div>
+          <table class="t">
+            <tr><th>Who</th><th>Access role</th><th>Team role</th><th>From</th><th></th></tr>
+            <tr><td><div class="who"><span class="av" style="background:#4a5560">PO</span><div><b>Product owners</b> <span class="chip">group · 3</span></div></div></td><td><span class="inp sel" style="padding:2px 8px">Approver</span></td><td class="small muted">—</td><td class="small">direct</td><td class="small muted">✕</td></tr>
+            <tr><td><div class="who"><span class="av" style="background:#4a5560">CS</span><div><b>Cybersecurity</b> <span class="chip">group · 4</span></div></div></td><td><span class="inp sel" style="padding:2px 8px">Security approver</span></td><td class="small muted">—</td><td class="small">direct</td><td class="small muted">✕</td></tr>
+            <tr><td><div class="who"><span class="av h2">MR</span><b>Maria R.</b></div></td><td><span class="inp sel" style="padding:2px 8px">Project admin</span></td><td class="small">reviewer</td><td class="small">direct <span class="muted">+ Product owners</span></td><td class="small muted">✕</td></tr>
+            <tr><td><div class="who"><span class="av h4">TO</span><b>Tom O.</b> <span class="chip red">locked</span></div></td><td><span class="inp sel" style="padding:2px 8px">Contributor</span></td><td class="small">developer</td><td class="small">direct</td><td class="small muted">✕</td></tr>
+            <tr><td><div class="who"><span class="av ai a1">Pi</span><b>Pilot</b> <span class="chip vio">AI · pm</span></div></td><td><span class="inp sel" style="padding:2px 8px">Contributor</span></td><td class="small">pm</td><td class="small">archetype default</td><td class="small muted">✕</td></tr>
+            <tr><td><div class="who"><span class="av ai a3">Fo</span><b>Forge</b> <span class="chip vio">AI · developer</span></div></td><td><span class="inp sel" style="padding:2px 8px">Contributor</span></td><td class="small">developer</td><td class="small">archetype default</td><td class="small muted">✕</td></tr>
+            <tr><td><div class="who"><span class="av ai a6">Co</span><b>Courier</b> <span class="chip vio">AI · git</span></div></td><td><span class="inp sel" style="padding:2px 8px">Release captain</span></td><td class="small">git</td><td class="small">archetype default</td><td class="small muted">✕</td></tr>
+          </table>
+        </div>
+        <div class="col" style="width:330px;display:flex;flex-direction:column;gap:14px">
+          <div class="card"><h3>Check access</h3>
+            <div class="row" style="gap:6px"><span class="inp grow">Tom O.</span><span class="inp sel" style="width:130px">release</span></div>
+            <div class="note red small" style="margin-top:8px"><b>No.</b> Tom is a <b>Contributor</b> (direct), which can't merge and release. Release needs <b>Maintainer</b>, <b>Release captain</b> or <b>Project admin</b>.</div>
+            <div class="row" style="gap:6px;margin-top:8px"><span class="inp grow">Forge (AI)</span><span class="inp sel" style="width:130px">start work</span></div>
+            <div class="note blue small" style="margin-top:8px"><b>Only for a person who may.</b> Forge holds Contributor, but starts work only when directed by someone who can <i>start agent work</i>. It gets the lower of the two.</div></div>
+          <div class="card"><h3>Rules</h3><div class="small" style="display:flex;flex-direction:column;gap:6px"><div><span class="cb on"></span> Nobody approves their own work</div><div><span class="cb on"></span> Release gates need 2 approvers</div><div><span class="cb"></span> Private: hide from people without access</div></div></div>
+        </div>
+      </div></div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="um-1d">
+  <header><span class="num">1d</span><h2>A person's page</h2><span class="req">FR-169</span><span class="req">FR-170</span><span class="req">FR-186</span></header>
+  <p class="look"><b>Look for:</b> the lifecycle actions with what each does (suspend keeps everything, deactivate keeps history but ends access for good), every project with the role and where it came from, their sign-in methods and live sessions and tokens (each revocable), and their access history.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/people/maria</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a class="on">People &amp; access</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot">v2026.12.01.1<br>4 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">People &amp; access / </span>Maria R.</h1><span class="search">Search, run a command…  ⌘K</span><span class="me"><span class="av h1">DF</span>david · <span class="chip">Owner</span></span></div>
+      <div class="content"><div class="row">
+        <div class="col grow" style="display:flex;flex-direction:column;gap:14px">
+          <div class="card"><div class="row c" style="gap:12px"><span class="av h2" style="width:44px;height:44px;font-size:16px">MR</span><div class="grow"><div style="font-size:17px;font-weight:700">Maria R. <span class="chip grn">Active</span></div><div class="small muted">maria@acme.com · Product owners · joined Dec 1 · last seen 2 min ago</div></div>
+            <span class="btn">Suspend</span><span class="btn">Sign out everywhere</span><span class="btn">Reset 2nd step</span><span class="btn d">Deactivate</span></div></div>
+          <div class="card" style="padding:0"><div style="padding:10px 14px;border-bottom:1px solid var(--line)" class="row c"><b>Projects</b><span class="grow"></span><span class="btn sm">+ Add to project</span></div>
+            <table class="t"><tr><th>Project</th><th>Access role</th><th>Team role</th><th>From</th></tr>
+              <tr><td><b>ledgerly</b></td><td>Project admin</td><td class="small">reviewer</td><td class="small">direct · Product owners (Approver)</td></tr>
+              <tr><td><b>trailmap</b></td><td>Approver</td><td class="small">—</td><td class="small">Product owners</td></tr>
+              <tr><td><b>inkwell</b></td><td>Commenter</td><td class="small">—</td><td class="small">direct · expires Jan 31</td></tr>
+            </table></div>
+          <div class="card"><h3>Access history</h3><div class="small" style="display:flex;flex-direction:column;gap:5px"><div><span class="muted">Dec 3</span> · david made Maria <b>Project admin</b> of ledgerly · "takes over from Alex"</div><div><span class="muted">Dec 1</span> · Maria accepted the invitation · set up a passkey</div><div><span class="muted">Dec 1</span> · david invited Maria · Product owners</div></div></div>
+        </div>
+        <div class="col" style="width:330px;display:flex;flex-direction:column;gap:14px">
+          <div class="card"><h3>Sign-in</h3><dl class="kv"><dt>Password</dt><dd>set Dec 1</dd><dt>2nd step</dt><dd>passkey (MacBook) · code app</dd><dt>Tailscale</dt><dd>maria@github</dd><dt>SSO</dt><dd class="muted">when OIDC is on</dd></dl></div>
+          <div class="card"><h3>Sessions &amp; tokens</h3><div class="small" style="display:flex;flex-direction:column;gap:7px"><div class="row c">Chrome · macOS · 2 min<span class="grow"></span><span class="btn sm">End</span></div><div class="row c">Phone · Safari · 1 h<span class="grow"></span><span class="btn sm">End</span></div><div class="row c">CLI token · laptop · 30 d<span class="grow"></span><span class="btn sm">Revoke</span></div></div></div>
+        </div>
+      </div></div>
+    </div>
+  </div></div></div>
+</section>
+<div class="take t1"><div class="pc"><div><b style="color:#1f9d55">Good</b><ul><li>Everyone has seen this shape before; admins and auditors find things fast.</li><li>One place to answer "who can do what" across the whole server.</li><li>Easiest to build and to secure.</li></ul></div><div><b style="color:#d1453b">Watch out</b><ul><li>Access sits apart from the team page, so a project lead jumps between two places.</li><li>Roles are server-wide, so one project's odd needs add clutter for everyone.</li></ul></div></div></div>
+
+<!-- ================= TAKE 2 ================= -->
+<div class="take t2" id="take2"><span class="tag">Take 2</span><h2>Project-first: access lives with the team</h2>
+  <p>Access is managed where the work is. A project's <b>Team</b> page lists people and AI members together, each with a team role <i>and</i> an access role. Project admins invite people straight into their project. <b>Custom roles are defined per project in <span class="mono">docs/gbi.toml</span></b>, just like custom artifact tabs: versioned, reviewed and committed by Courier. They are capped by the server's limits, so a repository file can never grant more than the server allows. Admins keep a thin <b>People</b> list for statuses and sign-in.</p>
+</div>
+
+<section class="view" id="um-2a">
+  <header><span class="num">2a</span><h2>Project → Team: people and AI together</h2><span class="req">FR-177</span><span class="req">FR-179</span><span class="req">FR-181</span></header>
+  <p class="look"><b>Look for:</b> the team page you already know, now with humans in it. Each row has a <b>team role</b> (what they do) and an <b>access role</b> (what they may do). The ledgerly roles are its own, read from <span class="mono">docs/gbi.toml</span>. <b>Invite to ledgerly</b> sends an invitation that grants access here only. Pending <b>access requests</b> come from people who opened a link they can't see yet.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/projects/ledgerly/team</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a class="on">Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>People</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot">v2026.12.01.1<br>4 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">Projects / </span>ledgerly</h1><span class="search">Search, run a command…  ⌘K</span><span class="me"><span class="av h2">MR</span>maria · <span class="chip">Lead</span></span></div>
+      <div class="tabs"><span>Overview</span><span>Artifacts</span><span class="on">Team</span><span>Queue</span><span>Sessions</span><span>Releases</span><span>History</span><span>Settings</span></div>
+      <div class="content"><div class="row">
+        <div class="card grow" style="padding:0">
+          <div class="row c" style="padding:10px 14px;gap:8px;border-bottom:1px solid var(--line)"><b>Team · 9</b><span class="seg"><span class="on">All</span><span>People 5</span><span>AI 4</span></span><span class="grow"></span><span class="btn">+ AI member</span><span class="btn p">+ Invite to ledgerly</span></div>
+          <table class="t">
+            <tr><th>Member</th><th>Team role</th><th>Access role <span class="muted" style="text-transform:none;letter-spacing:0">· from gbi.toml</span></th><th>State</th></tr>
+            <tr><td><div class="who"><span class="av h2">MR</span><div><b>Maria R.</b><div class="small muted">maria@acme.com</div></div></div></td><td>Reviewer</td><td><span class="chip acc">lead</span></td><td class="small">online</td></tr>
+            <tr><td><div class="who"><span class="av h4">TO</span><div><b>Tom O.</b><div class="small muted">tom@acme.com</div></div></div></td><td>Developer</td><td><span class="chip acc">builder</span></td><td><span class="chip red">locked</span></td></tr>
+            <tr><td><div class="who"><span class="av h3">PK</span><div><b>Priya K.</b><div class="small muted">Cybersecurity</div></div></div></td><td class="muted">—</td><td><span class="chip acc">security-signoff</span></td><td class="small">1 h</td></tr>
+            <tr><td><div class="who"><span class="av h1">DF</span><div><b>David F.</b><div class="small muted">Sponsor</div></div></div></td><td class="muted">—</td><td><span class="chip acc">sponsor</span></td><td class="small">now</td></tr>
+            <tr><td><div class="who"><span class="av h5">LN</span><div><b>Lena N.</b><div class="small muted">UI/UX · invited</div></div></div></td><td class="muted">—</td><td><span class="chip acc">design-review</span></td><td><span class="chip amb">invited</span></td></tr>
+            <tr><td><div class="who"><span class="av ai a1">Pi</span><div><b>Pilot</b> <span class="chip vio">AI</span><div class="small muted">claude · opus</div></div></div></td><td>Project Manager</td><td><span class="chip acc">builder</span> <span class="small muted">ceiling</span></td><td><span class="chip blue">working</span></td></tr>
+            <tr><td><div class="who"><span class="av ai a3">Fo</span><div><b>Forge</b> <span class="chip vio">AI</span><div class="small muted">claude · opus</div></div></div></td><td>Developer</td><td><span class="chip acc">builder</span> <span class="small muted">ceiling</span></td><td class="small">idle</td></tr>
+            <tr><td><div class="who"><span class="av ai a5">Le</span><div><b>Lens</b> <span class="chip vio">AI</span><div class="small muted">antigravity</div></div></div></td><td>Reviewer</td><td><span class="chip acc">reviewer-ai</span> <span class="small muted">ceiling</span></td><td class="small">idle</td></tr>
+          </table>
+        </div>
+        <div class="col" style="width:320px;display:flex;flex-direction:column;gap:14px">
+          <div class="card"><h3>Access requests <span class="chip red">1</span></h3><div class="small"><div class="who"><span class="av h3" style="width:22px;height:22px;font-size:9px">JS</span><b>Jon S.</b> · DevSecOps</div><div class="muted" style="margin:4px 0">"Need to see release pipeline failures." · opened a link to R-31</div><div class="row" style="gap:6px"><span class="inp sel" style="padding:2px 8px">observer</span><span class="btn sm p">Grant</span><span class="btn sm">Decline</span></div></div></div>
+          <div class="card"><h3>Invite to ledgerly</h3><div class="field"><label>Email</label><div class="inp">lena@acme.com</div></div><div class="field" style="margin-top:8px"><label>Access role</label><div class="inp sel">design-review</div></div><div class="small muted" style="margin-top:8px">New people get an account in <b>Active · ledgerly only</b>. An admin sees every invitation in People.</div></div>
+        </div>
+      </div></div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="um-2b">
+  <header><span class="num">2b</span><h2>Roles as code: <span class="mono">docs/gbi.toml</span> with the server's ceiling</h2><span class="req">FR-174</span><span class="req">FR-176</span></header>
+  <p class="look"><b>Look for:</b> roles live next to the artifact tabs in the repository, so a regulated project and a weekend prototype each define their own, and changes go through review like code. The <b>ceiling</b> on the right is set by the server admin: permissions a project file may use for each kind of role. A role that asks for more is shown in red and clipped, and the change can't be applied until an admin approves it. Who <i>holds</i> each role stays in the server, never in the repository, so editing the file can't give anyone access.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/projects/ledgerly/settings#roles</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a class="on">Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>People</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot">v2026.12.01.1<br>4 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">ledgerly / Settings / </span>Roles</h1><span class="search">Search, run a command…  ⌘K</span><span class="me"><span class="av h2">MR</span>maria · <span class="chip">Lead</span></span></div>
+      <div class="content"><div class="row">
+        <div class="col grow" style="display:flex;flex-direction:column;gap:10px">
+          <div class="row c small" style="gap:8px"><span class="mono">docs/gbi.toml</span><span class="chip">main · 3f2a91c</span><span class="seg"><span>Form</span><span class="on">File</span></span><span class="grow"></span><span class="chip amb">1 change to review</span></div>
+<div class="code"><span class="c"># Who may do what in this project. Roles only; who holds them is kept in go-build-it.</span>
+<span class="k">[roles.lead]</span>
+extends     = <span class="s">"project-admin"</span>
+
+<span class="k">[roles.builder]</span>
+allow = [<span class="s">"view"</span>, <span class="s">"comment"</span>, <span class="s">"answer"</span>, <span class="s">"queue"</span>, <span class="s">"start-work"</span>, <span class="s">"edit-artifacts"</span>]
+
+<span class="k">[roles.security-signoff]</span>
+extends     = <span class="s">"commenter"</span>
+allow       = [<span class="s">"answer"</span>, <span class="s">"queue"</span>]
+approve     = [<span class="s">"security"</span>, <span class="s">"threat-model"</span>]
+
+<span class="k">[roles.sponsor]</span>
+allow       = [<span class="s">"view"</span>, <span class="s">"comment"</span>]
+approve     = [<span class="s">"release"</span>]
+
+<span class="a"><span class="k">[roles.design-review]</span>                         <span class="c"># added by Lena's proposal</span></span><span class="a">allow       = [<span class="s">"view"</span>, <span class="s">"comment"</span>, <span class="s">"edit-artifacts"</span>, <span class="s">"release"</span>]</span><span class="a">approve     = [<span class="s">"mockups"</span>, <span class="s">"compare"</span>]</span>
+<span class="k">[roles.reviewer-ai]</span>
+allow = [<span class="s">"view"</span>, <span class="s">"comment"</span>, <span class="s">"queue"</span>]     <span class="c"># AI ceiling: never approves</span></div>
+        </div>
+        <div class="col" style="width:360px;display:flex;flex-direction:column;gap:14px">
+          <div class="card"><h3>Check against the server ceiling</h3>
+            <div class="small" style="display:flex;flex-direction:column;gap:6px">
+              <div><span class="chip grn">ok</span> lead · builder · security-signoff · sponsor · reviewer-ai</div>
+              <div class="note red small"><b>design-review</b> asks for <span class="mono">release</span>. On this server, a project file can grant <span class="mono">release</span> only to roles that extend <b>maintainer</b>. It will be clipped until an admin approves an exception.</div>
+              <div class="row" style="gap:6px"><span class="btn sm">Remove "release"</span><span class="btn sm">Ask an admin</span></div>
+            </div></div>
+          <div class="card"><h3>Who holds these</h3><div class="small" style="display:flex;flex-direction:column;gap:4px"><div><b>lead</b> · Maria</div><div><b>builder</b> · Tom, Pilot, Forge, Courier</div><div><b>security-signoff</b> · Cybersecurity (4)</div><div><b>sponsor</b> · David</div><div><b>design-review</b> · Lena (invited)</div></div><div class="small muted" style="margin-top:6px">Kept in go-build-it's database and history, never in the repository.</div></div>
+          <div class="card"><h3>Apply</h3><div class="small muted">The change is committed by Courier on a branch and reviewed like any other change. It takes effect when merged.</div><div style="margin-top:8px"><span class="btn p">Propose change</span></div></div>
+        </div>
+      </div></div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="um-2c">
+  <header><span class="num">2c</span><h2>People (admin): statuses and sign-in, across projects</h2><span class="req">FR-169</span><span class="req">FR-170</span><span class="req">FR-171</span></header>
+  <p class="look"><b>Look for:</b> the admin view stays thin: who exists, their status and how they sign in. Projects show as chips with each project's own role name, which is why the same person can be <i>lead</i> in one project and <i>sponsor</i> in another. Admins see invitations that project leads sent.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/people</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a class="on">People</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot">v2026.12.01.1<br>4 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1>People</h1><span class="search">Search, run a command…  ⌘K</span><span class="me"><span class="av h1">DF</span>david · <span class="chip">Owner</span></span></div>
+      <div class="content">
+        <div class="row c" style="gap:8px"><span class="inp" style="width:240px">Filter…</span><span class="seg"><span class="on">Everyone 14</span><span>Needs attention 3</span><span>Invited by leads 2</span></span><span class="grow"></span><span class="btn">Server ceiling…</span><span class="btn p">+ Invite</span></div>
+        <div class="card" style="padding:0"><table class="t">
+          <tr><th>Person</th><th>Status</th><th>Projects (their role there)</th><th>Server role</th><th>Sign-in</th></tr>
+          <tr><td><div class="who"><span class="av h2">MR</span><b>Maria R.</b></div></td><td><span class="chip grn">Active</span></td><td class="small"><span class="chip">ledgerly · lead</span> <span class="chip">trailmap · approver</span> <span class="chip">inkwell · commenter</span></td><td class="small muted">—</td><td class="small">passkey</td></tr>
+          <tr><td><div class="who"><span class="av h1">DF</span><b>David F.</b></div></td><td><span class="chip grn">Active</span></td><td class="small"><span class="chip">ledgerly · sponsor</span> <span class="chip">go-build-it · lead</span> <span class="small muted">+5</span></td><td><span class="chip vio">Owner</span></td><td class="small">passkey</td></tr>
+          <tr><td><div class="who"><span class="av h4">TO</span><b>Tom O.</b></div></td><td><span class="chip red">Locked</span></td><td class="small"><span class="chip">ledgerly · builder</span> <span class="chip">go-build-it · builder</span></td><td class="small muted">—</td><td class="small">code</td></tr>
+          <tr><td><div class="who"><span class="av h5">LN</span><b>Lena N.</b></div></td><td><span class="chip amb">Invited</span> <span class="small muted">by Maria</span></td><td class="small"><span class="chip">ledgerly · design-review</span></td><td class="small muted">—</td><td class="small muted">—</td></tr>
+          <tr><td><div class="who"><span class="av h3">JS</span><b>Jon S.</b></div></td><td><span class="chip">Suspended</span></td><td class="small"><span class="chip">4 projects</span></td><td><span class="chip">Admin</span></td><td class="small">passkey</td></tr>
+        </table></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="um-2d">
+  <header><span class="num">2d</span><h2>No access yet: request it (desktop and phone)</h2><span class="req">FR-181</span></header>
+  <p class="look"><b>Look for:</b> someone who opens a shared link without access sees <i>what</i> they'd need and from whom, not a dead end. Private projects don't reveal their name or contents. The request goes to the project lead's inbox, and on the phone too.</p>
+  <div class="row" style="gap:36px;flex-wrap:wrap;align-items:flex-start">
+    <div class="frame" style="width:780px"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/projects/ledgerly/reviews/R-31</span></div>
+      <div class="app" style="min-height:420px"><aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">3</span></a><a>Questions</a><a>Sessions</a><div class="foot">v2026.12.01.1</div></aside>
+        <div class="main"><div class="topbar"><h1>Review R-31</h1><span class="me" style="margin-left:auto"><span class="av h3">JS</span>jon</span></div>
+          <div class="content" style="align-items:center;justify-content:center;flex:1"><div class="card" style="width:440px;text-align:center"><div style="font-size:30px">🔒</div><b style="font-size:15px">You don't have access to ledgerly yet</b><div class="small muted" style="margin:6px 0 10px">Viewing a review needs the <b>observer</b> role or higher. Maria R. (lead) can grant it.</div><div class="inp" style="text-align:left;min-height:52px">Need to see release pipeline failures.</div><div style="margin-top:10px"><span class="btn p">Request access</span></div></div></div></div></div></div>
+    <div class="phone"><div class="status"><span>9:41</span><span>●●● 5G</span></div>
+      <div style="background:#17212b;color:#fff;padding:10px 16px 12px"><div style="font-size:12px;color:#a9b7c3">● gbi.acme.internal · maria</div><div style="font-size:20px;font-weight:700">Inbox</div></div>
+      <div style="padding:12px;display:flex;flex-direction:column;gap:10px;background:#f4f6f7;flex:1;font:13.5px/1.45 -apple-system,system-ui,sans-serif">
+        <div style="font-size:11px;color:#66727c;text-transform:uppercase;letter-spacing:.05em">Access requests</div>
+        <div style="background:#fff;border:1px solid #e1e5e8;border-left:3px solid #c47f00;border-radius:10px;padding:10px 12px"><b>Jon S.</b> wants <b>observer</b> on ledgerly<div style="font-size:12px;color:#66727c;margin:4px 0">"Need to see release pipeline failures." · DevSecOps · 4 min</div><div style="display:flex;gap:8px;margin-top:6px"><span style="flex:1;text-align:center;padding:9px;border-radius:8px;border:1px solid #e1e5e8;font-weight:600">Decline</span><span style="flex:1;text-align:center;padding:9px;border-radius:8px;background:#0f9d8a;color:#fff;font-weight:600">Grant observer</span></div></div>
+        <div style="font-size:11px;color:#66727c;text-transform:uppercase;letter-spacing:.05em">Questions</div>
+        <div style="background:#fff;border:1px solid #e1e5e8;border-radius:10px;padding:10px 12px">UK bank CSV dates: DD/MM? <span style="font-size:11px;color:#c47f00">· assumed</span></div>
+      </div></div>
+  </div>
+</section>
+<div class="take t2"><div class="pc"><div><b style="color:#1f9d55">Good</b><ul><li>Access sits with the team, where leads already work; fewer admin requests.</li><li>Each kind of project shapes its own roles, versioned and reviewed in its repository, the same as custom artifact tabs.</li><li>Access requests turn "I can't see it" into a one-tap decision.</li></ul></div><div><b style="color:#d1453b">Watch out</b><ul><li>Role names differ between projects (<i>lead</i> here, <i>owner</i> there); a server-wide view needs mapping.</li><li>The ceiling is essential and must be understood; without it a repository could grant itself power.</li><li>More moving parts to build: file parsing, checks, proposals.</li></ul></div></div></div>
+
+<!-- ================= TAKE 3 ================= -->
+<div class="take t3" id="take3"><span class="tag">Take 3</span><h2>Stakeholders &amp; sign-off policy</h2>
+  <p>Access follows the software factory's <b>stakeholders</b> and the <b>stage</b> of the work. You manage <b>stakeholder groups</b> (Product owners, Cybersecurity, DevSecOps, UI/UX, Transformation, Sponsors, Developers) and a <b>policy</b>: what each group may do in each stage, Discover → Design → Build → Verify → Release. Projects pick a <b>policy template</b> ("Internal tool", "Regulated"). Gates route sign-off to the right groups automatically, like Jira workflows. Custom roles are the cells of the matrix.</p>
+</div>
+
+<section class="view" id="um-3a">
+  <header><span class="num">3a</span><h2>Policy templates: who may do what, at each stage</h2><span class="req">FR-171</span><span class="req">FR-174</span><span class="req">FR-179</span><span class="req">FR-182</span></header>
+  <p class="look"><b>Look for:</b> one matrix per template. Rows are stakeholder groups, columns are stages, and each cell is a level: <span class="lvl A">A</span> admin · <span class="lvl S">S</span> signs off · <span class="lvl C">C</span> contributes · <span class="lvl R">R</span> reviews and comments · <span class="lvl V">V</span> views · <span class="lvl N">–</span> none. Clicking a cell opens the exact permissions behind it, so each level is a custom role. "Regulated" adds a second sign-off and takes Build access away from sponsors. AI members are a row too, capped at C.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/access/policies/regulated</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>Stakeholders</a><a class="on">Access policies</a><a>Sign-off routes</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Docs</a><div class="foot">v2026.12.01.1<br>4 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">Access policies / </span>Regulated</h1><span class="search">Search, run a command…  ⌘K</span><span class="me"><span class="av h1">DF</span>david · <span class="chip">Owner</span></span></div>
+      <div class="content"><div class="row">
+        <div class="card" style="width:200px;padding:8px 0"><div class="small muted" style="padding:2px 12px 6px;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Templates</div>
+          <div class="small" style="padding:6px 12px">Internal tool <span class="muted">· 4 projects</span></div><div class="small" style="padding:6px 12px;background:var(--acc-s);font-weight:600">Regulated <span class="muted" style="font-weight:400">· 2</span></div><div class="small" style="padding:6px 12px">Prototype <span class="muted">· 1</span></div><div style="padding:8px 12px"><span class="btn sm">+ Template</span></div></div>
+        <div class="card grow" style="padding:0">
+          <div class="row c" style="padding:10px 14px;gap:8px;border-bottom:1px solid var(--line)"><b>Regulated</b><span class="small muted">used by ledgerly, inkwell · rev 5</span><span class="grow"></span><span class="btn">Compare with Internal tool</span><span class="btn p">Save rev 6</span></div>
+          <table class="t matrix">
+            <tr><th>Stakeholder group</th><th>Discover</th><th>Design</th><th>Build</th><th>Verify</th><th>Release</th></tr>
+            <tr><td><b>Product owners</b> <span class="small muted">3</span></td><td><span class="lvl S">S</span></td><td><span class="lvl S">S</span></td><td><span class="lvl R">R</span></td><td><span class="lvl R">R</span></td><td><span class="lvl S">S</span></td></tr>
+            <tr><td><b>UI/UX</b> <span class="small muted">2</span></td><td><span class="lvl C">C</span></td><td><span class="lvl S">S</span></td><td><span class="lvl R">R</span></td><td><span class="lvl R">R</span></td><td><span class="lvl V">V</span></td></tr>
+            <tr><td><b>Developers</b> <span class="small muted">5</span></td><td><span class="lvl R">R</span></td><td><span class="lvl C">C</span></td><td style="outline:2px solid var(--acc);outline-offset:-3px"><span class="lvl C">C</span></td><td><span class="lvl C">C</span></td><td><span class="lvl V">V</span></td></tr>
+            <tr><td><b>Cybersecurity</b> <span class="small muted">4</span></td><td><span class="lvl R">R</span></td><td><span class="lvl S">S</span></td><td><span class="lvl R">R</span></td><td><span class="lvl S">S</span></td><td><span class="lvl S">S</span></td></tr>
+            <tr><td><b>DevSecOps</b> <span class="small muted">2</span></td><td><span class="lvl V">V</span></td><td><span class="lvl R">R</span></td><td><span class="lvl R">R</span></td><td><span class="lvl C">C</span></td><td><span class="lvl A">A</span></td></tr>
+            <tr><td><b>Transformation</b> <span class="small muted">1</span></td><td><span class="lvl C">C</span></td><td><span class="lvl R">R</span></td><td><span class="lvl V">V</span></td><td><span class="lvl V">V</span></td><td><span class="lvl R">R</span></td></tr>
+            <tr><td><b>Sponsors</b> <span class="small muted">2</span></td><td><span class="lvl S">S</span></td><td><span class="lvl R">R</span></td><td><span class="lvl N">–</span></td><td><span class="lvl V">V</span></td><td><span class="lvl S">S</span></td></tr>
+            <tr style="background:#faf8fe"><td><b>AI members</b> <span class="chip vio">capped at C</span></td><td><span class="lvl C">C</span></td><td><span class="lvl C">C</span></td><td><span class="lvl C">C</span></td><td><span class="lvl C">C</span></td><td><span class="lvl R">R</span></td></tr>
+          </table>
+        </div>
+        <div class="col" style="width:300px;display:flex;flex-direction:column;gap:14px">
+          <div class="card"><h3>Developers · Build = C</h3><div class="small" style="display:flex;flex-direction:column;gap:5px"><div><span class="cb on"></span> view · comment · answer</div><div><span class="cb on"></span> queue tasks</div><div><span class="cb on"></span> start agent work <span class="chip amb">$</span></div><div><span class="cb on"></span> edit artifacts</div><div><span class="cb"></span> approve gates</div><div><span class="cb"></span> merge and release</div></div><div class="small muted" style="margin-top:8px">Level C is the custom role <b>Contributor+spend</b>. Change it here or per cell.</div></div>
+          <div class="card"><h3>Rules in this template</h3><div class="small" style="display:flex;flex-direction:column;gap:5px"><div><span class="cb on"></span> No one signs off their own work</div><div><span class="cb on"></span> Release needs 2 groups to sign off</div><div><span class="cb on"></span> Stage moves only after its gate is signed</div></div></div>
+        </div>
+      </div></div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="um-3b">
+  <header><span class="num">3b</span><h2>Stakeholder groups</h2><span class="req">FR-171</span></header>
+  <p class="look"><b>Look for:</b> groups are the stakeholder kinds from the vision, each with a plain description and its people. When OIDC arrives, a group can follow a claim from the identity provider ("acme-security"). A person can be in several groups; in a project they get the highest level any of their groups has at the current stage.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/access/stakeholders</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a class="on">Stakeholders</a><a>Access policies</a><a>Sign-off routes</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Docs</a><div class="foot">v2026.12.01.1<br>4 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1>Stakeholders</h1><span class="search">Search, run a command…  ⌘K</span><span class="me"><span class="av h1">DF</span>david · <span class="chip">Owner</span></span></div>
+      <div class="content">
+        <div class="row c" style="gap:8px"><span class="small muted">People: 14 · Active 10 · Invited 2 · Suspended 1 · Locked 1</span><span class="grow"></span><span class="btn">People list</span><span class="btn p">+ Group</span></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+          <div class="card"><h3>Product owners <span class="chip">3</span></h3><div class="small muted">Own the problem and the requirements; sign off what gets built.</div><div class="row" style="gap:4px;margin-top:8px"><span class="av h2">MR</span><span class="av h5">AK</span><span class="av h3">SB</span></div></div>
+          <div class="card"><h3>Cybersecurity <span class="chip">4</span></h3><div class="small muted">Threat models, security gates, findings.</div><div class="row" style="gap:4px;margin-top:8px"><span class="av h3">PK</span><span class="av h4">RD</span><span class="av h1">EL</span><span class="av h2">MW</span></div><div class="small muted" style="margin-top:6px">OIDC claim: <span class="mono">groups: acme-security</span> (when SSO is on)</div></div>
+          <div class="card"><h3>DevSecOps <span class="chip">2</span></h3><div class="small muted">Pipelines, release, remote access, the server itself.</div><div class="row" style="gap:4px;margin-top:8px"><span class="av h3">JS</span><span class="av h5">KO</span></div><div class="small" style="margin-top:6px"><span class="chip">Jon S. suspended</span></div></div>
+          <div class="card"><h3>UI/UX <span class="chip">2</span></h3><div class="small muted">Mockups, Compare, design option sets.</div><div class="row" style="gap:4px;margin-top:8px"><span class="av h5">LN</span><span class="av h4">GP</span></div><div class="small" style="margin-top:6px"><span class="chip amb">Lena invited</span></div></div>
+          <div class="card"><h3>Developers <span class="chip">5</span></h3><div class="small muted">Build and verify, directing AI members.</div><div class="row" style="gap:4px;margin-top:8px"><span class="av h4">TO</span><span class="av h1">YH</span><span class="av h2">CN</span><span class="av h3">BV</span><span class="av h5">IM</span></div></div>
+          <div class="card"><h3>Transformation <span class="chip">1</span></h3><div class="small muted">Organisational change; history and insights.</div><div class="row" style="gap:4px;margin-top:8px"><span class="av h1">FA</span></div></div>
+          <div class="card"><h3>Sponsors <span class="chip">2</span></h3><div class="small muted">Whose problem is being solved; fund and accept.</div><div class="row" style="gap:4px;margin-top:8px"><span class="av h1">DF</span><span class="av h4">HC</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="um-3c">
+  <header><span class="num">3c</span><h2>Sign-off route for a gate</h2><span class="req">FR-180</span><span class="req">FR-182</span><span class="req">FR-183</span><span class="req">FR-184</span></header>
+  <p class="look"><b>Look for:</b> the route comes from the policy (who has <span class="lvl S">S</span> at this stage), shown as steps that run in order or side by side. Each step names its group, how many must sign and who has. Changing the artifact after a sign-off withdraws it and says so. The author can't sign. A step can be delegated while someone is away, and the delegation is recorded.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/projects/ledgerly/gates/G-7</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a class="on">Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>Stakeholders</a><a>Access policies</a><a>Sign-off routes</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Docs</a><div class="foot">v2026.12.01.1<br>4 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">ledgerly / Gates / </span>G-7 · Release 2026.12.08.1</h1><span class="search">Search, run a command…  ⌘K</span><span class="me"><span class="av h3">PK</span>priya · <span class="chip">Cybersecurity</span></span></div>
+      <div class="content">
+        <div class="row c small" style="gap:8px"><span class="chip">Regulated</span><span class="chip blue">Stage: Release</span><span class="muted">route from the policy · rev 5</span><span class="grow"></span><span class="chip amb">2 of 4 steps signed</span></div>
+        <div class="route">
+          <div class="stp done"><div class="small muted">1 · Verify</div><b>QA evidence</b><div class="small">Probe (AI) ran the dress rehearsal · <span class="chip grn">passed</span></div><div class="small muted" style="margin-top:4px">automatic</div></div><div class="arr">→</div>
+          <div class="stp done"><div class="small muted">2 · Product owners · 1 of 3</div><b>Feature acceptance</b><div class="small">✓ Maria R. · Dec 7 14:02<br><span class="muted">"Matches requirements rev 4."</span></div></div><div class="arr">→</div>
+          <div class="stp now"><div class="small muted">3 · side by side</div><b>Security &amp; Sponsor</b><div class="small" style="margin-top:4px"><span class="chip amb">Cybersecurity · 1 needed</span> <b>you</b><br><span class="chip amb">Sponsors · 1 needed</span> David F. · Hana C.</div></div><div class="arr">→</div>
+          <div class="stp"><div class="small muted">4 · DevSecOps (A)</div><b>Ship</b><div class="small muted">Jon S. is suspended · delegated to Kai O. until Jan 4</div></div>
+        </div>
+        <div class="row">
+          <div class="card grow"><h3>Your sign-off · Cybersecurity</h3>
+            <div class="small" style="display:flex;flex-direction:column;gap:6px"><div>Evidence: threat model <a class="l" href="#">TM-3 rev 2</a> · dependency scan <span class="chip grn">0 high</span> · 3 findings from earlier gates <span class="chip grn">all closed</span></div>
+            <div class="inp" style="min-height:60px">Reviewed the CSV import path; input limits are in place.</div>
+            <div class="row" style="gap:8px"><span class="btn d">Reject</span><span class="btn">Request changes</span><span class="btn">Delegate…</span><span class="grow"></span><span class="btn p">Sign off release 2026.12.08.1</span></div></div></div>
+          <div class="card" style="width:340px"><h3>Rules</h3><div class="small" style="display:flex;flex-direction:column;gap:6px"><div><span class="chip red">blocked</span> Tom O. authored 6 of the 9 changes and can't sign any step.</div><div><span class="chip amb">withdraws</span> Changing anything in the release withdraws steps 2–3.</div><div><span class="chip">recorded</span> Each sign-off records who, when, which version and the comment.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="um-3d">
+  <header><span class="num">3d</span><h2>Access review</h2><span class="req">FR-186</span><span class="req">FR-187</span><span class="req">FR-189</span></header>
+  <p class="look"><b>Look for:</b> a quarterly review that a security or compliance person can run without help. It shows who can do what, then what needs attention: accounts unused for 60 days, grants that bypass groups, temporary access that's about to expire, and people who could both build and sign off the same thing. Each item can be kept (with a reason) or removed, and the finished review is exported and recorded.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/access/review/2026-Q4</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">7</span></a><a>Questions <span class="badge">3</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">2</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>Stakeholders</a><a class="on">Access policies</a><a>Sign-off routes</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Docs</a><div class="foot">v2026.12.01.1<br>4 live · dispatch auto</div></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">Access / </span>Review 2026 Q4</h1><span class="search">Search, run a command…  ⌘K</span><span class="me"><span class="av h3">PK</span>priya · <span class="chip">Auditor</span></span></div>
+      <div class="content">
+        <div class="row" style="gap:14px">
+          <div class="card grow"><div class="small muted">People with access</div><div style="font-size:24px;font-weight:700">11</div><div class="small muted">of 14 accounts</div></div>
+          <div class="card grow"><div class="small muted">Can release something</div><div style="font-size:24px;font-weight:700">4</div><div class="small muted">2 people · 2 AI (Courier)</div></div>
+          <div class="card grow"><div class="small muted">Direct grants</div><div style="font-size:24px;font-weight:700">6</div><div class="small muted">not through a group</div></div>
+          <div class="card grow" style="border-color:#f1d9a3"><div class="small muted">Needs a decision</div><div style="font-size:24px;font-weight:700;color:var(--amb)">5</div><div class="small muted">2 done</div></div>
+        </div>
+        <div class="card" style="padding:0"><table class="t">
+          <tr><th>Finding</th><th>Who</th><th>Where</th><th>Decision</th></tr>
+          <tr><td><span class="chip amb">unused 60 d</span> Account active but not used since Oct 9</td><td>Ravi D.</td><td class="small">Cybersecurity · 4 projects</td><td><span class="btn sm">Keep…</span> <span class="btn sm d">Suspend</span></td></tr>
+          <tr><td><span class="chip red">build + sign</span> Can contribute in Build and sign off Verify in the same project</td><td>Yuki H.</td><td class="small">inkwell · Developers + direct Security approver</td><td><span class="btn sm">Keep…</span> <span class="btn sm d">Remove direct</span></td></tr>
+          <tr><td><span class="chip blue">direct grant</span> Commenter outside any group</td><td>Maria R.</td><td class="small">inkwell · expires Jan 31</td><td><span class="chip grn">kept · "advises on billing"</span></td></tr>
+          <tr><td><span class="chip amb">expiring</span> Temporary Approver, 24 h</td><td>Kai O.</td><td class="small">ledgerly · delegated by Jon</td><td><span class="chip grn">kept · ends Jan 4</span></td></tr>
+          <tr><td><span class="chip">service account</span> Loopback trusted as ops-bot</td><td>ops-bot</td><td class="small">server setting</td><td><span class="btn sm">Keep…</span> <span class="btn sm d">Turn off</span></td></tr>
+        </table></div>
+        <div class="row c"><span class="small muted">Started by Priya K. on Dec 10 · recorded in the history</span><span class="grow"></span><span class="btn">Export CSV</span><span class="btn p">Finish review</span></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+<div class="take t3"><div class="pc"><div><b style="color:#1f9d55">Good</b><ul><li>Speaks the factory's language: stakeholders, stages, sign-off. It supports the vision directly.</li><li>Sign-off routing falls out of the policy instead of being set up per gate.</li><li>A template sets up a new regulated project in one choice.</li></ul></div><div><b style="color:#d1453b">Watch out</b><ul><li>The most abstract: a matrix of levels is harder to understand than "Maria is an Approver".</li><li>Access that changes with the stage can surprise people ("I could edit this yesterday").</li><li>The most to build. It depends on stages being tracked reliably.</li></ul></div></div></div>
+
+
+<!-- ================= D: DEV MODE AND THE ASSISTANT ================= -->
+<div class="take t1" id="dev"><span class="tag" style="background:#c2410c">D · comes first</span><h2>Dev mode and the personal Assistant</h2>
+<p>Dev mode lets one person on one machine play two users and try multi-user work before sign-in exists (FR-190–FR-193). Every user has a personal <b>Assistant</b>, always running while they're signed in, shown in the top bar, and the one you talk to in every side chat (FR-194–FR-199). Harnesses are paid for by one shared subscription or by each user's own credentials, and are kept warm so replies start quickly (FR-200–FR-206).</p></div>
+
+<section class="view" id="um-D1">
+  <header><span class="num">D1</span><h2>The dev bar: switch users in one click</h2><span class="req">FR-190</span><span class="req">FR-191</span><span class="req">FR-192</span><span class="req">FR-193</span></header>
+  <p class="look"><b>Look for:</b> the bar is a colour nothing else uses, on every screen. You switch to <b>maria</b> and the whole UI becomes hers: her inbox, her projects, her Assistant. The right side says why your last request was allowed or denied, so access rules are checked as you click. The bar says it is local only, because dev mode refuses to start while go-build-it is reachable from other machines.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">127.0.0.1:7420/questions</span></div>
+  <div class="devbar"><b>DEV MODE</b><span>acting as</span><span class="devwho"><span class="av h1">DF</span>david <span class="chip">Owner</span> ▾</span><span class="devalt">switch to <span class="av h2">MR</span> maria</span><span class="grow"></span><span class="devwhy">last request: <b>allowed</b> · answer questions · from <i>Approver</i> on ledgerly (direct grant)</span><span class="devx">only on this machine · refused while remote access is on</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">2</span></a><a>Questions <span class="badge">2</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">1</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>People &amp; access</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot">v2026.12 · 2 live · dispatch manual</div></aside>
+    <div class="main">
+      <div class="topbar"><h1>Questions</h1><span class="chip red">1 blocking</span><span class="search">Search, run a command…  ⌘K</span><span class="ast"><span class="dot grn"></span>Assistant · ready</span><span class="me"><span class="av h1">DF</span>david</span></div>
+      <div class="content"><div class="row">
+        <div class="card grow"><h3>Switch user <span class="chip amb">dev</span></h3>
+          <div class="opt on"><span class="radio on"></span><div class="grow"><div class="who"><span class="av h1">DF</span><div><b>david</b><div class="small muted">Owner · Approver on ledgerly, trailmap</div></div></div></div><span class="chip grn">Assistant ready</span></div>
+          <div class="opt" style="margin-top:8px"><span class="radio"></span><div class="grow"><div class="who"><span class="av h2">MR</span><div><b>maria</b><div class="small muted">Contributor on ledgerly · Viewer on trailmap</div></div></div></div><span class="chip">Assistant starts on switch</span></div>
+          <div class="row c" style="margin-top:10px"><span class="btn sm">+ Dev user</span><span class="small muted">or from a terminal: <span class="mono">gbi dev as maria</span></span></div></div>
+        <div class="card" style="width:340px"><h3>Recorded as</h3>
+          <div class="small">maria answered Q-4 <span class="chip amb">dev</span><div class="muted">switched by david · 14:02</div></div>
+          <div class="small" style="margin-top:8px">maria tried to approve gate G-2 <span class="chip red">denied</span><div class="muted">needs <b>approve gates</b>; Contributor doesn't have it</div></div>
+          <div class="note" style="margin-top:10px">First start in dev mode: <b>Create two dev users</b> (david, Owner · maria, Contributor) with their Assistants.</div></div>
+      </div></div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="um-D2">
+  <header><span class="num">D2</span><h2>Your Assistant: status on every screen, the panel, every side chat</h2><span class="req">FR-194</span><span class="req">FR-196</span><span class="req">FR-197</span><span class="req">FR-198</span><span class="req">FR-205</span></header>
+  <p class="look"><b>Look for:</b> the chip in the top bar is your Assistant: <b>starting · ready · working · waiting for you · offline</b>, with context use. It opens a panel that is also the side chat on artifacts, archetypes and standards: you no longer pick a persona, your Assistant asks the right team member. It <b>drafts</b> decisions and you confirm them. When its harness is stopped on a screen, the chip says what the screen says.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">127.0.0.1:7420/standards/git-workflow</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">2</span></a><a>Questions <span class="badge">2</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">1</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>People &amp; access</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot">v2026.12 · 2 live · dispatch manual</div></aside>
+    <div class="main">
+      <div class="topbar"><h1>Global standards</h1><span class="search">Search, run a command…  ⌘K</span><span class="ast"><span class="dot acc"></span>Assistant · working · 18%</span><span class="me"><span class="av h1">DF</span>david</span></div>
+      <div class="content"><div class="row">
+        <div class="card grow"><h3>Git workflow <span class="small muted" style="text-transform:none;letter-spacing:0">rev 1</span></h3>
+          <ol class="small" style="margin:0;padding-left:18px;line-height:1.9"><li>One branch per task.</li><li>Courier pushes and opens the PR.</li><li>Lens review, then a human approves.</li><li style="background:#e5f6ec">Squash-merge, <b>after the harness check passes</b>. <span class="chip grn">proposed by your Assistant</span></li><li>Releases are tagged YYYY.MM.DD.N.</li></ol>
+          <div class="row c" style="margin-top:12px"><span class="btn">Reject</span><span class="btn p">Accept change</span></div></div>
+        <div class="card" style="width:360px;display:flex;flex-direction:column;gap:8px"><h3>Your Assistant <span class="chip acc">working</span></h3>
+          <div class="small muted">Claude Code · opus · 36k of 200k · started 09:12</div>
+          <div class="small" style="background:#f4f6f7;border-radius:8px;padding:8px 10px"><b>You:</b> make the harness check part of every merge</div>
+          <div class="small" style="border:1px solid var(--line);border-radius:8px;padding:8px 10px"><b>Assistant:</b> I drafted step 4 (highlighted). Lens agrees it can be checked at review. Accept it to save rev 2. I also drafted an answer to <b>Q-4</b> for you: <span class="btn sm">Review draft</span></div>
+          <div class="inp small muted">Ask your Assistant…  🎙</div>
+          <div class="note red small"><b>If it stops:</b> "Assistant · waiting for you: Fable now runs on usage credits · Switch to Opus 5.5 and continue" <span class="btn sm">Open terminal</span></div></div>
+      </div></div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="um-D3">
+  <header><span class="num">D3</span><h2>Profile → My Assistant: tune your own</h2><span class="req">FR-195</span><span class="req">FR-196</span><span class="req">FR-199</span><span class="req">FR-202</span></header>
+  <p class="look"><b>Look for:</b> your Assistant is made from the system-wide <b>Assistant archetype</b>. You add your own instructions on top, and pick a harness and model where the admin allows it. A change to the archetype arrives as a proposal, like any archetype change. In Per user mode, the credential it runs on is yours and can be tested here.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">127.0.0.1:7420/profile/assistant</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">2</span></a><a>Questions <span class="badge">2</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">1</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>People &amp; access</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot">v2026.12 · 2 live · dispatch manual</div></aside>
+    <div class="main">
+      <div class="topbar"><h1><span class="crumb">Profile / </span>My Assistant</h1><span class="search">Search, run a command…  ⌘K</span><span class="ast"><span class="dot grn"></span>Assistant · ready</span><span class="me"><span class="av h1">DF</span>david</span></div>
+      <div class="tabs"><span>Account</span><span class="on">My Assistant</span><span>Credentials</span><span>Sessions &amp; tokens</span></div>
+      <div class="content"><div class="row">
+        <div class="card grow"><h3>From the Assistant archetype <span class="chip">rev 3</span></h3>
+          <div class="row c wrap small" style="gap:10px;margin-bottom:10px">Harness <span class="inp sel" style="width:150px">Claude Code</span> Model <span class="inp sel" style="width:120px">opus</span><span class="muted">the admin allows: Claude Code, Pi</span></div>
+          <div class="field"><label>My tuning (added under "## For david")</label><div class="inp" style="min-height:90px;font-family:ui-monospace,Menlo,monospace;font-size:12px">- Answer in short bullet points.<br>- Before queuing work that spends money, tell me the estimate.<br>- Draft review verdicts with the evidence gaps first.</div></div>
+          <div class="note blue" style="margin-top:10px">Archetype rev 4 is waiting: "Always quote the requirement ID." <span class="btn sm">See the change</span> <span class="btn sm p">Apply</span></div></div>
+        <div class="card" style="width:330px"><h3>Running</h3>
+          <dl class="kv"><dt>Status</dt><dd><span class="chip grn">ready</span> warm since 09:12</dd><dt>Stops</dt><dd>2 h after you leave · when you sign out</dd><dt>Acts as</dt><dd>you, with your permissions; drafts decisions for you</dd><dt>Token</dt><dd class="mono">assistant@david · ends with the session</dd><dt>Credential</dt><dd>Shared: the server's Claude login</dd></dl>
+          <div class="row c" style="margin-top:10px"><span class="btn sm">Restart</span><span class="btn sm">New conversation</span><span class="btn sm">Open terminal</span></div></div>
+      </div></div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="um-D4">
+  <header><span class="num">D4</span><h2>Settings → Harnesses: credentials and warm harnesses</h2><span class="req">FR-200</span><span class="req">FR-201</span><span class="req">FR-202</span><span class="req">FR-203</span><span class="req">FR-204</span></header>
+  <p class="look"><b>Look for:</b> one choice, <b>Shared</b> or <b>Per user</b>, says who pays. A credential is a harness already signed in, or an API key (one per model if you like); keys are never shown again. Below, the warm harnesses: each user's Assistant and the members of projects with work queued, with memory, inside the limits you set.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">127.0.0.1:7420/settings#harnesses</span></div>
+  <div class="app">
+    <aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">2</span></a><a>Questions <span class="badge">2</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">1</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>People &amp; access</a><a>History</a><div class="sep">System</div><a class="on">Settings</a><a>Learn</a><a>Docs</a><div class="foot">v2026.12 · 2 live · dispatch manual</div></aside>
+    <div class="main">
+      <div class="topbar"><h1>Settings</h1><span class="search">Search, run a command…  ⌘K</span><span class="ast"><span class="dot grn"></span>Assistant · ready</span><span class="me"><span class="av h1">DF</span>david · <span class="chip">Owner</span></span></div>
+      <div class="content">
+        <div class="card"><h3>Who pays for AI work</h3>
+          <div class="row">
+            <div class="opt on grow"><span class="radio on"></span><div><b>Shared</b><div class="small muted">Every harness runs on this server's sign-in or key. Every user's Assistant and agent work uses <b>your</b> subscription.</div></div></div>
+            <div class="opt grow"><span class="radio"></span><div><b>Per user</b><div class="small muted">Each user signs in their own harnesses (in their profile) or adds keys. Work runs on the credentials of whoever started it; automatic dispatch only for projects that name whose credentials pay.</div></div></div>
+          </div>
+          <table class="t" style="margin-top:12px"><tr><th>Harness</th><th>Credential</th><th>Models</th><th>Check</th><th></th></tr>
+            <tr><td><b>Claude Code</b></td><td>signed in before go-build-it started <span class="small muted">(~/.claude)</span></td><td class="small">opus <span class="muted">· fable needs usage credits</span></td><td><span class="chip grn">starts without a menu</span></td><td><span class="btn sm">Test</span></td></tr>
+            <tr><td><b>Pi</b></td><td>API key ••••3f2a <span class="small muted">· one for <span class="mono">gpt-6</span>, one for the rest</span></td><td class="small">2 models</td><td><span class="chip grn">ok</span></td><td><span class="btn sm">Replace key</span></td></tr>
+            <tr><td><b>Antigravity</b></td><td><span class="muted">none</span></td><td></td><td><span class="chip amb">not signed in</span></td><td><span class="btn sm p">Sign in (opens a terminal)</span></td></tr></table></div>
+        <div class="card"><h3>Warm harnesses <span class="small muted" style="text-transform:none;letter-spacing:0">5 of 8 · 2.1 GB of 4 GB</span></h3>
+          <table class="t"><tr><th>Harness</th><th>For</th><th>Why warm</th><th>State</th><th>Memory</th><th>Idle stop</th></tr>
+            <tr><td>Assistant · david</td><td>david</td><td>signed in</td><td><span class="chip acc">working</span></td><td>410 MB</td><td>2 h after david leaves</td></tr>
+            <tr><td>Assistant · maria</td><td>maria</td><td>signed in (dev)</td><td><span class="chip grn">ready</span></td><td>380 MB</td><td>2 h after maria leaves</td></tr>
+            <tr><td>Forge · ledgerly</td><td>project</td><td>2 tasks queued</td><td><span class="chip grn">ready</span></td><td>450 MB</td><td>30 min with no work</td></tr>
+            <tr><td>Lens · ledgerly</td><td>project</td><td>reviews open</td><td><span class="chip grn">ready</span></td><td>420 MB</td><td>30 min with no work</td></tr>
+            <tr><td>Forge · lastcard</td><td>project</td><td>3 tasks queued</td><td><span class="chip">starting</span></td><td>—</td><td>30 min with no work</td></tr></table>
+          <div class="row c small" style="margin-top:10px;gap:10px">Keep at most <span class="inp" style="width:50px">8</span> warm, using at most <span class="inp" style="width:60px">4 GB</span>; stop idle members after <span class="inp" style="width:60px">30 min</span>.</div></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ================= COMPARE ================= -->
+<section class="view" id="compare">
+  <header><h2>Side by side</h2></header>
+  <table class="cmp">
+    <tr><th></th><th>Take 1 · Admin console</th><th>Take 2 · Project-first</th><th>Take 3 · Stakeholders &amp; sign-off</th></tr>
+    <tr><td><b>Where access is managed</b></td><td>System area: People &amp; access</td><td>The project's Team page; a thin People list for admins</td><td>Stakeholder groups and policy templates</td></tr>
+    <tr><td><b>Custom roles</b></td><td>Server-wide, ticked from a permission list</td><td>Per project in <span class="mono">docs/gbi.toml</span>, capped by a server ceiling</td><td>Levels in a matrix (each level is a role), per template</td></tr>
+    <tr><td><b>Who grants access</b></td><td>Admins (and project admins on the Access tab)</td><td>Project leads, plus access requests</td><td>Admins edit groups and policies; projects pick a template</td></tr>
+    <tr><td><b>Sign-off routing</b></td><td>"Approve gates of type…" permission plus project rules</td><td>Approve lists in each project role</td><td>Comes from the policy: who has S at the stage</td></tr>
+    <tr><td><b>Best for</b></td><td>A central IT or security team</td><td>Many independent project teams</td><td>A governed factory with regulated work</td></tr>
+    <tr><td><b>Effort to build</b></td><td>Lowest</td><td>Medium</td><td>Highest</td></tr>
+  </table>
+  <p class="look" style="margin-top:14px"><b>My suggestion:</b> build <b>Take 1</b>'s model and screens first: users, statuses, server-wide custom roles, the project Access tab, Check access. Add <b>Take 2</b>'s access requests and invitations from the team page. Then grow into <b>Take 3</b>'s stakeholder groups and policy-driven sign-off routes once projects track stages. All three share the same underneath: permissions, roles, grants to users, groups and AI members, and checks in the API.</p>
+</section>
+
+<section class="view" id="questions">
+  <header><h2>Questions for you</h2></header>
+  <ol class="look" style="font-size:14.5px;line-height:1.7">
+    <li>Which take, or which mix? (Suggestion above.)</li>
+    <li>Should project admins be able to invite people who don't have an account yet (Take 2), or only admins?</li>
+    <li>Take 2 keeps roles in the repository. Is that worth it for you, or are server-wide roles enough?</li>
+    <li>Should access ever change by stage (Take 3), or only sign-off routing?</li>
+    <li>Is a second sign-in step (passkey or code) required for everyone, or only for admins and approvers?</li>
+    <li>Can an AI member ever approve anything (for example, the AI reviewer passing a low-risk gate), or never?</li>
+  </ol>
+</section>
+
+<p class="rv-foot">User management · three takes · static mockups for requirements rev 12 (§4.4). <a href="index.html">Back to all mockups</a></p>
+</body>
+</html>

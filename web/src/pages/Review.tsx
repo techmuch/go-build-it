@@ -179,19 +179,20 @@ export function Reviews({ rid }: { rid?: string }) {
 
 function ReviewDetail({ id, list }: { id: string; list: any[] }) {
   const { data: r, error } = useData<any>(() => api.reviews.get(id), [id], (e) => e.subject === id);
-  const [verdict, setVerdict] = useState<'approve' | 'changes' | 'reject'>('approve');
+  const [verdict, setVerdict] = useState<'' | 'approve' | 'changes' | 'reject'>(''); // no default: the person chooses (FR-112)
   const [comment, setComment] = useState('');
   const [mode, setMode] = useState<'side' | 'slider'>('side');
   const [slider, setSlider] = useState(50);
   const [viewer, setViewer] = useState<number | null>(null);
   const { run, busy } = useAction();
-  useEffect(() => { if (r?.assessment?.recommendation === 'changes') setVerdict('changes'); }, [r?.assessment?.recommendation]);
   if (error) return <Err msg={error} />;
   if (!r) return <Loading />;
   const a = r.assessment || {};
   const t = a.tests || {};
   const groups: [string, any[]][] = [['Standards', a.standards || []], ['Requirements in scope', a.requirements || []], ['Feedback from mockup review & rehearsal', a.feedback || []]];
-  const score = (xs: any[]) => `${xs.filter((x) => x.status === 'met').length}/${xs.length}`;
+  const applies = (xs: any[]) => xs.filter((x) => x.status !== 'na');
+  const score = (xs: any[]) => `${xs.filter((x) => x.status === 'met').length}/${applies(xs).length}`;
+  const gaps: string[] = a.gaps || [];
   const pair = (a.mockups || []).find((m: any) => m.mockup && m.built) || (a.mockups || [])[0];
   const items = (a.mockups || []).flatMap((m: any) => [m.mockup && { name: 'Mockup · ' + m.name, kind: kindOf(m.mockup), url: `/raw/${r.projectId}/${m.mockup}` }, m.built && { name: 'Built · ' + m.name, kind: 'image', url: `/raw/${r.projectId}/${m.built}` }].filter(Boolean));
   return <>
@@ -203,7 +204,7 @@ function ReviewDetail({ id, list }: { id: string; list: any[] }) {
           <div className="tile"><div className="lbl">Mockup match</div><div className="big">{(a.mockups || []).filter((m: any) => m.mockup && m.built).length} pairs</div><div className="small muted">{(a.mockups || []).length} screens</div></div>
           <div className="tile"><div className="lbl">Unit tests</div><div className="big" style={{ color: t.unitFailed ? 'var(--red)' : t.ran ? 'var(--grn)' : undefined }}>{t.ran ? `${t.unitPassed}/${t.unitPassed + t.unitFailed}` : '—'}</div><div className="small muted">{t.coverage || (t.ran ? '' : 'not run')}</div></div>
           <div className="tile"><div className="lbl">E2E tests</div><div className="big" style={{ color: t.e2eFailed ? 'var(--red)' : t.e2ePassed ? 'var(--grn)' : undefined }}>{t.e2ePassed + t.e2eFailed ? `${t.e2ePassed}/${t.e2ePassed + t.e2eFailed}` : '—'}</div><div className="small muted">Playwright</div></div>
-          <div className="tile"><div className="lbl">Standards</div><div className="big">{score(a.standards || [])}</div><div className="small muted">global + project</div></div>
+          <div className="tile"><div className="lbl">Standards</div><div className="big">{score(a.standards || [])}</div><div className="small muted">{(a.standards || []).length - applies(a.standards || []).length ? `${(a.standards || []).length - applies(a.standards || []).length} do not apply` : 'that apply'}</div></div>
           <div className="tile"><div className="lbl">Feedback</div><div className="big">{score(a.feedback || [])}</div><div className="small muted">addressed</div></div>
         </div>
         <Card title="Approved mockup vs built" right={<><Seg value={mode} onChange={setMode} options={[['side', 'Side by side'], ['slider', 'Slider']]} /> {items.length > 0 && <button type="button" className="lnk" onClick={() => setViewer(0)}>⤢ Full screen</button>}</>}>
@@ -218,7 +219,8 @@ function ReviewDetail({ id, list }: { id: string; list: any[] }) {
         </Card>
         <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
           {groups.map(([title, xs], k) => <Card key={title} title={title} style={k === 2 ? { gridColumn: '1 / -1' } : undefined}>
-            <div className="chk">{xs.map((c: any, j: number) => <span key={j}><Status s={c.status} /> {c.author && <b>{c.author} · </b>}{c.item}{c.evidence && <span className="muted"> — {c.evidence}</span>}</span>)}{xs.length === 0 && <span className="muted">Nothing to assess.</span>}</div></Card>)}
+            <div className="chk">{applies(xs).map((c: any, j: number) => <span key={j}><Status s={c.status} /> {c.author && <b>{c.author} · </b>}{c.item}{c.evidence && <span className="muted"> — {c.evidence}</span>}</span>)}{xs.length === 0 && <span className="muted">Nothing to assess.</span>}</div>
+            {xs.length - applies(xs).length > 0 && <details className="small muted" style={{ marginTop: 6 }}><summary>{xs.length - applies(xs).length} do not apply to this change</summary><div className="chk">{xs.filter((c: any) => c.status === 'na').map((c: any, j: number) => <span key={j}>{c.item}{c.evidence && <> — {c.evidence}</>}</span>)}</div></details>}</Card>)}
         </div>
         {t.output && <Card title="Test failures"><pre className="mono" style={{ whiteSpace: 'pre-wrap' }}>{t.output}</pre></Card>}
         {a.diffStat && <details><summary className="small muted">Files changed</summary><pre className="mono small">{a.diffStat}</pre></details>}
@@ -228,9 +230,10 @@ function ReviewDetail({ id, list }: { id: string; list: any[] }) {
           <div className="small" style={{ marginTop: 6 }}>Recommends: <b>{a.recommendation === 'changes' ? 'request changes' : 'approve'}</b></div><div className="xs muted">assessed {ago(a.generatedAt)}</div></Card>
         {r.status === 'pending' ? <Card title="Your verdict">
           {(['approve', 'changes', 'reject'] as const).map((v) => <label key={v} className="small" style={{ display: 'block' }}><input type="radio" name="v" checked={verdict === v} onChange={() => setVerdict(v)} /> {v === 'approve' ? 'Approve' : v === 'changes' ? 'Request changes' : 'Reject'}</label>)}
-          <div style={{ marginTop: 6 }}><DictArea value={comment} onChange={setComment} placeholder={verdict === 'changes' ? 'What should change?' : 'Comment (optional)'} /></div>
-          <div className="small muted" style={{ margin: '6px 0' }}>{verdict === 'changes' ? 'Becomes context for the follow-up session and is recorded in history.' : verdict === 'approve' ? 'Courier merges the work.' : 'The task is closed as failed.'}</div>
-          <button type="button" className="btn p" disabled={busy} onClick={() => run(() => api.reviews.verdict(id, { verdict, comment }), 'Review submitted')}>Submit review</button></Card>
+          <div style={{ marginTop: 6 }}><DictArea value={comment} onChange={setComment} placeholder={verdict === 'changes' ? 'What should change?' : verdict === 'approve' && gaps.length ? 'Why approve without this evidence?' : 'Comment (optional)'} /></div>
+          {gaps.length > 0 && <div className="small" data-testid="evidence-gaps" style={{ margin: '6px 0', color: 'var(--amb)' }}><b>Evidence gaps:</b> {gaps.join('; ')}. Approving needs a reason.</div>}
+          <div className="small muted" style={{ margin: '6px 0' }}>{verdict === 'changes' ? 'Becomes context for the follow-up session and is recorded in history.' : verdict === 'approve' ? 'Courier merges the work.' : verdict === 'reject' ? 'The task is closed as failed.' : 'Choose a verdict.'}</div>
+          <button type="button" className="btn p" disabled={busy || !verdict || (verdict === 'changes' && !comment.trim()) || (verdict === 'approve' && gaps.length > 0 && !comment.trim())} onClick={() => run(() => api.reviews.verdict(id, { verdict, comment }), 'Review submitted')}>Submit review</button></Card>
           : <Card title="Decision"><div className="small">{r.reviewer} {r.status} {ago(r.decidedAt)}{r.comment && <p>{r.comment}</p>}</div></Card>}
         <Card title="After approval"><div className="small">Courier {a.prUrl ? 'squash-merges the PR' : 'merges the branch'} and removes the worktree. <span className="muted">(no LLM session needed)</span></div></Card>
       </div>

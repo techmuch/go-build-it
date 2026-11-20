@@ -1,0 +1,418 @@
+[
+ {
+  "name": "d01-catalog",
+  "addr": "/",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/"
+ },
+ {
+  "name": "d02-project",
+  "addr": "/projects/ledgerly",
+  "height": 1158,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/projects/ledgerly"
+ },
+ {
+  "name": "d03-milestone",
+  "addr": "/milestones/ledgerly-M0",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/milestones/ledgerly-M0"
+ },
+ {
+  "name": "d04-artifacts-requirements",
+  "addr": "/projects/trailmap/artifacts",
+  "height": 919,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/projects/trailmap/artifacts/requirements"
+ },
+ {
+  "name": "d05-artifacts-mockups",
+  "addr": "/projects/trailmap/artifacts/mockups/docs/mockups/phone.html#v02",
+  "height": 915,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/projects/trailmap/artifacts/mockups/docs/mockups/phone.html#v02"
+ },
+ {
+  "name": "d06-artifacts-trace",
+  "addr": "/projects/trailmap/artifacts/requirements?trace=1",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/projects/trailmap/artifacts/requirements?trace=1"
+ },
+ {
+  "name": "d07-artifacts-compare",
+  "addr": "/projects/trailmap/artifacts/compare/v02",
+  "height": 1742,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/projects/trailmap/artifacts/compare/v02"
+ },
+ {
+  "name": "d08-artifacts-files",
+  "addr": "/projects/trailmap/artifacts/files",
+  "height": 1089,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/projects/trailmap/artifacts/files"
+ },
+ {
+  "name": "d09-artifacts-tracker",
+  "addr": "/projects/trailmap/artifacts/tracker",
+  "height": 915,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/projects/trailmap/artifacts/tracker"
+ },
+ {
+  "name": "d10-artifact-editor",
+  "addr": "/projects/trailmap/edit",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/projects/trailmap/edit"
+ },
+ {
+  "name": "d11-project-team",
+  "addr": "/projects/ledgerly/team",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/projects/ledgerly/team"
+ },
+ {
+  "name": "d12-project-member",
+  "addr": "/projects/ledgerly/team/forge%40ledgerly",
+  "height": 1062,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/projects/ledgerly/team/forge%40ledgerly"
+ },
+ {
+  "name": "d13-project-queue",
+  "addr": "/projects/ledgerly/queue",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/projects/ledgerly/queue"
+ },
+ {
+  "name": "d14-project-sessions",
+  "addr": "/projects/ledgerly/sessions",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/projects/ledgerly/sessions"
+ },
+ {
+  "name": "d15-project-releases",
+  "addr": "/projects/ledgerly/releases",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/projects/ledgerly/releases"
+ },
+ {
+  "name": "d16-project-history",
+  "addr": "/projects/ledgerly/history",
+  "height": 2000,
+  "cut": true,
+  "title": "go-build-it",
+  "at": "/projects/ledgerly/history"
+ },
+ {
+  "name": "d17-project-settings",
+  "addr": "/projects/ledgerly/settings",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/projects/ledgerly/settings"
+ },
+ {
+  "name": "d18-questions",
+  "addr": "/questions",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/questions"
+ },
+ {
+  "name": "d19-question",
+  "addr": "/questions/Q-1",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/questions/Q-1"
+ },
+ {
+  "name": "d20-options",
+  "addr": "/options/OS-1",
+  "height": 913,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/options/OS-1"
+ },
+ {
+  "name": "d21-rehearsal",
+  "addr": "/rehearsals/G-1",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/rehearsals/G-1"
+ },
+ {
+  "name": "d22-review",
+  "addr": "/reviews/R-1",
+  "height": 951,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/reviews/R-1"
+ },
+ {
+  "name": "d23-sessions",
+  "addr": "/sessions",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/sessions"
+ },
+ {
+  "name": "d24-session",
+  "addr": "/sessions/S-3",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/sessions/S-3"
+ },
+ {
+  "name": "d25-session-terminal",
+  "addr": "/sessions/S-3?view=terminal",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/sessions/S-3?view=terminal"
+ },
+ {
+  "name": "d26-queue",
+  "addr": "/queue",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/queue"
+ },
+ {
+  "name": "d27-archetypes",
+  "addr": "/archetypes/developer",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/archetypes/developer"
+ },
+ {
+  "name": "d28-standards",
+  "addr": "/standards/git-workflow",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/standards/git-workflow"
+ },
+ {
+  "name": "d29-history",
+  "addr": "/history",
+  "height": 2000,
+  "cut": true,
+  "title": "go-build-it",
+  "at": "/history"
+ },
+ {
+  "name": "d30-event",
+  "addr": "/history",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/history/94"
+ },
+ {
+  "name": "d31-settings",
+  "addr": "/settings",
+  "height": 1733,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/settings"
+ },
+ {
+  "name": "d32-settings-herdr",
+  "addr": "/settings/herdr",
+  "height": 1550,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/settings/herdr"
+ },
+ {
+  "name": "d33-changelog",
+  "addr": "/changelog",
+  "height": 2000,
+  "cut": true,
+  "title": "go-build-it",
+  "at": "/changelog"
+ },
+ {
+  "name": "d34-learn",
+  "addr": "/learn",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/learn"
+ },
+ {
+  "name": "d35-lesson",
+  "addr": "/learn/around",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/learn/around"
+ },
+ {
+  "name": "d36-docs",
+  "addr": "/docs",
+  "height": 1150,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/docs"
+ },
+ {
+  "name": "d37-palette",
+  "addr": "/",
+  "height": 900,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/"
+ },
+ {
+  "name": "m01-home",
+  "addr": "/m/",
+  "height": 844,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/m/"
+ },
+ {
+  "name": "m02-project",
+  "addr": "/m/projects/ledgerly",
+  "height": 929,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/m/projects/ledgerly"
+ },
+ {
+  "name": "m03-inbox",
+  "addr": "/m/inbox",
+  "height": 993,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/m/inbox"
+ },
+ {
+  "name": "m04-answer",
+  "addr": "/m/q/Q-1",
+  "height": 844,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/m/q/Q-1"
+ },
+ {
+  "name": "m05-review",
+  "addr": "/m/review/R-1",
+  "height": 844,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/m/review/R-1"
+ },
+ {
+  "name": "m06-rehearsal",
+  "addr": "/m/rehearsal/G-1",
+  "height": 844,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/m/rehearsal/G-1"
+ },
+ {
+  "name": "m07-options",
+  "addr": "/m/options/OS-1",
+  "height": 844,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/m/options/OS-1"
+ },
+ {
+  "name": "m08-sessions",
+  "addr": "/m/sessions",
+  "height": 844,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/m/sessions"
+ },
+ {
+  "name": "m09-terminal",
+  "addr": "/m/sessions/S-3",
+  "height": 844,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/m/sessions/S-3"
+ },
+ {
+  "name": "m10-documents",
+  "addr": "/m/projects/trailmap/docs",
+  "height": 844,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/m/projects/trailmap/docs"
+ },
+ {
+  "name": "m11-document",
+  "addr": "/m/projects/trailmap/docs/requirements",
+  "height": 852,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/m/projects/trailmap/docs/requirements"
+ },
+ {
+  "name": "m12-compare",
+  "addr": "/m/projects/trailmap/compare/v02",
+  "height": 1049,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/m/projects/trailmap/compare/v02"
+ },
+ {
+  "name": "m13-more",
+  "addr": "/m/more",
+  "height": 2000,
+  "cut": true,
+  "title": "go-build-it",
+  "at": "/m/more"
+ },
+ {
+  "name": "m14-changelog",
+  "addr": "/m/changelog",
+  "height": 2000,
+  "cut": true,
+  "title": "go-build-it",
+  "at": "/m/changelog"
+ },
+ {
+  "name": "m15-learn",
+  "addr": "/m/learn",
+  "height": 844,
+  "cut": false,
+  "title": "go-build-it",
+  "at": "/m/learn"
+ }
+]

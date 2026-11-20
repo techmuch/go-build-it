@@ -1,6 +1,7 @@
 package sessions
 
 import (
+	"strings"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -95,5 +96,26 @@ func TestTrustAllowed(t *testing.T) {
 	cfg.Agents.TrustFolders = false
 	if TrustAllowed(cfg, in) {
 		t.Fatal("the setting turns it off")
+	}
+}
+
+// A stopped harness's dialog becomes the reason the person sees (the model menu that stopped
+// every Claude Code member when its default model began to need usage credits).
+func TestScreenSummary(t *testing.T) {
+	screen := ` ▐▛███▛█   Claude Code v2.1.328
+❯ Read .gbi-task.md in this folder and do what it says.
+───────────────────────────────────────────
+  Fable now runs on usage credits
+  You don't have usage credits yet.
+  ❯ Switch to Opus 5.5 and continue
+    Set up usage credits on claude.ai
+  Enter to confirm · Esc to cancel
+`
+	got := ScreenSummary(screen)
+	if !strings.Contains(got, "Fable now runs on usage credits") || !strings.Contains(got, "Switch to Opus 5.5") || strings.Contains(got, "Enter to confirm") || strings.Contains(got, "───") {
+		t.Fatalf("summary: %q", got)
+	}
+	if ScreenSummary("\n  \n") != "" {
+		t.Fatal("an empty screen has no reason")
 	}
 }

@@ -127,11 +127,12 @@ func Wire(cfg *config.Config, db *sql.DB, version string, log *slog.Logger) *App
 		_, err := a.Reviews.Open(ctx, t.ID)
 		return err
 	}
-	a.Reviews.Hooks = reviews.Hooks{Merge: a.Courier.Merge, Lens: a.lens, Feedback: a.feedbackFor, Workdir: a.Sessions.WorktreePath, Assign: a.assignReviewer}
+	a.Reviews.Hooks = reviews.Hooks{Merge: a.Courier.Merge, Lens: a.lens, Feedback: a.feedbackFor, Workdir: a.Sessions.WorktreePath, Assign: a.assignReviewer, Resume: a.resumeTask}
 	a.Questions.Hooks = questions.Hooks{
 		StopSession:   a.Sessions.StopForQuestion,
 		SendToSession: a.Sessions.Send,
 		ProposeValue:  a.proposeValue,
+		Resume:        a.resumeTask,
 	}
 	a.Options.Hooks = options.Hooks{Values: a.valueTexts, ProposeValue: a.proposeValue, FollowUp: a.optionFollowUp}
 	a.Rehearsals.IsOwner = cfg.IsOwner
@@ -193,12 +194,35 @@ func (a *App) assignReviewer(ctx context.Context, t queue.Task) string {
 }
 
 // reviewer returns an AI reviewer: a project member when one exists, else the reviewer archetype.
-func (a *App) reviewer(ctx context.Context) string {
-	return a.defaultPersona(ctx, "", "reviewer")
+// resumeTask starts a task the person just unblocked (an answer, or requested changes),
+// whether or not automatic dispatch is on. A task that cannot start stays queued.
+// The member that asked is often still finishing the turn in which it asked, so a busy
+// member is waited for (up to ten minutes) rather than treated as a failure.
+func (a *App) resumeTask(ctx context.Context, taskID string) {
+	deadline := time.Now().Add(10 * time.Minute)
+	for {
+		if t, err := a.Queue.Get(ctx, taskID); err != nil || t.Status != queue.Queued {
+			return // started some other way, or no longer wanted
+		}
+		_, err := a.Sessions.Start(ctx, taskID, "")
+		if err == nil {
+			return
+		}
+		if !strings.Contains(err.Error(), "busy") || time.Now().After(deadline) {
+			a.Log.Info("task stays queued", "task", taskID, "why", err.Error())
+			return
+		}
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(3 * time.Second):
+		}
+	}
 }
 
-func (a *App) lens(ctx context.Context, prompt string) (string, error) {
-	id := a.reviewer(ctx)
+// lens asks the project's own reviewer member to assess a change.
+func (a *App) lens(ctx context.Context, projectID, prompt string) (string, error) {
+	id := a.defaultPersona(ctx, projectID, "reviewer")
 	if id == "" {
 		return "", fmt.Errorf("no AI persona holds the reviewer role")
 	}

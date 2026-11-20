@@ -173,16 +173,27 @@ func (m *Manager) openTranscript(r *run) {
 }
 
 // follow polls herdr state and the transcript until the member settles after seq.
+// resubmitAfter is how long an idle member with an empty transcript waits before the task
+// is sent again.
+func (m *Manager) resubmitAfter() time.Duration {
+	if m.ResubmitAfter > 0 {
+		return m.ResubmitAfter
+	}
+	return 12 * time.Second
+}
+
 func (m *Manager) follow(ctx context.Context, r *run, seq int64) {
 	var limited *harness.RateLimit
 	var resultErr bool
 	var resultText, lastText string
 	sawChange, lastSave := false, time.Now()
 	submitted := time.Now()
+	lastSubmit, resubmits, sawEvent := submitted, 0, false
 	handoffAsked, settled := false, false
 	// handle applies one transcript event; the last read after the member settles uses it too,
 	// so nothing at the end of a turn (a compaction, a tool call, an error) is lost.
 	handle := func(e harness.Event) {
+		sawEvent = true
 		switch e.Kind {
 		case harness.KUser:
 			m.appendLine(ctx, r, "input", e.Text)
@@ -276,11 +287,11 @@ func (m *Manager) follow(ctx context.Context, r *run, seq int64) {
 				continue
 			}
 			if r.state != "blocked" {
-				r.s.Status, r.s.ExitReason = "blocked", r.mem.Name+" is waiting for you in its terminal"
+				r.s.Status, r.s.ExitReason = "blocked", r.mem.Name+" is waiting for you in its terminal"+screenReason(ctx, r.h, r.pane)
 				_ = m.write(ctx, r.s)
 				m.setState(r, "blocked")
 				m.hist.Must(ctx, history.Event{ProjectID: r.s.ProjectID, Type: "session.blocked", Subject: r.s.ID, Summary: r.mem.Name + " needs you (" + r.t.ID + ")",
-					Why: "herdr reports the agent blocked", Data: history.Data(map[string]any{"member": r.mem.ID, "pane": r.pane, "task": r.t.ID})})
+					Why: r.s.ExitReason, Data: history.Data(map[string]any{"member": r.mem.ID, "pane": r.pane, "task": r.t.ID})})
 			}
 			continue
 		case herdr.AgentStatusWorking:
@@ -295,7 +306,19 @@ func (m *Manager) follow(ctx context.Context, r *run, seq int64) {
 			continue
 		}
 		if !sawChange {
-			if time.Since(submitted) > 45*time.Second {
+			// A harness that is still starting can drop the prompt: it stays idle with nothing in
+			// its transcript. Send the prompt again (twice at most) before giving up.
+			if !sawEvent && a.AgentStatus == herdr.AgentStatusIdle && resubmits < 2 && time.Since(lastSubmit) > m.resubmitAfter() {
+				if _, err := r.h.Submit(ctx, r.pane, agentName(r.mem), r.prof.Kind != "", Prompt); err == nil {
+					resubmits++
+					lastSubmit = time.Now()
+					m.hist.Must(ctx, history.Event{ProjectID: r.s.ProjectID, Type: "session.resubmitted", Subject: r.s.ID,
+						Summary: fmt.Sprintf("Sent %s to %s again", r.t.ID, r.mem.Name), Why: r.mem.Name + " was idle and had not read the task",
+						Data: history.Data(map[string]any{"member": r.mem.ID, "task": r.t.ID, "attempt": resubmits + 1})})
+				}
+				continue
+			}
+			if time.Since(lastSubmit) > 45*time.Second {
 				m.fail(ctx, r, r.mem.Name+" did not start working after the prompt")
 				return
 			}
@@ -407,6 +430,7 @@ func (m *Manager) finish(ctx context.Context, r *run, limited *harness.RateLimit
 			Why: "experimental smart handoffs; context reached the threshold", Data: history.Data(map[string]any{"task": t.ID, "briefing": r.s.Handoff, "usedBefore": r.s.Used, "missingSections": MissingHandoffSections(r.s.Handoff)})})
 	default:
 		r.s.Status, r.s.ExitReason = "done", "completed"
+		_ = m.write(ctx, r.s) // the member has finished: say so while Courier commits and the reviewer assesses
 		cur, _ := m.queue.Get(ctx, t.ID)
 		if cur.Status == queue.Blocked {
 			r.s.ExitReason = "stopped for a blocking question"

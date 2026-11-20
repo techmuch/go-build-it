@@ -11,6 +11,8 @@ When a session finishes, Courier commits, pushes and opens a PR, and Lens opens 
 
 ![Review](screenshots/review.png)
 
+**Evidence gaps:** the review lists what is missing (no tests ran, tests failed, requirements not met or not assessed, feedback not addressed). Nothing is selected for you, and approving while there are gaps asks you to say why (FR-112a). Standards that don't apply to the change are folded away under "do not apply".
+
 **Your verdict:**
 - **Approve:** Courier merges the work.
 - **Request changes:** your comment goes into the task's notes and the task is requeued.

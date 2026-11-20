@@ -1,6 +1,6 @@
 # go-build-it — Requirements
 
-Status: Draft · Last updated: 2026-11-12 (rev. 11: a phone that opens a desktop address gets the matching mobile screen, with a per-device Desktop site choice, and the desktop UI keeps its navigation behind ☰ on narrow screens, FR-35a; the remote access QR code opens the mobile UI, FR-20c. Rev. 10: each harness reports its models, and archetypes and members choose one from a searchable list, FR-63a; the logo and title lead to the landing page, FR-34a. Rev. 9: starter archetypes with full role instructions that upgrade when unedited, FR-12f; new installations start with the starter standards, FR-50a; a remote access checklist that proves go-build-it is served, private and not clashing with other services, with a QR code, FR-20a–FR-20d, see [ADR-015](decisions/ADR-015-remote-access.md). Rev. 8: docs/gbi.toml controls the Artifacts sub-tabs, which ones exist, their order and their names, including your own roles such as vision, FR-151. Rev. 7: project documents with HTML entry points, explicit labels, a viewer that follows links, mockup-to-app comparison and traceability, FR-140–FR-150, see [ADR-014](decisions/ADR-014-project-documents.md). Rev. 6: go-build-it answers a harness's folder trust prompt for folders it created, FR-07f, see [ADR-013](decisions/ADR-013-folder-trust.md). Rev. 5: a doctor that proves gbi can start herdr and a harness and explains failures to people and AI agents, FR-07a–FR-07e; install by giving an AI agent the GitHub URL, FR-02a–FR-02b; lessons, a practice project, harness control and design rationale, FR-134–FR-139; see [ADR-012](decisions/ADR-012-doctor-and-learning.md). Rev. 4: in-app change log and guided updates, FR-06a–FR-06e, see [ADR-011](decisions/ADR-011-changelog-guided-updates.md). Rev. 3: herdr as the only agent backend; per-project team members from global archetypes, see [ADR-009](decisions/ADR-009-herdr-backend.md) and [ADR-010](decisions/ADR-010-project-team-members.md))
+Status: Draft · Last updated: 2026-11-20 (rev. 13: user management follows Take 1, the admin console (Q13); a **dev mode** with a user switcher for trying multi-user work on one machine; a **personal Assistant** for every user, always running while they are signed in and the one you talk to in every side chat; shared or per-user **harness credentials**; **warm harnesses** started ahead of need; a **harness check** before every release; evidence gaps need a reason to approve, FR-190–FR-206, FR-112a, NFR-23–NFR-24. rev. 12: users, sign-in and per-project access control for one shared server: local accounts first and OIDC next, a loopback-trust setting, statuses, groups, custom roles, AI members under the same rules, sign-off routing and access reviews, FR-160–FR-189; answers Q1 and Q4; three takes are in the [user management mockups](mockups/user-management.html). Rev. 11: a phone that opens a desktop address gets the matching mobile screen, with a per-device Desktop site choice, and the desktop UI keeps its navigation behind ☰ on narrow screens, FR-35a; the remote access QR code opens the mobile UI, FR-20c. Rev. 10: each harness reports its models, and archetypes and members choose one from a searchable list, FR-63a; the logo and title lead to the landing page, FR-34a. Rev. 9: starter archetypes with full role instructions that upgrade when unedited, FR-12f; new installations start with the starter standards, FR-50a; a remote access checklist that proves go-build-it is served, private and not clashing with other services, with a QR code, FR-20a–FR-20d, see [ADR-015](decisions/ADR-015-remote-access.md). Rev. 8: docs/gbi.toml controls the Artifacts sub-tabs, which ones exist, their order and their names, including your own roles such as vision, FR-151. Rev. 7: project documents with HTML entry points, explicit labels, a viewer that follows links, mockup-to-app comparison and traceability, FR-140–FR-150, see [ADR-014](decisions/ADR-014-project-documents.md). Rev. 6: go-build-it answers a harness's folder trust prompt for folders it created, FR-07f, see [ADR-013](decisions/ADR-013-folder-trust.md). Rev. 5: a doctor that proves gbi can start herdr and a harness and explains failures to people and AI agents, FR-07a–FR-07e; install by giving an AI agent the GitHub URL, FR-02a–FR-02b; lessons, a practice project, harness control and design rationale, FR-134–FR-139; see [ADR-012](decisions/ADR-012-doctor-and-learning.md). Rev. 4: in-app change log and guided updates, FR-06a–FR-06e, see [ADR-011](decisions/ADR-011-changelog-guided-updates.md). Rev. 3: herdr as the only agent backend; per-project team members from global archetypes, see [ADR-009](decisions/ADR-009-herdr-backend.md) and [ADR-010](decisions/ADR-010-project-team-members.md))
 
 ## 1. Overview
 
@@ -123,15 +123,15 @@ go-build-it is a Go application with an embedded React frontend that manages lon
 
 ### 4.2 Access and identity
 
-Authentication is delegated to Tailscale. go-build-it does not run its own login system for local or tailnet access.
+In **solo mode** (one owner, the default for a new installation), authentication is delegated to the machine and to Tailscale, as below. In **multi-user mode** (§4.4, rev 12), everyone signs in and FR-16 and FR-17 change as noted.
 
 - **FR-15**: The application SHALL detect how each request reaches it and classify it as one of:
   1. **Local**: a loopback connection (`localhost` / `127.0.0.1` / `::1`).
   2. **Tailscale Serve**: proxied by `tailscale serve` on the tailnet.
   3. **External interface**: a direct connection on a non-loopback network interface.
-- **FR-16**: **Local** requests SHALL NOT be challenged. They SHALL be attributed to a configurable default local user.
-- **FR-17**: **Tailscale Serve** requests SHALL be treated as trusted, the same as local requests, because the user has already authenticated with Tailscale. When Tailscale identity headers are present (e.g. `Tailscale-User-Login`), the request SHOULD be attributed to that Tailscale user, so actions in the history show who performed them.
-- **FR-18**: **External interface** requests SHALL be challenged before access is granted. See open question Q1.
+- **FR-16**: **Local** requests SHALL NOT be challenged. They SHALL be attributed to a configurable default local user. *(rev 12)* In multi-user mode this applies only when loopback trust is on (FR-164).
+- **FR-17**: **Tailscale Serve** requests SHALL be treated as trusted, the same as local requests, because the user has already authenticated with Tailscale. When Tailscale identity headers are present (e.g. `Tailscale-User-Login`), the request SHOULD be attributed to that Tailscale user, so actions in the history show who performed them. *(rev 12)* In multi-user mode a Tailscale identity only finds its linked user (FR-165); it SHALL NOT grant access on its own.
+- **FR-18**: **External interface** requests SHALL be challenged before access is granted. *(rev 12)* The challenge is the sign-in of §4.4 (Q1 answered).
 - **FR-19**: By default the application SHALL listen only on loopback. Listening on external interfaces SHALL require explicit configuration.
 - **FR-20**: The application SHALL help the user set up Tailscale Serve, for example by detecting whether Tailscale is installed and logged in and then offering to configure `tailscale serve`. It SHALL show clear guidance when Tailscale is missing.
 - **FR-20a**: *(rev 9)* **Settings → Remote access** and `gbi tailscale status` SHALL show a checklist, each line with its evidence and, when it fails, the fix:
@@ -158,7 +158,74 @@ Authentication is delegated to Tailscale. go-build-it does not run its own login
 | **Reviewer** | Reviews completed work against requirements, standards and values. |
 | **Git / Release Manager** | Handles all git and forge operations (see §9), so other personas don't spend tokens on them. |
 
-- **FR-26**: Users SHOULD be able to define additional custom roles.
+- **FR-26**: Users SHOULD be able to define additional custom roles. *(rev 12)* These are **team roles** (the job someone does). What someone may do is set by **access roles** (FR-174), which SHALL also be customizable.
+
+### 4.4 Users, sign-in and access control (rev 12)
+
+go-build-it runs as **one shared server** for a team (decided 2026-11-12). Two ideas are kept apart: a **team role** (§4.3) is the job someone does on a project, filled by a person or an AI; an **access role** is what someone may do. A person can be a project's reviewer and hold Approver access. Three takes on the screens are in the [user management mockups](mockups/user-management.html). **Take 1, the admin console, was chosen on 2026-11-20 (Q13)**: People & access is a system area with Users, Groups and Roles, and each project has an Access tab with "Check access". Dev mode (§4.5) comes first, so multi-user work can be tried on one machine before sign-in exists.
+
+#### Modes and sign-in
+
+- **FR-160**: Every person SHALL be a **user**: a stable ID, display name, email (unique), status, and the time they were created and last seen. History events, comments, answers and sign-offs SHALL point at the user ID, so renaming someone does not rewrite the record.
+- **FR-161**: go-build-it SHALL support **local accounts** first: a password (at least 12 characters, hashed with a memory-hard algorithm such as Argon2id, and checked against a list of known leaked passwords) and a **second step**, a passkey (WebAuthn) or a one-time code (TOTP). Whether the second step is required SHALL be a setting, per installation, with a stricter setting allowed for admins and approvers. Forgotten passwords SHALL be reset by an admin, or by email once email is configured.
+- **FR-162**: go-build-it SHALL support **single sign-on with OIDC** (for example Entra ID, Okta, Google Workspace or Keycloak) as the next sign-in method; it is **required**, though the provider is not chosen yet. Settings SHALL take the issuer URL, client ID and secret, test the connection, and show the redirect URL. Users SHALL be matched by verified email. Group membership MAY come from a claim (FR-170). Local accounts MAY be turned off once OIDC works, keeping at least one break-glass account (FR-167).
+- **FR-163**: An installation SHALL run in **solo mode** (one owner, today's behaviour, no sign-in from this machine) or **multi-user mode**. Switching to multi-user mode SHALL be an explicit action by the owner that first creates the owner's own account, and SHALL be recorded in the history.
+- **FR-164**: In multi-user mode, **loopback requests SHALL NOT be trusted by default**. A setting SHALL allow trusting loopback **as a named user** (typically a service account). Untokened loopback requests then act as that user, with that user's access and never more, and are recorded under that user's name. Settings SHALL warn that anything running on the machine, including agents, gets that access.
+- **FR-165**: In multi-user mode, a **Tailscale identity** SHALL only identify a user that is linked to it (by an admin, or by the user after signing in). An unlinked Tailscale login SHALL get the sign-in page.
+- **FR-166**: The **CLI** SHALL sign in with `gbi login` (a device-code flow in the browser) and keep a token that expires (default 30 days) and can be revoked. The **MCP server** SHALL use the same tokens.
+- **FR-167**: **Agent sessions** SHALL get their own short-lived token, bound to the session and its task and ending with it, in place of the `X-GBI-Persona` header that any local process can send. In multi-user mode the header SHALL be ignored. A break-glass command run on the server (`gbi users recover`) SHALL restore an owner when every owner is locked out, and SHALL be recorded.
+- **FR-168**: Web sessions SHALL expire (default 12 hours, 30 minutes idle; both settings), use secure, HTTP-only, same-site cookies, and be protected against cross-site request forgery. Repeated failed sign-ins SHALL lock the account for a while (default 5 tries, 15 minutes) and be recorded.
+
+#### Users and groups
+
+- **FR-169**: A user SHALL have one status: **Invited** (an invitation link, which expires), **Active**, **Suspended** (temporarily blocked, everything kept), **Locked** (after failed sign-ins; clears by itself or by an admin) or **Deactivated** (can't sign in; history stays attributed). Suspending or deactivating SHALL end that user's sessions and tokens at once. Every status change SHALL be recorded with who did it and why.
+- **FR-170**: Admins SHALL invite users by email, choosing their first groups or project access. A user's page SHALL show their status, sign-in methods, projects and access roles (with where each came from), live sessions and tokens (each can be ended), and their access history. `gbi users …` SHALL do the same from the CLI.
+- **FR-171**: go-build-it SHALL support **groups** (for example the stakeholder kinds: Product owners, Cybersecurity, DevSecOps, UI/UX, Transformation, Sponsors, Developers). Access SHOULD be granted to groups rather than to people one by one. With OIDC, a group MAY follow a claim from the identity provider. **Service accounts** (users that can't sign in interactively, only use tokens) SHALL be supported for automation and loopback trust.
+
+#### Access roles and grants
+
+- **FR-172**: Access SHALL be built from **permissions**. **Project permissions**: view; comment and mark up artifacts; answer questions; queue tasks and file findings; start agent work (spends money); edit artifacts; manage the team, tuning and members; approve gates (optionally limited to gate types); merge and release; project settings; manage project access. **System permissions**: manage users and groups; manage roles; manage archetypes and standards; server settings, remote access and updates; view all projects; run access reviews and export.
+- **FR-173**: An **access role** SHALL be a named set of permissions with a scope (project or system). go-build-it SHALL ship built-in roles: **Owner** and **Admin** (system); **Viewer**, **Commenter**, **Contributor**, **Approver**, **Maintainer** and **Project admin** (project). Built-in roles can be copied but not edited.
+- **FR-174**: Admins SHALL be able to create **custom access roles** from the start, as flexible as custom artifact tabs (FR-151): pick permissions, optionally start from another role, limit approval to gate types. Roles SHALL be versioned. Saving a role SHALL show who it affects, and SHALL be recorded.
+- **FR-175**: Permissions that spend money (start agent work) or can't be undone (merge and release) SHALL be marked wherever roles are edited or granted.
+- **FR-176**: Projects MAY define their own roles in the repository (for example `[roles]` in `docs/gbi.toml`), within a **ceiling** the server admin sets: a project file SHALL NOT be able to grant a permission the ceiling doesn't allow, and *who* holds a role SHALL be kept only in go-build-it, never in the repository. (Take 2. **Not planned**: Take 1 was chosen (Q13); roles live in go-build-it. Kept here in case a project needs roles in its repository later.)
+- **FR-177**: A **grant** SHALL give a user, a group or an AI member an access role on one project, or on all projects. A grant MAY expire. Each project SHALL have a default for signed-in users without a grant (none, or a role), and MAY be **private**: hidden, name included, from people without access. One person SHALL be able to hold different roles in different projects. Projects that declare compatibility with each other SHALL NOT share access.
+- **FR-178**: A project's access list SHALL show every grant with where it came from (direct, a group, the project default, an archetype) and SHALL answer **"can this person do this, and why?"** for any user, AI member and permission.
+
+#### AI members, separation of duties and sign-off
+
+- **FR-179**: **AI members** SHALL be subject to the same permission checks as people. Each AI member SHALL have an access role (by default from its archetype) that acts as its **ceiling**. When an AI member acts for a person, it SHALL get only the permissions both of them hold. By default AI members SHALL NOT answer questions, approve gates, change access, or merge and release, except Courier, which may merge and release when a person with that permission has signed off (Q16).
+- **FR-180**: **Nobody signs off their own work**: the author of a change, and the person who directed the AI member that made it, SHALL NOT approve a gate on it. A project MAY require more than one approver.
+- **FR-181**: Someone who opens a link to a project they can't see SHALL be offered **Request access** with a reason. Requests SHALL go to the inbox of the project's access managers (desktop and phone), where they can be granted with a role or declined. Private projects SHALL NOT reveal their name.
+- **FR-182**: A gate type MAY name the groups or roles that must sign it off, in order or side by side, with how many from each (a **sign-off route**). go-build-it SHALL route the request to those people's inboxes and show the route's progress on the gate. *(This builds on the review gates of §10.3, FR-115–FR-118, and the sign-off workflow decided 2026-11-11.)*
+- **FR-183**: A sign-off SHALL record who, when, which version of the artifact or release, and the comment. Changing what was signed SHALL withdraw the sign-off and say so.
+- **FR-184**: A signer MAY **delegate** a step for a period (for example during leave); the delegation SHALL be recorded and shown on the route.
+
+#### Enforcement and audit
+
+- **FR-185**: Every API route SHALL declare the permission it needs, in the route table (FR-31), so the web UIs, CLI and MCP server are all checked in the same place. The UIs SHALL hide what someone can't do but SHALL NOT rely on hiding. A denied request SHALL say which permission is missing.
+- **FR-186**: The history SHALL record sign-ins, failed sign-ins and sign-outs; status changes; grants added, changed, expired and removed; role changes; token creation and revocation; loopback-trust and sign-in setting changes; and denials of sensitive actions. *(A tamper-evident log stays out of scope; see §15.)*
+- **FR-187**: An admin or auditor SHALL be able to run an **access review**: who can do what in each project, with findings to decide on (accounts unused for 60 days, direct grants, expiring access, people who could both build and sign off the same work, loopback trust), each kept with a reason or removed. The finished review SHALL be exportable (CSV) and recorded.
+- **FR-188**: There SHALL always be at least one active Owner; the last one SHALL NOT be suspended, deactivated or demoted.
+- **FR-189**: Temporary elevation MAY be requested (a role on a project for a set time, with a reason) and approved by someone who manages that project's access; it SHALL end by itself and be recorded. *(Later phase.)*
+
+### 4.5 Dev mode (rev 13)
+
+Dev mode is for evaluating and iterating on go-build-it itself: one person on one machine plays several users to try multi-user work, without sign-in.
+
+- **FR-190**: go-build-it SHALL have a **dev mode**, turned on by starting the server with `gbi serve --dev` (or `dev = true` in config.toml). Dev mode SHALL be refused, with the reason, while go-build-it is reachable from other machines (external interfaces or Tailscale Serve, §4.2), and SHALL be shown in `gbi doctor` and Settings.
+- **FR-191**: In dev mode a **dev bar** SHALL be fixed at the top of every desktop and phone screen, in a warning colour that no other part of the UI uses. It SHALL show the user you are acting as, and SHALL switch to any other user in one click (or `gbi dev as USER` from the CLI) without signing in. The switch SHALL apply at once to every open screen of that browser.
+- **FR-192**: On the first start in dev mode go-build-it SHALL offer to create **two dev users** (an owner and a second person, for example `david` and `maria`) with their Assistants (§4.6), so multi-user work can be tried at once. Further dev users MAY be added from the dev bar.
+- **FR-193**: Every action taken in dev mode SHALL be recorded as the user acted as, marked **dev** with the person who switched; and the dev bar SHALL show why the last request was allowed or denied (the permission and where it came from, FR-178), so access rules can be checked as you click.
+
+### 4.6 The personal Assistant (rev 13)
+
+- **FR-194**: Every user SHALL have a personal **Assistant**: an AI that works only with that user and operates go-build-it for them. It is not a project team member (§4.1): team members do the project's work, the Assistant talks with its person. Every side chat in the UI (the "Edit with" chat beside artifacts, archetypes and standards, the persona coach, Learn's helper) SHALL be a conversation with your Assistant, which makes the change or asks the right team member.
+- **FR-195**: An **Assistant archetype** SHALL be defined system-wide (instructions, harness, model), like the other archetypes (FR-12). Every user's Assistant SHALL be made from it automatically. Each user SHALL be able to **tune their own Assistant** in their profile (added instructions, and the harness and model where the admin allows a choice); archetype changes SHALL reach Assistants as FR-12b describes.
+- **FR-196**: A user's Assistant SHALL be **always running while the user is signed in**: it starts at sign-in (or when dev mode switches to the user), runs in its own herdr pane in that user's workspace, and stops after the user signs out or has been idle for a set time (default 2 hours). Its conversation SHALL be resumed next time.
+- **FR-197**: The Assistant's **status** SHALL be shown on every screen (desktop top bar and phone header): starting, ready, working, waiting for you, or offline, with its context use. Clicking it SHALL open the Assistant panel; a stopped or blocked Assistant SHALL say why (FR-205).
+- **FR-198**: The Assistant SHALL act with **its user's permissions** and never more (FR-179). It MAY read anything its user can, and queue work, ask members and draft changes. It SHALL NOT submit a decision on its own: answers, verdicts, gate sign-offs, choices between options and access changes SHALL be drafted for the user to confirm. Its actions SHALL be recorded as "Assistant for USER".
+- **FR-199**: The Assistant SHALL use go-build-it through the CLI and MCP server with a token bound to its user and to itself (FR-167), so its access can be checked and ended like any token.
 
 ## 5. User interfaces
 
@@ -303,6 +370,16 @@ By default, an AI team member's conversation relies on the harness's built-in au
 - **NFR-31**: A scheduled review SHOULD run at least weekly. It compares the latest herdr and Ovis sources, herdr's API schema (`herdr api schema --json`) and changelogs with the recorded revisions, and opens an issue or PR when something affects go-build-it.
 - **NFR-32**: go-build-it's herdr client types SHALL be generated from herdr's published API schema, so an incompatible change fails the build. The supported herdr version range SHALL be declared in one place and tested in CI.
 
+### 8.5 Harness credentials and warm harnesses (rev 13)
+
+- **FR-200**: A system setting SHALL choose how harnesses are paid for: **Shared**, where every harness runs on the server's own sign-in or key, or **Per user**, where a user's Assistant and the agent work that user starts run on that user's own credentials. Both SHALL be supported equally well.
+- **FR-201**: A harness credential SHALL be one of: a harness that is **already signed in** before go-build-it starts (in Per user mode, signed in inside that user's own harness configuration folder, guided step by step in a herdr pane); or an **API key** for the harness, optionally one per model. Keys SHALL be stored encrypted, never shown again after saving, and never written to logs, the history or a repository (NFR-22).
+- **FR-202**: Settings, and each user's profile in Per user mode, SHALL show which credential each harness and model uses, and SHALL test it with the doctor (FR-07b) without starting project work.
+- **FR-203**: In Per user mode, agent work SHALL run on the credentials of the user who started it. Automatic dispatch SHALL use the credentials of a user named for the project; with none named, it SHALL not start paid work.
+- **FR-204**: go-build-it SHALL keep **warm harnesses** started ahead of need: every signed-in user's Assistant, and the members of projects with queued or running work, within limits set in Settings (how many, and how much memory). Others SHALL start on demand, and idle ones SHALL stop after a set time. Settings SHALL show each warm harness with its state and memory.
+- **FR-205**: When a harness stops at a screen go-build-it does not answer (a model or plan menu, a sign-in, a permission), the reason the person sees SHALL be that screen's text, and the doctor's prompt tier SHALL check that the configured model starts without such a screen.
+- **FR-206**: A short-lived harness used for one question (a reviewer's assessment, release notes) SHALL get the same care as a member: folder trust answered (FR-07f), and a prompt that the harness dropped while starting sent again.
+
 ## 9. Git, GitHub and GitLab workflow
 
 - **FR-90**: The application SHALL work with both GitHub (`gh`) and GitLab (`glab`), and SHALL detect which one each project uses and whether its CLI is authenticated.
@@ -343,10 +420,11 @@ By default, an AI team member's conversation relies on the harness's built-in au
 - **FR-112**: The review of completed work SHALL be an assessment, not primarily a code diff. It SHALL show:
   - the approved mockup next to the built result (screenshots captured by the e2e tests)
   - a summary of the tests run: unit and end-to-end, passed, failed and coverage
-  - an assessment against the global and project standards
+  - an assessment against the global and project standards (a standard that does not apply to the change is marked so, with the reason, and is not counted)
   - an assessment against the feedback given during mockup reviews and dress rehearsals: addressed or not
   - an assessment against the requirements in scope: met, partly met or not met, with evidence
   - a link to the pull or merge request, where the code diff remains available
+- **FR-112a**: *(rev 13)* The reviewer SHALL be given the whole change (the task, the diff since the branch left the main line, the worktree to read) and the tests go-build-it ran. The review SHALL list its **evidence gaps** (no tests ran, tests failed, requirements not met or not assessed, feedback not addressed, a mockup without a screenshot). No verdict SHALL be selected in advance, and approving with gaps SHALL need a stated reason.
 
 ### 10.3 Review gates and dress rehearsals
 
@@ -413,16 +491,19 @@ By default, an AI team member's conversation relies on the harness's built-in au
 ## 13. Security posture
 
 - **NFR-20**: Agents MAY run arbitrary code on the development machine. Container or VM sandboxing is explicitly **not** required.
-- **NFR-21**: Access control relies on network exposure and Tailscale (§4.2). The application SHALL NOT expose itself on external interfaces without the challenge required by FR-18.
+- **NFR-21**: Access control relies on network exposure and Tailscale (§4.2) in solo mode, and on sign-in and per-project permissions (§4.4) in multi-user mode. The application SHALL NOT expose itself on external interfaces without the challenge required by FR-18.
+- **NFR-23**: *(rev 13)* Before every release, the **harness check** (`scripts/harness_e2e.sh`) SHALL pass for each harness marked verified. It SHALL run in its own data folder and herdr session, prove that a member works a task without stopping, that a one-question helper answers, that answering a blocking question resumes the task, and that a member takes a second task in its conversation, and SHALL print the screen of any harness that stopped.
+- **NFR-24**: *(rev 13)* With warm harnesses (FR-204), a user's Assistant SHALL begin replying within 5 seconds, and a member SHALL begin a task within 10 seconds of it being started.
+- **NFR-22**: *(rev 12)* Passwords, tokens and OIDC secrets SHALL never be written to logs, the history or the repository. Tokens SHALL be stored hashed. Security-relevant settings SHALL be changeable only by an Owner or Admin, and each change SHALL be recorded.
 
 ## 14. Open questions
 
 | # | Question |
 |---|---|
-| Q1 | For access through an external network interface (FR-18), what should the challenge be: a local password or token, an OAuth/OIDC provider, or refusing external access completely and requiring Tailscale Serve? |
+| Q1 | ~~For access through an external network interface (FR-18), what should the challenge be?~~ **Answered 2026-11-12:** sign-in (§4.4): local accounts with a second step first, OIDC required next (provider not chosen yet). |
 | Q2 | Check that each target harness supports headless operation **and** reports context-window usage. Claude Code reports usage in its streaming JSON output. OpenCode offers a non-interactive mode (`opencode run`) and a server mode; how it reports context usage needs to be confirmed. Antigravity's headless and CLI support needs to be confirmed. |
 | Q3 | When smart handoffs graduate from experimental, what is the default context threshold, and should it be configurable per harness or model? What evidence (rework rate, handoff quality vs. compaction) decides that they are ready? |
-| Q4 | Can multiple humans collaborate on the same projects (e.g. different Tailscale users with different roles), or is it single-user with optional reviewers? |
+| Q4 | ~~Can multiple humans collaborate on the same projects?~~ **Answered 2026-11-11/12:** yes, on one shared server, with their own accounts, statuses and per-project access roles (§4.4). |
 | Q5 | What is the exact default git workflow (branch naming, PR/MR requirements, merge strategy)? |
 | Q6 | ~~What is the mechanism and channel for auto-updates?~~ **Answered:** GitHub Releases with signed checksums (ADR-004). Rev 4 adds the in-app change log and guided updates with step progress (ADR-011). |
 | Q7 | ~~How should attachable (headed) sessions work?~~ **Answered (rev 3):** every session runs in herdr; see ADR-009. |
@@ -431,6 +512,11 @@ By default, an AI team member's conversation relies on the harness's built-in au
 | Q10 | ~~Archetype change propagation (FR-12b)?~~ **Answered 2026-11-08:** a proposal per affected member, plus one action to apply the change to every member that has not overridden the changed fields. See ADR-010. |
 | Q11 | ~~Should the doctor's prompt tier (FR-07b) ever run on its own?~~ **Answered 2026-11-09:** no. It runs only when asked for, because it uses tokens. See ADR-012. |
 | Q12 | ~~Should lessons use a sandbox or a real project?~~ **Answered 2026-11-09:** a practice project with the scripted fake harness by default (FR-136); the last lesson moves to a real project. Claude Code is the main harness example (FR-137). See ADR-012. |
+| Q13 | ~~Which user management take?~~ **Answered 2026-11-20:** Take 1, the admin console. Dev mode first (§4.5), then the personal Assistant (§4.6). Project-defined roles (FR-176) are not planned. |
+| Q14 | Which OIDC provider will be used first (FR-162)? |
+| Q15 | Is the second sign-in step required for everyone, or only for admins and approvers (FR-161)? May project admins invite people who have no account yet? |
+| Q16 | May an AI member ever approve a gate (for example the AI reviewer on a low-risk gate), or never (FR-179)? *(Rev 13: the personal Assistant never decides on its own; it drafts for its user, FR-198.)* |
+| Q17 | How much memory may warm harnesses use by default (FR-204)? To be set from measurements in dev mode. |
 
 ## 15. Out of scope (for now)
 
