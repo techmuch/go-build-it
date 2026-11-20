@@ -1,320 +1,332 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>go-build-it Mockups</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>go-build-it: screens as built</title>
 <style>
-:root { --bg:#f7f5f0; --surface:#fffdf9; --text:#23262a; --muted:#646a72; --line:#e2ddd2; --accent:#3a5a8c; --accent-s:#e3eaf5;
-  --a:#0f9d8a; --b:#c2562f; --c:#8b7cf6; --warn:#a86a00; --warn-s:#fbf0d9; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg:#15171a; --surface:#1c1f23; --text:#e6e6e3; --muted:#9aa1a9; --line:#2e3338; --accent:#86a8e0; --accent-s:#1f2a3a; --warn:#f0b23d; --warn-s:#33280f; } }
-:root[data-theme="dark"] { --bg:#15171a; --surface:#1c1f23; --text:#e6e6e3; --muted:#9aa1a9; --line:#2e3338; --accent:#86a8e0; --accent-s:#1f2a3a; --warn:#f0b23d; --warn-s:#33280f; }
-* { box-sizing:border-box; }
-html { scroll-behavior:smooth; }
-body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-main { max-width:1120px; margin:0 auto; padding:48px 24px 96px; }
-h1 { font-size:2.3rem; line-height:1.15; margin:0 0 10px; letter-spacing:-.015em; }
-h2 { font-size:1.45rem; margin:56px 0 14px; padding-bottom:8px; border-bottom:1px solid var(--line); scroll-margin-top:16px; }
-h3 { font-size:1.08rem; margin:22px 0 8px; }
-p, li { max-width:80ch; }
-.lede { font-size:1.12rem; color:var(--muted); margin:0 0 18px; }
-.meta { font-size:14px; color:var(--muted); }
-a { color:var(--accent); }
-code { font:.88em ui-monospace, SFMono-Regular, Menlo, monospace; background:var(--accent-s); padding:1px 5px; border-radius:4px; }
-.toc { display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; padding:0; list-style:none; }
-.toc a { display:block; padding:5px 12px; border:1px solid var(--line); border-radius:999px; background:var(--surface); text-decoration:none; color:var(--text); font-size:14px; }
-.steps { counter-reset:s; list-style:none; padding:0; display:grid; gap:10px; }
-.steps li { counter-increment:s; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:12px 16px 12px 56px; position:relative; max-width:none; }
-.steps li::before { content:counter(s); position:absolute; left:16px; top:12px; width:26px; height:26px; border-radius:50%; background:var(--accent); color:#fff; display:grid; place-items:center; font-weight:700; font-size:13px; }
-.cards { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; }
-.ap { background:var(--surface); border:1px solid var(--line); border-radius:14px; overflow:hidden; display:flex; flex-direction:column; }
-.ap .thumb { height:150px; position:relative; overflow:hidden; }
-.ap .bd { padding:16px; display:flex; flex-direction:column; gap:8px; flex:1; }
-.ap h3 { margin:0; }
-.ap .tag { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; }
-.ap ul { margin:0; padding-left:18px; font-size:14.5px; }
-.ap .links { margin-top:auto; display:flex; gap:10px; flex-wrap:wrap; padding-top:8px; }
-.ap .links a { font-size:14px; font-weight:600; text-decoration:none; padding:6px 12px; border-radius:8px; border:1px solid var(--line); }
-.ap.a .tag { color:var(--a); } .ap.b .tag { color:var(--b); } .ap.c .tag { color:var(--c); }
-/* thumbnails (pure CSS sketches) */
-.t-a { background:#f4f6f7; } .t-a::before { content:""; position:absolute; left:0; top:0; bottom:0; width:42px; background:#17212b; }
-.t-a i { position:absolute; background:#fff; border:1px solid #e1e5e8; border-radius:4px; }
-.t-b { background:#faf6ef; } .t-b i { position:absolute; border-radius:10px; background:#fffdf9; border:1px solid #e8dfd1; }
-.t-c { background:#0e1217; } .t-c i { position:absolute; border-radius:5px; background:#1b232c; border:1px solid #26313c; }
-.table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--surface); margin:12px 0; }
-table { border-collapse:collapse; width:100%; font-size:14.5px; }
-th, td { text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
-th { font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); background:var(--bg); }
-tr:last-child td { border-bottom:0; }
-td.n { font:600 12px ui-monospace, Menlo, monospace; color:var(--muted); white-space:nowrap; }
-.req { font:600 11px ui-monospace, Menlo, monospace; color:var(--accent); white-space:nowrap; }
-.callout { background:var(--warn-s); border-left:3px solid var(--warn); border-radius:8px; padding:12px 16px; margin:14px 0; }
-.callout p { margin:4px 0; }
-pre.tpl { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px; overflow-x:auto; font:13px/1.6 ui-monospace, Menlo, monospace; white-space:pre-wrap; }
-.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-.box { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
-.box h3 { margin-top:0; }
-.box ul { margin:0; padding-left:18px; font-size:14.5px; }
-@media (max-width:860px) {
-  main { padding:32px 16px 72px; }
-  h1 { font-size:1.8rem; }
-  .cards, .grid2 { grid-template-columns:1fr; }
-}
-</style>
-</head>
-<body>
+:root{color-scheme:light dark;--bg:#f4f6f7;--card:#fff;--ink:#1c2329;--mut:#5b6770;--line:#dde3e8;--acc:#0f9d8a;--link:#1f63d0;
+--grn:#16794c;--grn-s:#e2f4ea;--amb:#8a5a00;--amb-s:#fdf0cf;--red:#b3261e;--red-s:#fde4e1;--blue-s:#e4edfb;--side:#16212b}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1418;--card:#182028;--ink:#e3e9ee;--mut:#9aa7b1;--line:#2a343d;--link:#6ea5ff;
+--grn:#6fd3a0;--grn-s:#143524;--amb:#f0c15c;--amb-s:#3a2c08;--red:#ff9b93;--red-s:#451a17;--blue-s:#1b2c47}}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;background:var(--bg);color:var(--ink)}
+a{color:var(--link)}main{max-width:1180px;margin:0 auto;padding:28px 16px 80px}
+header.top{background:var(--side);color:#fff;padding:26px 16px}header.top .in{max-width:1180px;margin:0 auto}
+header.top h1{margin:0 0 6px;font-size:26px}header.top p{margin:4px 0;color:#b9c6d0}header.top a{color:#8fd8cc}
+nav.toc{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:8px 16px;overflow-x:auto;white-space:nowrap}
+nav.toc a{margin-right:16px;text-decoration:none;font-size:13.5px;font-weight:600}
+h2{font-size:21px;margin:44px 0 6px;scroll-margin-top:52px}h2+p.lead{margin:0 0 16px;color:var(--mut)}
+h3{font-size:16px;margin:0 0 2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:12px 0}
+.chip{display:inline-block;font-size:12px;font-weight:650;border-radius:20px;padding:1px 9px;white-space:nowrap}
+.chip.grn{background:var(--grn-s);color:var(--grn)}.chip.amb{background:var(--amb-s);color:var(--amb)}.chip.red{background:var(--red-s);color:var(--red)}
+.chip.idea{background:var(--blue-s);color:var(--link);font-weight:500}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:14px 0}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}.tile b{display:block;font-size:26px;line-height:1.2}.tile span{color:var(--mut);font-size:13px}
+table{border-collapse:collapse;width:100%}th,td{text-align:left;vertical-align:top;padding:9px 10px;border-bottom:1px solid var(--line)}
+th{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)}tr:last-child td{border-bottom:0}
+.scroll{overflow-x:auto}
+.screen{display:grid;grid-template-columns:minmax(0,46%) minmax(0,1fr);gap:20px;scroll-margin-top:52px}
+.screen.ph{grid-template-columns:200px minmax(0,1fr)}
+.screen .shot{display:block;border:1px solid var(--line);border-radius:8px;overflow:hidden;max-height:460px;background:#fff;align-self:start}
+.screen .shot img{display:block;width:100%;height:auto}
+.screen .hd{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.sid{font:600 12px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--mut)}
+.addr{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--mut);overflow-wrap:anywhere}
+.screen p{margin:6px 0}.screen ul{margin:4px 0 8px;padding-left:20px}.screen li{margin:3px 0}
+.lbl{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);margin-top:10px}
+.fref{font:600 12px ui-monospace,SFMono-Regular,Menlo,monospace;text-decoration:none;background:var(--blue-s);border-radius:5px;padding:0 5px;margin-right:4px}
+.finding{scroll-margin-top:52px}.finding h3{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.finding .fix{border-left:3px solid var(--acc);padding-left:12px;margin-top:8px}
+.sev-High{background:var(--red-s);color:var(--red)}.sev-Medium{background:var(--amb-s);color:var(--amb)}.sev-Low{background:var(--blue-s);color:var(--link)}
+.loop{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.loop .card{margin:0}
+.note{color:var(--mut);font-size:13.5px}
+code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--blue-s);border-radius:4px;padding:0 4px}
+@media(max-width:820px){.screen,.screen.ph{grid-template-columns:minmax(0,1fr)}.screen.ph .shot{max-width:220px}.loop{grid-template-columns:minmax(0,1fr)}}
+</style></head><body>
+<header class="top"><div class="in">
+<h1>go-build-it: the screens as built</h1>
+<p>A screenshot of every screen in the running app, and a review of each against the <a href="../vision.html">vision</a>. Replaces the design mockups on this tab.</p>
+<p>Reviewed Nov 15, 2026 · build of <code style="background:#24323f;color:#cfe">main</code> after release 2026.11.12.3 · seeded demo with the scripted harness</p>
+</div></header>
+<nav class="toc"><a href="#summary">Summary</a><a href="#vision">Against the vision</a><a href="#workflow">Workflow</a><a href="#findings">Findings</a>
+<a href="#find">Find what needs you</a>
+<a href="#discover">Discover</a>
+<a href="#gate">The gate</a>
+<a href="#deliver">Deliver</a>
+<a href="#release">Release and the record</a>
+<a href="#rules">The rules and the team</a>
+<a href="#system">System and learning</a>
+<a href="#phone">Phone</a>
+<a href="#files">Files</a></nav>
 <main>
-  <p class="meta">go-build-it · design exploration · option set OS-0 · Nov 7, 2026 · <b>rev 2 Nov 8</b> · <b>rev 3 Nov 8 (Approach A)</b> · <b>rev 4 Nov 9 (Approach A)</b> · <b>rev 5 Nov 9 (Approach A)</b> · <b>rev 7 Nov 9 (Approach A)</b> · based on <a href="../requirements.html">docs/requirements.md</a></p>
-  <h1>Three ways go-build-it could look and feel</h1>
-  <p class="lede">This page links to static HTML mockups of three different UI approaches. Each has desktop and mobile versions, and every view the requirements call for is drawn in all three. Please review all three and choose what to keep, mixing aspects across approaches if you like.</p>
-  <ul class="toc">
-    <li><a href="#how">How to review</a></li><li><a href="#approaches">The three approaches</a></li><li><a href="#compare">Side-by-side comparison</a></li>
-    <li><a href="#coverage">View coverage</a></li><li><a href="#mobile">Mobile coverage</a></li><li><a href="#questions">Questions for you</a></li>
-    <li><a href="#findings">Requirement gaps found</a></li><li><a href="#feedback">Feedback template</a></li><li><a href="#rev7">What changed in rev 7</a></li><li><a href="#rev5">What changed in rev 5</a></li><li><a href="#rev4">What changed in rev 4</a></li><li><a href="#rev3">What changed in rev 3</a></li><li><a href="#rev2">What changed in rev 2</a></li>
-  </ul>
-
-  <h2 id="rev7">What changed in rev 7</h2>
-  <p>Requirements <a href="../requirements.html">rev 7</a> add project documents (FR-140–FR-150, <a href="../decisions/ADR-014-project-documents.md">ADR-014</a>). Artifacts has six sub-tabs. Requirements, Mockups, Plan and Tracker each open an HTML entry point you choose. Every file has explicit labels (never guessed). HTML pages are how you move between documents. Approach A only:</p>
-  <ul>
-    <li><a href="a-mission-control/desktop.html#v21">21 Requirements tab</a>: the sub-tabs, an HTML entry in a sandbox, Markdown included with <span class="mono">&lt;gbi-md&gt;</span>, anchors in the address bar.</li>
-    <li><a href="a-mission-control/desktop.html#v22">22 Mockups tab</a>: the entry links to its sets; the viewer follows links; the IDs on the page.</li>
-    <li><a href="a-mission-control/desktop.html#v23">23 Compare</a>: mockup view and screenshot side by side or overlaid; accept or file a task; decisions in <span class="mono">docs/compare.json</span>.</li>
-    <li><a href="a-mission-control/desktop.html#v24">24 Traceability</a>: requirement → views → tasks → screens, with the gaps.</li>
-    <li><a href="a-mission-control/desktop.html#v25">25 Support files</a>: <b>rev 8:</b> the tabs, their order and names come from <span class="mono">docs/gbi.toml</span> (FR-151), e.g. Vision first and no Mockups tab; every file with its labels, Unlabelled first, Set as entry point, the check, and the CLI.</li>
-    <li><a href="a-mission-control/desktop.html#v26">26 Plan &amp; tracker</a>: the tracker reads a snapshot of gbi's tasks; <span class="mono">gbi artifacts init</span> creates the standard set.</li>
-    <li><a href="a-mission-control/mobile.html">M15 Desktop site on a phone</a> and <a href="a-mission-control/mobile.html">M9 More</a>: <b>rev 11:</b> a phone opening a desktop link lands on the matching mobile screen; Desktop site keeps it on the desktop UI, whose navigation is behind ☰ (FR-35a). <a href="a-mission-control/desktop.html#v27">27 Remote access</a>: the QR code opens <span class="mono">/m/</span> (FR-20c).</li>
-    <li><a href="a-mission-control/desktop.html#v10">10 Persona archetypes</a>: <b>rev 10:</b> the default model is chosen from the harness's own list, searchable, and any name can still be typed (FR-63a); the logo and title lead to the landing page in every view (FR-34a).</li>
-    <li><a href="a-mission-control/desktop.html#v10">10 Persona archetypes</a>: <b>rev 9:</b> the starters carry full role instructions, and unedited starters upgrade through the change review (FR-12f).</li>
-    <li><a href="a-mission-control/desktop.html#v27">27 Remote access</a>: <b>rev 9:</b> a checklist that proves go-build-it is served on the tailnet, is this go-build-it, and is private; what else the machine serves; a QR code for your phone; and setup that never takes another service's address (FR-20a–FR-20d).</li>
-    <li><a href="a-mission-control/mobile.html">M14 Project documents</a>: the sub-tabs on the phone and Compare with swipe.</li>
-  </ul>
-  <h2 id="rev5">What changed in rev 5</h2>
-  <p>Requirements <a href="../requirements.html">rev 5</a> add a doctor that proves herdr and each harness work and explains failures to people and AI agents (FR-07a–FR-07e), installing by giving an AI agent the GitHub URL (FR-02a–FR-02b), and lessons with a practice project, harness control and design rationale (FR-134–FR-139). See <a href="../decisions/ADR-012-doctor-and-learning.md">ADR-012</a>. Approach A only:</p>
-  <ul>
-    <li><a href="a-mission-control/desktop.html#v17">17 Doctor</a>: static → live → harness → prompt tiers, with evidence, automatic and <i>needs you</i> fixes, and the same result as JSON for an AI agent.</li>
-    <li><a href="a-mission-control/desktop.html#v18">18 Learn</a>: eleven lessons, a practice project on the scripted harness, and <i>How go-build-it thinks</i>.</li>
-    <li><a href="a-mission-control/desktop.html#v19">19 Lesson coach</a>: a panel docked on the real page, steps that tick themselves off, Show me, and Pro tips.</li>
-    <li><a href="a-mission-control/desktop.html#v20">20 AI harness</a>: CLI or MCP, with examples showing request → commands → result, and <span class="mono">gbi agent guide</span>.</li>
-    <li><a href="a-mission-control/mobile.html">M13 Learn</a> on the phone; Learn on More (M9).</li>
-  </ul>
-  <h2 id="rev4">What changed in rev 4</h2>
-  <p>Requirements <a href="../requirements.html">rev 4</a> add an in-app change log and guided updates (FR-06a–FR-06e, <a href="../decisions/ADR-011-changelog-guided-updates.md">ADR-011</a>). Approach A only:</p>
-  <ul>
-    <li><b>16 Change log &amp; guided update</b> (new): the sidebar version opens the change log. <b>Check again</b> lists every newer release; <b>Update now</b> shows eight steps completing across the restart (three states: available, updating, done).</li>
-    <li><b>01:</b> the sidebar version is a link. <b>13 Settings → Updates:</b> links to the change log.</li>
-    <li><b>Mobile M9, M12</b> (new): tap the version on More to open the change log and update with progress.</li>
-  </ul>
-
-  <h2 id="rev3">What changed in rev 3</h2>
-  <p>Requirements <a href="../requirements.html">rev 3</a> make herdr the only agent backend (<a href="../decisions/ADR-009-herdr-backend.md">ADR-009</a>) and replace global teams with per-project team members made from global persona archetypes (<a href="../decisions/ADR-010-project-team-members.md">ADR-010</a>). Only Approach A, the baseline, was updated:</p>
-  <ul>
-    <li><b>05 Team members at work:</b> herdr state per member, a <i>needs you</i> row for blocked agents, context from the transcript, conversation rotation at 75%.</li>
-    <li><b>05b Live terminal:</b> the herdr pane streamed live; take control and hand back.</li>
-    <li><b>10 Persona archetypes</b> (was Team &amp; personas): the global library, with a change review that applies edits per member or to every member without overrides.</li>
-    <li><b>10b Project team</b> (new): members made from archetypes, tuning with a diff against the archetype, promote back, worktree, pane and conversation per member.</li>
-    <li><b>13 Settings:</b> herdr section, integrations per harness, attachable sessions removed.</li>
-    <li><b>15 herdr setup &amp; doctor</b> (new).</li>
-    <li><b>01, 02, 06:</b> project team and its state on cards and the overview; queue assigns to a role or a specific member.</li>
-    <li><b>Mobile M2, M3, M8, M10:</b> project team, blocked members in the Inbox, Members tab, live terminal with take control.</li>
-    <li>Keyboard conventions for every view: <a href="../user/18-keyboard.md">docs/user/18-keyboard.md</a>.</li>
-  </ul>
-  <h2 id="rev2">What changed in rev 2</h2>
-  <p>Your review of Approach A drove these changes. Points that apply to every approach were carried into B and C, and the requirements were updated to match (<a href="../requirements.html">rev 2</a>). Each changed view says what changed in its "Look for" note.</p>
-  <div class="table-wrap"><table>
-    <tr><th>Your feedback</th><th>What changed</th><th>Where</th><th>Requirement</th></tr>
-    <tr><td>Clicking a roadmap item should open a detail page</td><td>New roadmap item page: scope, gate criteria, tasks, requirements, history</td><td><a href="a-mission-control/desktop.html#v02b">A 02b</a></td><td class="req">FR-45b</td></tr>
-    <tr><td>Artifacts need Edit: chat with an agent or edit directly, then save a new revision</td><td>New artifact editor: agent chat proposes inline changes; WYSIWYG / Markdown editor; save → Rev 8 committed by Courier</td><td><a href="a-mission-control/desktop.html#v03b">A 03b</a> · <a href="b-team-room/desktop.html#v03">B 03</a> · <a href="c-roadmap-canvas/desktop.html#v03">C 03</a></td><td class="req">FR-45a</td></tr>
-    <tr><td>Attachments should open in a good viewer</td><td>New attachment &amp; mockup viewer (live HTML, viewport sizes, pins); mobile full-screen version</td><td><a href="a-mission-control/desktop.html#v04b">A 04b</a> · <a href="a-mission-control/mobile.html">A M11</a></td><td class="req">FR-102a, FR-116a</td></tr>
-    <tr><td>Let me dictate answers</td><td>🎙 on every answer, feedback and chat box in all approaches</td><td>all</td><td class="req">FR-107</td></tr>
-    <tr><td>Terminal view like Herdr's web front-ends; run headed and take control</td><td>Structured / Terminal toggle; attachable sessions with "Attach &amp; take control"; phone terminal with a key bar</td><td><a href="a-mission-control/desktop.html#v05b">A 05b</a> · <a href="a-mission-control/mobile.html">A M10</a> · B 05 · C 05</td><td class="req">FR-66, FR-67, Q7</td></tr>
-    <tr><td>Make handoffs experimental; compaction is fine for the MVP</td><td>Harness compaction is the default and is logged; smart handoffs are an experimental setting (shown on for go-build-it only)</td><td>all sessions views · <a href="a-mission-control/desktop.html#v13">A 13</a></td><td class="req">§8.2, FR-72</td></tr>
-    <tr><td>Desktop-size mockups won't fit small option-set panels</td><td>A: one large preview at a time with tabs, compare, full screen, and a combination tray. B and C: ⤢ full size on every preview</td><td><a href="a-mission-control/desktop.html#v07">A 07</a></td><td class="req">FR-116a</td></tr>
-    <tr><td>Expand rehearsal mockups; more than one human reviewer</td><td>⤢ open full size; findings from several reviewers (maria joins over the tailnet)</td><td>A/B/C 08 · M6</td><td class="req">FR-117a</td></tr>
-    <tr><td>Review = mockup vs built, tests, standards, feedback, requirements; no code diff</td><td>Work review rebuilt as an assessment in all three approaches, on desktop and mobile (now ledgerly T-204)</td><td><a href="a-mission-control/desktop.html#v09">A 09</a> · <a href="b-team-room/desktop.html#v09">B 09</a> · <a href="c-roadmap-canvas/desktop.html#v09">C 09</a></td><td class="req">FR-112</td></tr>
-    <tr><td>Persona: chat with an agent to develop it; nicer editor than a text area</td><td>Persona coach column plus a rich Markdown editor</td><td><a href="a-mission-control/desktop.html#v10">A 10</a> · B 10 · C 10</td><td class="req">FR-13</td></tr>
-    <tr><td>Standards: chat with an agent to change them</td><td>Agent chat beside the standards editor; Git workflow is now a standard</td><td><a href="a-mission-control/desktop.html#v11">A 11</a> · B 11 · C 11</td><td class="req">FR-51, FR-91</td></tr>
-    <tr><td>History items should open detail views; human actions recorded too</td><td>New event detail page (a human decision, with the dictated reason)</td><td><a href="a-mission-control/desktop.html#v12b">A 12b</a> · B 12 · C 12</td><td class="req">NFR-14</td></tr>
-    <tr><td>Something looks broken in Settings; git flow belongs in standards</td><td>The harness table overflowed behind the Access panel. Fixed with a full-width layout. Git workflow moved to Standards; new Experimental section</td><td><a href="a-mission-control/desktop.html#v13">A 13</a> · B 13 · C 13</td><td class="req">FR-91</td></tr>
-    <tr><td>Docs don't need agent editing</td><td>No change: docs are built into the app</td><td>14</td><td class="req">FR-130</td></tr>
-  </table></div>
-
-  <h2 id="how">How to review</h2>
-  <ol class="steps">
-    <li><b>Read the three approach summaries below</b> (2 minutes). Each one is built around a different main idea: <i>monitoring</i>, <i>conversation</i>, and <i>visual progress</i>.</li>
-    <li><b>Open each desktop file and scroll through its 14 views.</b> The same sample data appears everywhere: six projects, seven AI personas, and you as owner. That way you're comparing <i>layout and interaction</i>, not content. Each view has a short "Look for" note and the requirement IDs it covers.</li>
-    <li><b>Open each mobile file</b> (9 screens). Imagine using it one-handed, on a trail or in a queue. FR-35 puts answering questions, reviewing work, checking status and approving gates first on mobile.</li>
-    <li><b>Run the same three tasks in every approach</b> and note which felt fastest and clearest:
-      <br>① Find out which projects need you and why. ② Answer Forge's blocking question about OpenCode. ③ Decide whether the T-142 handoff is good enough to continue.</li>
-    <li><b>Pick, don't just rank.</b> Choosing one approach outright is fine, but mixing is expected (FR-122). For example: "A's catalog and settings, B's desk and handoff letter, C's roadmap timeline." Use the <a href="#feedback">feedback template</a>.</li>
-    <li><b>Flag requirement changes.</b> Some mockups stretch the requirements on purpose (see <a href="#findings">gaps found</a>). If a mockup changes your mind about a requirement, say so.</li>
-  </ol>
-  <div class="callout"><p><b>What these mockups are not:</b> they aren't final visual design, copy or data. Colors, fonts and density are there to make each approach's character obvious. A chosen direction would be restyled against the global frontend standard. All links between views are illustrative; only the reviewer bar at the top of each page navigates.</p></div>
-
-  <h2 id="approaches">The three approaches</h2>
-  <div class="cards">
-    <div class="ap a">
-      <div class="thumb t-a"><i style="left:54px;top:12px;right:12px;height:16px"></i><i style="left:54px;top:38px;width:30%;height:48px"></i><i style="left:calc(54px + 32%);top:38px;width:30%;height:48px"></i><i style="right:12px;top:38px;width:22%;height:48px"></i><i style="left:54px;top:96px;right:12px;height:42px"></i></div>
-      <div class="bd"><span class="tag">Approach A</span><h3>Mission Control</h3>
-        <p style="margin:0;font-size:14.5px">An operations console: a persistent sidebar, dense tables and panels, and tabs inside each project. Everything is one click away and shown at once.</p>
-        <ul><li><b>Strong at:</b> scanning many projects and sessions; power-user speed; a familiar pattern (like GitHub or Linear)</li><li><b>Weak at:</b> feeling like "a team"; first-run clarity; explaining <i>why</i></li></ul>
-        <div class="links"><a href="a-mission-control/desktop.html">Desktop →</a><a href="a-mission-control/mobile.html">Mobile →</a></div></div></div>
-    <div class="ap b">
-      <div class="thumb t-b"><i style="left:12px;top:12px;width:34%;height:30px;border:2px solid #c2562f"></i><i style="left:12px;top:50px;width:34%;height:30px;border:2px solid #c2562f"></i><i style="left:12px;top:88px;width:34%;height:30px"></i><i style="right:12px;top:12px;width:28%;height:62px"></i><i style="right:calc(12px + 30%);top:12px;width:24%;height:62px"></i><i style="right:12px;top:82px;width:56%;height:56px"></i></div>
-      <div class="bd"><span class="tag">Approach B</span><h3>Team Room</h3>
-        <p style="margin:0;font-size:14.5px">Conversation first. Each project is a room where personas post updates, ask questions and present work. A "Desk" lets you work through what's waiting one item at a time. Warm, editorial typography.</p>
-        <ul><li><b>Strong at:</b> "interactive, like working with a team"; quick replies; context and reasoning; handoffs as letters</li><li><b>Weak at:</b> status can get buried in chat; less dense; harder to compare many projects</li></ul>
-        <div class="links"><a href="b-team-room/desktop.html">Desktop →</a><a href="b-team-room/mobile.html">Mobile →</a></div></div></div>
-    <div class="ap c">
-      <div class="thumb t-c"><i style="left:12px;top:12px;width:13%;height:126px"></i><i style="left:calc(12px + 14%);top:12px;width:13%;height:126px"></i><i style="left:calc(12px + 28%);top:12px;width:13%;height:126px;border-color:#8b7cf6"></i><i style="left:calc(12px + 42%);top:12px;width:13%;height:126px"></i><i style="left:calc(12px + 56%);top:12px;width:13%;height:126px"></i><i style="right:12px;top:12px;width:24%;height:126px"></i></div>
-      <div class="bd"><span class="tag">Approach C</span><h3>Roadmap Canvas</h3>
-        <p style="margin:0;font-size:14.5px">Show the work as a picture: a lifecycle board, roadmap timelines with gates, relay lanes for sessions, a decision tree for option sets, and matrices for the team and standards. Icon rail plus ⌘K palette. Dark theme.</p>
-        <ul><li><b>Strong at:</b> seeing progress, dependencies and decision history; showing CLI parity in the palette; distinctive</li><li><b>Weak at:</b> most effort to build and test; can be visually noisy; dark-only feel</li></ul>
-        <div class="links"><a href="c-roadmap-canvas/desktop.html">Desktop →</a><a href="c-roadmap-canvas/mobile.html">Mobile →</a></div></div></div>
-  </div>
-
-  <h2 id="compare">Side-by-side comparison</h2>
-  <div class="table-wrap"><table>
-    <tr><th>Dimension</th><th>A · Mission Control</th><th>B · Team Room</th><th>C · Roadmap Canvas</th></tr>
-    <tr><td>Main idea</td><td>Monitor and control</td><td>Converse and collaborate</td><td>Visualize progress and decisions</td></tr>
-    <tr><td>Navigation</td><td>Fixed sidebar, tabs per project</td><td>Top nav: Home · Rooms · Desk · Team · Handbook · Journal</td><td>Icon rail + ⌘K command palette</td></tr>
-    <tr><td>Landing (FR-40)</td><td>Card grid sorted by "needs you"</td><td>"Waiting on you" desk + room cards</td><td>Kanban board by lifecycle stage</td></tr>
-    <tr><td>Questions (FR-104)</td><td>Inbox list + detail pane (triage)</td><td>One at a time, full focus</td><td>Columns by urgency + drawer</td></tr>
-    <tr><td>Handoffs (FR-73, experimental)</td><td>Structured panel beside live log</td><td>Letter to the next session, relay strip</td><td>Relay lanes with context curves and batons</td></tr>
-    <tr><td>Option sets (FR-122)</td><td>One large preview + combination tray</td><td>♥/✕ reactions + live summary from Atlas</td><td>Decision tree + drag-to-tray composition</td></tr>
-    <tr><td>Rehearsal (FR-117)</td><td>Step list · stage · chat (3 columns)</td><td>Guided meeting with transcript</td><td>Filmstrip + feedback pins on frames</td></tr>
-    <tr><td>History (NFR-10)</td><td>Filterable event log + KPIs</td><td>Narrative journal + weekly retro</td><td>Swimlanes per persona + trend lines</td></tr>
-    <tr><td>Information density</td><td>High</td><td>Low to medium</td><td>High (visual)</td></tr>
-    <tr><td>Learning curve</td><td>Medium</td><td>Low</td><td>Medium to high</td></tr>
-    <tr><td>Build &amp; test effort</td><td>Lowest: tables and forms</td><td>Medium: real-time chat, threading</td><td>Highest: SVG timelines, graphs, drag-and-drop</td></tr>
-    <tr><td>Mobile model</td><td>4 bottom tabs; Inbox combines everything</td><td>Messaging app; swipeable desk stack</td><td>Floating dock + ⌘ palette; vertical timelines</td></tr>
-  </table></div>
-
-  <h2 id="coverage">View coverage (desktop)</h2>
-  <p>I derived the 14 views from the requirements. Each approach draws all 14, with its own name for each, and each link jumps straight to that view. <b>Rev 2:</b> Approach A also has seven detail views (marked ＋). B and C cover the same ideas inside their existing views.</p>
-  <div class="table-wrap"><table>
-    <tr><th>#</th><th>View</th><th>Requirements</th><th>A</th><th>B</th><th>C</th></tr>
-    <tr><td class="n">01</td><td>Project catalog (landing)</td><td class="req">FR-40–44, FR-94</td><td><a href="a-mission-control/desktop.html#v01">Catalog</a></td><td><a href="b-team-room/desktop.html#v01">Desk + rooms</a></td><td><a href="c-roadmap-canvas/desktop.html#v01">Portfolio board</a></td></tr>
-    <tr><td class="n">02</td><td>Project overview</td><td class="req">FR-41, FR-44, FR-115, NFR-11</td><td><a href="a-mission-control/desktop.html#v02">Overview tab</a> ＋ <a href="a-mission-control/desktop.html#v02b">roadmap item</a></td><td><a href="b-team-room/desktop.html#v02">Project room</a></td><td><a href="c-roadmap-canvas/desktop.html#v02">Roadmap timeline</a></td></tr>
-    <tr><td class="n">03</td><td>Artifacts, problem definition &amp; values</td><td class="req">FR-45, FR-45a, FR-46, FR-123</td><td><a href="a-mission-control/desktop.html#v03">Artifacts</a> ＋ <a href="a-mission-control/desktop.html#v03b">editor</a></td><td><a href="b-team-room/desktop.html#v03">Notebook</a></td><td><a href="c-roadmap-canvas/desktop.html#v03">Trace map</a></td></tr>
-    <tr><td class="n">04</td><td>Questions dashboard</td><td class="req">FR-100–105, FR-102a, FR-107</td><td><a href="a-mission-control/desktop.html#v04">Inbox triage</a> ＋ <a href="a-mission-control/desktop.html#v04b">viewer</a></td><td><a href="b-team-room/desktop.html#v04">Desk focus mode</a></td><td><a href="c-roadmap-canvas/desktop.html#v04">Decision board</a></td></tr>
-    <tr><td class="n">05</td><td>Live sessions, context, compaction &amp; handoff (exp.)</td><td class="req">FR-60, FR-65, FR-66–67, FR-70–74</td><td><a href="a-mission-control/desktop.html#v05">Sessions</a> ＋ <a href="a-mission-control/desktop.html#v05b">terminal</a></td><td><a href="b-team-room/desktop.html#v05">Who's working</a></td><td><a href="c-roadmap-canvas/desktop.html#v05">Relay lanes</a></td></tr>
-    <tr><td class="n">06</td><td>Task queue</td><td class="req">FR-75, FR-80–82</td><td><a href="a-mission-control/desktop.html#v06">Queue table</a></td><td><a href="b-team-room/desktop.html#v06">Team plan</a></td><td><a href="c-roadmap-canvas/desktop.html#v06">Flow board</a></td></tr>
-    <tr><td class="n">07</td><td>Option set (exploratory design)</td><td class="req">FR-120–124, FR-116a</td><td><a href="a-mission-control/desktop.html#v07">Large preview + tray</a></td><td><a href="b-team-room/desktop.html#v07">Team proposal</a></td><td><a href="c-roadmap-canvas/desktop.html#v07">Decision tree</a></td></tr>
-    <tr><td class="n">08</td><td>Review gate / dress rehearsal</td><td class="req">FR-115–118, FR-132</td><td><a href="a-mission-control/desktop.html#v08">3-column</a></td><td><a href="b-team-room/desktop.html#v08">Guided meeting</a></td><td><a href="c-roadmap-canvas/desktop.html#v08">Storyboard</a></td></tr>
-    <tr><td class="n">09</td><td>Work review &amp; feedback</td><td class="req">FR-54, FR-92, FR-110–112</td><td><a href="a-mission-control/desktop.html#v09">Assessment</a></td><td><a href="b-team-room/desktop.html#v09">Show &amp; tell</a></td><td><a href="c-roadmap-canvas/desktop.html#v09">Trace review</a></td></tr>
-    <tr><td class="n">10</td><td>Team &amp; personas</td><td class="req">FR-10–13, FR-25–26</td><td><a href="a-mission-control/desktop.html#v10">Roster + editor + coach</a></td><td><a href="b-team-room/desktop.html#v10">Profiles</a></td><td><a href="c-roadmap-canvas/desktop.html#v10">Team matrix</a></td></tr>
-    <tr><td class="n">11</td><td>Global standards</td><td class="req">FR-50–54</td><td><a href="a-mission-control/desktop.html#v11">Editor</a></td><td><a href="b-team-room/desktop.html#v11">Handbook</a></td><td><a href="c-roadmap-canvas/desktop.html#v11">Standards matrix</a></td></tr>
-    <tr><td class="n">12</td><td>History &amp; insights</td><td class="req">NFR-10–14</td><td><a href="a-mission-control/desktop.html#v12">Event log</a> ＋ <a href="a-mission-control/desktop.html#v12b">event detail</a></td><td><a href="b-team-room/desktop.html#v12">Journal &amp; retro</a></td><td><a href="c-roadmap-canvas/desktop.html#v12">Swimlanes</a></td></tr>
-    <tr><td class="n">13</td><td>Settings: harnesses, access, forges, experimental, updates</td><td class="req">FR-05–06, FR-15–20, FR-63, FR-90–91</td><td><a href="a-mission-control/desktop.html#v13">Settings</a></td><td><a href="b-team-room/desktop.html#v13">Plain-language</a></td><td><a href="c-roadmap-canvas/desktop.html#v13">System map</a></td></tr>
-    <tr><td class="n">14</td><td>Embedded docs</td><td class="req">FR-30, FR-130–133</td><td><a href="a-mission-control/desktop.html#v14">Docs page</a></td><td><a href="b-team-room/desktop.html#v14">Help drawer</a></td><td><a href="c-roadmap-canvas/desktop.html#v14">⌘K palette</a></td></tr>
-    <tr><td class="n">16</td><td>Change log &amp; guided update <i>(rev 4)</i></td><td class="req">FR-06a–06e</td><td><a href="a-mission-control/desktop.html#v16">Change log + steps</a></td><td>—</td><td>—</td></tr>
-    <tr><td class="n">17</td><td>Doctor <i>(rev 5)</i></td><td class="req">FR-07a–07e</td><td><a href="a-mission-control/desktop.html#v17">Tiers + evidence + fixes</a></td><td>—</td><td>—</td></tr>
-    <tr><td class="n">18</td><td>Learn <i>(rev 5)</i></td><td class="req">FR-134–136, 138</td><td><a href="a-mission-control/desktop.html#v18">Lessons + practice</a></td><td>—</td><td>—</td></tr>
-    <tr><td class="n">19</td><td>Lesson coach <i>(rev 5)</i></td><td class="req">FR-134–135</td><td><a href="a-mission-control/desktop.html#v19">Coach panel</a></td><td>—</td><td>—</td></tr>
-    <tr><td class="n">20</td><td>Drive gbi from your AI harness <i>(rev 5)</i></td><td class="req">FR-137, FR-139</td><td><a href="a-mission-control/desktop.html#v20">Cookbook</a></td><td>—</td><td>—</td></tr>
-    <tr><td class="n">21</td><td>Artifacts sub-tabs · Requirements <i>(rev 7)</i></td><td class="req">FR-140, 141, 144, 145</td><td><a href="a-mission-control/desktop.html#v21">Entry in a sandbox</a></td><td>—</td><td>—</td></tr>
-    <tr><td class="n">22</td><td>Mockups tab <i>(rev 7)</i></td><td class="req">FR-141, 144, 146</td><td><a href="a-mission-control/desktop.html#v22">Links between sets</a></td><td>—</td><td>—</td></tr>
-    <tr><td class="n">23</td><td>Compare <i>(rev 7)</i></td><td class="req">FR-147</td><td><a href="a-mission-control/desktop.html#v23">Side by side + overlay</a></td><td>—</td><td>—</td></tr>
-    <tr><td class="n">24</td><td>Traceability <i>(rev 7)</i></td><td class="req">FR-146</td><td><a href="a-mission-control/desktop.html#v24">Matrix + gaps</a></td><td>—</td><td>—</td></tr>
-    <tr><td class="n">25</td><td>Support files <i>(rev 7)</i></td><td class="req">FR-142, 143, 150</td><td><a href="a-mission-control/desktop.html#v25">Labels + check</a></td><td>—</td><td>—</td></tr>
-    <tr><td class="n">26</td><td>Plan &amp; tracker <i>(rev 7)</i></td><td class="req">FR-141, 148, 149</td><td><a href="a-mission-control/desktop.html#v26">Snapshot + init</a></td><td>—</td><td>—</td></tr>
-    <tr><td class="n">27</td><td>Remote access <i>(rev 9)</i></td><td class="req">FR-20, 20a–20d</td><td><a href="a-mission-control/desktop.html#v27">Checklist + QR</a></td><td>—</td><td>—</td></tr>
-  </table></div>
-  <p class="meta">Shown throughout rather than as separate views: access identity badge (FR-15–17) in every header; live updates (FR-36); desktop/mobile split (FR-34–35); release and website links (FR-41, FR-44); rate-limit pauses (FR-65).</p>
-
-  <h2 id="mobile">Mobile coverage</h2>
-  <div class="table-wrap"><table>
-    <tr><th>Screen</th><th>Requirements</th><th>A · tabs</th><th>B · messaging</th><th>C · dock + palette</th></tr>
-    <tr><td>M1 Projects / home</td><td class="req">FR-40–44</td><td>Card list</td><td>Room cards</td><td>Stage sections</td></tr>
-    <tr><td>M2 Project status</td><td class="req">FR-41, FR-115</td><td>Status cards</td><td>Room thread + pinned status</td><td>Vertical timeline</td></tr>
-    <tr><td>M3 Everything waiting on you</td><td class="req">FR-104</td><td>Unified inbox</td><td>Swipe stack</td><td>Segmented decisions</td></tr>
-    <tr><td>M4 Answer a question</td><td class="req">FR-101–103, FR-105</td><td>Full screen</td><td>Full screen</td><td>Bottom sheet</td></tr>
-    <tr><td>M5 Review work</td><td class="req">FR-110–112</td><td>Assessment + verdict</td><td>Show &amp; tell (assessment)</td><td>Slider + trace chips</td></tr>
-    <tr><td>M6 Rehearsal step / gate</td><td class="req">FR-116–118</td><td>Step + chat</td><td>Meeting thread</td><td>Filmstrip + pins</td></tr>
-    <tr><td>M7 Option set</td><td class="req">FR-120–122</td><td>Swipe + checkboxes</td><td>Swipe + ♥/✕</td><td>Carousel + tray</td></tr>
-    <tr><td>M8 Sessions &amp; handoff</td><td class="req">FR-65, FR-71–74</td><td>Context bars · compaction · terminal</td><td>Energy bars · letter (exp.) · terminal peek</td><td>Relay strips · ⟲ compaction</td></tr>
-    <tr><td>M10 Terminal &amp; attach <i>(new)</i></td><td class="req">FR-66–67</td><td>Terminal + key bar</td><td>in M8</td><td>in M8</td></tr>
-    <tr><td>M11 Attachment viewer <i>(new)</i></td><td class="req">FR-102a, FR-116a</td><td>Full screen + pins</td><td>⤢ on previews</td><td>⤢ on previews</td></tr>
-    <tr><td>M12 Change log &amp; update <i>(rev 4)</i></td><td class="req">FR-06a–06e</td><td>Steps + change log</td><td>—</td><td>—</td></tr>
-    <tr><td>M13 Learn <i>(rev 5)</i></td><td class="req">FR-134–136</td><td>Lessons + steps</td><td>—</td><td>—</td></tr>
-    <tr><td>M14 Project documents <i>(rev 7)</i></td><td class="req">FR-140, 141, 147</td><td>Sub-tabs + Compare</td><td>—</td><td>—</td></tr>
-    <tr><td>M9 Everything else</td><td class="req">team, standards, history, settings, docs</td><td>"More" list (read-only)</td><td>"More" list</td><td>⌘ palette</td></tr>
-  </table></div>
-  <p class="meta">Creating and editing personas, standards and settings is treated as a desktop task. On mobile they're read-only apart from light actions. Tell me if you disagree.</p>
-
-  <h2 id="questions">Questions for you</h2>
-  <div class="grid2">
-    <div class="box"><h3>Across all three</h3><ul>
-      <li>Which landing page answers "what needs me and where does everything stand?" fastest?</li>
-      <li>Is the triage list (A), one-at-a-time desk (B) or urgency board (C) the right model for questions?</li>
-      <li>Which handoff presentation would make you trust a handoff without reading the transcript?</li>
-      <li>Light, warm or dark? Should the app offer a theme toggle regardless?</li>
-      <li>How important is the ⌘K command palette that shows the CLI command for each action (C, view 14)? It could be added to any approach.</li></ul></div>
-    <div class="box"><h3>Approach-specific</h3><ul>
-      <li><b>A:</b> Is the density right, or too much on a laptop screen?</li>
-      <li><b>B:</b> Do status sentences ("Forge is handing off…") help, or would you rather see numbers?</li>
-      <li><b>B:</b> Should rooms be real chat where you can talk to personas any time, or only structured messages?</li>
-      <li><b>C:</b> Is grouping the catalog by lifecycle stage better than sorting by "needs you"?</li>
-      <li><b>C:</b> Is the trace map (requirements ↔ values ↔ decisions) worth building early?</li></ul></div>
-  </div>
-
-  <h2 id="findings">Requirement gaps found while mocking</h2>
-  <p>Drawing every view turned up places where the requirements are silent or ambiguous. These are worth deciding regardless of which approach you choose:</p>
-  <div class="table-wrap"><table>
-    <tr><th>Finding</th><th>Related</th><th>Suggested action</th></tr>
-    <tr><td><b>Unified "needs you" stream.</b> Every approach ended up combining questions, gates, reviews and option sets into one place. The requirements only define a <i>questions</i> dashboard.</td><td class="req">FR-104</td><td>Widen FR-104 to "everything awaiting a human decision".</td></tr>
-    <tr><td><i>Rev 2: smart handoffs are now experimental (§8.2), so this can wait until they graduate.</i> <b>Handoff approval.</b> Each mockup lets a human (or Lens) check a handoff before the next session starts. The requirements don't say whether handoffs are automatic or gated.</td><td class="req">FR-72–74</td><td>Add a setting: auto-continue, reviewer-persona check, or human approval.</td></tr>
-    <tr><td><i>Rev 2: deferred with handoffs.</i> <b>Handoff templates.</b> Mockups show role-specific templates (e.g. developer-v3) and let you compare a session's handoff with the one before it.</td><td class="req">FR-73</td><td>Add a requirement for versioned handoff templates per role.</td></tr>
-    <tr><td><b>Context usage confidence.</b> OpenCode and Antigravity usage may be <i>estimated</i>. The UI needs to show measured vs. estimated.</td><td class="req">FR-71, Q2</td><td>Require the adapter to report whether usage is measured or estimated.</td></tr>
-    <tr><td><b>Human vs. persona reviewer.</b> Lens (AI) and you both review. The order and authority aren't defined.</td><td class="req">FR-54, FR-110</td><td>Define it: Lens checks first, then a human approves (as mocked), with a per-project option.</td></tr>
-    <tr><td><b>Notifications on mobile.</b> Email is out of scope, but without some notification a blocking question can wait for hours.</td><td class="req">FR-106</td><td>Consider PWA web push as the minimum. It isn't email.</td></tr>
-    <tr><td><b>Answered-question cost.</b> Mockups show "blocks 2 tasks · waiting 12m" and, in C, roadmap slip.</td><td class="req">FR-102</td><td>Add "show the impact of leaving a question unanswered".</td></tr>
-    <tr><td><b>Theme.</b> No requirement covers light/dark.</td><td class="req">FR-34–35</td><td>Add light + dark themes following the system setting.</td></tr>
-    <tr><td><b>Multi-user (Q4).</b> Tailnet identity appears in headers and history. <i>Rev 2:</i> rehearsals now show a second human reviewer (maria, FR-117a), so Q4 matters sooner.</td><td class="req">FR-17, Q4</td><td>Decide Q4 before building review assignment.</td></tr>
-  </table></div>
-
-  <h2 id="feedback">Feedback template</h2>
-  <p>Copy this, fill in what you have opinions on, and paste it back to the team. Partial answers are fine.</p>
-<pre class="tpl">## Mockup review: go-build-it OS-0
-
-Overall direction:  A / B / C / combination
-Why (one or two sentences, these become project values):
-
-Keep from A (Mission Control):
-Keep from B (Team Room):
-Keep from C (Roadmap Canvas):
-Drop entirely:
-
-Per view (only where you have an opinion), e.g. "04 Questions: B's desk, but with A's list on the left"
-- 01 Catalog:
-- 04 Questions:
-- 05 Sessions & handoffs:
-- 07 Option set:
-- 08 Dress rehearsal:
-- other:
-
-Mobile model:  A tabs / B messaging / C dock + palette
-Theme:  light / warm / dark / follow system
-
-Requirement changes (see "gaps found"):
-- accept / reject / modify: ...
-
-Open questions answered:
-- Q1 external access challenge:
-- Q4 multi-user:
-</pre>
-
-  <h2 id="files">Files</h2>
-  <div class="table-wrap"><table>
-    <tr><th>Path</th><th>Contents</th></tr>
-    <tr><td><code>docs/mockups/index.html</code></td><td>This overview and review guide</td></tr>
-    <tr><td><code>docs/mockups/a-mission-control/desktop.html</code> · <code>mobile.html</code></td><td>Approach A: 14 desktop views + 7 detail views, 11 mobile screens</td></tr>
-    <tr><td><code>docs/mockups/b-team-room/desktop.html</code> · <code>mobile.html</code></td><td>Approach B: 14 desktop views, 9 mobile screens</td></tr>
-    <tr><td><code>docs/mockups/c-roadmap-canvas/desktop.html</code> · <code>mobile.html</code></td><td>Approach C: 14 desktop views, 9 mobile screens</td></tr>
-    <tr><td><code>docs/mockups/frame.css</code></td><td>Shared reviewer chrome (browser and phone frames)</td></tr>
-  </table></div>
-  <p class="meta">All files are static, with no build step, network access or JavaScript. Desktop frames are 1240px wide and scroll horizontally on smaller screens.</p>
-</main>
-</body>
-</html>
+<h2 id="summary">Summary</h2>
+<p class="lead">The app is good at the delivery half of the vision and at keeping people in charge. It is weaker where the vision is most distinctive: evidence at the moment of approval, one place for a person's attention, and showing the loop from discovery to release.</p>
+<div class="tiles">
+<div class="tile"><b>52</b><span>screens reviewed (37 desktop, 15 phone)</span></div>
+<div class="tile"><b>28</b><span><span class="chip grn">Works</span></span></div>
+<div class="tile"><b>20</b><span><span class="chip amb">Needs work</span></span></div>
+<div class="tile"><b>4</b><span><span class="chip red">Weak</span></span></div>
+<div class="tile"><b>12</b><span>findings, 4 high</span></div></div>
+<div class="card"><h3>The four that matter most</h3><ol style="margin:8px 0 0;padding-left:22px">
+<li style="margin:5px 0"><a class="fref" href="#F-01">F-01</a><b>Approval is possible without evidence.</b> A review can be approved with every evidence tile empty, the phone shows a green &quot;pass&quot; when no test ran, the 16 standards are never assessed, and a release can be made while a gate is pending.</li>
+<li style="margin:5px 0"><a class="fref" href="#F-02">F-02</a><b>The desktop has no single &quot;needs you&quot; list.</b> What is waiting for you is spread over five sidebar entries with five badges (Questions 3, Sessions 1, Reviews 1, Options 1, Rehearsals 1), and proposed values are a sixth kind found only inside Artifacts.</li>
+<li style="margin:5px 0"><a class="fref" href="#F-03">F-03</a><b>The app is organised by kind of thing, not by the loop.</b> No screen shows where a project is in the loop from discovery to release, or what it is waiting for.</li>
+<li style="margin:5px 0"><a class="fref" href="#F-04">F-04</a><b>Every decision has one decider.</b> Questions, option sets, rehearsals and reviews each record one person&#x27;s choice.</li>
+</ol></div>
+<div class="card"><h3>What already works well</h3><ul style="margin:8px 0 0;padding-left:22px"><li><b>People decide, agents do.</b> Questions state why they matter and what the member recommends. Any member's terminal can be watched, taken over and handed back.</li><li><b>Gates on small slices.</b> A milestone has a gate with criteria, and tasks behind it say they are waiting for it.</li><li><b>Real evidence exists.</b> Traceability names its gaps, compare remembers which screenshot was accepted, and the doctor shows the proof for every check.</li><li><b>The phone.</b> One Inbox, one thumb, the right order.</li></ul></div>
+<p class="note">How to read this: the screenshots come from a seeded demo whose AI members are scripted, so empty test results and "Fake Lens" text are demo data. Findings are about what the screen allows and shows, which is the same with real members.</p>
+<h2 id="vision">Against the vision</h2><p class="lead">The six ideas behind the vision, and how today's screens serve each.</p>
+<div class="card scroll"><table><tr><th>Idea</th><th>Today</th><th>Assessment</th></tr>
+<tr><td style="white-space:nowrap"><b>01</b> Agreement is the scarce thing</td><td><span class="chip amb">Needs work</span></td><td>Questions, the catalog and the phone Inbox spend attention carefully. The desktop then scatters it over five lists (<a class="fref" href="#F-02">F-02</a>).</td></tr>
+<tr><td style="white-space:nowrap"><b>02</b> Discovery never finishes</td><td><span class="chip amb">Needs work</span></td><td>Documents have revisions, values record where they came from, and drift is detected on screens. A changed requirement does not yet flag what it invalidates, and there is no baseline (<a class="fref" href="#F-03">F-03</a>, <a class="fref" href="#F-08">F-08</a>).</td></tr>
+<tr><td style="white-space:nowrap"><b>03</b> Conflict is information</td><td><span class="chip red">Weak</span></td><td>Option sets record the reason for a choice and turn it into a value. Who disagreed, and how it was settled, has no place yet (<a class="fref" href="#F-04">F-04</a>).</td></tr>
+<tr><td style="white-space:nowrap"><b>04</b> People decide, agents do</td><td><span class="chip grn">Works</span></td><td>The strongest idea in the app. Agents ask, draft, build and review; people answer, choose and approve; a person can watch, stop and take over any member.</td></tr>
+<tr><td style="white-space:nowrap"><b>05</b> Small true slices</td><td><span class="chip amb">Needs work</span></td><td>Milestones with gates and criteria are clear, and tasks wait for their gate. Tasks are not shown as the slice they belong to, and the slice has no approved baseline (<a class="fref" href="#F-03">F-03</a>).</td></tr>
+<tr><td style="white-space:nowrap"><b>06</b> Evidence, not assurance</td><td><span class="chip amb">Needs work</span></td><td>Traceability, compare and the doctor are real evidence. The review and release screens, where evidence matters most, accept approval without any (<a class="fref" href="#F-01">F-01</a>).</td></tr>
+</table></div>
+<h2 id="workflow">Workflow</h2><p class="lead">The vision's loop, and where a person meets a break when following it through the app today.</p>
+<div class="loop">
+<div class="card"><h3>1 · Discover</h3><p style="margin:6px 0 0">Requirements, mockups, values and option sets exist and link to each other. <b>Break:</b> they live under Artifacts and Options with no shared view of "what is still undecided". No interview or conflict record.</p></div>
+<div class="card"><h3>2 · Gate</h3><p style="margin:6px 0 0">The dress rehearsal and compare are the gate. <b>Break:</b> the thing being judged is too small to see, and approval records one person. There is no baseline to approve.</p></div>
+<div class="card"><h3>3 · Deliver</h3><p style="margin:6px 0 0">Queue, sessions and terminals work, and blocked members reach you. <b>Break:</b> the same blocked member appears as a session, a question and an inbox item, with different statuses.</p></div>
+<div class="card"><h3>4 · Release</h3><p style="margin:6px 0 0">Courier releases without an AI session. <b>Break:</b> review and release accept approval with no evidence, and nothing assembles the record of a release.</p></div>
+</div>
+<p class="note">The return path, "working software to react to, early and often", is the rehearsal and compare screens. Feedback from a rehearsal does follow the task into its review, which is the loop closing once.</p>
+<h2 id="findings">Findings</h2><p class="lead">Each finding, the idea it touches, and a proposed change. Screens link here by number.</p>
+<div class="card finding" id="F-01"><h3><span class="sid">F-01</span> Approval is possible without evidence <span class="chip sev-High">High</span> <span class="chip idea">06 Evidence, not assurance</span></h3><p style="margin:8px 0 0">A review can be approved with every evidence tile empty, the phone shows a green &quot;pass&quot; when no test ran, the 16 standards are never assessed, and a release can be made while a gate is pending. The vision says each release carries the tests that ran, the screens against their mockups, and who approved what; no screen assembles that.</p><div class="fix"><b>Proposed:</b> Make the verdict depend on the evidence: no default verdict; Approve asks for a reason when tests did not run, a mockup is not matched or a requirement is unassessed; show &quot;not run&quot; in grey, never &quot;pass&quot;. Assess only the standards that apply, with the reviewer member&#x27;s finding beside each. Add a release record page listing tests, compare results, requirements covered and approvals.</div><p class="note" style="margin:8px 0 0">Seen on: <a href="#S19">S19</a> <a href="#S23">S23</a> <a href="#S27">S27</a> <a href="#S41">S41</a></p></div>
+<div class="card finding" id="F-02"><h3><span class="sid">F-02</span> The desktop has no single &quot;needs you&quot; list <span class="chip sev-High">High</span> <span class="chip idea">01 Agreement is the scarce thing</span></h3><p style="margin:8px 0 0">What is waiting for you is spread over five sidebar entries with five badges (Questions 3, Sessions 1, Reviews 1, Options 1, Rehearsals 1), and proposed values are a sixth kind found only inside Artifacts. The vision treats a person&#x27;s attention as the scarce thing. The phone already has one Inbox with all eight items in the right order.</p><div class="fix"><b>Proposed:</b> Give the desktop the phone&#x27;s Inbox as its first sidebar entry, with one count. Keep Questions, Reviews, Options and Rehearsals as filters of it.</div><p class="note" style="margin:8px 0 0">Seen on: <a href="#S04">S04</a> <a href="#S16">S16</a></p></div>
+<div class="card finding" id="F-03"><h3><span class="sid">F-03</span> The app is organised by kind of thing, not by the loop <span class="chip sev-High">High</span> <span class="chip idea">05 Small true slices</span></h3><p style="margin:8px 0 0">No screen shows where a project is in the loop from discovery to release, or what it is waiting for. The sidebar lists objects (questions, sessions, queue, reviews, options, rehearsals), the stage is a dropdown set by hand, and there is no baseline: nothing records which requirements and mockups a slice was approved against.</p><div class="fix"><b>Proposed:</b> Put a loop strip at the top of the project overview (Discover → Gate → Deliver → Release) showing counts and the one thing that is holding the project. Derive the stage from it. Add a baseline: a named, approved revision of requirements and mockups that a milestone is built against.</div><p class="note" style="margin:8px 0 0">Seen on: <a href="#S01">S01</a> <a href="#S02">S02</a> <a href="#S06">S06</a> <a href="#S15">S15</a> <a href="#S31">S31</a> <a href="#S33">S33</a></p></div>
+<div class="card finding" id="F-04"><h3><span class="sid">F-04</span> Every decision has one decider <span class="chip sev-High">High</span> <span class="chip idea">03 Conflict is information</span></h3><p style="margin:8px 0 0">Questions, option sets, rehearsals and reviews each record one person&#x27;s choice. The vision&#x27;s stakeholders with different aims, and the record of where they conflict and how it was settled, have no screen. This is known to be unbuilt; the review notes where it would attach.</p><div class="fix"><b>Proposed:</b> Covered by requirements rev 12 and the user management mockups. When that is built: ask a named person or group on a question; show each stakeholder&#x27;s pick on an option set; record each reviewer&#x27;s sign-off at a gate; add a conflicts list beside Values.</div><p class="note" style="margin:8px 0 0">Seen on: <a href="#S05">S05</a> <a href="#S11">S11</a> <a href="#S12">S12</a> <a href="#S20">S20</a></p></div>
+<div class="card finding" id="F-05"><h3><span class="sid">F-05</span> Mockups and screens are hard to see where they are judged <span class="chip sev-Medium">Medium</span> <span class="chip idea">06 Evidence, not assurance</span></h3><p style="margin:8px 0 0">Compare squeezes the mockup into a thin strip and stacks &quot;side by side&quot; vertically. The rehearsal shows the screen at a third of its size on the desktop and as an empty box on the phone. Option previews are cut off. These are the three screens where a person approves what they see.</p><div class="fix"><b>Proposed:</b> Scale each preview to fit its frame at the mockup&#x27;s own width, put the two panes next to each other from 1100 pixels up, and load the real preview on the phone rehearsal.</div><p class="note" style="margin:8px 0 0">Seen on: <a href="#S07">S07</a> <a href="#S11">S11</a> <a href="#S12">S12</a> <a href="#S13">S13</a> <a href="#S42">S42</a> <a href="#S43">S43</a> <a href="#S48">S48</a></p></div>
+<div class="card finding" id="F-06"><h3><span class="sid">F-06</span> Status says different things in different places <span class="chip sev-Medium">Medium</span> <span class="chip idea">06 Evidence, not assurance</span></h3><p style="margin:8px 0 0">A task is &quot;running&quot; in the queue while its session is &quot;blocked · needs you&quot;. herdr setup says &quot;all good&quot; beside &quot;✖ static 13/14&quot;. Remote access checks are worded as passes beside warning icons. A blocked session explains itself at the bottom of the page.</p><div class="fix"><b>Proposed:</b> One status per thing, computed once: a task whose session is blocked shows &quot;waiting for you&quot; with a link. Word each check as what was found. Put the reason a session is blocked at the top, with the action.</div><p class="note" style="margin:8px 0 0">Seen on: <a href="#S03">S03</a> <a href="#S14">S14</a> <a href="#S15">S15</a> <a href="#S17">S17</a> <a href="#S10b">S10b</a> <a href="#S29">S29</a> <a href="#S30">S30</a> <a href="#S45">S45</a></p></div>
+<div class="card finding" id="F-07"><h3><span class="sid">F-07</span> The history is complete but hard to read <span class="chip sev-Medium">Medium</span> <span class="chip idea">06 Evidence, not assurance</span></h3><p style="margin:8px 0 0">Document actions appear twice (the action and its commit), routine updates have no reason, adding a team is seven rows, and &quot;Related to&quot; shows unrelated events. The record is there; the decisions in it are hard to find.</p><div class="fix"><b>Proposed:</b> Fold a commit into the action that caused it, group runs of the same kind, add a &quot;Decisions&quot; filter (answers, choices, approvals, values), and give the project history the same search as the global one.</div><p class="note" style="margin:8px 0 0">Seen on: <a href="#S24">S24</a> <a href="#S25">S25</a> <a href="#S26">S26</a></p></div>
+<div class="card finding" id="F-08"><h3><span class="sid">F-08</span> Traceability is strong and hidden <span class="chip sev-Medium">Medium</span> <span class="chip idea">02 Discovery never finishes</span></h3><p style="margin:8px 0 0">The traceability table is the best evidence in the app, and it is a toggle inside one tab. Its gaps do not reach the overview or &quot;Needs you&quot;. Changing a requirement does not yet mark the mockups, tasks and screens that rest on it.</p><div class="fix"><b>Proposed:</b> Show gap and drift counts on the project overview and catalog card. In the editor, list what a requirement touches before saving, and mark those items &quot;check again&quot; after.</div><p class="note" style="margin:8px 0 0">Seen on: <a href="#S02">S02</a> <a href="#S06">S06</a> <a href="#S08">S08</a> <a href="#S09">S09</a></p></div>
+<div class="card finding" id="F-09"><h3><span class="sid">F-09</span> Machine detail leaks into decision screens <span class="chip sev-Low">Low</span> <span class="chip idea">01 Agreement is the scarce thing</span></h3><p style="margin:8px 0 0">Temporary folder paths in the Settings title, the Repository card and the member card (where it overflows); the launch command with environment variables at the top of every terminal.</p><div class="fix"><b>Proposed:</b> Shorten paths to the last two parts with the full path on hover; start the terminal view after the launch line.</div><p class="note" style="margin:8px 0 0">Seen on: <a href="#S02">S02</a> <a href="#S17">S17</a> <a href="#S18">S18</a> <a href="#S21">S21</a> <a href="#S29">S29</a> <a href="#S45">S45</a></p></div>
+<div class="card finding" id="F-10"><h3><span class="sid">F-10</span> Small defects <span class="chip sev-Low">Low</span> </h3><p style="margin:8px 0 0">&quot;◀ Step 0&quot; on the first rehearsal step. An unknown milestone address shows an empty page. The editor without a file says only &quot;No document path given&quot;. ⌘K for &quot;review&quot; lists help pages before the open review. Atlas coaches Atlas. The phone document view is soft and its tabs are cut off. The project tabs vanish in the editor.</p><div class="fix"><b>Proposed:</b> Fix each; none needs a design decision.</div><p class="note" style="margin:8px 0 0">Seen on: <a href="#S03">S03</a> <a href="#S09">S09</a> <a href="#S12">S12</a> <a href="#S20">S20</a> <a href="#S36">S36</a> <a href="#S47">S47</a></p></div>
+<div class="card finding" id="F-11"><h3><span class="sid">F-11</span> Artifacts tabs are flexible in the file but fixed in the UI <span class="chip sev-Medium">Medium</span> <span class="chip idea">02 Discovery never finishes</span></h3><p style="margin:8px 0 0">A project can have any tabs through docs/gbi.toml or the CLI, but the UI only offers the four standard names, labels are a fixed list of nine, Compare needs a tab named &quot;mockups&quot;, and the phone lists the standard tabs.</p><div class="fix"><b>Proposed:</b> Add &quot;New tab…&quot; to &quot;Set as entry point&quot;, allow project labels, show Compare whenever files are labelled mockup, and read the tab list on the phone.</div><p class="note" style="margin:8px 0 0">Seen on: <a href="#S06">S06</a> <a href="#S10">S10</a> <a href="#S10b">S10b</a> <a href="#S38">S38</a></p></div>
+<div class="card finding" id="F-12"><h3><span class="sid">F-12</span> Empty states and repeated text <span class="chip sev-Low">Low</span> <span class="chip idea">01 Agreement is the scarce thing</span></h3><p style="margin:8px 0 0">&quot;No stable release yet&quot; three times per card, columns that are empty for every row, a page of zeros on History, twenty-six help pages on the phone&#x27;s More.</p><div class="fix"><b>Proposed:</b> Hide what is empty, say it once, and give each empty state the next step.</div><p class="note" style="margin:8px 0 0">Seen on: <a href="#S01">S01</a> <a href="#S14">S14</a> <a href="#S22">S22</a> <a href="#S28">S28</a> <a href="#S49">S49</a></p></div>
+<h2 id="find">Find what needs you</h2><p class="lead">The first thing a person does: see which project is waiting on them, and why.</p>
+<div class="card screen" id="S01"><a class="shot" href="screens/d01-catalog.png" title="Open full size"><img loading="lazy" src="screens/d01-catalog.png" alt="Screenshot: Project catalog"></a><div><div class="hd"><span class="sid">S01</span><h3>Project catalog</h3><span class="chip grn">Works</span></div><div class="addr">/</div><p>Every project, with the ones that need you first.</p><p><span class="chip idea">01 Agreement is the scarce thing</span></p>
+<div class="lbl">Works</div><ul><li>Sorted by &quot;needs you&quot; by default, with a red edge and counts for blocking questions and items waiting.</li><li>Stage, running sessions and unpushed commits are visible without opening the project.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-12">F-12</a>&quot;No stable release yet&quot; appears three times on each card (Latest stable, under it, and the footer), and CI and Open PRs are empty dashes. A third of the card says nothing.</li><li><a class="fref" href="#F-03">F-03</a>The stage chip (Design, Implementation) is set by hand. The card does not say what the project is waiting for next in the loop: an answer, a baseline, a build or an approval.</li></ul>
+</div></div>
+<div class="card screen" id="S02"><a class="shot" href="screens/d02-project.png" title="Open full size"><img loading="lazy" src="screens/d02-project.png" alt="Screenshot: Project overview"></a><div><div class="hd"><span class="sid">S02</span><h3>Project overview</h3><span class="chip grn">Works</span></div><div class="addr">/projects/ledgerly</div><p>One project: purpose, roadmap with gates, what is running, and what needs you.</p><p><span class="chip idea">01 Agreement is the scarce thing</span> <span class="chip idea">05 Small true slices</span></p>
+<div class="lbl">Works</div><ul><li>&quot;Needs you&quot; is boxed at the top right and names each item with its kind: blocking question, gate, review.</li><li>The roadmap shows each milestone with its gate, which is the &quot;small slice, approved by people&quot; idea made visible.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-09">F-09</a>The Repository card gives a quarter of the screen to the folder path and a workflow sentence that is the same for every project.</li><li><a class="fref" href="#F-08">F-08</a>Traceability gaps and mockups that drifted are not here. You only find them inside Artifacts.</li><li><a class="fref" href="#F-03">F-03</a>Nothing shows the discovery side: open option sets, proposed values, or requirements changed since the last gate.</li></ul>
+</div></div>
+<div class="card screen" id="S03"><a class="shot" href="screens/d03-milestone.png" title="Open full size"><img loading="lazy" src="screens/d03-milestone.png" alt="Screenshot: Roadmap item"></a><div><div class="hd"><span class="sid">S03</span><h3>Roadmap item</h3><span class="chip grn">Works</span></div><div class="addr">/milestones/ledgerly-M0</div><p>One milestone: scope, tasks, the gate and its criteria.</p><p><span class="chip idea">05 Small true slices</span> <span class="chip idea">06 Evidence, not assurance</span></p>
+<div class="lbl">Works</div><ul><li>The gate card states the pass criteria and links to the rehearsal that decides it.</li><li>Tasks carry requirement IDs, and the milestone has its own history.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-10">F-10</a>A milestone address that does not exist shows an empty page with no message.</li><li><a class="fref" href="#F-06">F-06</a>The criteria checkboxes cannot be ticked here and do not say what ticks them.</li></ul>
+</div></div>
+<div class="card screen" id="S04"><a class="shot" href="screens/d18-questions.png" title="Open full size"><img loading="lazy" src="screens/d18-questions.png" alt="Screenshot: Questions"></a><div><div class="hd"><span class="sid">S04</span><h3>Questions</h3><span class="chip grn">Works</span></div><div class="addr">/questions</div><p>Everything an AI member has asked, split by whether work is paused.</p><p><span class="chip idea">01 Agreement is the scarce thing</span> <span class="chip idea">04 People decide, agents do</span></p>
+<div class="lbl">Works</div><ul><li>Three groups are exactly right: members waiting in their terminal, blocking, and non-blocking with the assumption stated.</li><li>The list stays beside the open question, so answering several is quick.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-02">F-02</a>This is one of five places that hold &quot;things waiting for you&quot; (Questions, Sessions, Reviews, Options, Rehearsals), each with its own badge. The phone has a single Inbox of 8.</li></ul>
+</div></div>
+<div class="card screen" id="S05"><a class="shot" href="screens/d19-question.png" title="Open full size"><img loading="lazy" src="screens/d19-question.png" alt="Screenshot: A question"></a><div><div class="hd"><span class="sid">S05</span><h3>A question</h3><span class="chip grn">Works</span></div><div class="addr">/questions/Q-2</div><p>One question: why it matters, the options, a recommendation, attachments.</p><p><span class="chip idea">01 Agreement is the scarce thing</span> <span class="chip idea">04 People decide, agents do</span></p>
+<div class="lbl">Works</div><ul><li>&quot;Why it matters&quot; comes before the options, and the member&#x27;s recommendation is marked.</li><li>&quot;Propose as project value&quot; turns an answer into a recorded value, which is how reasons become values.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-04">F-04</a>One person answers. There is no way to ask a named stakeholder, or to see that two people would answer differently.</li></ul>
+</div></div>
+<h2 id="discover">Discover: what should we build?</h2><p class="lead">Requirements, mockups, options and values. People lead, agents assist.</p>
+<div class="card screen" id="S06"><a class="shot" href="screens/d04-artifacts-requirements.png" title="Open full size"><img loading="lazy" src="screens/d04-artifacts-requirements.png" alt="Screenshot: Artifacts: a document"></a><div><div class="hd"><span class="sid">S06</span><h3>Artifacts: a document</h3><span class="chip amb">Needs work</span></div><div class="addr">/projects/trailmap/artifacts</div><p>The project&#x27;s documents as tabs, each an HTML entry point, with the problem and values beside them.</p><p><span class="chip idea">02 Discovery never finishes</span></p>
+<div class="lbl">Works</div><ul><li>Problem definition and values sit beside the requirements, with where each value came from.</li><li>A proposed value can be accepted, edited or dismissed in place.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-11">F-11</a>The tabs look fixed. A new tab can only be made from the CLI or by editing docs/gbi.toml, and Compare only appears if a tab is named &quot;mockups&quot;.</li><li><a class="fref" href="#F-08">F-08</a>Traceability is a small toggle in the document bar. It is the strongest evidence in the app and easy to miss.</li><li><a class="fref" href="#F-03">F-03</a>There is no baseline: nothing marks which revision of the requirements a slice was approved against.</li></ul>
+</div></div>
+<div class="card screen" id="S07"><a class="shot" href="screens/d05-artifacts-mockups.png" title="Open full size"><img loading="lazy" src="screens/d05-artifacts-mockups.png" alt="Screenshot: Artifacts: a mockup view"></a><div><div class="hd"><span class="sid">S07</span><h3>Artifacts: a mockup view</h3><span class="chip grn">Works</span></div><div class="addr">/projects/trailmap/artifacts/mockups/…/phone.html#v02</div><p>A mockup page, with the view under the cursor linked to its requirements, tasks and real screen.</p><p><span class="chip idea">06 Evidence, not assurance</span></p>
+<div class="lbl">Works</div><ul><li>&quot;On this view&quot; joins the mockup to requirements, tasks and the real screen in one small card. This is traceability where you need it.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-05">F-05</a>The mockup is cut off at the bottom of the frame; the download button is half visible.</li></ul>
+</div></div>
+<div class="card screen" id="S08"><a class="shot" href="screens/d06-artifacts-trace.png" title="Open full size"><img loading="lazy" src="screens/d06-artifacts-trace.png" alt="Screenshot: Artifacts: traceability"></a><div><div class="hd"><span class="sid">S08</span><h3>Artifacts: traceability</h3><span class="chip grn">Works</span></div><div class="addr">/projects/trailmap/artifacts/requirements?trace=1</div><p>Requirement → mockup view → task → real screen, with the gaps named.</p><p><span class="chip idea">06 Evidence, not assurance</span></p>
+<div class="lbl">Works</div><ul><li>The clearest evidence screen in the app. Gaps are stated in plain words: &quot;no task&quot;, &quot;v03 drifted&quot;, &quot;v04 names FR-22, which is not a requirement&quot;.</li><li>&quot;Gaps only&quot; filter and the CLI command are both offered.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-08">F-08</a>The six gaps here do not reach the project overview, the catalog card or &quot;Needs you&quot;.</li><li><a class="fref" href="#F-08">F-08</a>A changed requirement does not yet mark what rests on it. The vision asks for that.</li></ul>
+</div></div>
+<div class="card screen" id="S09"><a class="shot" href="screens/d10-artifact-editor.png" title="Open full size"><img loading="lazy" src="screens/d10-artifact-editor.png" alt="Screenshot: Document editor"></a><div><div class="hd"><span class="sid">S09</span><h3>Document editor</h3><span class="chip amb">Needs work</span></div><div class="addr">/projects/trailmap/edit?path=docs/requirements.md</div><p>Edit a document yourself or ask a member to; changes come back as proposals to accept.</p><p><span class="chip idea">02 Discovery never finishes</span> <span class="chip idea">04 People decide, agents do</span></p>
+<div class="lbl">Works</div><ul><li>&quot;Edit with Atlas&quot; plus accept or reject keeps the person deciding while the agent drafts.</li><li>Saving makes a numbered revision with a commit message.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-10">F-10</a>The project tabs disappear, so the way back is the breadcrumb only. Opened without a file it says only &quot;No document path given&quot;.</li><li><a class="fref" href="#F-08">F-08</a>Nothing warns that editing FR-08 touches two mockup views and a task.</li></ul>
+</div></div>
+<div class="card screen" id="S10"><a class="shot" href="screens/d08-artifacts-files.png" title="Open full size"><img loading="lazy" src="screens/d08-artifacts-files.png" alt="Screenshot: Artifacts: support files"></a><div><div class="hd"><span class="sid">S10</span><h3>Artifacts: support files</h3><span class="chip amb">Needs work</span></div><div class="addr">/projects/trailmap/artifacts/files</div><p>Every file under docs/, its labels, and which files are tab entry points.</p><p><span class="chip idea">02 Discovery never finishes</span></p>
+<div class="lbl">Works</div><ul><li>Nothing is guessed: an unlabelled file is called out and counted on the tab.</li><li>The check card and the CLI equivalents are on the same screen.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-11">F-11</a>&quot;Set as entry point&quot; only offers the tabs that exist and the four standard names. You cannot create a tab here.</li><li><a class="fref" href="#F-11">F-11</a>Labels are a fixed list of nine. A project cannot add its own kind.</li></ul>
+</div></div>
+<div class="card screen" id="S11"><a class="shot" href="screens/d20-options.png" title="Open full size"><img loading="lazy" src="screens/d20-options.png" alt="Screenshot: Option set"></a><div><div class="hd"><span class="sid">S11</span><h3>Option set</h3><span class="chip grn">Works</span></div><div class="addr">/options/OS-1</div><p>Several designs side by side; tick the parts you want from each, and say why.</p><p><span class="chip idea">03 Conflict is information</span> <span class="chip idea">04 People decide, agents do</span></p>
+<div class="lbl">Works</div><ul><li>The combination tray lets you take parts of different options, and the reason is required and recorded.</li><li>The set is &quot;generated against values&quot;, and a choice can propose a new value. This closes the loop the vision describes.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-04">F-04</a>One person chooses. This is the natural home for &quot;who holds which aim&quot;, and it has no place for a second view.</li><li><a class="fref" href="#F-05">F-05</a>The preview is cut off below the sheet; the lower half of the frame is empty.</li></ul>
+</div></div>
+<h2 id="gate">The gate: approve a small slice</h2><p class="lead">Where discovery hands over to delivery, and where people approve.</p>
+<div class="card screen" id="S12"><a class="shot" href="screens/d21-rehearsal.png" title="Open full size"><img loading="lazy" src="screens/d21-rehearsal.png" alt="Screenshot: Dress rehearsal"></a><div><div class="hd"><span class="sid">S12</span><h3>Dress rehearsal</h3><span class="chip amb">Needs work</span></div><div class="addr">/rehearsals/G-1</div><p>Walk a feature step by step with reviewers, collect findings, then decide the gate.</p><p><span class="chip idea">01 Agreement is the scarce thing</span> <span class="chip idea">04 People decide, agents do</span> <span class="chip idea">05 Small true slices</span></p>
+<div class="lbl">Works</div><ul><li>Findings from people and AI members sit together per step, and the gate decision is on the same screen.</li><li>Approve is disabled until every step is reviewed, and only an owner can approve.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-05">F-05</a>The screen under review is shown at about a third of its size and cannot be read without opening it.</li><li><a class="fref" href="#F-10">F-10</a>On the first step the back button reads &quot;◀ Step 0&quot;.</li><li><a class="fref" href="#F-04">F-04</a>Reviewers are listed, but each one&#x27;s sign-off is not. The gate records one decision.</li></ul>
+</div></div>
+<div class="card screen" id="S13"><a class="shot" href="screens/d07-artifacts-compare.png" title="Open full size"><img loading="lazy" src="screens/d07-artifacts-compare.png" alt="Screenshot: Compare: mockup against the real screen"></a><div><div class="hd"><span class="sid">S13</span><h3>Compare: mockup against the real screen</h3><span class="chip amb">Needs work</span></div><div class="addr">/projects/trailmap/artifacts/compare/v02</div><p>Each mockup view beside the screenshot of the built screen; accept it or file a task.</p><p><span class="chip idea">06 Evidence, not assurance</span></p>
+<div class="lbl">Works</div><ul><li>The decision is saved with the screenshot&#x27;s hash, so a changed screen comes back for review. That is real evidence.</li><li>Status per view: accepted, drifted, not reviewed, no screenshot.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-05">F-05</a>&quot;Side by side&quot; stacks the two one above the other on a 1400-pixel screen, so you scroll to compare.</li><li><a class="fref" href="#F-05">F-05</a>The mockup is squeezed into a narrow frame: the phone is a thin strip and its text wraps over the button.</li></ul>
+</div></div>
+<h2 id="deliver">Deliver: build it right</h2><p class="lead">Tasks, the AI team at work, and review. Agents lead, people approve.</p>
+<div class="card screen" id="S14"><a class="shot" href="screens/d26-queue.png" title="Open full size"><img loading="lazy" src="screens/d26-queue.png" alt="Screenshot: Task queue"></a><div><div class="hd"><span class="sid">S14</span><h3>Task queue</h3><span class="chip amb">Needs work</span></div><div class="addr">/queue</div><p>All tasks, their status, and what each is waiting for.</p><p><span class="chip idea">05 Small true slices</span></p>
+<div class="lbl">Works</div><ul><li>&quot;waits for gate&quot; is written on the task, so gate-blocked work explains itself.</li><li>Run per task, or dispatch everything that is ready.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-06">F-06</a>T-5 shows &quot;running&quot; while its session is &quot;blocked · needs you&quot;. T-2 shows &quot;blocked&quot; without saying it waits on question Q-1.</li><li><a class="fref" href="#F-12">F-12</a>&quot;Depends on&quot; and &quot;Retries · compactions&quot; are empty for every row, and take a third of the width.</li></ul>
+</div></div>
+<div class="card screen" id="S15"><a class="shot" href="screens/d13-project-queue.png" title="Open full size"><img loading="lazy" src="screens/d13-project-queue.png" alt="Screenshot: Project queue"></a><div><div class="hd"><span class="sid">S15</span><h3>Project queue</h3><span class="chip amb">Needs work</span></div><div class="addr">/projects/ledgerly/queue</div><p>The same queue for one project.</p><p><span class="chip idea">05 Small true slices</span></p>
+<div class="lbl">Works</div><ul><li>Same clear gate message.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-06">F-06</a>Same status and empty-column problems as the global queue.</li><li><a class="fref" href="#F-03">F-03</a>Tasks are a flat list. They are not grouped by milestone, so the slice being built is not visible.</li></ul>
+</div></div>
+<div class="card screen" id="S16"><a class="shot" href="screens/d23-sessions.png" title="Open full size"><img loading="lazy" src="screens/d23-sessions.png" alt="Screenshot: Sessions"></a><div><div class="hd"><span class="sid">S16</span><h3>Sessions</h3><span class="chip grn">Works</span></div><div class="addr">/sessions</div><p>Which AI members are working now, on what, and how full their context is.</p><p><span class="chip idea">04 People decide, agents do</span></p>
+<div class="lbl">Works</div><ul><li>A blocked member is a red row with one button: Open terminal.</li><li>Context use and what happens when it is full are stated.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-02">F-02</a>A blocked session is also a question in Questions and an item in the phone Inbox: three names for one thing to do.</li></ul>
+</div></div>
+<div class="card screen" id="S17"><a class="shot" href="screens/d24-session.png" title="Open full size"><img loading="lazy" src="screens/d24-session.png" alt="Screenshot: Session: structured view"></a><div><div class="hd"><span class="sid">S17</span><h3>Session: structured view</h3><span class="chip amb">Needs work</span></div><div class="addr">/sessions/S-3</div><p>What a member is doing, as events from its transcript.</p><p><span class="chip idea">04 People decide, agents do</span></p>
+<div class="lbl">Works</div><ul><li>Cancel and the task link are at the top.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-06">F-06</a>The session is blocked, but the reason is in a yellow line at the very bottom, below an almost empty panel.</li><li><a class="fref" href="#F-09">F-09</a>The message box types into the terminal. With a y/n prompt waiting, it is not clear that a message will answer it.</li></ul>
+</div></div>
+<div class="card screen" id="S18"><a class="shot" href="screens/d25-session-terminal.png" title="Open full size"><img loading="lazy" src="screens/d25-session-terminal.png" alt="Screenshot: Session: terminal"></a><div><div class="hd"><span class="sid">S18</span><h3>Session: terminal</h3><span class="chip grn">Works</span></div><div class="addr">/sessions/S-3?view=terminal</div><p>The member&#x27;s real terminal: watch, take control, hand back.</p><p><span class="chip idea">04 People decide, agents do</span></p>
+<div class="lbl">Works</div><ul><li>&quot;watching · read-only&quot; until you take control is the right default, and it is what &quot;a person can watch, stop and take over&quot; means.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-09">F-09</a>The first lines are the launch command with its environment variables and temporary paths.</li></ul>
+</div></div>
+<div class="card screen" id="S19"><a class="shot" href="screens/d22-review.png" title="Open full size"><img loading="lazy" src="screens/d22-review.png" alt="Screenshot: Work review"></a><div><div class="hd"><span class="sid">S19</span><h3>Work review</h3><span class="chip red">Weak</span></div><div class="addr">/reviews/R-1</div><p>A finished task: tests, mockup match, standards, requirements, feedback, and your verdict.</p><p><span class="chip idea">06 Evidence, not assurance</span> <span class="chip idea">04 People decide, agents do</span></p>
+<div class="lbl">Works</div><ul><li>The right five kinds of evidence are on the page, and the reviewer member&#x27;s summary is separate from your verdict.</li><li>Feedback from the rehearsal follows the task into its review.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-01">F-01</a>Every evidence tile is empty (0 pairs, tests not run, standards 0/16, feedback 0/2) and the screen still offers Approve, already selected.</li><li><a class="fref" href="#F-01">F-01</a>Sixteen standards are listed as &quot;unassessed&quot; with no way to assess one, and no note of which apply to this change.</li><li><a class="fref" href="#F-01">F-01</a>The reviewer member recommends &quot;approve&quot; while its own checks are blank. Nothing connects the recommendation to evidence.</li></ul>
+</div></div>
+<div class="card screen" id="S10b"><a class="shot" href="screens/d09-artifacts-tracker.png" title="Open full size"><img loading="lazy" src="screens/d09-artifacts-tracker.png" alt="Screenshot: Artifacts: tracker"></a><div><div class="hd"><span class="sid">S10b</span><h3>Artifacts: tracker</h3><span class="chip amb">Needs work</span></div><div class="addr">/projects/trailmap/artifacts/tracker</div><p>A snapshot of milestones and tasks, written into the repository as a document.</p><p><span class="chip idea">05 Small true slices</span> <span class="chip idea">06 Evidence, not assurance</span></p>
+<div class="lbl">Works</div><ul><li>The plan&#x27;s state travels with the repository, and tasks link to their requirements.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-06">F-06</a>It is a snapshot that someone must write. Its time is shown, but not whether it is behind the live queue.</li><li><a class="fref" href="#F-11">F-11</a>Writing the snapshot only works for a tab named &quot;tracker&quot;.</li></ul>
+</div></div>
+<div class="card screen" id="S20"><a class="shot" href="screens/d11-project-team.png" title="Open full size"><img loading="lazy" src="screens/d11-project-team.png" alt="Screenshot: Project team"></a><div><div class="hd"><span class="sid">S20</span><h3>Project team</h3><span class="chip grn">Works</span></div><div class="addr">/projects/ledgerly/team</div><p>The people and AI members on a project, and each member&#x27;s tuning.</p><p><span class="chip idea">04 People decide, agents do</span></p>
+<div class="lbl">Works</div><ul><li>People and AI members are in one list with their roles.</li><li>Tuning, effective instructions and the difference from the archetype are three tabs.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-10">F-10</a>The persona coach for Atlas is Atlas.</li><li><a class="fref" href="#F-04">F-04</a>People have a role but no stated aim or say at gates; this is where stakeholders would live.</li></ul>
+</div></div>
+<div class="card screen" id="S21"><a class="shot" href="screens/d12-project-member.png" title="Open full size"><img loading="lazy" src="screens/d12-project-member.png" alt="Screenshot: Team member"></a><div><div class="hd"><span class="sid">S21</span><h3>Team member</h3><span class="chip grn">Works</span></div><div class="addr">/projects/ledgerly/team/forge@ledgerly</div><p>One member: harness, model, worktree, tuning, and promoting good tuning to the archetype.</p><p><span class="chip idea">04 People decide, agents do</span></p>
+<div class="lbl">Works</div><ul><li>&quot;Promote to the archetype&quot; lets one project&#x27;s lesson help every project.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-09">F-09</a>The worktree path runs out of its card on the right.</li></ul>
+</div></div>
+<div class="card screen" id="S22"><a class="shot" href="screens/d14-project-sessions.png" title="Open full size"><img loading="lazy" src="screens/d14-project-sessions.png" alt="Screenshot: Project sessions"></a><div><div class="hd"><span class="sid">S22</span><h3>Project sessions</h3><span class="chip amb">Needs work</span></div><div class="addr">/projects/ledgerly/sessions</div><p>Sessions for one project.</p><p><span class="chip idea">04 People decide, agents do</span></p>
+<div class="lbl">Works</div><ul><li>The empty state links to the queue.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-12">F-12</a>With nothing live the page is empty. Recent sessions, which exist, are behind a tab.</li></ul>
+</div></div>
+<h2 id="release">Release and the record</h2><p class="lead">What ships, with what evidence, and the history of who did what and why.</p>
+<div class="card screen" id="S23"><a class="shot" href="screens/d15-project-releases.png" title="Open full size"><img loading="lazy" src="screens/d15-project-releases.png" alt="Screenshot: Releases"></a><div><div class="hd"><span class="sid">S23</span><h3>Releases</h3><span class="chip red">Weak</span></div><div class="addr">/projects/ledgerly/releases</div><p>The latest release and the button that makes the next one.</p><p><span class="chip idea">06 Evidence, not assurance</span></p>
+<div class="lbl">Works</div><ul><li>Preview before releasing, and the release needs no AI session.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-01">F-01</a>&quot;Release now&quot; is offered with a gate pending, a review open and five unpushed commits. Nothing lists what the release would contain or what evidence goes with it.</li><li><a class="fref" href="#F-01">F-01</a>There is no release record: tests that ran, screens against mockups, who approved. The vision calls this the evidence package.</li></ul>
+</div></div>
+<div class="card screen" id="S24"><a class="shot" href="screens/d29-history.png" title="Open full size"><img loading="lazy" src="screens/d29-history.png" alt="Screenshot: History and insights"></a><div><div class="hd"><span class="sid">S24</span><h3>History and insights</h3><span class="chip amb">Needs work</span></div><div class="addr">/history</div><p>Every action by people and agents, with search, and measures of how the team is doing.</p><p><span class="chip idea">06 Evidence, not assurance</span></p>
+<div class="lbl">Works</div><ul><li>Who, what and why are on every row, and people and agents look the same.</li><li>Improvement proposals come with evidence and Accept or Reject.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-07">F-07</a>Each document action appears twice (the action, then its commit), and rows like &quot;Updated T-5&quot; have no reason. The decisions are buried.</li><li><a class="fref" href="#F-07">F-07</a>The six tiles at the top are all zero in a new installation and say nothing about what good looks like.</li></ul>
+</div></div>
+<div class="card screen" id="S25"><a class="shot" href="screens/d30-event.png" title="Open full size"><img loading="lazy" src="screens/d30-event.png" alt="Screenshot: Event detail"></a><div><div class="hd"><span class="sid">S25</span><h3>Event detail</h3><span class="chip amb">Needs work</span></div><div class="addr">/history/E-…</div><p>One event: who, when, what, why, and what followed.</p><p><span class="chip idea">06 Evidence, not assurance</span></p>
+<div class="lbl">Works</div><ul><li>&quot;What happened as a result&quot; is the right question to ask of an event.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-07">F-07</a>&quot;Related to&quot; lists the latest events of every kind when the event has no subject; none of these relate to running the doctor.</li><li><a class="fref" href="#F-07">F-07</a>&quot;Why&quot; is a dash.</li></ul>
+</div></div>
+<div class="card screen" id="S26"><a class="shot" href="screens/d16-project-history.png" title="Open full size"><img loading="lazy" src="screens/d16-project-history.png" alt="Screenshot: Project history"></a><div><div class="hd"><span class="sid">S26</span><h3>Project history</h3><span class="chip amb">Needs work</span></div><div class="addr">/projects/ledgerly/history</div><p>The history for one project.</p><p><span class="chip idea">06 Evidence, not assurance</span></p>
+<div class="lbl">Works</div><ul><li>Complete, in order, with a link to each event.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-07">F-07</a>No search or filter here, unlike the global history. Adding seven team members is seven rows.</li></ul>
+</div></div>
+<h2 id="rules">The rules and the team</h2><p class="lead">Standards every agent reads, and the archetypes members are made from.</p>
+<div class="card screen" id="S27"><a class="shot" href="screens/d28-standards.png" title="Open full size"><img loading="lazy" src="screens/d28-standards.png" alt="Screenshot: Global standards"></a><div><div class="hd"><span class="sid">S27</span><h3>Global standards</h3><span class="chip grn">Works</span></div><div class="addr">/standards/git-workflow</div><p>The rules, how each reaches the agents, and where a project overrides one.</p><p><span class="chip idea">06 Evidence, not assurance</span></p>
+<div class="lbl">Works</div><ul><li>&quot;Delivered as AGENTS.md · CLAUDE.md · GEMINI.md&quot; and &quot;Lens checks every review&quot; show the rule has teeth.</li><li>Overrides per project are listed with the standard.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-01">F-01</a>The promise &quot;Lens checks every review against this standard&quot; is not kept by the review screen, where all 16 are unassessed.</li></ul>
+</div></div>
+<div class="card screen" id="S28"><a class="shot" href="screens/d27-archetypes.png" title="Open full size"><img loading="lazy" src="screens/d27-archetypes.png" alt="Screenshot: Persona archetypes"></a><div><div class="hd"><span class="sid">S28</span><h3>Persona archetypes</h3><span class="chip grn">Works</span></div><div class="addr">/archetypes/developer</div><p>The six roles, their instructions, harness and model, and the change review when one is revised.</p><p><span class="chip idea">04 People decide, agents do</span></p>
+<div class="lbl">Works</div><ul><li>Revisions are explicit: saving makes rev 3, and members move to it only when you apply it.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-12">F-12</a>Courier has no model picker and does not say why (it runs without an AI model).</li></ul>
+</div></div>
+<h2 id="system">System and learning</h2><p class="lead">Setup, health, updates, lessons and help.</p>
+<div class="card screen" id="S29"><a class="shot" href="screens/d31-settings.png" title="Open full size"><img loading="lazy" src="screens/d31-settings.png" alt="Screenshot: Settings"></a><div><div class="hd"><span class="sid">S29</span><h3>Settings</h3><span class="chip amb">Needs work</span></div><div class="addr">/settings</div><p>herdr, harnesses, remote access, identity, dispatch and updates.</p>
+<div class="lbl">Works</div><ul><li>Each harness shows whether it is installed, measured and verified.</li><li>Remote access never replaces another service&#x27;s address and shows the exact command it will run.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-06">F-06</a>Remote access check titles are written as passes (&quot;No other service on go-build-it&#x27;s address&quot;) beside a warning icon whose text says the opposite.</li><li><a class="fref" href="#F-09">F-09</a>The page title carries a long temporary path, and eight sections of machine setup sit at the same level as the two a team would change (dispatch, updates).</li></ul>
+</div></div>
+<div class="card screen" id="S30"><a class="shot" href="screens/d32-settings-herdr.png" title="Open full size"><img loading="lazy" src="screens/d32-settings-herdr.png" alt="Screenshot: herdr setup (doctor)"></a><div><div class="hd"><span class="sid">S30</span><h3>herdr setup (doctor)</h3><span class="chip grn">Works</span></div><div class="addr">/settings/herdr</div><p>Proves herdr and each harness work, with evidence and a fix for each problem.</p><p><span class="chip idea">06 Evidence, not assurance</span></p>
+<div class="lbl">Works</div><ul><li>Every check shows its evidence, the command behind it and a Fix button. This is &quot;evidence, not assurance&quot; done well.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-06">F-06</a>The header says &quot;all good&quot; beside a red &quot;✖ static 13/14&quot; and two warnings.</li></ul>
+</div></div>
+<div class="card screen" id="S31"><a class="shot" href="screens/d17-project-settings.png" title="Open full size"><img loading="lazy" src="screens/d17-project-settings.png" alt="Screenshot: Project settings"></a><div><div class="hd"><span class="sid">S31</span><h3>Project settings</h3><span class="chip amb">Needs work</span></div><div class="addr">/projects/ledgerly/settings</div><p>Stage, website and removing the project.</p>
+<div class="lbl">Works</div><ul><li>Short.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-03">F-03</a>Stage is a dropdown someone must remember to change. It should follow from the gates.</li></ul>
+</div></div>
+<div class="card screen" id="S32"><a class="shot" href="screens/d33-changelog.png" title="Open full size"><img loading="lazy" src="screens/d33-changelog.png" alt="Screenshot: Change log and updates"></a><div><div class="hd"><span class="sid">S32</span><h3>Change log and updates</h3><span class="chip grn">Works</span></div><div class="addr">/changelog</div><p>What changed in each release, and the update button.</p>
+<div class="lbl">Works</div><ul><li>The update card warns that a member is working and says they keep running.</li></ul>
+<div class="lbl">Problems</div><p class="note">None found.</p>
+</div></div>
+<div class="card screen" id="S33"><a class="shot" href="screens/d34-learn.png" title="Open full size"><img loading="lazy" src="screens/d34-learn.png" alt="Screenshot: Learn"></a><div><div class="hd"><span class="sid">S33</span><h3>Learn</h3><span class="chip grn">Works</span></div><div class="addr">/learn</div><p>Eleven lessons in a practice project with scripted AI members.</p>
+<div class="lbl">Works</div><ul><li>Lessons follow the real workflow in order, and &quot;How go-build-it thinks&quot; explains the reasons.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-03">F-03</a>No lesson is about discovery: interviewing, requirements, conflicts. The lessons teach the delivery half.</li></ul>
+</div></div>
+<div class="card screen" id="S34"><a class="shot" href="screens/d35-lesson.png" title="Open full size"><img loading="lazy" src="screens/d35-lesson.png" alt="Screenshot: A lesson"></a><div><div class="hd"><span class="sid">S34</span><h3>A lesson</h3><span class="chip grn">Works</span></div><div class="addr">/learn/around</div><p>Steps that tick themselves off as you do them.</p>
+<div class="lbl">Works</div><ul><li>&quot;Show me&quot; points at the control, and the step says what it is waiting for.</li></ul>
+<div class="lbl">Problems</div><p class="note">None found.</p>
+</div></div>
+<div class="card screen" id="S35"><a class="shot" href="screens/d36-docs.png" title="Open full size"><img loading="lazy" src="screens/d36-docs.png" alt="Screenshot: Docs"></a><div><div class="hd"><span class="sid">S35</span><h3>Docs</h3><span class="chip grn">Works</span></div><div class="addr">/docs</div><p>The user documentation, inside the app.</p>
+<div class="lbl">Works</div><ul><li>Each page names the requirements it covers.</li></ul>
+<div class="lbl">Problems</div><p class="note">None found.</p>
+</div></div>
+<div class="card screen" id="S36"><a class="shot" href="screens/d37-palette.png" title="Open full size"><img loading="lazy" src="screens/d37-palette.png" alt="Screenshot: Search and commands (⌘K)"></a><div><div class="hd"><span class="sid">S36</span><h3>Search and commands (⌘K)</h3><span class="chip amb">Needs work</span></div><div class="addr">⌘K</div><p>Search projects, tasks, docs and commands; each hit shows its CLI command.</p>
+<div class="lbl">Works</div><ul><li>The CLI equivalent beside every hit teaches the CLI for free.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-10">F-10</a>Typing &quot;review&quot; lists twelve help pages first. The open review R-1 and the Reviews page are not in view.</li></ul>
+</div></div>
+<h2 id="phone">Phone</h2><p class="lead">Answering, reviewing and approving away from the desk.</p>
+<div class="card screen ph" id="S37"><a class="shot" href="screens/m01-home.png" title="Open full size"><img loading="lazy" src="screens/m01-home.png" alt="Screenshot: Projects"></a><div><div class="hd"><span class="sid">S37</span><h3>Projects</h3><span class="chip grn">Works</span></div><div class="addr">/m/</div><p>Projects that need you.</p><p><span class="chip idea">01 Agreement is the scarce thing</span></p>
+<div class="lbl">Works</div><ul><li>Only what matters: blocking, waiting, unpushed.</li></ul>
+<div class="lbl">Problems</div><p class="note">None found.</p>
+</div></div>
+<div class="card screen ph" id="S38"><a class="shot" href="screens/m02-project.png" title="Open full size"><img loading="lazy" src="screens/m02-project.png" alt="Screenshot: Project"></a><div><div class="hd"><span class="sid">S38</span><h3>Project</h3><span class="chip grn">Works</span></div><div class="addr">/m/projects/ledgerly</div><p>One project on one screen.</p><p><span class="chip idea">01 Agreement is the scarce thing</span> <span class="chip idea">05 Small true slices</span></p>
+<div class="lbl">Works</div><ul><li>&quot;Needs you&quot; first, then roadmap with gates.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-11">F-11</a>Documents lists the standard tabs even when the project has others.</li></ul>
+</div></div>
+<div class="card screen ph" id="S39"><a class="shot" href="screens/m03-inbox.png" title="Open full size"><img loading="lazy" src="screens/m03-inbox.png" alt="Screenshot: Inbox"></a><div><div class="hd"><span class="sid">S39</span><h3>Inbox</h3><span class="chip grn">Works</span></div><div class="addr">/m/inbox</div><p>Everything waiting for you, in one list.</p><p><span class="chip idea">01 Agreement is the scarce thing</span></p>
+<div class="lbl">Works</div><ul><li>This is the screen the desktop lacks: questions, gates, option sets, proposed values, reviews and blocked members together, ordered by whether work is paused.</li></ul>
+<div class="lbl">Problems</div><p class="note">None found.</p>
+</div></div>
+<div class="card screen ph" id="S40"><a class="shot" href="screens/m04-answer.png" title="Open full size"><img loading="lazy" src="screens/m04-answer.png" alt="Screenshot: Answer a question"></a><div><div class="hd"><span class="sid">S40</span><h3>Answer a question</h3><span class="chip grn">Works</span></div><div class="addr">/m/q/Q-1</div><p>Pick an option, add a note, resume work.</p><p><span class="chip idea">01 Agreement is the scarce thing</span> <span class="chip idea">04 People decide, agents do</span></p>
+<div class="lbl">Works</div><ul><li>One thumb, one button, dictation offered.</li></ul>
+<div class="lbl">Problems</div><p class="note">None found.</p>
+</div></div>
+<div class="card screen ph" id="S41"><a class="shot" href="screens/m05-review.png" title="Open full size"><img loading="lazy" src="screens/m05-review.png" alt="Screenshot: Review"></a><div><div class="hd"><span class="sid">S41</span><h3>Review</h3><span class="chip red">Weak</span></div><div class="addr">/m/review/R-1</div><p>Approve, ask for changes or reject.</p><p><span class="chip idea">06 Evidence, not assurance</span></p>
+<div class="lbl">Works</div><ul><li>Four lines of evidence above three buttons is the right shape.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-01">F-01</a>A green &quot;pass&quot; is shown when no test ran (Unit —, E2E —). Standards 0/16 and Requirements 0/2 sit under it, and Approve is one tap.</li></ul>
+</div></div>
+<div class="card screen ph" id="S42"><a class="shot" href="screens/m06-rehearsal.png" title="Open full size"><img loading="lazy" src="screens/m06-rehearsal.png" alt="Screenshot: Rehearsal step"></a><div><div class="hd"><span class="sid">S42</span><h3>Rehearsal step</h3><span class="chip red">Weak</span></div><div class="addr">/m/rehearsal/G-1</div><p>Walk the steps and give feedback.</p><p><span class="chip idea">05 Small true slices</span></p>
+<div class="lbl">Works</div><ul><li>Step progress and dictated feedback.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-05">F-05</a>The screen under review is an empty grey box that says &quot;Screen preview&quot;. There is nothing to judge.</li></ul>
+</div></div>
+<div class="card screen ph" id="S43"><a class="shot" href="screens/m07-options.png" title="Open full size"><img loading="lazy" src="screens/m07-options.png" alt="Screenshot: Option set"></a><div><div class="hd"><span class="sid">S43</span><h3>Option set</h3><span class="chip grn">Works</span></div><div class="addr">/m/options/OS-1</div><p>One option at a time, tick the parts to keep.</p><p><span class="chip idea">03 Conflict is information</span> <span class="chip idea">04 People decide, agents do</span></p>
+<div class="lbl">Works</div><ul><li>Pros, cons and aspects fit one screen; the reason is required.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-05">F-05</a>The preview shows only the top of the mockup.</li></ul>
+</div></div>
+<div class="card screen ph" id="S44"><a class="shot" href="screens/m08-sessions.png" title="Open full size"><img loading="lazy" src="screens/m08-sessions.png" alt="Screenshot: Sessions"></a><div><div class="hd"><span class="sid">S44</span><h3>Sessions</h3><span class="chip grn">Works</span></div><div class="addr">/m/sessions</div><p>Who is working.</p><p><span class="chip idea">04 People decide, agents do</span></p>
+<div class="lbl">Works</div><ul><li>Blocked is marked; the terminal is one tap away.</li></ul>
+<div class="lbl">Problems</div><p class="note">None found.</p>
+</div></div>
+<div class="card screen ph" id="S45"><a class="shot" href="screens/m09-terminal.png" title="Open full size"><img loading="lazy" src="screens/m09-terminal.png" alt="Screenshot: Terminal"></a><div><div class="hd"><span class="sid">S45</span><h3>Terminal</h3><span class="chip amb">Needs work</span></div><div class="addr">/m/sessions/S-3</div><p>The member&#x27;s terminal with a key bar.</p><p><span class="chip idea">04 People decide, agents do</span></p>
+<div class="lbl">Works</div><ul><li>Esc, Tab, Ctrl, arrows and Enter as keys make a real terminal usable on a phone.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-09">F-09</a>The launch command fills the first lines and runs off the side. &quot;Open in herdr&quot; wraps to three lines.</li><li><a class="fref" href="#F-06">F-06</a>&quot;Waiting for you&quot; is in small grey text at the very bottom.</li></ul>
+</div></div>
+<div class="card screen ph" id="S46"><a class="shot" href="screens/m10-documents.png" title="Open full size"><img loading="lazy" src="screens/m10-documents.png" alt="Screenshot: Documents"></a><div><div class="hd"><span class="sid">S46</span><h3>Documents</h3><span class="chip grn">Works</span></div><div class="addr">/m/projects/trailmap/docs</div><p>The project&#x27;s documents and the compare status of each view.</p><p><span class="chip idea">06 Evidence, not assurance</span></p>
+<div class="lbl">Works</div><ul><li>Compare status per view is on the first screen, with &quot;2 to review&quot;.</li></ul>
+<div class="lbl">Problems</div><p class="note">None found.</p>
+</div></div>
+<div class="card screen ph" id="S47"><a class="shot" href="screens/m11-document.png" title="Open full size"><img loading="lazy" src="screens/m11-document.png" alt="Screenshot: A document"></a><div><div class="hd"><span class="sid">S47</span><h3>A document</h3><span class="chip amb">Needs work</span></div><div class="addr">/m/projects/trailmap/docs/requirements</div><p>Read a document.</p><p><span class="chip idea">02 Discovery never finishes</span></p>
+<div class="lbl">Works</div><ul><li>Readable requirement text.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-10">F-10</a>The page is scaled, so text is soft, and the document&#x27;s own tab strip is cut off at &quot;Tracker&quot;.</li></ul>
+</div></div>
+<div class="card screen ph" id="S48"><a class="shot" href="screens/m12-compare.png" title="Open full size"><img loading="lazy" src="screens/m12-compare.png" alt="Screenshot: Compare"></a><div><div class="hd"><span class="sid">S48</span><h3>Compare</h3><span class="chip amb">Needs work</span></div><div class="addr">/m/projects/trailmap/compare/v02</div><p>Flip between mockup and real app.</p><p><span class="chip idea">06 Evidence, not assurance</span></p>
+<div class="lbl">Works</div><ul><li>Flipping is better than side by side on a phone.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-05">F-05</a>The mockup is squeezed the same way as on the desktop.</li></ul>
+</div></div>
+<div class="card screen ph" id="S49"><a class="shot" href="screens/m13-more.png" title="Open full size"><img loading="lazy" src="screens/m13-more.png" alt="Screenshot: More"></a><div><div class="hd"><span class="sid">S49</span><h3>More</h3><span class="chip amb">Needs work</span></div><div class="addr">/m/more</div><p>Everything else: Learn, desktop-only screens, docs, theme.</p>
+<div class="lbl">Works</div><ul><li>Desktop-only screens are marked as such.</li></ul>
+<div class="lbl">Problems</div><ul><li><a class="fref" href="#F-12">F-12</a>Twenty-six help pages make the screen six screens long; Theme is at the very bottom.</li></ul>
+</div></div>
+<div class="card screen ph" id="S50"><a class="shot" href="screens/m14-changelog.png" title="Open full size"><img loading="lazy" src="screens/m14-changelog.png" alt="Screenshot: Change log"></a><div><div class="hd"><span class="sid">S50</span><h3>Change log</h3><span class="chip grn">Works</span></div><div class="addr">/m/changelog</div><p>What changed, and update.</p>
+<div class="lbl">Works</div><ul><li>Same content as the desktop.</li></ul>
+<div class="lbl">Problems</div><p class="note">None found.</p>
+</div></div>
+<div class="card screen ph" id="S51"><a class="shot" href="screens/m15-learn.png" title="Open full size"><img loading="lazy" src="screens/m15-learn.png" alt="Screenshot: Learn"></a><div><div class="hd"><span class="sid">S51</span><h3>Learn</h3><span class="chip grn">Works</span></div><div class="addr">/m/learn</div><p>The lessons.</p>
+<div class="lbl">Works</div><ul><li>Order and time for each.</li></ul>
+<div class="lbl">Problems</div><p class="note">None found.</p>
+</div></div>
+<h2 id="files">Files</h2>
+<div class="card scroll"><table>
+<tr><th>File</th><th>What it is</th></tr>
+<tr><td><code>docs/mockups/index.html</code></td><td>This page.</td></tr>
+<tr><td><code>docs/mockups/screens/*.png</code></td><td>The screenshots: d01–d37 desktop at 1400 pixels wide, m01–m15 phone at 390. Tall pages are captured up to 2,000 pixels.</td></tr>
+<tr><td><code>scripts/e2e/capture_screens.cjs</code></td><td>Captures them again from a seeded demo: start <code>scripts/demo.sh</code>, then <code>cd web &amp;&amp; node ../scripts/e2e/capture_screens.cjs</code>.</td></tr>
+<tr><td><a href="user-management.html"><code>docs/mockups/user-management.html</code></a></td><td>Mockups for users, sign-in and access control (requirements rev 12). Not built yet, so still a design.</td></tr>
+<tr><td><a href="archive/index.html"><code>docs/mockups/archive/</code></a></td><td>The design mockups the app was built from: three approaches, Approach A chosen. Archived Nov 15, 2026 and no longer updated.</td></tr>
+</table></div>
+</main></body></html>

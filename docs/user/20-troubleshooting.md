@@ -42,6 +42,17 @@ Every result has:
 
 > **Pro tip:** when you ask an AI for help, paste the output of `gbi doctor --report`. It has the versions, your configuration (secrets removed) and every piece of evidence.
 
+## A member or the reviewer is "waiting for you"
+
+The reason in Sessions, Questions and the phone Inbox quotes what the harness's screen shows (FR-205). Common ones:
+- **A model or plan menu** (for example "Fable now runs on usage credits"): set a model for that harness in **Settings → Agent harnesses** (for Claude Code, `opus`), or answer it once in the terminal.
+- **A sign-in screen:** sign the harness in from a terminal, then run the doctor again.
+- **A permission prompt:** answer it in the terminal (**Sessions → Open terminal**). Claude Code members run in auto mode, so these should be rare.
+
+To prove a harness works end to end, run the harness check from a clone of go-build-it: `scripts/harness_e2e.sh` (or `HARNESS=pi scripts/harness_e2e.sh`). It uses a few small prompts.
+
+**herdr does not start and the data folder has a long path:** herdr's socket lives under go-build-it's data folder, and macOS limits socket paths to about 104 bytes. Use a shorter `GBI_HOME`.
+
 ## Checks
 
 ### `herdr.installed`

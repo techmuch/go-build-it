@@ -105,7 +105,7 @@ table.t tr.sec td { background:var(--bg); font-weight:600; font-size:12.5px; col
     <span class="sp"></span>
     <a href="plan.html" style="color:var(--side-t);font-size:13px">Plan</a>
     <a href="../requirements.html" style="color:var(--side-t);font-size:13px">Requirements</a>
-    <a href="../mockups/a-mission-control/desktop.html" style="color:var(--side-t);font-size:13px">Approach A</a>
+    <a href="../mockups/archive/a-mission-control/desktop.html" style="color:var(--side-t);font-size:13px">Approach A</a>
     <button id="theme" type="button" aria-label="Toggle theme">◐ Theme</button>
   </div>
   <nav class="tabs" id="tabs">
@@ -191,9 +191,10 @@ table.t tr.sec td { background:var(--bg); font-weight:600; font-size:12.5px; col
     return "todo";
   }
   function viewLink(v) {
-    if (v === "A-all") return '<a href="../mockups/index.html">mockups overview</a>';
-    var m = v.match(/^A-(v\w+)$/); if (m) return '<a href="../mockups/a-mission-control/desktop.html#' + m[1] + '">A ' + m[1].slice(1) + '</a>';
-    m = v.match(/^A-(M\d+)$/); if (m) return '<a href="../mockups/a-mission-control/mobile.html">A ' + m[1] + '</a>';
+    if (v === "A-all") return '<a href="../mockups/archive/index.html">mockups overview</a>';
+    var u = v.match(/^UM-(\w+)$/); if (u) return '<a href="../mockups/user-management.html#um-' + u[1] + '">UM ' + u[1] + '</a>';
+    var m = v.match(/^A-(v\w+)$/); if (m) return '<a href="../mockups/archive/a-mission-control/desktop.html#' + m[1] + '">A ' + m[1].slice(1) + '</a>';
+    m = v.match(/^A-(M\d+)$/); if (m) return '<a href="../mockups/archive/a-mission-control/mobile.html">A ' + m[1] + '</a>';
     return esc(v);
   }
   function reqChip(r) { return '<a class="chip req" href="../requirements.html#' + r + '" title="' + esc((D.requirements[r] || {}).text || "") + '">' + r + '</a>'; }

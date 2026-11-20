@@ -2,7 +2,7 @@
 // (todo | in-progress | blocked | done) and update "updated". The page reads this file.
 window.TRACKER = {
  "project": "go-build-it",
- "updated": "2026-11-12",
+ "updated": "2026-11-20",
  "sizes": {
   "S": 1,
   "M": 3,
@@ -373,6 +373,105 @@ window.TRACKER = {
     "Scanning the Remote access QR code opens /m/; the address is written under the code and gbi tailscale qr prints it",
     "On a phone, a desktop link (question, project, documents, session) opens the matching mobile screen; Desktop site sticks per device until Mobile UI",
     "On a narrow screen the desktop UI has a ☰ menu (closes on a choice, a tap outside, Esc) and no page is wider than the screen"
+   ]
+  },
+  {
+   "id": "P26",
+   "name": "Harnesses that work in herdr",
+   "mvp": false,
+   "goal": "Real AI harnesses run go-build-it's work in herdr without silent stalls: prompts are delivered, helpers answer, answered questions resume work, reviews see the whole change, and a check proves it before every release.",
+   "gate": "Harness check",
+   "gateCriteria": [
+    "scripts/harness_e2e.sh passes for Claude Code: a task without a permission stop, a helper answer, a blocking question that resumes by itself, a second task in the same conversation",
+    "A stopped harness says what its screen shows (for example a model or plan menu)",
+    "Approving a review with evidence gaps needs a reason; standards that don't apply aren't counted"
+   ]
+  },
+  {
+   "id": "P27",
+   "name": "Dev mode and users",
+   "mvp": false,
+   "goal": "One person on one machine can play two users and try multi-user work: users exist, access roles and grants decide what each may do, every route is checked, and the dev bar switches users and explains each allow or deny.",
+   "gate": "Two users in dev mode",
+   "gateCriteria": [
+    "gbi serve --dev creates david (Owner) and maria (Contributor); the dev bar switches between them on every desktop and phone screen",
+    "As maria, approving a gate is denied and the bar names the missing permission; as david it is allowed",
+    "Every action is recorded as the user acted as, marked dev with who switched",
+    "Dev mode refuses to start while Tailscale Serve or external interfaces are on"
+   ]
+  },
+  {
+   "id": "P28",
+   "name": "The personal Assistant and warm harnesses",
+   "mvp": false,
+   "goal": "Every user has an Assistant, made from the Assistant archetype and tuned in their profile, always running while they are signed in, shown on every screen, and the one every side chat talks to; harnesses are kept warm so replies start quickly.",
+   "gate": "Two Assistants at work",
+   "gateCriteria": [
+    "Switching to maria starts her Assistant; both Assistants show their status in the top bar and on the phone",
+    "Every side chat (artifacts, archetypes, standards, Learn) talks to your Assistant, which drafts a change you accept",
+    "The Assistant drafts an answer and a review verdict for its user and cannot submit either itself",
+    "A warm Assistant starts replying within 5 s; a warm member starts a task within 10 s (NFR-24)"
+   ]
+  },
+  {
+   "id": "P29",
+   "name": "Sign-in",
+   "mvp": false,
+   "goal": "Multi-user mode: people sign in with local accounts and a second step; the CLI, MCP and agent sessions use expiring tokens; loopback and Tailscale are trusted only as configured.",
+   "gate": "Sign-in review",
+   "gateCriteria": [
+    "The owner switches to multi-user mode; maria accepts an invitation, sets a password and a passkey, and signs in",
+    "gbi login gets a token; an agent session's token ends with its session; X-GBI-Persona is ignored",
+    "Loopback is refused until trusted as a named service account; an unlinked Tailscale login gets the sign-in page"
+   ]
+  },
+  {
+   "id": "P30",
+   "name": "People & access (the admin console)",
+   "mvp": false,
+   "goal": "Take 1: People & access with users, statuses, groups, service accounts and custom roles; each project has an Access tab that answers \"can this person do this, and why?\"; access is requested and granted from the inbox.",
+   "gate": "Access review by the owner",
+   "gateCriteria": [
+    "Suspending a user ends their sessions and tokens at once and is recorded with the reason",
+    "A custom role made by ticking permissions shows who it affects before saving",
+    "Check access explains an allow or a deny for any user, AI member and permission",
+    "A person without access requests it; the request lands in the project admin's inbox and can be granted"
+   ]
+  },
+  {
+   "id": "P31",
+   "name": "Harness credentials",
+   "mvp": false,
+   "goal": "Shared or Per user credentials, as one setting: harnesses signed in before go-build-it starts, or API keys per harness and model, each tested by the doctor; work runs on the right person's credentials.",
+   "gate": "Credentials review",
+   "gateCriteria": [
+    "In Per user mode, maria signs in her own Claude Code from her profile and her Assistant runs on it",
+    "An API key is saved, tested, never shown again and never in a log",
+    "Automatic dispatch starts paid work only for a project that names whose credentials pay"
+   ]
+  },
+  {
+   "id": "P32",
+   "name": "Sign-off routes and access review",
+   "mvp": false,
+   "goal": "Gates are signed off by the groups that must sign them, in order or together; sign-offs are tied to versions; an access review finds risky access and exports it.",
+   "gate": "Sign-off rehearsal",
+   "gateCriteria": [
+    "A gate with a two-step route reaches each signer's inbox and shows progress; changing the artifact withdraws the sign-off",
+    "Nobody can sign off their own work",
+    "An access review lists unused accounts and self-approval risks and exports CSV"
+   ]
+  },
+  {
+   "id": "P33",
+   "name": "Single sign-on (OIDC)",
+   "mvp": false,
+   "goal": "People sign in with the organisation's identity provider; groups can follow its claims; a break-glass account stays.",
+   "gate": "SSO sign-in",
+   "gateCriteria": [
+    "Settings test the OIDC connection and show the redirect URL",
+    "A user signs in with SSO and is matched by verified email; a group follows a claim",
+    "Local accounts can be turned off with one break-glass account kept"
    ]
   }
  ],
@@ -4724,6 +4823,1179 @@ window.TRACKER = {
    "status": "done",
    "done": "",
    "q": []
+  },
+  {
+   "id": "P26-01",
+   "phase": "P26",
+   "title": "Resend a task a starting harness dropped (members)",
+   "reqs": [
+    "FR-60",
+    "FR-68"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "internal/sessions/run.go",
+   "q": []
+  },
+  {
+   "id": "P26-02",
+   "phase": "P26",
+   "title": "Claude Code members run in auto permission mode; a mode in the harness flags replaces it",
+   "reqs": [
+    "FR-63"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "internal/harness/profile.go",
+   "q": []
+  },
+  {
+   "id": "P26-03",
+   "phase": "P26",
+   "title": "Answering the last blocking question resumes the task, waiting for a busy member; requested changes start the follow-up",
+   "reqs": [
+    "FR-105",
+    "FR-111"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "internal/questions, internal/app/app.go resumeTask",
+   "q": []
+  },
+  {
+   "id": "P26-04",
+   "phase": "P26",
+   "title": "One-question helpers: folder trust answered before the prompt, dropped prompts resent",
+   "reqs": [
+    "FR-206",
+    "FR-07f"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "internal/sessions/ask.go",
+   "q": []
+  },
+  {
+   "id": "P26-05",
+   "phase": "P26",
+   "title": "Reviewer gets the task, the whole change and the worktree; standards can be marked does not apply; npm and Node tests counted",
+   "reqs": [
+    "FR-112",
+    "FR-112a"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [],
+   "status": "done",
+   "done": "internal/reviews",
+   "q": []
+  },
+  {
+   "id": "P26-06",
+   "phase": "P26",
+   "title": "Evidence gaps: no verdict preselected; approving with gaps needs a reason (desktop and phone); not run is never pass",
+   "reqs": [
+    "FR-112a",
+    "FR-110"
+   ],
+   "views": [
+    "A-v09",
+    "A-M5"
+   ],
+   "size": "S",
+   "deps": [
+    "P26-05"
+   ],
+   "status": "done",
+   "done": "Review.tsx, Mobile.tsx, reviews.go",
+   "q": []
+  },
+  {
+   "id": "P26-07",
+   "phase": "P26",
+   "title": "A stopped harness's screen becomes the reason the person sees",
+   "reqs": [
+    "FR-205",
+    "FR-68"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "internal/sessions/trust.go ScreenSummary",
+   "q": []
+  },
+  {
+   "id": "P26-08",
+   "phase": "P26",
+   "title": "Partial settings changes merge at every depth",
+   "reqs": [
+    "FR-63"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "internal/app/routes.go mergeJSON",
+   "q": []
+  },
+  {
+   "id": "P26-09",
+   "phase": "P26",
+   "title": "One document action is one commit",
+   "reqs": [
+    "FR-46"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [],
+   "status": "done",
+   "done": "courier.CommitArtifacts",
+   "q": []
+  },
+  {
+   "id": "P26-10",
+   "phase": "P26",
+   "title": "Harness check script (NFR-23); measured on Claude Code with model opus",
+   "reqs": [
+    "NFR-23",
+    "FR-07b"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P26-01",
+    "P26-03",
+    "P26-04",
+    "P26-07"
+   ],
+   "status": "done",
+   "done": "scripts/harness_e2e.sh",
+   "q": []
+  },
+  {
+   "id": "P26-11",
+   "phase": "P26",
+   "title": "Screens as built with a review against the vision; design mockups archived",
+   "reqs": [
+    "FR-141",
+    "FR-133"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [],
+   "status": "done",
+   "done": "docs/mockups/index.html, scripts/e2e/capture_screens.cjs",
+   "q": []
+  },
+  {
+   "id": "P26-12",
+   "phase": "P26",
+   "title": "Requirements rev 12–13, ADR-016, user management mockups (Take 1 chosen, section D)",
+   "reqs": [
+    "FR-160",
+    "FR-190",
+    "FR-194",
+    "FR-200"
+   ],
+   "views": [
+    "UM-1a",
+    "UM-D1",
+    "UM-D2",
+    "UM-D3",
+    "UM-D4"
+   ],
+   "size": "M",
+   "deps": [],
+   "status": "done",
+   "done": "docs/requirements.md rev 13; docs/decisions/ADR-016",
+   "q": []
+  },
+  {
+   "id": "P26-13",
+   "phase": "P26",
+   "title": "Doctor names a herdr socket path that is too long for the OS",
+   "reqs": [
+    "FR-07b",
+    "FR-07"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P26-10"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P26-14",
+   "phase": "P26",
+   "title": "Release 2026.11.20.1: signed binaries, install check, harness check",
+   "reqs": [
+    "FR-05",
+    "FR-06",
+    "NFR-23"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P26-10",
+    "P26-11",
+    "P26-12"
+   ],
+   "status": "done",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P27-01",
+   "phase": "P27",
+   "title": "Users table and store: ID, name, email, status, created and last seen; history points at user IDs",
+   "reqs": [
+    "FR-160",
+    "FR-169"
+   ],
+   "views": [
+    "UM-1a"
+   ],
+   "size": "M",
+   "deps": [
+    "P26-14"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P27-02",
+   "phase": "P27",
+   "title": "Permissions, built-in access roles and grants per project (users, groups later, AI members); project default and private projects",
+   "reqs": [
+    "FR-172",
+    "FR-173",
+    "FR-177"
+   ],
+   "views": [
+    "UM-1b",
+    "UM-1c"
+   ],
+   "size": "L",
+   "deps": [
+    "P27-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P27-03",
+   "phase": "P27",
+   "title": "Every route declares its permission in the route table; one check for UI, CLI and MCP; denials name the missing permission",
+   "reqs": [
+    "FR-185",
+    "FR-30",
+    "FR-31"
+   ],
+   "views": [],
+   "size": "L",
+   "deps": [
+    "P27-02"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P27-04",
+   "phase": "P27",
+   "title": "AI members checked the same way, with their archetype's ceiling; acting for a person gets both their permissions",
+   "reqs": [
+    "FR-179"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P27-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P27-05",
+   "phase": "P27",
+   "title": "Solo and multi-user modes; at least one Owner always",
+   "reqs": [
+    "FR-163",
+    "FR-188"
+   ],
+   "views": [
+    "UM-S2"
+   ],
+   "size": "S",
+   "deps": [
+    "P27-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P27-06",
+   "phase": "P27",
+   "title": "Dev mode: gbi serve --dev, refused while reachable from other machines, shown in doctor and Settings",
+   "reqs": [
+    "FR-190"
+   ],
+   "views": [
+    "UM-D1"
+   ],
+   "size": "S",
+   "deps": [
+    "P27-05"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P27-07",
+   "phase": "P27",
+   "title": "Dev bar on every desktop and phone screen; switch user in one click and gbi dev as USER",
+   "reqs": [
+    "FR-191"
+   ],
+   "views": [
+    "UM-D1"
+   ],
+   "size": "M",
+   "deps": [
+    "P27-06",
+    "P27-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P27-08",
+   "phase": "P27",
+   "title": "Two dev users on first start; add more from the bar",
+   "reqs": [
+    "FR-192"
+   ],
+   "views": [
+    "UM-D1"
+   ],
+   "size": "S",
+   "deps": [
+    "P27-07"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P27-09",
+   "phase": "P27",
+   "title": "Dev actions recorded as the user, marked dev with who switched; the bar explains the last allow or deny",
+   "reqs": [
+    "FR-193",
+    "FR-186",
+    "FR-178"
+   ],
+   "views": [
+    "UM-D1"
+   ],
+   "size": "M",
+   "deps": [
+    "P27-07"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P27-10",
+   "phase": "P27",
+   "title": "Per-user inbox, projects and pins follow the acting user",
+   "reqs": [
+    "FR-170"
+   ],
+   "views": [
+    "UM-1d"
+   ],
+   "size": "M",
+   "deps": [
+    "P27-07"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P27-11",
+   "phase": "P27",
+   "title": "Tests (route permission table, dev bar UAT for two users), docs, CHANGELOG, release",
+   "reqs": [
+    "FR-133",
+    "FR-130",
+    "NFR-23"
+   ],
+   "views": [
+    "UM-D1"
+   ],
+   "size": "M",
+   "deps": [
+    "P27-08",
+    "P27-09",
+    "P27-10",
+    "P27-04"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P28-01",
+   "phase": "P28",
+   "title": "Assistant archetype (system-wide); each user's Assistant made from it; tuning and harness/model choice in the profile",
+   "reqs": [
+    "FR-195",
+    "FR-12b"
+   ],
+   "views": [
+    "UM-D3"
+   ],
+   "size": "M",
+   "deps": [
+    "P27-11"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P28-02",
+   "phase": "P28",
+   "title": "Assistant always running while its user is signed in or switched to; own herdr pane per user; idle stop; conversation resumed",
+   "reqs": [
+    "FR-196"
+   ],
+   "views": [
+    "UM-D3"
+   ],
+   "size": "M",
+   "deps": [
+    "P28-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P28-03",
+   "phase": "P28",
+   "title": "Assistant status chip on every desktop and phone screen; the Assistant panel",
+   "reqs": [
+    "FR-197"
+   ],
+   "views": [
+    "UM-D2"
+   ],
+   "size": "M",
+   "deps": [
+    "P28-02"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P28-04",
+   "phase": "P28",
+   "title": "Every side chat talks to your Assistant (artifacts, archetypes, standards, persona coach, Learn)",
+   "reqs": [
+    "FR-194"
+   ],
+   "views": [
+    "UM-D2"
+   ],
+   "size": "L",
+   "deps": [
+    "P28-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P28-05",
+   "phase": "P28",
+   "title": "Assistant acts with its user's permissions and a token bound to both; drafts decisions for the user to confirm",
+   "reqs": [
+    "FR-198",
+    "FR-199",
+    "FR-167"
+   ],
+   "views": [
+    "UM-D2"
+   ],
+   "size": "M",
+   "deps": [
+    "P28-02",
+    "P27-04"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P28-06",
+   "phase": "P28",
+   "title": "Warm harnesses: Assistants and members of projects with queued work kept started within count and memory limits; Settings shows each with memory",
+   "reqs": [
+    "FR-204"
+   ],
+   "views": [
+    "UM-D4"
+   ],
+   "size": "L",
+   "deps": [
+    "P28-02"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": [
+    "Q17"
+   ]
+  },
+  {
+   "id": "P28-07",
+   "phase": "P28",
+   "title": "Measure start and reply times and memory per harness; set the defaults; NFR-24 in the harness check",
+   "reqs": [
+    "NFR-24",
+    "NFR-23"
+   ],
+   "views": [
+    "UM-D4"
+   ],
+   "size": "S",
+   "deps": [
+    "P28-06"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": [
+    "Q17"
+   ]
+  },
+  {
+   "id": "P28-08",
+   "phase": "P28",
+   "title": "Tests, docs, CHANGELOG, release",
+   "reqs": [
+    "FR-133",
+    "FR-130"
+   ],
+   "views": [
+    "UM-D2"
+   ],
+   "size": "M",
+   "deps": [
+    "P28-04",
+    "P28-05",
+    "P28-07"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P29-01",
+   "phase": "P29",
+   "title": "Local accounts: Argon2id passwords, leaked-password check, admin reset",
+   "reqs": [
+    "FR-161",
+    "NFR-22"
+   ],
+   "views": [
+    "UM-S1"
+   ],
+   "size": "M",
+   "deps": [
+    "P27-11"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P29-02",
+   "phase": "P29",
+   "title": "Second step: passkeys (WebAuthn) and one-time codes (TOTP); required per setting",
+   "reqs": [
+    "FR-161"
+   ],
+   "views": [
+    "UM-S1",
+    "UM-S2"
+   ],
+   "size": "L",
+   "deps": [
+    "P29-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": [
+    "Q15"
+   ]
+  },
+  {
+   "id": "P29-03",
+   "phase": "P29",
+   "title": "Web sessions: expiry, idle timeout, secure cookies, CSRF, lockout after failed tries",
+   "reqs": [
+    "FR-168",
+    "FR-186"
+   ],
+   "views": [
+    "UM-S2"
+   ],
+   "size": "M",
+   "deps": [
+    "P29-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P29-04",
+   "phase": "P29",
+   "title": "Loopback untrusted in multi-user mode; trust as a named service account, with the warning",
+   "reqs": [
+    "FR-164",
+    "NFR-21"
+   ],
+   "views": [
+    "UM-S2"
+   ],
+   "size": "S",
+   "deps": [
+    "P29-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P29-05",
+   "phase": "P29",
+   "title": "Tailscale identity only for linked users",
+   "reqs": [
+    "FR-165",
+    "FR-17"
+   ],
+   "views": [
+    "UM-S1"
+   ],
+   "size": "S",
+   "deps": [
+    "P29-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P29-06",
+   "phase": "P29",
+   "title": "gbi login (device code), expiring revocable tokens for CLI and MCP",
+   "reqs": [
+    "FR-166"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P29-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P29-07",
+   "phase": "P29",
+   "title": "Agent sessions get short-lived tokens; X-GBI-Persona ignored in multi-user mode; gbi users recover",
+   "reqs": [
+    "FR-167"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P29-06"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P29-08",
+   "phase": "P29",
+   "title": "Tests, docs, CHANGELOG, release",
+   "reqs": [
+    "FR-133",
+    "FR-130"
+   ],
+   "views": [
+    "UM-S1"
+   ],
+   "size": "M",
+   "deps": [
+    "P29-02",
+    "P29-04",
+    "P29-05",
+    "P29-07"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P30-01",
+   "phase": "P30",
+   "title": "People & access → Users: statuses and filters, invitations by email, bulk actions; gbi users",
+   "reqs": [
+    "FR-169",
+    "FR-170"
+   ],
+   "views": [
+    "UM-1a"
+   ],
+   "size": "L",
+   "deps": [
+    "P29-08"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": [
+    "Q15"
+   ]
+  },
+  {
+   "id": "P30-02",
+   "phase": "P30",
+   "title": "A person's page: status, sign-in methods, projects and roles with where each came from, sessions and tokens, access history",
+   "reqs": [
+    "FR-170"
+   ],
+   "views": [
+    "UM-1d"
+   ],
+   "size": "M",
+   "deps": [
+    "P30-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P30-03",
+   "phase": "P30",
+   "title": "Groups and service accounts",
+   "reqs": [
+    "FR-171"
+   ],
+   "views": [
+    "UM-1a"
+   ],
+   "size": "M",
+   "deps": [
+    "P30-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P30-04",
+   "phase": "P30",
+   "title": "Custom access roles: tick permissions, start from a role, gate types, versions, who it affects; risky permissions marked",
+   "reqs": [
+    "FR-174",
+    "FR-175"
+   ],
+   "views": [
+    "UM-1b"
+   ],
+   "size": "L",
+   "deps": [
+    "P30-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P30-05",
+   "phase": "P30",
+   "title": "Project → Access tab and Check access",
+   "reqs": [
+    "FR-178",
+    "FR-177"
+   ],
+   "views": [
+    "UM-1c"
+   ],
+   "size": "M",
+   "deps": [
+    "P30-04"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P30-06",
+   "phase": "P30",
+   "title": "Request access from a link; requests in the access managers' inbox on desktop and phone",
+   "reqs": [
+    "FR-181"
+   ],
+   "views": [
+    "UM-2d"
+   ],
+   "size": "M",
+   "deps": [
+    "P30-05"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P30-07",
+   "phase": "P30",
+   "title": "Nobody signs off their own work; more than one approver per project",
+   "reqs": [
+    "FR-180"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P30-05"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P30-08",
+   "phase": "P30",
+   "title": "Tests, docs, CHANGELOG, release",
+   "reqs": [
+    "FR-133",
+    "FR-130"
+   ],
+   "views": [
+    "UM-1a"
+   ],
+   "size": "M",
+   "deps": [
+    "P30-02",
+    "P30-06",
+    "P30-07"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P31-01",
+   "phase": "P31",
+   "title": "Shared or Per user setting; Settings → Harnesses shows the credential for each harness and model",
+   "reqs": [
+    "FR-200",
+    "FR-202"
+   ],
+   "views": [
+    "UM-D4"
+   ],
+   "size": "M",
+   "deps": [
+    "P28-08"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P31-02",
+   "phase": "P31",
+   "title": "Harness signed in inside a user's own config folder, guided in a herdr pane",
+   "reqs": [
+    "FR-201"
+   ],
+   "views": [
+    "UM-D3",
+    "UM-D4"
+   ],
+   "size": "M",
+   "deps": [
+    "P31-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P31-03",
+   "phase": "P31",
+   "title": "API keys per harness and model, encrypted, never shown again or logged",
+   "reqs": [
+    "FR-201",
+    "NFR-22"
+   ],
+   "views": [
+    "UM-D4"
+   ],
+   "size": "M",
+   "deps": [
+    "P31-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P31-04",
+   "phase": "P31",
+   "title": "Work runs on the starter's credentials; automatic dispatch only for projects naming whose credentials pay",
+   "reqs": [
+    "FR-203"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P31-02",
+    "P31-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P31-05",
+   "phase": "P31",
+   "title": "Doctor tests each credential and that the configured model starts without a menu",
+   "reqs": [
+    "FR-202",
+    "FR-205",
+    "FR-07b"
+   ],
+   "views": [
+    "UM-D4"
+   ],
+   "size": "S",
+   "deps": [
+    "P31-04"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P31-06",
+   "phase": "P31",
+   "title": "Tests (harness check in Per user mode), docs, CHANGELOG, release",
+   "reqs": [
+    "FR-133",
+    "NFR-23"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P31-05"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P32-01",
+   "phase": "P32",
+   "title": "Sign-off routes per gate type: groups or roles, in order or together, how many from each",
+   "reqs": [
+    "FR-182",
+    "FR-115"
+   ],
+   "views": [
+    "UM-3c"
+   ],
+   "size": "L",
+   "deps": [
+    "P30-08"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P32-02",
+   "phase": "P32",
+   "title": "Sign-offs tied to versions; changes withdraw them; delegation for a period",
+   "reqs": [
+    "FR-183",
+    "FR-184"
+   ],
+   "views": [
+    "UM-3c"
+   ],
+   "size": "M",
+   "deps": [
+    "P32-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P32-03",
+   "phase": "P32",
+   "title": "Access review: findings, decisions with reasons, CSV export",
+   "reqs": [
+    "FR-187"
+   ],
+   "views": [
+    "UM-3d"
+   ],
+   "size": "M",
+   "deps": [
+    "P30-08"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P32-04",
+   "phase": "P32",
+   "title": "Temporary elevation with a reason, approved and ended by itself (later phase)",
+   "reqs": [
+    "FR-189"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P32-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P32-05",
+   "phase": "P32",
+   "title": "Project-defined roles in docs/gbi.toml under a ceiling: not planned (Take 2); revisit only if asked",
+   "reqs": [
+    "FR-176"
+   ],
+   "views": [
+    "UM-2c"
+   ],
+   "size": "S",
+   "deps": [],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P32-06",
+   "phase": "P32",
+   "title": "Tests, docs, CHANGELOG, release",
+   "reqs": [
+    "FR-133",
+    "FR-130"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P32-02",
+    "P32-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P33-01",
+   "phase": "P33",
+   "title": "OIDC settings: issuer, client, secret, connection test, redirect URL",
+   "reqs": [
+    "FR-162"
+   ],
+   "views": [
+    "UM-S2"
+   ],
+   "size": "M",
+   "deps": [
+    "P29-08"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": [
+    "Q14"
+   ]
+  },
+  {
+   "id": "P33-02",
+   "phase": "P33",
+   "title": "Sign in with SSO; match by verified email; groups from a claim; local accounts off with break-glass",
+   "reqs": [
+    "FR-162",
+    "FR-171"
+   ],
+   "views": [
+    "UM-S1"
+   ],
+   "size": "L",
+   "deps": [
+    "P33-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": [
+    "Q14"
+   ]
+  },
+  {
+   "id": "P33-03",
+   "phase": "P33",
+   "title": "Tests, docs, CHANGELOG, release",
+   "reqs": [
+    "FR-133",
+    "FR-130"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P33-02"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
   }
  ],
  "requirements": {
@@ -4902,6 +6174,166 @@ window.TRACKER = {
   "FR-26": {
    "text": "Users SHOULD be able to define additional custom roles.",
    "section": "4.3 Roles"
+  },
+  "FR-160": {
+   "text": "Every person SHALL be a user:",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-161": {
+   "text": "go-build-it SHALL support local accounts first:",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-162": {
+   "text": "go-build-it SHALL support single sign-on with OIDC (for example Entra ID, Okta, Google Workspace or Keycloak) as the next sign-in method; it is required, though the provider is not",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-163": {
+   "text": "An installation SHALL run in solo mode (one owner, today's behaviour, no sign-in from this machine) or multi-user mode.",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-164": {
+   "text": "In multi-user mode, loopback requests SHALL NOT be trusted by default.",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-165": {
+   "text": "In multi-user mode, a Tailscale identity SHALL only identify a user that is linked to it (by an admin, or by the user after signing in).",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-166": {
+   "text": "The CLI SHALL sign in with gbi login (a device-code flow in the browser) and keep a token that expires (default 30 days) and can be revoked.",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-167": {
+   "text": "Agent sessions SHALL get their own short-lived token, bound to the session and its task and ending with it, in place of the X-GBI-Persona header that any local process can send.",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-168": {
+   "text": "Web sessions SHALL expire (default 12 hours, 30 minutes idle; both settings), use secure, HTTP-only, same-site cookies, and be protected against cross-site request forgery.",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-169": {
+   "text": "A user SHALL have one status:",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-170": {
+   "text": "Admins SHALL invite users by email, choosing their first groups or project access.",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-171": {
+   "text": "go-build-it SHALL support groups (for example the stakeholder kinds:",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-172": {
+   "text": "Access SHALL be built from permissions.",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-173": {
+   "text": "An access role SHALL be a named set of permissions with a scope (project or system).",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-174": {
+   "text": "Admins SHALL be able to create custom access roles from the start, as flexible as custom artifact tabs (FR-151):",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-175": {
+   "text": "Permissions that spend money (start agent work) or can't be undone (merge and release) SHALL be marked wherever roles are edited or granted.",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-176": {
+   "text": "Projects MAY define their own roles in the repository (for example [roles] in docs/gbi.toml), within a ceiling the server admin sets:",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-177": {
+   "text": "A grant SHALL give a user, a group or an AI member an access role on one project, or on all projects.",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-178": {
+   "text": "A project's access list SHALL show every grant with where it came from (direct, a group, the project default, an archetype) and SHALL answer \"can this person do this, and why?\" for",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-179": {
+   "text": "AI members SHALL be subject to the same permission checks as people.",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-180": {
+   "text": "Nobody signs off their own work:",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-181": {
+   "text": "Someone who opens a link to a project they can't see SHALL be offered Request access with a reason.",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-182": {
+   "text": "A gate type MAY name the groups or roles that must sign it off, in order or side by side, with how many from each (a sign-off route).",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-183": {
+   "text": "A sign-off SHALL record who, when, which version of the artifact or release, and the comment.",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-184": {
+   "text": "A signer MAY delegate a step for a period (for example during leave); the delegation SHALL be recorded and shown on the route.",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-185": {
+   "text": "Every API route SHALL declare the permission it needs, in the route table (FR-31), so the web UIs, CLI and MCP server are all checked in the same place.",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-186": {
+   "text": "The history SHALL record sign-ins, failed sign-ins and sign-outs; status changes; grants added, changed, expired and removed; role changes; token creation and revocation; loopback-",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-187": {
+   "text": "An admin or auditor SHALL be able to run an access review:",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-188": {
+   "text": "There SHALL always be at least one active Owner; the last one SHALL NOT be suspended, deactivated or demoted.",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-189": {
+   "text": "Temporary elevation MAY be requested (a role on a project for a set time, with a reason) and approved by someone who manages that project's access; it SHALL end by itself and be re",
+   "section": "4.4 Users, sign-in and access control (rev 12)"
+  },
+  "FR-190": {
+   "text": "go-build-it SHALL have a dev mode, turned on by starting the server with gbi serve --dev (or dev = true in config.toml).",
+   "section": "4.5 Dev mode (rev 13)"
+  },
+  "FR-191": {
+   "text": "In dev mode a dev bar SHALL be fixed at the top of every desktop and phone screen, in a warning colour that no other part of the UI uses.",
+   "section": "4.5 Dev mode (rev 13)"
+  },
+  "FR-192": {
+   "text": "On the first start in dev mode go-build-it SHALL offer to create two dev users (an owner and a second person, for example david and maria) with their Assistants (§4.6), so multi-us",
+   "section": "4.5 Dev mode (rev 13)"
+  },
+  "FR-193": {
+   "text": "Every action taken in dev mode SHALL be recorded as the user acted as, marked dev with the person who switched; and the dev bar SHALL show why the last request was allowed or denie",
+   "section": "4.5 Dev mode (rev 13)"
+  },
+  "FR-194": {
+   "text": "Every user SHALL have a personal Assistant:",
+   "section": "4.6 The personal Assistant (rev 13)"
+  },
+  "FR-195": {
+   "text": "An Assistant archetype SHALL be defined system-wide (instructions, harness, model), like the other archetypes (FR-12).",
+   "section": "4.6 The personal Assistant (rev 13)"
+  },
+  "FR-196": {
+   "text": "A user's Assistant SHALL be always running while the user is signed in:",
+   "section": "4.6 The personal Assistant (rev 13)"
+  },
+  "FR-197": {
+   "text": "The Assistant's status SHALL be shown on every screen (desktop top bar and phone header):",
+   "section": "4.6 The personal Assistant (rev 13)"
+  },
+  "FR-198": {
+   "text": "The Assistant SHALL act with its user's permissions and never more (FR-179).",
+   "section": "4.6 The personal Assistant (rev 13)"
+  },
+  "FR-199": {
+   "text": "The Assistant SHALL use go-build-it through the CLI and MCP server with a token bound to its user and to itself (FR-167), so its access can be checked and ended like any token.",
+   "section": "4.6 The personal Assistant (rev 13)"
   },
   "FR-30": {
    "text": "Everything that can be done in the web UI SHALL also be possible through the CLI, so AI agents can operate the application.",
@@ -5147,6 +6579,34 @@ window.TRACKER = {
    "text": "go-build-it's herdr client types SHALL be generated from herdr's published API schema, so an incompatible change fails the build.",
    "section": "8.4 Upstream tracking"
   },
+  "FR-200": {
+   "text": "A system setting SHALL choose how harnesses are paid for:",
+   "section": "8.5 Harness credentials and warm harnesses (rev 13)"
+  },
+  "FR-201": {
+   "text": "A harness credential SHALL be one of:",
+   "section": "8.5 Harness credentials and warm harnesses (rev 13)"
+  },
+  "FR-202": {
+   "text": "Settings, and each user's profile in Per user mode, SHALL show which credential each harness and model uses, and SHALL test it with the doctor (FR-07b) without starting project wor",
+   "section": "8.5 Harness credentials and warm harnesses (rev 13)"
+  },
+  "FR-203": {
+   "text": "In Per user mode, agent work SHALL run on the credentials of the user who started it.",
+   "section": "8.5 Harness credentials and warm harnesses (rev 13)"
+  },
+  "FR-204": {
+   "text": "go-build-it SHALL keep warm harnesses started ahead of need:",
+   "section": "8.5 Harness credentials and warm harnesses (rev 13)"
+  },
+  "FR-205": {
+   "text": "When a harness stops at a screen go-build-it does not answer (a model or plan menu, a sign-in, a permission), the reason the person sees SHALL be that screen's text, and the doctor",
+   "section": "8.5 Harness credentials and warm harnesses (rev 13)"
+  },
+  "FR-206": {
+   "text": "A short-lived harness used for one question (a reviewer's assessment, release notes) SHALL get the same care as a member:",
+   "section": "8.5 Harness credentials and warm harnesses (rev 13)"
+  },
   "FR-90": {
    "text": "The application SHALL work with both GitHub (gh) and GitLab (glab), and SHALL detect which one each project uses and whether its CLI is authenticated.",
    "section": "9. Git, GitHub and GitLab workflow"
@@ -5213,6 +6673,10 @@ window.TRACKER = {
   },
   "FR-112": {
    "text": "The review of completed work SHALL be an assessment, not primarily a code diff.",
+   "section": "10.2 Feedback on completed work"
+  },
+  "FR-112a": {
+   "text": "(rev 13) The reviewer SHALL be given the whole change (the task, the diff since the branch left the main line, the worktree to read) and the tests go-build-it ran.",
    "section": "10.2 Feedback on completed work"
   },
   "FR-115": {
@@ -5324,15 +6788,27 @@ window.TRACKER = {
    "section": "13. Security posture"
   },
   "NFR-21": {
-   "text": "Access control relies on network exposure and Tailscale (§4.2).",
+   "text": "Access control relies on network exposure and Tailscale (§4.2) in solo mode, and on sign-in and per-project permissions (§4.4) in multi-user mode.",
+   "section": "13. Security posture"
+  },
+  "NFR-23": {
+   "text": "(rev 13) Before every release, the harness check (scripts/harness_e2e.sh) SHALL pass for each harness marked verified.",
+   "section": "13. Security posture"
+  },
+  "NFR-24": {
+   "text": "(rev 13) With warm harnesses (FR-204), a user's Assistant SHALL begin replying within 5 seconds, and a member SHALL begin a task within 10 seconds of it being started.",
+   "section": "13. Security posture"
+  },
+  "NFR-22": {
+   "text": "(rev 12) Passwords, tokens and OIDC secrets SHALL never be written to logs, the history or the repository.",
    "section": "13. Security posture"
   }
  },
  "questions": {
-  "Q1": "For access through an external network interface (FR-18), what should the challenge be: a local password or token, an OAuth/OIDC provider, or refusing external access completely and requiring Tailscale Serve?",
+  "Q1": "For access through an external network interface (FR-18), what should the challenge be? Answered 2026-11-12: sign-in (§4.4): local accounts with a second step first, OIDC required next (provider not chosen yet).",
   "Q2": "Check that each target harness supports headless operation and reports context-window usage. Claude Code reports usage in its streaming JSON output. OpenCode offers a non-interactive mode (opencode run) and a server mode; how it reports context usage needs to be confirmed. Antigravity's headless and CLI support needs to be confirmed.",
   "Q3": "When smart handoffs graduate from experimental, what is the default context threshold, and should it be configurable per harness or model? What evidence (rework rate, handoff quality vs. compaction) decides that they are ready?",
-  "Q4": "Can multiple humans collaborate on the same projects (e.g. different Tailscale users with different roles), or is it single-user with optional reviewers?",
+  "Q4": "Can multiple humans collaborate on the same projects? Answered 2026-11-11/12: yes, on one shared server, with their own accounts, statuses and per-project access roles (§4.4).",
   "Q5": "What is the exact default git workflow (branch naming, PR/MR requirements, merge strategy)?",
   "Q6": "What is the mechanism and channel for auto-updates? Answered: GitHub Releases with signed checksums (ADR-004). Rev 4 adds the in-app change log and guided updates with step progress (ADR-011).",
   "Q7": "How should attachable (headed) sessions work? Answered (rev 3): every session runs in herdr; see ADR-009.",
@@ -5340,6 +6816,11 @@ window.TRACKER = {
   "Q9": "Windows support level? Answered 2026-11-08: ship Windows at herdr's beta level, with herdr in the Windows CI job. A herdr capability missing on Windows is shown as unavailable there. See ADR-009.",
   "Q10": "Archetype change propagation (FR-12b)? Answered 2026-11-08: a proposal per affected member, plus one action to apply the change to every member that has not overridden the changed fields. See ADR-010.",
   "Q11": "Should the doctor's prompt tier (FR-07b) ever run on its own? Answered 2026-11-09: no. It runs only when asked for, because it uses tokens. See ADR-012.",
-  "Q12": "Should lessons use a sandbox or a real project? Answered 2026-11-09: a practice project with the scripted fake harness by default (FR-136); the last lesson moves to a real project. Claude Code is the main harness example (FR-137). See ADR-012."
+  "Q12": "Should lessons use a sandbox or a real project? Answered 2026-11-09: a practice project with the scripted fake harness by default (FR-136); the last lesson moves to a real project. Claude Code is the main harness example (FR-137). See ADR-012.",
+  "Q13": "Which user management take? Answered 2026-11-20: Take 1, the admin console. Dev mode first (§4.5), then the personal Assistant (§4.6). Project-defined roles (FR-176) are not planned.",
+  "Q14": "Which OIDC provider will be used first (FR-162)?",
+  "Q15": "Is the second sign-in step required for everyone, or only for admins and approvers (FR-161)? May project admins invite people who have no account yet?",
+  "Q16": "May an AI member ever approve a gate (for example the AI reviewer on a low-risk gate), or never (FR-179)? *(Rev 13: the personal Assistant never decides on its own; it drafts for its user, FR-198.)*",
+  "Q17": "How much memory may warm harnesses use by default (FR-204)? To be set from measurements in dev mode."
  }
 };

@@ -142,8 +142,16 @@ func TestMemberTrustScreenAnswered(t *testing.T) {
 		t.Fatal(err)
 	}
 	e.waitStatus(tk.ID, queue.Review)
+	// Forge's own trust screen is answered, and so is the one for the reviewer's helper,
+	// which assesses the finished task in its own folder.
 	evs, _ := e.a.Hist.List(e.ctx, historyQueryType("agent.trusted"))
-	if len(evs) != 1 || evs[0].Subject != "Forge" || evs[0].ProjectID != "demo" {
+	forge := 0
+	for _, ev := range evs {
+		if ev.Subject == "Forge" && ev.ProjectID == "demo" {
+			forge++
+		}
+	}
+	if forge != 1 || len(evs) > 2 {
 		t.Fatalf("agent.trusted events: %+v", evs)
 	}
 	if blocked, _ := e.a.Hist.List(e.ctx, historyQueryType("session.blocked")); len(blocked) != 0 {

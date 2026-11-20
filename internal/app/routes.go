@@ -387,7 +387,7 @@ func (a *App) updateSettings(c *api.Ctx) (any, error) {
 		if k == "listen" || k == "defaultUser" {
 			continue // changed only in config.toml (needs restart / affects identity)
 		}
-		merged[k] = v
+		merged[k] = mergeJSON(merged[k], v)
 	}
 	b, _ := json.Marshal(merged)
 	if err := json.Unmarshal(b, a.Cfg); err != nil {
@@ -406,6 +406,21 @@ func (a *App) updateSettings(c *api.Ctx) (any, error) {
 		a.Sessions.SetAuto(a.Cfg.AutoDispatch)
 	}
 	return a.Cfg, nil
+}
+
+// mergeJSON applies a partial change: objects are merged key by key at every depth, so
+// {"harnesses":{"claude":{"model":"opus"}}} changes the model and keeps the rest.
+// Anything else (a value, a list, null) replaces what was there.
+func mergeJSON(cur, change json.RawMessage) json.RawMessage {
+	var c, ch map[string]json.RawMessage
+	if json.Unmarshal(cur, &c) != nil || json.Unmarshal(change, &ch) != nil || c == nil || ch == nil {
+		return change
+	}
+	for k, v := range ch {
+		c[k] = mergeJSON(c[k], v)
+	}
+	b, _ := json.Marshal(c)
+	return b
 }
 
 func (a *App) harnesses(c *api.Ctx) (any, error) {

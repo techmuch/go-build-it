@@ -6,6 +6,30 @@ To release, run `gbi dev changelog release YYYY.MM.DD.N`, then `VERSION=YYYY.MM.
 
 ## [Unreleased]
 
+## [2026.11.20.1] - 2026-11-20
+
+### Added
+
+- **Harness check** (NFR-23). `scripts/harness_e2e.sh` proves a real AI harness works inside herdr the way go-build-it uses it: a member works a task without stopping, the reviewer answers, answering a blocking question resumes the task by itself, and a member takes a second task in its conversation. It runs in its own data folder and herdr session, and prints the screen of any harness that stopped. It passes for Claude Code.
+- **Evidence gaps in reviews** (FR-112a). A review lists what is missing: no tests ran, tests failed, requirements not met or not assessed, feedback not addressed. No verdict is selected for you, and approving with gaps needs a reason, on the desktop and the phone. The phone no longer shows "pass" when no test ran.
+- **Mockups tab: the screens as built.** Every screen is captured from a seeded demo (`scripts/e2e/capture_screens.cjs`) and reviewed against the vision. The design mockups the app was built from are archived under `docs/mockups/archive/`.
+- **Plan for users, dev mode and the personal Assistant** (requirements rev 13, ADR-016, tracker P27–P33). User management follows Take 1, the admin console; dev mode and a personal Assistant for every user come first. Mockups in `docs/mockups/user-management.html`, section D.
+
+### Changed
+
+- **The reviewer sees the whole change** (FR-112). It is given the task, every commit since the branch left the main line, and the worktree to read, instead of a list of changed files. A standard that does not apply to the change is marked so and not counted. go-build-it now runs `npm test` and counts Vitest, Jest and Node test-runner results.
+- **The project's reviewer reviews** its project's work (it used to be the first reviewer of any project).
+- **Claude Code members start in auto permission mode** (FR-63), so builds, tests and `gbi` commands no longer stop for approval. Put a `--permission-mode` in the harness's flags to choose another.
+- **Answering a blocking question restarts the task** (FR-105), once its last blocking question is answered, waiting for the member to finish its turn. **Requesting changes** starts the follow-up the same way.
+- **One document action is one commit** (FR-46). Creating a project's standard documents made a commit per file.
+
+### Fixed
+
+- **A task sent to a harness that was still starting was lost** (FR-60). The member sat idle, the session failed after 45 seconds and the task went back to the queue. The task is now sent again, twice at most, for members and for one-question helpers (FR-206).
+- **The reviewer stopped at the folder-trust screen** (FR-07f) when it appeared after the harness reported it had started. It is now answered before the question is sent.
+- **A stopped harness said only "needs you"** (FR-205). The reason now quotes its screen, for example Claude Code's "Fable now runs on usage credits · Switch to Opus 5.5" menu, which stopped every new Claude Code session on plans without usage credits. Set a model for Claude Code in Settings (for example `opus`) to avoid it.
+- **Changing one harness setting cleared the others.** `gbi settings update --data '{"harnesses":{"claude":{"model":"opus"}}}'` turned Claude Code off and cleared its path. Partial changes now merge at every depth.
+
 ## [2026.11.12.3] - 2026-11-12
 
 ### Added

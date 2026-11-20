@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -53,16 +54,22 @@ type Tests struct {
 
 // Assessment is the review content (FR-112).
 type Assessment struct {
-	Mockups        []MockupPair `json:"mockups"`
-	Tests          Tests        `json:"tests"`
-	Standards      []Check      `json:"standards"`
-	Feedback       []Check      `json:"feedback"`
-	Requirements   []Check      `json:"requirements"`
-	DiffStat       string       `json:"diffStat"`
-	Summary        string       `json:"summary"`
-	Recommendation string       `json:"recommendation"`
-	GeneratedAt    string       `json:"generatedAt"`
-	PRURL          string       `json:"prUrl"`
+	Mockups      []MockupPair `json:"mockups"`
+	Tests        Tests        `json:"tests"`
+	Standards    []Check      `json:"standards"`
+	Feedback     []Check      `json:"feedback"`
+	Requirements []Check      `json:"requirements"`
+	DiffStat     string       `json:"diffStat"`
+	// Gaps lists the evidence that is missing or against the change. Approving with gaps
+	// needs a stated reason (FR-112).
+	Gaps []string `json:"gaps"`
+	// Base is the commit the change is compared with: where its branch left the main line.
+	Base            string `json:"base,omitempty"`
+	diff, dir, task string
+	Summary         string `json:"summary"`
+	Recommendation  string `json:"recommendation"`
+	GeneratedAt     string `json:"generatedAt"`
+	PRURL           string `json:"prUrl"`
 }
 
 // Review is a pending or decided review.
@@ -83,8 +90,11 @@ type Review struct {
 
 // Hooks connect reviews to Courier, Lens and rehearsal feedback.
 type Hooks struct {
-	Merge    func(ctx context.Context, taskID string) error
-	Lens     func(ctx context.Context, prompt string) (string, error)
+	Merge func(ctx context.Context, taskID string) error
+	// Lens asks the project's reviewer member to assess a change.
+	Lens func(ctx context.Context, projectID, prompt string) (string, error)
+	// Resume starts a task again after changes were requested.
+	Resume   func(ctx context.Context, taskID string)
 	Feedback func(ctx context.Context, t queue.Task) []Check
 	Workdir  func(projectID, taskID string) string
 	Assign   func(ctx context.Context, t queue.Task) string // picks a human reviewer (P9-08)
@@ -230,6 +240,9 @@ func (s *Service) Verdict(ctx context.Context, id, verdict, comment string) (Rev
 	}
 	switch verdict {
 	case "approve":
+		if len(r.Assessment.Gaps) > 0 && strings.TrimSpace(comment) == "" {
+			return r, errors.New("the evidence has gaps (" + strings.Join(r.Assessment.Gaps, "; ") + "): say why you approve anyway")
+		}
 		r.Status = "approved"
 	case "changes":
 		r.Status = "changes"
@@ -259,7 +272,10 @@ func (s *Service) Verdict(ctx context.Context, id, verdict, comment string) (Rev
 	case "changes":
 		t.ContextNote = strings.TrimSpace(t.ContextNote + fmt.Sprintf("\n\nReview %s by %s requested changes: %s", id, a.Name, comment))
 		_, _ = s.queue.Update(ctx, t)
-		_, _ = s.queue.SetStatus(ctx, t.ID, queue.Queued, "changes requested in "+id)
+		// The person asked for changes: start the follow-up now, without a second click.
+		if _, err := s.queue.SetStatus(ctx, t.ID, queue.Queued, "changes requested in "+id); err == nil && s.Hooks.Resume != nil {
+			go s.Hooks.Resume(context.WithoutCancel(ctx), t.ID)
+		}
 	case "reject":
 		_, _ = s.queue.SetStatus(ctx, t.ID, queue.Failed, "rejected in "+id+": "+comment)
 	}
@@ -285,10 +301,23 @@ func (s *Service) Assess(ctx context.Context, t queue.Task) Assessment {
 		a.Tests = RunTests(ctx, dir)
 	}
 	if t.Branch != "" {
-		if out, err := exec.CommandContext(ctx, "git", "-C", dir, "diff", "--stat", "HEAD~1..HEAD").Output(); err == nil {
+		// The whole change: everything on the task's branch since it left the main line, not
+		// only its last commit.
+		a.Base = "HEAD~1"
+		for _, main := range []string{"main", "master"} {
+			if out, err := exec.CommandContext(ctx, "git", "-C", dir, "merge-base", "HEAD", main).Output(); err == nil && strings.TrimSpace(string(out)) != "" {
+				a.Base = strings.TrimSpace(string(out))
+				break
+			}
+		}
+		if out, err := exec.CommandContext(ctx, "git", "-C", dir, "diff", "--stat", a.Base+"..HEAD").Output(); err == nil {
 			a.DiffStat = strings.TrimSpace(string(out))
 		}
+		if out, err := exec.CommandContext(ctx, "git", "-C", dir, "diff", a.Base+"..HEAD").Output(); err == nil {
+			a.diff = string(out)
+		}
 	}
+	a.dir, a.task = dir, strings.TrimSpace(t.Description)
 	reqText := requirementText(filepath.Join(dir, "docs", "requirements.md"))
 	for _, r := range t.Reqs {
 		a.Requirements = append(a.Requirements, Check{Item: strings.TrimSpace(r + " " + reqText[r]), Status: "unassessed"})
@@ -317,7 +346,49 @@ func (s *Service) Assess(ctx context.Context, t queue.Task) Assessment {
 			}
 		}
 	}
+	a.Gaps = a.gaps()
 	return a
+}
+
+// gaps names what an approver would be approving without.
+func (a Assessment) gaps() []string {
+	out := []string{}
+	count := func(xs []Check, statuses ...string) int {
+		n := 0
+		for _, c := range xs {
+			for _, st := range statuses {
+				if c.Status == st {
+					n++
+				}
+			}
+		}
+		return n
+	}
+	switch {
+	case !a.Tests.Ran:
+		out = append(out, "no tests ran")
+	case a.Tests.UnitFailed+a.Tests.E2EFailed > 0:
+		out = append(out, fmt.Sprintf("%d tests failed", a.Tests.UnitFailed+a.Tests.E2EFailed))
+	}
+	if n := count(a.Requirements, "not", "partly"); n > 0 {
+		out = append(out, fmt.Sprintf("%d requirements not fully met", n))
+	}
+	if n := count(a.Requirements, "unassessed"); n > 0 {
+		out = append(out, fmt.Sprintf("%d requirements not assessed", n))
+	}
+	if n := count(a.Standards, "not", "partly"); n > 0 {
+		out = append(out, fmt.Sprintf("%d standards not fully met", n))
+	}
+	if n := count(a.Feedback, "not", "partly", "unassessed"); n > 0 {
+		out = append(out, fmt.Sprintf("%d feedback items not addressed", n))
+	}
+	for _, m := range a.Mockups {
+		if m.Mockup != "" && m.Built == "" {
+			out = append(out, "a mockup has no screenshot of the built screen")
+			break
+		}
+	}
+	return out
 }
 
 // lens asks the Reviewer persona to fill in statuses as JSON.
@@ -338,16 +409,32 @@ func (s *Service) lens(ctx context.Context, t queue.Task, a *Assessment) {
 		items = append(items, item{"feedback", i, c.Item})
 	}
 	ib, _ := json.Marshal(items)
+	tests := "not run: go-build-it found no test command for this project"
+	if a.Tests.Ran {
+		tests = fmt.Sprintf("%s: %d passed, %d failed; end-to-end %d passed, %d failed. %s", a.Tests.Command, a.Tests.UnitPassed, a.Tests.UnitFailed, a.Tests.E2EPassed, a.Tests.E2EFailed, trunc(a.Tests.Output, 1500))
+	}
 	prompt := fmt.Sprintf(`Assess task %s "%s" for review.
-Diff summary:
+
+What the task asked for:
 %s
-Tests: %+v
+
+The change is in the folder %s (a git worktree, compared with commit %s). You may read any file there and run read-only commands in it (git diff, git log, the project's tests). Do not change anything in it.
+
+Files changed:
+%s
+
+The change:
+%s
+
+Tests go-build-it ran: %s
 
 Items to assess (JSON): %s
 
-Answer ONLY with JSON: {"summary": "two sentences", "recommendation": "approve|changes", "checks": [{"group":"…","index":0,"status":"met|partly|not","evidence":"…"}]}`,
-		t.ID, t.Title, trunc(a.DiffStat, 3000), a.Tests, ib)
-	out, err := s.Hooks.Lens(ctx, prompt)
+Judge each item from what you read, and quote the file or line that shows it. Use "na" for an item that does not apply to this change (for example a backend standard on a documents-only change); never mark such an item "met".
+
+Answer ONLY with JSON: {"summary": "two sentences", "recommendation": "approve|changes", "checks": [{"group":"…","index":0,"status":"met|partly|not|na","evidence":"…"}]}`,
+		t.ID, t.Title, trunc(firstLine(a.task, "(no description)"), 4000), a.dir, trunc(a.Base, 12), trunc(a.DiffStat, 3000), trunc(a.diff, 60000), tests, ib)
+	out, err := s.Hooks.Lens(ctx, t.ProjectID, prompt)
 	if err != nil {
 		a.Summary = "Lens could not assess: " + err.Error()
 		return
@@ -383,7 +470,10 @@ Answer ONLY with JSON: {"summary": "two sentences", "recommendation": "approve|c
 			group = a.Feedback
 		}
 		if c.Index >= 0 && c.Index < len(group) {
-			group[c.Index].Status, group[c.Index].Evidence = c.Status, c.Evidence
+			switch c.Status {
+			case "met", "partly", "not", "na":
+				group[c.Index].Status, group[c.Index].Evidence = c.Status, c.Evidence
+			}
 		}
 	}
 }
@@ -464,6 +554,9 @@ func RunTests(ctx context.Context, dir string) Tests {
 			t.Coverage = covs[len(covs)-1] + "% (last package)"
 		}
 	}
+	if !t.Ran {
+		npmTests(ctx, dir, &t)
+	}
 	for _, rp := range []string{"web/test-results/results.json", "test-results/results.json"} {
 		b, err := os.ReadFile(filepath.Join(dir, rp))
 		if err != nil {
@@ -482,6 +575,81 @@ func RunTests(ctx context.Context, dir string) Tests {
 		}
 	}
 	return t
+}
+
+// firstLine returns s, or alt when s is empty.
+func firstLine(s, alt string) string {
+	if strings.TrimSpace(s) == "" {
+		return alt
+	}
+	return s
+}
+
+var (
+	npmPassedRe = regexp.MustCompile(`(?m)^\s*Tests\s+.*?(\d+) passed`)
+	npmFailedRe = regexp.MustCompile(`(?m)^\s*Tests\s+.*?(\d+) failed`)
+	nodePassRe  = regexp.MustCompile(`(?m)^\s*(?:ℹ|#)\s*pass\s+(\d+)`)
+	nodeFailRe  = regexp.MustCompile(`(?m)^\s*(?:ℹ|#)\s*fail\s+(\d+)`)
+	ansiRe      = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+)
+
+// npmTests runs "npm test" for a project whose package.json has a test script (Vitest and
+// Jest print "Tests  3 failed | 12 passed"). Without counts, the exit code decides.
+func npmTests(ctx context.Context, dir string, t *Tests) {
+	b, err := os.ReadFile(filepath.Join(dir, "package.json"))
+	if err != nil {
+		return
+	}
+	var pkg struct {
+		Scripts map[string]string `json:"scripts"`
+	}
+	if json.Unmarshal(b, &pkg) != nil || strings.TrimSpace(pkg.Scripts["test"]) == "" {
+		return
+	}
+	run := func(args ...string) (string, error) {
+		cmd := exec.CommandContext(ctx, "npm", args...)
+		cmd.Dir = dir
+		cmd.Env = append(os.Environ(), "CI=1", "NO_COLOR=1")
+		out, err := cmd.CombinedOutput()
+		return ansiRe.ReplaceAllString(string(out), ""), err
+	}
+	if !exists(filepath.Join(dir, "node_modules")) {
+		if out, err := run("install", "--no-audit", "--no-fund"); err != nil {
+			t.Ran, t.Command, t.UnitFailed, t.Output = true, "npm install", 1, "npm install failed:\n"+tail(out, 1500)
+			return
+		}
+	}
+	out, err := run("test")
+	t.Ran, t.Command = true, "npm test"
+	if m := npmPassedRe.FindStringSubmatch(out); m != nil {
+		t.UnitPassed, _ = strconv.Atoi(m[1])
+	}
+	if m := npmFailedRe.FindStringSubmatch(out); m != nil {
+		t.UnitFailed, _ = strconv.Atoi(m[1])
+	}
+	// Node's own test runner prints "ℹ pass 24" and "ℹ fail 0" (or "# pass 24" as TAP).
+	if t.UnitPassed+t.UnitFailed == 0 {
+		if m := nodePassRe.FindStringSubmatch(out); m != nil {
+			t.UnitPassed, _ = strconv.Atoi(m[1])
+		}
+		if m := nodeFailRe.FindStringSubmatch(out); m != nil {
+			t.UnitFailed, _ = strconv.Atoi(m[1])
+		}
+	}
+	if err != nil {
+		if t.UnitFailed == 0 {
+			t.UnitFailed = 1
+		}
+		t.Output = tail(out, 2000)
+	}
+}
+
+// tail returns the last n bytes of s.
+func tail(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	return "…" + s[len(s)-n:]
 }
 
 var reqLineRe = regexp.MustCompile(`^- \*\*((?:FR|NFR)-\d+[a-z]?)\*\*: (.*)`)

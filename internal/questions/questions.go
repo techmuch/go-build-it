@@ -60,6 +60,8 @@ type Hooks struct {
 	StopSession   func(ctx context.Context, taskID string)
 	SendToSession func(ctx context.Context, sessionID, text string) error
 	ProposeValue  func(ctx context.Context, projectID, text, source string) error
+	// Resume starts a task again after its last blocking question is answered.
+	Resume func(ctx context.Context, taskID string)
 }
 
 // Service manages questions.
@@ -230,7 +232,16 @@ func (s *Service) Answer(ctx context.Context, id, answer, choice string, propose
 				sent = s.Hooks.SendToSession(ctx, q.SessionID, "Answer to "+q.ID+": "+text) == nil
 			}
 			if !sent && t.Status == queue.Blocked {
-				_, _ = s.queue.SetStatus(ctx, t.ID, queue.Queued, "answer received for "+q.ID)
+				// A task that asked several blocking questions waits for all of them. Once the
+				// last is answered it is queued and started again: the person asked for the work
+				// to resume, whether or not automatic dispatch is on.
+				var waiting int
+				_ = s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM questions WHERE task_id=? AND status='open' AND blocking=1`, t.ID).Scan(&waiting)
+				if waiting == 0 {
+					if _, err := s.queue.SetStatus(ctx, t.ID, queue.Queued, "answer received for "+q.ID); err == nil && s.Hooks.Resume != nil {
+						go s.Hooks.Resume(context.WithoutCancel(ctx), t.ID)
+					}
+				}
 			}
 		}
 	}

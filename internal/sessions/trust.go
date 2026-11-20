@@ -212,3 +212,37 @@ func (m *Manager) answerTrust(ctx context.Context, h *herdr.Client, projectID, w
 		Data:    history.Data(map[string]any{"folder": dir, "pane": pane, "harness": label})})
 	return true
 }
+
+// screenReason is what a stopped harness is showing, in one line, so the person sees why it
+// needs them without opening the terminal (for example a model or sign-in menu).
+func screenReason(ctx context.Context, h *herdr.Client, pane string) string {
+	text, err := h.Read(ctx, pane, "visible", 40)
+	if err != nil || strings.TrimSpace(text) == "" {
+		return ""
+	}
+	return ScreenSummary(text)
+}
+
+// ScreenSummary keeps the last few meaningful lines of a terminal screen: the dialog, not the
+// banner, the separators or the key hints.
+func ScreenSummary(text string) string {
+	var lines []string
+	for _, l := range strings.Split(text, "\n") {
+		t := strings.TrimSpace(l)
+		if t == "" || strings.Trim(t, "─━-═╌ ") == "" || strings.HasPrefix(t, "Enter to") || strings.HasPrefix(t, "Esc to") {
+			continue
+		}
+		lines = append(lines, t)
+	}
+	if len(lines) > 6 {
+		lines = lines[len(lines)-6:]
+	}
+	out := strings.Join(lines, " · ")
+	if len([]rune(out)) > 320 {
+		out = string([]rune(out)[:320]) + "…"
+	}
+	if out == "" {
+		return ""
+	}
+	return ": " + out
+}

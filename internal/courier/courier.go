@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -358,6 +359,49 @@ func (c *Courier) CommitArtifact(ctx context.Context, p projects.Project, rel, c
 	}
 	c.hist.Must(ctx, history.Event{ProjectID: p.ID, Type: "artifact.revised", Subject: clean, Summary: fmt.Sprintf("Committed %s (%s)", clean, hash), Why: message,
 		Data: history.Data(map[string]any{"hash": hash, "author": author})})
+	return hash, nil
+}
+
+// CommitArtifacts writes several files and commits them together: one commit, one push and
+// one history event for one action (for example creating a project's standard documents).
+func (c *Courier) CommitArtifacts(ctx context.Context, p projects.Project, files map[string]string, message, author string) (string, error) {
+	ctx = c.ctx(ctx)
+	paths := make([]string, 0, len(files))
+	for rel, content := range files {
+		clean := filepath.Clean(rel)
+		if strings.HasPrefix(clean, "..") || filepath.IsAbs(clean) {
+			return "", fmt.Errorf("invalid artifact path %q", rel)
+		}
+		full := filepath.Join(p.Path, clean)
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			return "", err
+		}
+		if err := os.WriteFile(full, []byte(content), 0o644); err != nil {
+			return "", err
+		}
+		paths = append(paths, clean)
+	}
+	sort.Strings(paths)
+	if _, err := c.git.Run(ctx, p.Path, "git", append([]string{"add", "--"}, paths...)...); err != nil {
+		return "", err
+	}
+	args := append([]string{"-c", "user.name=" + firstNonEmpty(author, Name), "-c", "user.email=courier@go-build-it.local", "commit", "-m", message, "--"}, paths...)
+	if _, err := c.git.Run(ctx, p.Path, "git", args...); err != nil {
+		if strings.Contains(err.Error(), "nothing to commit") || strings.Contains(err.Error(), "no changes added") {
+			return "", fmt.Errorf("no changes to save")
+		}
+		return "", err
+	}
+	hash, _ := c.git.Run(ctx, p.Path, "git", "rev-parse", "--short", "HEAD")
+	if p.Remote != "" {
+		if br := c.git.CurrentBranch(ctx, p.Path); br != "" {
+			if err := c.git.Push(ctx, p.Path, br); err != nil {
+				c.hist.Must(ctx, history.Event{ProjectID: p.ID, Type: "git.push_failed", Subject: paths[0], Summary: "Could not push artifact revision", Why: err.Error()})
+			}
+		}
+	}
+	c.hist.Must(ctx, history.Event{ProjectID: p.ID, Type: "artifact.revised", Subject: paths[0], Summary: fmt.Sprintf("Committed %d documents (%s)", len(paths), hash), Why: message,
+		Data: history.Data(map[string]any{"hash": hash, "author": author, "paths": paths})})
 	return hash, nil
 }
 

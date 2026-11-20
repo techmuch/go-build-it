@@ -114,11 +114,27 @@ func withModel(args []string, flag, model string) []string {
 	return args
 }
 
+// hasFlag reports whether flags sets name, as "--name value" or "--name=value".
+func hasFlag(flags []string, name string) bool {
+	for _, f := range flags {
+		if f == name || strings.HasPrefix(f, name+"=") {
+			return true
+		}
+	}
+	return false
+}
+
 func init() {
 	register(Profile{Name: "claude", Label: "Claude Code", Kind: "claude", Binary: "claude", Integration: "claude", ChoosesID: true, Window: 200_000, UsageMeasured: true, Verified: true,
 		models: fixed("built in to go-build-it (Claude Code has no list command)", claudeModels),
 		launch: func(model string, flags []string, conv string, resume bool) []string {
-			args := []string{"--permission-mode", "acceptEdits"}
+			// Auto mode: Claude Code runs safe commands (builds, tests, gbi) itself and still
+			// stops for risky ones. With acceptEdits a member stopped at every shell command.
+			// A --permission-mode in the harness's flags replaces it (FR-63).
+			var args []string
+			if !hasFlag(flags, "--permission-mode") {
+				args = []string{"--permission-mode", "auto"}
+			}
 			args = withModel(args, "--model", model)
 			if resume {
 				args = append(args, "--resume", conv)

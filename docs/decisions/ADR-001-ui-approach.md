@@ -3,7 +3,7 @@
 Status: Accepted · 2026-11-08 · Tracker: P0-03
 
 ## Decision
-Build the desktop and mobile UIs from Approach A, rev 2 (`docs/mockups/a-mission-control/`).
+Build the desktop and mobile UIs from Approach A, rev 2 (`docs/mockups/a-mission-control/`, archived on 2026-11-15 to `docs/mockups/archive/a-mission-control/`).
 
 ## Borrowed from B and C
 - From C: the ⌘K command palette that shows the CLI equivalent of each action (FR-30).

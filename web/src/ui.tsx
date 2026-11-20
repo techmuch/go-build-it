@@ -41,10 +41,11 @@ export function Loading({ what }: { what?: string }) { return <div className="em
 const STATUS: Record<string, string> = {
   queued: '', running: 'acc', blocked: 'red', review: 'amb', done: 'grn', failed: 'red', paused: 'amb',
   open: 'amb', answered: 'grn', skipped: '', pending: 'amb', approved: 'grn', changes: 'red', rejected: 'red', decided: 'grn',
-  rate_limited: 'amb', cancelled: '', active: 'acc', planned: '', starting: 'acc', met: 'grn', partly: 'amb', not: 'red', unassessed: '',
+  rate_limited: 'amb', cancelled: '', active: 'acc', planned: '', starting: 'acc', met: 'grn', partly: 'amb', not: 'red', unassessed: '', na: '',
   accepted: 'grn', proposed: 'acc', dismissed: '',
 };
-export function Status({ s }: { s: string }) { return <Chip c={STATUS[s] ?? ''}>{s.replace('_', ' ')}</Chip>; }
+const STATUS_LABEL: Record<string, string> = { na: 'does not apply', not: 'not met', unassessed: 'not assessed' };
+export function Status({ s }: { s: string }) { return <Chip c={STATUS[s] ?? ''}>{STATUS_LABEL[s] ?? s.replace('_', ' ')}</Chip>; }
 
 export function A({ to, children, className }: { to: string; children: ReactNode; className?: string }) {
   return <a href={to} className={className} onClick={(e) => { if (e.metaKey || e.ctrlKey) return; e.preventDefault(); navigate(to); }}>{children}</a>;

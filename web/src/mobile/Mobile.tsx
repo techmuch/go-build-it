@@ -110,7 +110,8 @@ function ReviewScreen({ id }: { id: string }) {
   const { run, busy } = useAction();
   if (!r) return <Screen title="Review" back="/m/inbox"><Loading /></Screen>;
   const a = r.assessment || {}, t = a.tests || {};
-  const met = (xs: any[]) => `${(xs || []).filter((x) => x.status === 'met').length}/${(xs || []).length}`;
+  const met = (xs: any[]) => `${(xs || []).filter((x) => x.status === 'met').length}/${(xs || []).filter((x) => x.status !== 'na').length}`;
+  const gaps: string[] = a.gaps || [];
   const pair = (a.mockups || []).find((m: any) => m.mockup && m.built) || (a.mockups || [])[0];
   const items = pair ? [pair.mockup && { name: 'Mockup', kind: kindOf(pair.mockup), url: `/raw/${r.projectId}/${pair.mockup}` }, pair.built && { name: 'Built', kind: 'image', url: `/raw/${r.projectId}/${pair.built}` }].filter(Boolean) : [];
   const verdict = (v: string) => run(() => api.reviews.verdict(id, { verdict: v, comment: text }), 'Review submitted').then((x) => x && navigate('/m/inbox'));
@@ -119,13 +120,14 @@ function ReviewScreen({ id }: { id: string }) {
       <div className="m-shot">{pair?.mockup ? 'Mockup ⤢' : 'no mockup'}</div><div className="m-shot" style={{ background: 'var(--card)' }}>{pair?.built ? <img src={`/raw/${r.projectId}/${pair.built}`} alt="built" style={{ maxWidth: '100%', maxHeight: 90 }} /> : 'no screenshot'}</div></div>}
     {a.summary && <div className="small">{a.summary}</div>}
     <div className="m-card m-flush">
-      <div className="m-li"><span>🧪 Unit {t.ran ? `${t.unitPassed}/${t.unitPassed + t.unitFailed}` : '—'} · E2E {t.e2ePassed + t.e2eFailed ? `${t.e2ePassed}/${t.e2ePassed + t.e2eFailed}` : '—'}</span><Chip c={t.unitFailed || t.e2eFailed ? 'red' : 'grn'}>{t.unitFailed || t.e2eFailed ? 'fail' : 'pass'}</Chip></div>
+      <div className="m-li"><span>🧪 Unit {t.ran ? `${t.unitPassed}/${t.unitPassed + t.unitFailed}` : '—'} · E2E {t.e2ePassed + t.e2eFailed ? `${t.e2ePassed}/${t.e2ePassed + t.e2eFailed}` : '—'}</span>{t.unitFailed || t.e2eFailed ? <Chip c="red">fail</Chip> : t.ran ? <Chip c="grn">pass</Chip> : <Chip>not run</Chip>}</div>
       <div className="m-li"><span>📐 Standards {met(a.standards)}</span></div>
       <div className="m-li"><span>💬 Feedback {met(a.feedback)}</span></div>
       <div className="m-li"><span>📋 Requirements {met(a.requirements)}</span></div>
     </div>
-    {r.status === 'pending' ? <><DictArea value={text} onChange={setText} placeholder="Comment (required to request changes)" />
-      <div className="m-row" style={{ gap: 8 }}><button type="button" className="m-btn d" disabled={busy} onClick={() => verdict('reject')}>Reject</button><button type="button" className="m-btn" disabled={busy || !text} onClick={() => verdict('changes')}>Changes</button><button type="button" className="m-btn p" disabled={busy} onClick={() => verdict('approve')}>Approve</button></div></>
+    {r.status === 'pending' ? <>{gaps.length > 0 && <div className="small" data-testid="evidence-gaps" style={{ color: 'var(--amb)' }}><b>Evidence gaps:</b> {gaps.join('; ')}. Approving needs a reason.</div>}
+      <DictArea value={text} onChange={setText} placeholder={gaps.length ? 'Comment (required to approve with gaps, or to request changes)' : 'Comment (required to request changes)'} />
+      <div className="m-row" style={{ gap: 8 }}><button type="button" className="m-btn d" disabled={busy} onClick={() => verdict('reject')}>Reject</button><button type="button" className="m-btn" disabled={busy || !text} onClick={() => verdict('changes')}>Changes</button><button type="button" className="m-btn p" disabled={busy || (gaps.length > 0 && !text.trim())} onClick={() => verdict('approve')}>Approve</button></div></>
       : <div className="small muted">{r.reviewer} {r.status} {ago(r.decidedAt)}</div>}
     {viewer && <Viewer items={items as any} index={0} onClose={() => setViewer(false)} title={r.id} projectId={r.projectId} />}
   </Screen>;

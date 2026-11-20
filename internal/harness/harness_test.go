@@ -78,10 +78,14 @@ func TestAgyAndPiReaders(t *testing.T) {
 
 func TestLaunchArgsAndPaths(t *testing.T) {
 	c, _ := Get("claude")
-	if got := strings.Join(c.Args("opus", nil, "abc", false), " "); got != "--permission-mode acceptEdits --model opus --session-id abc" {
+	if got := strings.Join(c.Args("opus", nil, "abc", false), " "); got != "--permission-mode auto --model opus --session-id abc" {
 		t.Fatalf("claude new %q", got)
 	}
-	if got := strings.Join(c.Args("", nil, "abc", true), " "); got != "--permission-mode acceptEdits --resume abc" {
+	// A permission mode in the harness's flags replaces the default (FR-63).
+	if got := strings.Join(c.Args("", []string{"--permission-mode", "acceptEdits"}, "abc", false), " "); got != "--session-id abc --permission-mode acceptEdits" {
+		t.Fatalf("claude args with its own permission mode: %s", got)
+	}
+	if got := strings.Join(c.Args("", nil, "abc", true), " "); got != "--permission-mode auto --resume abc" {
 		t.Fatalf("claude resume %q", got)
 	}
 	if p := c.TranscriptPath("/tmp/x.y_z", "abc"); !strings.HasSuffix(p, filepath.Join("projects", "-tmp-x-y-z", "abc.jsonl")) && !strings.Contains(p, "-private-tmp-x-y-z") {

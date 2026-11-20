@@ -1,6 +1,6 @@
 # go-build-it — Phased delivery plan
 
-Status: Draft · 2026-11-12 · Based on [requirements rev 10](../requirements.md) and [Approach A mockups](../mockups/a-mission-control/desktop.html) · Live status: [tracker](index.html)
+Status: Draft · 2026-11-20 · Based on [requirements rev 10](../requirements.md) and [Approach A mockups, archived](../mockups/archive/a-mission-control/desktop.html) · [screens as built](../mockups/index.html) · Live status: [tracker](index.html)
 
 ## 1. How this plan is built
 
@@ -50,6 +50,14 @@ Status: Draft · 2026-11-12 · Based on [requirements rev 10](../requirements.md
 | P23 | Remote access |  | 6 | 10 | ◆ Remote access UAT |
 | P24 | Model discovery & landing link |  | 6 | 8 | ◆ Model picker review |
 | P25 | Phones get the mobile UI |  | 7 | 7 | ◆ Phone review |
+| P26 | Harnesses that work in herdr |  | 14 | 22 | ◆ Harness check |
+| P27 | Dev mode and users |  | 11 | 37 | ◆ Two users in dev mode |
+| P28 | The personal Assistant and warm harnesses |  | 8 | 32 | ◆ Two Assistants at work |
+| P29 | Sign-in |  | 8 | 25 | ◆ Sign-in review |
+| P30 | People & access (the admin console) |  | 8 | 32 | ◆ Access review by the owner |
+| P31 | Harness credentials |  | 6 | 16 | ◆ Credentials review |
+| P32 | Sign-off routes and access review |  | 6 | 21 | ◆ Sign-off rehearsal |
+| P33 | Single sign-on (OIDC) |  | 3 | 12 | ◆ SSO sign-in |
 
 ## 3. Critical path
 
@@ -610,6 +618,169 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 | **P25-05** Lessons started on the phone tick their visit steps ✅ | S | FR-134, FR-35 | A-M13 | P25-03 |
 | **P25-06** Tests, UAT and keyboard steps, docs and CHANGELOG ✅ | S | FR-133, FR-130, FR-06a | A-M15 | P25-02, P25-03, P25-04, P25-05 |
 | **P25-07** Release 2026.11.12.3: signed binaries, install check ✅ | S | FR-05, FR-06 | — | P25-06 |
+
+### P26 · Harnesses that work in herdr
+
+**Goal:** Real AI harnesses run go-build-it's work in herdr without silent stalls: prompts are delivered, helpers answer, answered questions resume work, reviews see the whole change, and a check proves it before every release.
+
+**◆ Gate: Harness check.** Passes when:
+- scripts/harness_e2e.sh passes for Claude Code: a task without a permission stop, a helper answer, a blocking question that resumes by itself, a second task in the same conversation
+- A stopped harness says what its screen shows (for example a model or plan menu)
+- Approving a review with evidence gaps needs a reason; standards that don't apply aren't counted
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P26-01** Resend a task a starting harness dropped (members) ✅ | S | FR-60, FR-68 | — | — |
+| **P26-02** Claude Code members run in auto permission mode; a mode in the harness flags replaces it ✅ | S | FR-63 | — | — |
+| **P26-03** Answering the last blocking question resumes the task, waiting for a busy member; requested changes start the follow-up ✅ | S | FR-105, FR-111 | — | — |
+| **P26-04** One-question helpers: folder trust answered before the prompt, dropped prompts resent ✅ | S | FR-206, FR-07f | — | — |
+| **P26-05** Reviewer gets the task, the whole change and the worktree; standards can be marked does not apply; npm and Node tests counted ✅ | M | FR-112, FR-112a | — | — |
+| **P26-06** Evidence gaps: no verdict preselected; approving with gaps needs a reason (desktop and phone); not run is never pass ✅ | S | FR-112a, FR-110 | A-v09, A-M5 | P26-05 |
+| **P26-07** A stopped harness's screen becomes the reason the person sees ✅ | S | FR-205, FR-68 | — | — |
+| **P26-08** Partial settings changes merge at every depth ✅ | S | FR-63 | — | — |
+| **P26-09** One document action is one commit ✅ | S | FR-46 | — | — |
+| **P26-10** Harness check script (NFR-23); measured on Claude Code with model opus ✅ | M | NFR-23, FR-07b | — | P26-01, P26-03, P26-04, P26-07 |
+| **P26-11** Screens as built with a review against the vision; design mockups archived ✅ | M | FR-141, FR-133 | — | — |
+| **P26-12** Requirements rev 12–13, ADR-016, user management mockups (Take 1 chosen, section D) ✅ | M | FR-160, FR-190, FR-194, FR-200 | UM-1a, UM-D1, UM-D2, UM-D3, UM-D4 | — |
+| **P26-13** Doctor names a herdr socket path that is too long for the OS | S | FR-07b, FR-07 | — | P26-10 |
+| **P26-14** Release 2026.11.20.1: signed binaries, install check, harness check ✅ | S | FR-05, FR-06, NFR-23 | — | P26-10, P26-11, P26-12 |
+
+### P27 · Dev mode and users
+
+**Goal:** One person on one machine can play two users and try multi-user work: users exist, access roles and grants decide what each may do, every route is checked, and the dev bar switches users and explains each allow or deny.
+
+**◆ Gate: Two users in dev mode.** Passes when:
+- gbi serve --dev creates david (Owner) and maria (Contributor); the dev bar switches between them on every desktop and phone screen
+- As maria, approving a gate is denied and the bar names the missing permission; as david it is allowed
+- Every action is recorded as the user acted as, marked dev with who switched
+- Dev mode refuses to start while Tailscale Serve or external interfaces are on
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P27-01** Users table and store: ID, name, email, status, created and last seen; history points at user IDs | M | FR-160, FR-169 | UM-1a | P26-14 |
+| **P27-02** Permissions, built-in access roles and grants per project (users, groups later, AI members); project default and private projects | L | FR-172, FR-173, FR-177 | UM-1b, UM-1c | P27-01 |
+| **P27-03** Every route declares its permission in the route table; one check for UI, CLI and MCP; denials name the missing permission | L | FR-185, FR-30, FR-31 | — | P27-02 |
+| **P27-04** AI members checked the same way, with their archetype's ceiling; acting for a person gets both their permissions | M | FR-179 | — | P27-03 |
+| **P27-05** Solo and multi-user modes; at least one Owner always | S | FR-163, FR-188 | UM-S2 | P27-01 |
+| **P27-06** Dev mode: gbi serve --dev, refused while reachable from other machines, shown in doctor and Settings | S | FR-190 | UM-D1 | P27-05 |
+| **P27-07** Dev bar on every desktop and phone screen; switch user in one click and gbi dev as USER | M | FR-191 | UM-D1 | P27-06, P27-03 |
+| **P27-08** Two dev users on first start; add more from the bar | S | FR-192 | UM-D1 | P27-07 |
+| **P27-09** Dev actions recorded as the user, marked dev with who switched; the bar explains the last allow or deny | M | FR-193, FR-186, FR-178 | UM-D1 | P27-07 |
+| **P27-10** Per-user inbox, projects and pins follow the acting user | M | FR-170 | UM-1d | P27-07 |
+| **P27-11** Tests (route permission table, dev bar UAT for two users), docs, CHANGELOG, release | M | FR-133, FR-130, NFR-23 | UM-D1 | P27-08, P27-09, P27-10, P27-04 |
+
+### P28 · The personal Assistant and warm harnesses
+
+**Goal:** Every user has an Assistant, made from the Assistant archetype and tuned in their profile, always running while they are signed in, shown on every screen, and the one every side chat talks to; harnesses are kept warm so replies start quickly.
+
+**◆ Gate: Two Assistants at work.** Passes when:
+- Switching to maria starts her Assistant; both Assistants show their status in the top bar and on the phone
+- Every side chat (artifacts, archetypes, standards, Learn) talks to your Assistant, which drafts a change you accept
+- The Assistant drafts an answer and a review verdict for its user and cannot submit either itself
+- A warm Assistant starts replying within 5 s; a warm member starts a task within 10 s (NFR-24)
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P28-01** Assistant archetype (system-wide); each user's Assistant made from it; tuning and harness/model choice in the profile | M | FR-195, FR-12b | UM-D3 | P27-11 |
+| **P28-02** Assistant always running while its user is signed in or switched to; own herdr pane per user; idle stop; conversation resumed | M | FR-196 | UM-D3 | P28-01 |
+| **P28-03** Assistant status chip on every desktop and phone screen; the Assistant panel | M | FR-197 | UM-D2 | P28-02 |
+| **P28-04** Every side chat talks to your Assistant (artifacts, archetypes, standards, persona coach, Learn) | L | FR-194 | UM-D2 | P28-03 |
+| **P28-05** Assistant acts with its user's permissions and a token bound to both; drafts decisions for the user to confirm | M | FR-198, FR-199, FR-167 | UM-D2 | P28-02, P27-04 |
+| **P28-06** Warm harnesses: Assistants and members of projects with queued work kept started within count and memory limits; Settings shows each with memory · waits on Q17 | L | FR-204 | UM-D4 | P28-02 |
+| **P28-07** Measure start and reply times and memory per harness; set the defaults; NFR-24 in the harness check · waits on Q17 | S | NFR-24, NFR-23 | UM-D4 | P28-06 |
+| **P28-08** Tests, docs, CHANGELOG, release | M | FR-133, FR-130 | UM-D2 | P28-04, P28-05, P28-07 |
+
+### P29 · Sign-in
+
+**Goal:** Multi-user mode: people sign in with local accounts and a second step; the CLI, MCP and agent sessions use expiring tokens; loopback and Tailscale are trusted only as configured.
+
+**◆ Gate: Sign-in review.** Passes when:
+- The owner switches to multi-user mode; maria accepts an invitation, sets a password and a passkey, and signs in
+- gbi login gets a token; an agent session's token ends with its session; X-GBI-Persona is ignored
+- Loopback is refused until trusted as a named service account; an unlinked Tailscale login gets the sign-in page
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P29-01** Local accounts: Argon2id passwords, leaked-password check, admin reset | M | FR-161, NFR-22 | UM-S1 | P27-11 |
+| **P29-02** Second step: passkeys (WebAuthn) and one-time codes (TOTP); required per setting · waits on Q15 | L | FR-161 | UM-S1, UM-S2 | P29-01 |
+| **P29-03** Web sessions: expiry, idle timeout, secure cookies, CSRF, lockout after failed tries | M | FR-168, FR-186 | UM-S2 | P29-01 |
+| **P29-04** Loopback untrusted in multi-user mode; trust as a named service account, with the warning | S | FR-164, NFR-21 | UM-S2 | P29-03 |
+| **P29-05** Tailscale identity only for linked users | S | FR-165, FR-17 | UM-S1 | P29-03 |
+| **P29-06** gbi login (device code), expiring revocable tokens for CLI and MCP | M | FR-166 | — | P29-03 |
+| **P29-07** Agent sessions get short-lived tokens; X-GBI-Persona ignored in multi-user mode; gbi users recover | M | FR-167 | — | P29-06 |
+| **P29-08** Tests, docs, CHANGELOG, release | M | FR-133, FR-130 | UM-S1 | P29-02, P29-04, P29-05, P29-07 |
+
+### P30 · People & access (the admin console)
+
+**Goal:** Take 1: People & access with users, statuses, groups, service accounts and custom roles; each project has an Access tab that answers "can this person do this, and why?"; access is requested and granted from the inbox.
+
+**◆ Gate: Access review by the owner.** Passes when:
+- Suspending a user ends their sessions and tokens at once and is recorded with the reason
+- A custom role made by ticking permissions shows who it affects before saving
+- Check access explains an allow or a deny for any user, AI member and permission
+- A person without access requests it; the request lands in the project admin's inbox and can be granted
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P30-01** People & access → Users: statuses and filters, invitations by email, bulk actions; gbi users · waits on Q15 | L | FR-169, FR-170 | UM-1a | P29-08 |
+| **P30-02** A person's page: status, sign-in methods, projects and roles with where each came from, sessions and tokens, access history | M | FR-170 | UM-1d | P30-01 |
+| **P30-03** Groups and service accounts | M | FR-171 | UM-1a | P30-01 |
+| **P30-04** Custom access roles: tick permissions, start from a role, gate types, versions, who it affects; risky permissions marked | L | FR-174, FR-175 | UM-1b | P30-03 |
+| **P30-05** Project → Access tab and Check access | M | FR-178, FR-177 | UM-1c | P30-04 |
+| **P30-06** Request access from a link; requests in the access managers' inbox on desktop and phone | M | FR-181 | UM-2d | P30-05 |
+| **P30-07** Nobody signs off their own work; more than one approver per project | S | FR-180 | — | P30-05 |
+| **P30-08** Tests, docs, CHANGELOG, release | M | FR-133, FR-130 | UM-1a | P30-02, P30-06, P30-07 |
+
+### P31 · Harness credentials
+
+**Goal:** Shared or Per user credentials, as one setting: harnesses signed in before go-build-it starts, or API keys per harness and model, each tested by the doctor; work runs on the right person's credentials.
+
+**◆ Gate: Credentials review.** Passes when:
+- In Per user mode, maria signs in her own Claude Code from her profile and her Assistant runs on it
+- An API key is saved, tested, never shown again and never in a log
+- Automatic dispatch starts paid work only for a project that names whose credentials pay
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P31-01** Shared or Per user setting; Settings → Harnesses shows the credential for each harness and model | M | FR-200, FR-202 | UM-D4 | P28-08 |
+| **P31-02** Harness signed in inside a user's own config folder, guided in a herdr pane | M | FR-201 | UM-D3, UM-D4 | P31-01 |
+| **P31-03** API keys per harness and model, encrypted, never shown again or logged | M | FR-201, NFR-22 | UM-D4 | P31-01 |
+| **P31-04** Work runs on the starter's credentials; automatic dispatch only for projects naming whose credentials pay | M | FR-203 | — | P31-02, P31-03 |
+| **P31-05** Doctor tests each credential and that the configured model starts without a menu | S | FR-202, FR-205, FR-07b | UM-D4 | P31-04 |
+| **P31-06** Tests (harness check in Per user mode), docs, CHANGELOG, release | M | FR-133, NFR-23 | — | P31-05 |
+
+### P32 · Sign-off routes and access review
+
+**Goal:** Gates are signed off by the groups that must sign them, in order or together; sign-offs are tied to versions; an access review finds risky access and exports it.
+
+**◆ Gate: Sign-off rehearsal.** Passes when:
+- A gate with a two-step route reaches each signer's inbox and shows progress; changing the artifact withdraws the sign-off
+- Nobody can sign off their own work
+- An access review lists unused accounts and self-approval risks and exports CSV
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P32-01** Sign-off routes per gate type: groups or roles, in order or together, how many from each | L | FR-182, FR-115 | UM-3c | P30-08 |
+| **P32-02** Sign-offs tied to versions; changes withdraw them; delegation for a period | M | FR-183, FR-184 | UM-3c | P32-01 |
+| **P32-03** Access review: findings, decisions with reasons, CSV export | M | FR-187 | UM-3d | P30-08 |
+| **P32-04** Temporary elevation with a reason, approved and ended by itself (later phase) | M | FR-189 | — | P32-03 |
+| **P32-05** Project-defined roles in docs/gbi.toml under a ceiling: not planned (Take 2); revisit only if asked | S | FR-176 | UM-2c | — |
+| **P32-06** Tests, docs, CHANGELOG, release | M | FR-133, FR-130 | — | P32-02, P32-03 |
+
+### P33 · Single sign-on (OIDC)
+
+**Goal:** People sign in with the organisation's identity provider; groups can follow its claims; a break-glass account stays.
+
+**◆ Gate: SSO sign-in.** Passes when:
+- Settings test the OIDC connection and show the redirect URL
+- A user signs in with SSO and is matched by verified email; a group follows a claim
+- Local accounts can be turned off with one break-glass account kept
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P33-01** OIDC settings: issuer, client, secret, connection test, redirect URL · waits on Q14 | M | FR-162 | UM-S2 | P29-08 |
+| **P33-02** Sign in with SSO; match by verified email; groups from a claim; local accounts off with break-glass · waits on Q14 | L | FR-162, FR-171 | UM-S1 | P33-01 |
+| **P33-03** Tests, docs, CHANGELOG, release | S | FR-133, FR-130 | — | P33-02 |
 
 ## 5. Open questions schedule
 
