@@ -52,12 +52,13 @@ Status: Draft · 2026-11-20 · Based on [requirements rev 10](../requirements.md
 | P25 | Phones get the mobile UI |  | 7 | 7 | ◆ Phone review |
 | P26 | Harnesses that work in herdr |  | 14 | 22 | ◆ Harness check |
 | P27 | Dev mode and users |  | 11 | 37 | ◆ Two users in dev mode |
-| P28 | The personal Assistant and warm harnesses |  | 8 | 32 | ◆ Two Assistants at work |
-| P29 | Sign-in |  | 8 | 25 | ◆ Sign-in review |
+| P28 | The personal Assistant, the setup wizard and warm harnesses |  | 14 | 49 | ◆ Two Assistants at work |
+| P29 | Sign-in |  | 11 | 32 | ◆ Sign-in review |
 | P30 | People & access (the admin console) |  | 8 | 32 | ◆ Access review by the owner |
 | P31 | Harness credentials |  | 6 | 16 | ◆ Credentials review |
 | P32 | Sign-off routes and access review |  | 6 | 21 | ◆ Sign-off rehearsal |
 | P33 | Single sign-on (OIDC) |  | 3 | 12 | ◆ SSO sign-in |
+| P34 | Per-user workspaces on a Linux server |  | 12 | 54 | ◆ Two users, two workspaces |
 
 ## 3. Critical path
 
@@ -669,15 +670,16 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 | **P27-10** Per-user inbox, projects and pins follow the acting user | M | FR-170 | UM-1d | P27-07 |
 | **P27-11** Tests (route permission table, dev bar UAT for two users), docs, CHANGELOG, release | M | FR-133, FR-130, NFR-23 | UM-D1 | P27-08, P27-09, P27-10, P27-04 |
 
-### P28 · The personal Assistant and warm harnesses
+### P28 · The personal Assistant, the setup wizard and warm harnesses
 
-**Goal:** Every user has an Assistant, made from the Assistant archetype and tuned in their profile, always running while they are signed in, shown on every screen, and the one every side chat talks to; harnesses are kept warm so replies start quickly.
+**Goal:** Every user sets up their Assistant in the browser (a harness signed in through a terminal on the page, or an API key) and nothing on their own machine; it is made from the Assistant archetype, tuned in their profile, always running while they are signed in, shown on every screen, the one every side chat talks to, and kept warm.
 
 **◆ Gate: Two Assistants at work.** Passes when:
 - Switching to maria starts her Assistant; both Assistants show their status in the top bar and on the phone
 - Every side chat (artifacts, archetypes, standards, Learn) talks to your Assistant, which drafts a change you accept
 - The Assistant drafts an answer and a review verdict for its user and cannot submit either itself
 - A warm Assistant starts replying within 5 s; a warm member starts a task within 10 s (NFR-24)
+- maria finishes the setup wizard in the browser with Claude Code (or an API key) and her Assistant answers; skipping it leaves a Set up chip and a Finish setting up card
 
 | Task | Size | Requirements | Approach A views | Depends on |
 |---|---|---|---|---|
@@ -688,7 +690,13 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 | **P28-05** Assistant acts with its user's permissions and a token bound to both; drafts decisions for the user to confirm | M | FR-198, FR-199, FR-167 | UM-D2 | P28-02, P27-04 |
 | **P28-06** Warm harnesses: Assistants and members of projects with queued work kept started within count and memory limits; Settings shows each with memory · waits on Q17 | L | FR-204 | UM-D4 | P28-02 |
 | **P28-07** Measure start and reply times and memory per harness; set the defaults; NFR-24 in the harness check · waits on Q17 | S | NFR-24, NFR-23 | UM-D4 | P28-06 |
-| **P28-08** Tests, docs, CHANGELOG, release | M | FR-133, FR-130 | UM-D2 | P28-04, P28-05, P28-07 |
+| **P28-09** Spike: sign Claude Code, Antigravity and Pi in through a web terminal on a server; record which need an API key | S | FR-220, FR-221 | UM-W2 | P27-11 |
+| **P28-10** Setup wizard: choose a harness, sign it in in a terminal on the page (link as a button, paste box), detect success by checking the harness; only its owner sees the terminal | L | FR-219, FR-220, FR-224 | UM-W1, UM-W2 | P28-09, P28-02 |
+| **P28-11** Check step: a test prompt, a model that works on the person's plan; API key fallback | M | FR-219, FR-221, FR-205 | UM-W3 | P28-10 |
+| **P28-12** Skip, the Set up chip and the Finish setting up checklist (home, profile, phone); Fix when a sign-in expires, with an inbox item | M | FR-222, FR-223 | UM-W4 | P28-10, P28-03 |
+| **P28-13** Findable everywhere: first sign-in, top bar, home card, profile, Settings, phone home and More, ⌘K, Learn lesson 0, docs | S | FR-228 | UM-W4 | P28-12 |
+| **P28-14** Shared mode set up by an admin through the same wizard in Settings → Harnesses | S | FR-225 | UM-D4 | P28-11 |
+| **P28-08** Tests, docs, CHANGELOG, release | M | FR-133, FR-130 | UM-D2 | P28-04, P28-05, P28-07, P28-11, P28-12, P28-13, P28-14 |
 
 ### P29 · Sign-in
 
@@ -708,7 +716,10 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 | **P29-05** Tailscale identity only for linked users | S | FR-165, FR-17 | UM-S1 | P29-03 |
 | **P29-06** gbi login (device code), expiring revocable tokens for CLI and MCP | M | FR-166 | — | P29-03 |
 | **P29-07** Agent sessions get short-lived tokens; X-GBI-Persona ignored in multi-user mode; gbi users recover | M | FR-167 | — | P29-06 |
-| **P29-08** Tests, docs, CHANGELOG, release | M | FR-133, FR-130 | UM-S1 | P29-02, P29-04, P29-05, P29-07 |
+| **P29-09** CLI contexts: gbi context add/use, gbi login per server; every changing command names its server; gbi mcp uses the context | M | FR-226, FR-166 | — | P29-06 |
+| **P29-10** gbi sessions attach: watch and take over your agents' terminals from the CLI | M | FR-227, FR-66 | — | P29-09 |
+| **P29-11** A shared-server install starts in multi-user mode; gbi serve on a workstation stays solo | S | FR-163 | — | P29-08 |
+| **P29-08** Tests, docs, CHANGELOG, release | M | FR-133, FR-130 | UM-S1 | P29-02, P29-04, P29-05, P29-07, P29-09, P29-10 |
 
 ### P30 · People & access (the admin console)
 
@@ -742,7 +753,7 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 
 | Task | Size | Requirements | Approach A views | Depends on |
 |---|---|---|---|---|
-| **P31-01** Shared or Per user setting; Settings → Harnesses shows the credential for each harness and model | M | FR-200, FR-202 | UM-D4 | P28-08 |
+| **P31-01** Shared or Per user setting (Per user is the default in multi-user mode); Settings → Harnesses shows the credential for each harness and model | M | FR-200, FR-202 | UM-D4 | P28-08 |
 | **P31-02** Harness signed in inside a user's own config folder, guided in a herdr pane | M | FR-201 | UM-D3, UM-D4 | P31-01 |
 | **P31-03** API keys per harness and model, encrypted, never shown again or logged | M | FR-201, NFR-22 | UM-D4 | P31-01 |
 | **P31-04** Work runs on the starter's credentials; automatic dispatch only for projects naming whose credentials pay | M | FR-203 | — | P31-02, P31-03 |
@@ -781,6 +792,31 @@ The longest rev 2 chain ran through the **harness spike (P0-04, Q2)**, the adapt
 | **P33-01** OIDC settings: issuer, client, secret, connection test, redirect URL · waits on Q14 | M | FR-162 | UM-S2 | P29-08 |
 | **P33-02** Sign in with SSO; match by verified email; groups from a claim; local accounts off with break-glass · waits on Q14 | L | FR-162, FR-171 | UM-S1 | P33-01 |
 | **P33-03** Tests, docs, CHANGELOG, release | S | FR-133, FR-130 | — | P33-02 |
+
+### P34 · Per-user workspaces on a Linux server
+
+**Goal:** On a multi-user Linux server every user works in their own isolated workspace: images pulled with go-containerregistry and run by gVisor with no daemon; their Assistant, agent work, worktrees, credentials and herdr inside; code leaves only through review.
+
+**◆ Gate: Two users, two workspaces.** Passes when:
+- On a stock Linux server, david and maria each get a workspace; from inside maria's, nothing of david's (files, processes, credentials) or the server's data can be seen
+- An agent task runs in its starter's workspace, is watched and taken over from the UI, and its change leaves only through Courier and review
+- A workspace starts in under 3 s, and a real task (npm ci, tests, git) runs within 10% of the host or with a reasoned exception (NFR-25)
+- The doctor explains what a host is missing for the runtime; solo mode, macOS and Windows behave as before
+
+| Task | Size | Requirements | Approach A views | Depends on |
+|---|---|---|---|---|
+| **P34-01** Spike: gVisor runs a workspace image built from go-containerregistry, rootless or least privilege; herdr and harnesses work inside; measure start and task cost against runc and the host · waits on Q18, Q20 | M | FR-208, FR-209, NFR-25 | — | P28-08 |
+| **P34-02** Decide ADR-017 from the spike (accept, or fall back to runc by default or containerd) · waits on Q18, Q19, Q20 | S | FR-208 | — | P34-01 |
+| **P34-03** Runtime interface (create, start, run, attach, stop, remove, use) with gVisor and runc implementations | L | FR-208 | — | P34-02 |
+| **P34-04** Images: pull by digest with go-containerregistry, unpack per user, persistent home; default workspace image (git, toolchains, herdr, harnesses); project images from a registry · waits on Q19 | L | FR-209 | — | P34-03 |
+| **P34-05** Limits (CPU, memory, disk, processes) per everyone, group or user; use shown in Settings, profile and the dev bar | M | FR-210 | — | P34-03 |
+| **P34-06** Network allow-list per workspace; go-build-it's API reachable only through the user's token | M | FR-211 | — | P34-03 |
+| **P34-07** herdr inside each workspace; terminal view, output and blocked detection across the boundary; watch by project access, control only your own | L | FR-214, FR-66, FR-68 | — | P34-03 |
+| **P34-08** Worktrees and clones inside workspaces; code leaves only as commits through Courier and review; agent work runs in its starter's workspace | L | FR-207, FR-212, FR-213 | — | P34-07 |
+| **P34-09** Lifecycle: create, start, stop when idle, keep, reset or remove by an admin, all recorded; image updates staged and reversible | M | FR-215, FR-218 | — | P34-04, P34-08 |
+| **P34-10** Workspace shell from the UI (desktop and phone) and gbi workspace shell; image, limits, use and network on the profile | M | FR-217 | — | P34-07 |
+| **P34-11** Doctor: user namespaces, subordinate IDs, cgroups v2 delegation, KVM; solo mode, macOS and Windows unchanged; NFR-20 in multi-user mode | M | FR-216, NFR-20 | — | P34-03 |
+| **P34-12** Tests (isolation checks between two users, harness check inside a workspace), docs, CHANGELOG, release | M | FR-133, NFR-23, NFR-25 | — | P34-09, P34-10, P34-11 |
 
 ## 5. Open questions schedule
 

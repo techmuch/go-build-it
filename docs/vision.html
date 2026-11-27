@@ -43,6 +43,8 @@ h2{font-size:22px;margin:48px 0 14px;letter-spacing:-.01em}
 .two li{margin:5px 0}
 .two li b{color:var(--ink);font-weight:600}
 .card.next{border:1.5px dashed var(--vis);background:var(--vis-soft)}
+.sub{color:var(--muted);margin:-4px 0 14px}
+.card code{font:12px ui-monospace,Menlo,monospace;background:rgba(127,127,127,.12);border-radius:4px;padding:0 4px}
 .card.next h3{color:var(--vis)}
 footer{margin-top:40px;font-size:13px;color:var(--muted)}
 
@@ -75,7 +77,7 @@ svg text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-ser
 <body>
 <main>
 <header>
-  <p class="kicker">Operational concept (OV-1) · draft for discussion · 2026-11-11</p>
+  <p class="kicker">Operational concept (OV-1) · draft for discussion · 2026-11-11 · per-user workspaces and setup in the browser added 2026-11-20</p>
   <h1>Many people explore a problem. A team of agents builds the answer.</h1>
   <p class="lede"><b>go-build-it is an application that builds applications.</b> Stakeholders with different, sometimes conflicting, aims work out what is needed while AI team members turn each agreed slice into working, evidenced software. What people learn from the software changes what they ask for next.</p>
 </header>
@@ -125,7 +127,7 @@ svg text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-ser
 <text x="305" y="472" text-anchor="middle" class="t-a">mockups, rehearsals</text>
 
 <!-- go-build-it -->
-<rect x="370" y="70" width="720" height="620" rx="18" class="gbi"/>
+<rect x="370" y="70" width="720" height="634" rx="18" class="gbi"/>
 <text x="394" y="104" class="t-h">go-build-it</text>
 <text x="394" y="122" class="t-s">one place where people and agents do the work, in the open</text>
 
@@ -190,7 +192,9 @@ svg text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-ser
   <rect x="849" y="572" width="104" height="68" rx="10" class="box"/><use href="#bot" x="901" y="598"/><text x="901" y="628" text-anchor="middle" class="t-n">Reviewer</text>
   <rect x="963" y="572" width="104" height="68" rx="10" class="box"/><use href="#bot" x="1015" y="598"/><text x="1015" y="628" text-anchor="middle" class="t-n">Release manager</text>
 </g>
-<text x="730" y="668" text-anchor="middle" class="t-a">Claude Code · Antigravity · OpenCode · Pi, running where a person can watch, stop and take over</text>
+<text x="730" y="658" text-anchor="middle" class="t-a">Claude Code · Antigravity · OpenCode · Pi, running where a person can watch, stop and take over</text>
+<rect x="393" y="667" width="674" height="26" rx="8" class="pill-v"/>
+<text x="730" y="684" text-anchor="middle" class="t-a t-v">on a shared Linux server: each person's own isolated workspace for their Assistant and the agent work they start</text>
 
 <!-- releases -->
 <text x="1155" y="164" text-anchor="middle" class="t-a">releases</text>
@@ -261,6 +265,16 @@ svg text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-ser
   <div class="card"><span class="num">04</span><h3>People decide, agents do</h3><p>Agents interview, draft, build and review. People choose between options, approve baselines and approve releases.</p></div>
   <div class="card"><span class="num">05</span><h3>Small true slices</h3><p>Only a small, agreed slice is built at a time, end to end, test first. Working software arrives early and tests the understanding.</p></div>
   <div class="card"><span class="num">06</span><h3>Evidence, not assurance</h3><p>Each release carries the tests that ran, the screens against their mockups, and the record of who approved what.</p></div>
+  <div class="card next"><span class="num">07</span><h3>Everyone works in their own space</h3><p>On a shared server, each person's Assistant and the agents they direct run in that person's own isolated workspace. Agents run whatever code a project brings, so one person's work can never reach another's files, credentials or processes. Work leaves a workspace only through review.</p></div>
+</div>
+
+<h2>How people reach it</h2>
+<p class="sub">One shared server holds the work and does the setup. People bring only a browser. Mockups: <a href="mockups/user-management.html#wizard">the setup wizard</a> · <a href="mockups/user-management.html#dev">dev mode and the Assistant</a> · <a href="mockups/user-management.html#take1">People &amp; access</a>.</p>
+<div class="two">
+  <div class="card next"><h3>Sign in, and the server sets you up</h3><p>On first sign-in a wizard sets up your Assistant: choose Claude Code, Antigravity or Pi, sign it in inside a terminal shown on the page (a link becomes a button, a code goes in a paste box), or give an API key, then a test prompt proves it works. Skip it if you only answer and sign off; a <b>Set up</b> chip and a <b>Finish setting up</b> card stay until it's done, and a <b>Fix</b> button appears if a sign-in expires.</p></div>
+  <div class="card next"><h3>Browser, phone or terminal: the same server</h3><p>The browser and the phone are the main way in. People who like terminals point the <code>gbi</code> CLI at the server (<code>gbi context use team</code>, <code>gbi login</code>) and can watch or take over their agents from there; their own AI tool can work with the server through <code>gbi mcp</code>. Nothing else is installed or configured on their machine.</p></div>
+  <div class="card"><h3>On your own machine</h3><p>Solo mode stays: one person, their own projects, no sign-in, still with the setup wizard for their Assistant. A solo project becomes a team project by importing its repository on the server.</p></div>
+  <div class="card"><h3>Decided against</h3><p>Running a shared server's agent work on people's laptops, and syncing a local copy with the server. The server holds the one record of tasks, answers and approvals; git carries the documents and code.</p></div>
 </div>
 
 <h2>Where it stands</h2>
@@ -284,6 +298,9 @@ svg text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-ser
       <li><b>Baselines:</b> a named, approved set of requirements and mockups that a slice is built against.</li>
       <li><b>Scale:</b> a large system split into areas, each with its own glossary, owners and rules.</li>
       <li><b>Evidence packages:</b> the record assembled for whoever must authorise the system.</li>
+      <li><b>A personal Assistant</b> for each person, always running while they work, the one they talk to everywhere.</li>
+      <li><b>Setup in the browser:</b> a wizard signs each person's harness in through a terminal on the page, or takes an API key; nothing to configure on their own machine.</li>
+      <li><b>Per-user workspaces:</b> on a shared Linux server, each person's own container or microVM with their Assistant, their agents' work, their worktrees and credentials, and limits on what it can use.</li>
     </ul>
   </div>
 </div>
