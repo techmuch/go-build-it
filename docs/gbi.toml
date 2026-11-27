@@ -9,6 +9,7 @@ tracker      = "docs/tracker/index.html"
 
 [labels]
 "docs/agent-guide.md" = ["support"]
+"docs/agents/" = ["support"]
 "docs/decisions/" = ["decision"]
 "docs/embed.go" = ["support"]
 "docs/embed_test.go" = ["support"]

@@ -137,12 +137,13 @@ td:first-child { white-space: nowrap; }
 <tr><td>P25</td><td>Phones get the mobile UI</td><td></td><td>7</td><td>7</td><td>◆ Phone review</td></tr>
 <tr><td>P26</td><td>Harnesses that work in herdr</td><td></td><td>14</td><td>22</td><td>◆ Harness check</td></tr>
 <tr><td>P27</td><td>Dev mode and users</td><td></td><td>11</td><td>37</td><td>◆ Two users in dev mode</td></tr>
-<tr><td>P28</td><td>The personal Assistant and warm harnesses</td><td></td><td>8</td><td>32</td><td>◆ Two Assistants at work</td></tr>
-<tr><td>P29</td><td>Sign-in</td><td></td><td>8</td><td>25</td><td>◆ Sign-in review</td></tr>
+<tr><td>P28</td><td>The personal Assistant, the setup wizard and warm harnesses</td><td></td><td>14</td><td>49</td><td>◆ Two Assistants at work</td></tr>
+<tr><td>P29</td><td>Sign-in</td><td></td><td>11</td><td>32</td><td>◆ Sign-in review</td></tr>
 <tr><td>P30</td><td>People &amp; access (the admin console)</td><td></td><td>8</td><td>32</td><td>◆ Access review by the owner</td></tr>
 <tr><td>P31</td><td>Harness credentials</td><td></td><td>6</td><td>16</td><td>◆ Credentials review</td></tr>
 <tr><td>P32</td><td>Sign-off routes and access review</td><td></td><td>6</td><td>21</td><td>◆ Sign-off rehearsal</td></tr>
 <tr><td>P33</td><td>Single sign-on (OIDC)</td><td></td><td>3</td><td>12</td><td>◆ SSO sign-in</td></tr>
+<tr><td>P34</td><td>Per-user workspaces on a Linux server</td><td></td><td>12</td><td>54</td><td>◆ Two users, two workspaces</td></tr>
 </tbody></table></div>
 <h2 id="3-critical-path">3. Critical path</h2>
 <ul><li>
@@ -760,8 +761,8 @@ Dev mode refuses to start while Tailscale Serve or external interfaces are on
 <tr><td><strong>P27-10</strong> Per-user inbox, projects and pins follow the acting user</td><td>M</td><td>FR-170</td><td>UM-1d</td><td>P27-07</td></tr>
 <tr><td><strong>P27-11</strong> Tests (route permission table, dev bar UAT for two users), docs, CHANGELOG, release</td><td>M</td><td>FR-133, FR-130, NFR-23</td><td>UM-D1</td><td>P27-08, P27-09, P27-10, P27-04</td></tr>
 </tbody></table></div>
-<h3 id="p28-the-personal-assistant-and-warm-harnesses">P28 · The personal Assistant and warm harnesses</h3>
-<p><strong>Goal:</strong> Every user has an Assistant, made from the Assistant archetype and tuned in their profile, always running while they are signed in, shown on every screen, and the one every side chat talks to; harnesses are kept warm so replies start quickly.</p>
+<h3 id="p28-the-personal-assistant-the-setup-wizard-and-warm-harnesses">P28 · The personal Assistant, the setup wizard and warm harnesses</h3>
+<p><strong>Goal:</strong> Every user sets up their Assistant in the browser (a harness signed in through a terminal on the page, or an API key) and nothing on their own machine; it is made from the Assistant archetype, tuned in their profile, always running while they are signed in, shown on every screen, the one every side chat talks to, and kept warm.</p>
 <p><strong>◆ Gate: Two Assistants at work.</strong> Passes when:</p>
 <ul><li>
 Switching to maria starts her Assistant; both Assistants show their status in the top bar and on the phone
@@ -771,6 +772,8 @@ Every side chat (artifacts, archetypes, standards, Learn) talks to your Assistan
 The Assistant drafts an answer and a review verdict for its user and cannot submit either itself
 </li><li>
 A warm Assistant starts replying within 5 s; a warm member starts a task within 10 s (NFR-24)
+</li><li>
+maria finishes the setup wizard in the browser with Claude Code (or an API key) and her Assistant answers; skipping it leaves a Set up chip and a Finish setting up card
 </li></ul>
 <div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
 <tr><td><strong>P28-01</strong> Assistant archetype (system-wide); each user's Assistant made from it; tuning and harness/model choice in the profile</td><td>M</td><td>FR-195, FR-12b</td><td>UM-D3</td><td>P27-11</td></tr>
@@ -780,7 +783,13 @@ A warm Assistant starts replying within 5 s; a warm member starts a task within 
 <tr><td><strong>P28-05</strong> Assistant acts with its user's permissions and a token bound to both; drafts decisions for the user to confirm</td><td>M</td><td>FR-198, FR-199, FR-167</td><td>UM-D2</td><td>P28-02, P27-04</td></tr>
 <tr><td><strong>P28-06</strong> Warm harnesses: Assistants and members of projects with queued work kept started within count and memory limits; Settings shows each with memory · waits on Q17</td><td>L</td><td>FR-204</td><td>UM-D4</td><td>P28-02</td></tr>
 <tr><td><strong>P28-07</strong> Measure start and reply times and memory per harness; set the defaults; NFR-24 in the harness check · waits on Q17</td><td>S</td><td>NFR-24, NFR-23</td><td>UM-D4</td><td>P28-06</td></tr>
-<tr><td><strong>P28-08</strong> Tests, docs, CHANGELOG, release</td><td>M</td><td>FR-133, FR-130</td><td>UM-D2</td><td>P28-04, P28-05, P28-07</td></tr>
+<tr><td><strong>P28-09</strong> Spike: sign Claude Code, Antigravity and Pi in through a web terminal on a server; record which need an API key</td><td>S</td><td>FR-220, FR-221</td><td>UM-W2</td><td>P27-11</td></tr>
+<tr><td><strong>P28-10</strong> Setup wizard: choose a harness, sign it in in a terminal on the page (link as a button, paste box), detect success by checking the harness; only its owner sees the terminal</td><td>L</td><td>FR-219, FR-220, FR-224</td><td>UM-W1, UM-W2</td><td>P28-09, P28-02</td></tr>
+<tr><td><strong>P28-11</strong> Check step: a test prompt, a model that works on the person's plan; API key fallback</td><td>M</td><td>FR-219, FR-221, FR-205</td><td>UM-W3</td><td>P28-10</td></tr>
+<tr><td><strong>P28-12</strong> Skip, the Set up chip and the Finish setting up checklist (home, profile, phone); Fix when a sign-in expires, with an inbox item</td><td>M</td><td>FR-222, FR-223</td><td>UM-W4</td><td>P28-10, P28-03</td></tr>
+<tr><td><strong>P28-13</strong> Findable everywhere: first sign-in, top bar, home card, profile, Settings, phone home and More, ⌘K, Learn lesson 0, docs</td><td>S</td><td>FR-228</td><td>UM-W4</td><td>P28-12</td></tr>
+<tr><td><strong>P28-14</strong> Shared mode set up by an admin through the same wizard in Settings → Harnesses</td><td>S</td><td>FR-225</td><td>UM-D4</td><td>P28-11</td></tr>
+<tr><td><strong>P28-08</strong> Tests, docs, CHANGELOG, release</td><td>M</td><td>FR-133, FR-130</td><td>UM-D2</td><td>P28-04, P28-05, P28-07, P28-11, P28-12, P28-13, P28-14</td></tr>
 </tbody></table></div>
 <h3 id="p29-sign-in">P29 · Sign-in</h3>
 <p><strong>Goal:</strong> Multi-user mode: people sign in with local accounts and a second step; the CLI, MCP and agent sessions use expiring tokens; loopback and Tailscale are trusted only as configured.</p>
@@ -800,7 +809,10 @@ Loopback is refused until trusted as a named service account; an unlinked Tailsc
 <tr><td><strong>P29-05</strong> Tailscale identity only for linked users</td><td>S</td><td>FR-165, FR-17</td><td>UM-S1</td><td>P29-03</td></tr>
 <tr><td><strong>P29-06</strong> gbi login (device code), expiring revocable tokens for CLI and MCP</td><td>M</td><td>FR-166</td><td>—</td><td>P29-03</td></tr>
 <tr><td><strong>P29-07</strong> Agent sessions get short-lived tokens; X-GBI-Persona ignored in multi-user mode; gbi users recover</td><td>M</td><td>FR-167</td><td>—</td><td>P29-06</td></tr>
-<tr><td><strong>P29-08</strong> Tests, docs, CHANGELOG, release</td><td>M</td><td>FR-133, FR-130</td><td>UM-S1</td><td>P29-02, P29-04, P29-05, P29-07</td></tr>
+<tr><td><strong>P29-09</strong> CLI contexts: gbi context add/use, gbi login per server; every changing command names its server; gbi mcp uses the context</td><td>M</td><td>FR-226, FR-166</td><td>—</td><td>P29-06</td></tr>
+<tr><td><strong>P29-10</strong> gbi sessions attach: watch and take over your agents' terminals from the CLI</td><td>M</td><td>FR-227, FR-66</td><td>—</td><td>P29-09</td></tr>
+<tr><td><strong>P29-11</strong> A shared-server install starts in multi-user mode; gbi serve on a workstation stays solo</td><td>S</td><td>FR-163</td><td>—</td><td>P29-08</td></tr>
+<tr><td><strong>P29-08</strong> Tests, docs, CHANGELOG, release</td><td>M</td><td>FR-133, FR-130</td><td>UM-S1</td><td>P29-02, P29-04, P29-05, P29-07, P29-09, P29-10</td></tr>
 </tbody></table></div>
 <h3 id="p30-people-access-the-admin-console">P30 · People &amp; access (the admin console)</h3>
 <p><strong>Goal:</strong> Take 1: People &amp; access with users, statuses, groups, service accounts and custom roles; each project has an Access tab that answers "can this person do this, and why?"; access is requested and granted from the inbox.</p>
@@ -835,7 +847,7 @@ An API key is saved, tested, never shown again and never in a log
 Automatic dispatch starts paid work only for a project that names whose credentials pay
 </li></ul>
 <div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
-<tr><td><strong>P31-01</strong> Shared or Per user setting; Settings → Harnesses shows the credential for each harness and model</td><td>M</td><td>FR-200, FR-202</td><td>UM-D4</td><td>P28-08</td></tr>
+<tr><td><strong>P31-01</strong> Shared or Per user setting (Per user is the default in multi-user mode); Settings → Harnesses shows the credential for each harness and model</td><td>M</td><td>FR-200, FR-202</td><td>UM-D4</td><td>P28-08</td></tr>
 <tr><td><strong>P31-02</strong> Harness signed in inside a user's own config folder, guided in a herdr pane</td><td>M</td><td>FR-201</td><td>UM-D3, UM-D4</td><td>P31-01</td></tr>
 <tr><td><strong>P31-03</strong> API keys per harness and model, encrypted, never shown again or logged</td><td>M</td><td>FR-201, NFR-22</td><td>UM-D4</td><td>P31-01</td></tr>
 <tr><td><strong>P31-04</strong> Work runs on the starter's credentials; automatic dispatch only for projects naming whose credentials pay</td><td>M</td><td>FR-203</td><td>—</td><td>P31-02, P31-03</td></tr>
@@ -874,6 +886,32 @@ Local accounts can be turned off with one break-glass account kept
 <tr><td><strong>P33-01</strong> OIDC settings: issuer, client, secret, connection test, redirect URL · waits on Q14</td><td>M</td><td>FR-162</td><td>UM-S2</td><td>P29-08</td></tr>
 <tr><td><strong>P33-02</strong> Sign in with SSO; match by verified email; groups from a claim; local accounts off with break-glass · waits on Q14</td><td>L</td><td>FR-162, FR-171</td><td>UM-S1</td><td>P33-01</td></tr>
 <tr><td><strong>P33-03</strong> Tests, docs, CHANGELOG, release</td><td>S</td><td>FR-133, FR-130</td><td>—</td><td>P33-02</td></tr>
+</tbody></table></div>
+<h3 id="p34-per-user-workspaces-on-a-linux-server">P34 · Per-user workspaces on a Linux server</h3>
+<p><strong>Goal:</strong> On a multi-user Linux server every user works in their own isolated workspace: images pulled with go-containerregistry and run by gVisor with no daemon; their Assistant, agent work, worktrees, credentials and herdr inside; code leaves only through review.</p>
+<p><strong>◆ Gate: Two users, two workspaces.</strong> Passes when:</p>
+<ul><li>
+On a stock Linux server, david and maria each get a workspace; from inside maria's, nothing of david's (files, processes, credentials) or the server's data can be seen
+</li><li>
+An agent task runs in its starter's workspace, is watched and taken over from the UI, and its change leaves only through Courier and review
+</li><li>
+A workspace starts in under 3 s, and a real task (npm ci, tests, git) runs within 10% of the host or with a reasoned exception (NFR-25)
+</li><li>
+The doctor explains what a host is missing for the runtime; solo mode, macOS and Windows behave as before
+</li></ul>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Size</th><th>Requirements</th><th>Approach A views</th><th>Depends on</th></tr></thead><tbody>
+<tr><td><strong>P34-01</strong> Spike: gVisor runs a workspace image built from go-containerregistry, rootless or least privilege; herdr and harnesses work inside; measure start and task cost against runc and the host · waits on Q18, Q20</td><td>M</td><td>FR-208, FR-209, NFR-25</td><td>—</td><td>P28-08</td></tr>
+<tr><td><strong>P34-02</strong> Decide ADR-017 from the spike (accept, or fall back to runc by default or containerd) · waits on Q18, Q19, Q20</td><td>S</td><td>FR-208</td><td>—</td><td>P34-01</td></tr>
+<tr><td><strong>P34-03</strong> Runtime interface (create, start, run, attach, stop, remove, use) with gVisor and runc implementations</td><td>L</td><td>FR-208</td><td>—</td><td>P34-02</td></tr>
+<tr><td><strong>P34-04</strong> Images: pull by digest with go-containerregistry, unpack per user, persistent home; default workspace image (git, toolchains, herdr, harnesses); project images from a registry · waits on Q19</td><td>L</td><td>FR-209</td><td>—</td><td>P34-03</td></tr>
+<tr><td><strong>P34-05</strong> Limits (CPU, memory, disk, processes) per everyone, group or user; use shown in Settings, profile and the dev bar</td><td>M</td><td>FR-210</td><td>—</td><td>P34-03</td></tr>
+<tr><td><strong>P34-06</strong> Network allow-list per workspace; go-build-it's API reachable only through the user's token</td><td>M</td><td>FR-211</td><td>—</td><td>P34-03</td></tr>
+<tr><td><strong>P34-07</strong> herdr inside each workspace; terminal view, output and blocked detection across the boundary; watch by project access, control only your own</td><td>L</td><td>FR-214, FR-66, FR-68</td><td>—</td><td>P34-03</td></tr>
+<tr><td><strong>P34-08</strong> Worktrees and clones inside workspaces; code leaves only as commits through Courier and review; agent work runs in its starter's workspace</td><td>L</td><td>FR-207, FR-212, FR-213</td><td>—</td><td>P34-07</td></tr>
+<tr><td><strong>P34-09</strong> Lifecycle: create, start, stop when idle, keep, reset or remove by an admin, all recorded; image updates staged and reversible</td><td>M</td><td>FR-215, FR-218</td><td>—</td><td>P34-04, P34-08</td></tr>
+<tr><td><strong>P34-10</strong> Workspace shell from the UI (desktop and phone) and gbi workspace shell; image, limits, use and network on the profile</td><td>M</td><td>FR-217</td><td>—</td><td>P34-07</td></tr>
+<tr><td><strong>P34-11</strong> Doctor: user namespaces, subordinate IDs, cgroups v2 delegation, KVM; solo mode, macOS and Windows unchanged; NFR-20 in multi-user mode</td><td>M</td><td>FR-216, NFR-20</td><td>—</td><td>P34-03</td></tr>
+<tr><td><strong>P34-12</strong> Tests (isolation checks between two users, harness check inside a workspace), docs, CHANGELOG, release</td><td>M</td><td>FR-133, NFR-23, NFR-25</td><td>—</td><td>P34-09, P34-10, P34-11</td></tr>
 </tbody></table></div>
 <h2 id="5-open-questions-schedule">5. Open questions schedule</h2>
 <div class="table-wrap"><table><thead><tr><th>Question</th><th>Answer before</th><th>Why</th></tr></thead><tbody>

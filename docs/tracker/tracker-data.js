@@ -402,15 +402,16 @@ window.TRACKER = {
   },
   {
    "id": "P28",
-   "name": "The personal Assistant and warm harnesses",
+   "name": "The personal Assistant, the setup wizard and warm harnesses",
    "mvp": false,
-   "goal": "Every user has an Assistant, made from the Assistant archetype and tuned in their profile, always running while they are signed in, shown on every screen, and the one every side chat talks to; harnesses are kept warm so replies start quickly.",
+   "goal": "Every user sets up their Assistant in the browser (a harness signed in through a terminal on the page, or an API key) and nothing on their own machine; it is made from the Assistant archetype, tuned in their profile, always running while they are signed in, shown on every screen, the one every side chat talks to, and kept warm.",
    "gate": "Two Assistants at work",
    "gateCriteria": [
     "Switching to maria starts her Assistant; both Assistants show their status in the top bar and on the phone",
     "Every side chat (artifacts, archetypes, standards, Learn) talks to your Assistant, which drafts a change you accept",
     "The Assistant drafts an answer and a review verdict for its user and cannot submit either itself",
-    "A warm Assistant starts replying within 5 s; a warm member starts a task within 10 s (NFR-24)"
+    "A warm Assistant starts replying within 5 s; a warm member starts a task within 10 s (NFR-24)",
+    "maria finishes the setup wizard in the browser with Claude Code (or an API key) and her Assistant answers; skipping it leaves a Set up chip and a Finish setting up card"
    ]
   },
   {
@@ -472,6 +473,19 @@ window.TRACKER = {
     "Settings test the OIDC connection and show the redirect URL",
     "A user signs in with SSO and is matched by verified email; a group follows a claim",
     "Local accounts can be turned off with one break-glass account kept"
+   ]
+  },
+  {
+   "id": "P34",
+   "name": "Per-user workspaces on a Linux server",
+   "mvp": false,
+   "goal": "On a multi-user Linux server every user works in their own isolated workspace: images pulled with go-containerregistry and run by gVisor with no daemon; their Assistant, agent work, worktrees, credentials and herdr inside; code leaves only through review.",
+   "gate": "Two users, two workspaces",
+   "gateCriteria": [
+    "On a stock Linux server, david and maria each get a workspace; from inside maria's, nothing of david's (files, processes, credentials) or the server's data can be seen",
+    "An agent task runs in its starter's workspace, is watched and taken over from the UI, and its change leaves only through Courier and review",
+    "A workspace starts in under 3 s, and a real task (npm ci, tests, git) runs within 10% of the host or with a reasoned exception (NFR-25)",
+    "The doctor explains what a host is missing for the runtime; solo mode, macOS and Windows behave as before"
    ]
   }
  ],
@@ -5401,6 +5415,123 @@ window.TRACKER = {
    ]
   },
   {
+   "id": "P28-09",
+   "phase": "P28",
+   "title": "Spike: sign Claude Code, Antigravity and Pi in through a web terminal on a server; record which need an API key",
+   "reqs": [
+    "FR-220",
+    "FR-221"
+   ],
+   "views": [
+    "UM-W2"
+   ],
+   "size": "S",
+   "deps": [
+    "P27-11"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P28-10",
+   "phase": "P28",
+   "title": "Setup wizard: choose a harness, sign it in in a terminal on the page (link as a button, paste box), detect success by checking the harness; only its owner sees the terminal",
+   "reqs": [
+    "FR-219",
+    "FR-220",
+    "FR-224"
+   ],
+   "views": [
+    "UM-W1",
+    "UM-W2"
+   ],
+   "size": "L",
+   "deps": [
+    "P28-09",
+    "P28-02"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P28-11",
+   "phase": "P28",
+   "title": "Check step: a test prompt, a model that works on the person's plan; API key fallback",
+   "reqs": [
+    "FR-219",
+    "FR-221",
+    "FR-205"
+   ],
+   "views": [
+    "UM-W3"
+   ],
+   "size": "M",
+   "deps": [
+    "P28-10"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P28-12",
+   "phase": "P28",
+   "title": "Skip, the Set up chip and the Finish setting up checklist (home, profile, phone); Fix when a sign-in expires, with an inbox item",
+   "reqs": [
+    "FR-222",
+    "FR-223"
+   ],
+   "views": [
+    "UM-W4"
+   ],
+   "size": "M",
+   "deps": [
+    "P28-10",
+    "P28-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P28-13",
+   "phase": "P28",
+   "title": "Findable everywhere: first sign-in, top bar, home card, profile, Settings, phone home and More, ⌘K, Learn lesson 0, docs",
+   "reqs": [
+    "FR-228"
+   ],
+   "views": [
+    "UM-W4"
+   ],
+   "size": "S",
+   "deps": [
+    "P28-12"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P28-14",
+   "phase": "P28",
+   "title": "Shared mode set up by an admin through the same wizard in Settings → Harnesses",
+   "reqs": [
+    "FR-225"
+   ],
+   "views": [
+    "UM-D4"
+   ],
+   "size": "S",
+   "deps": [
+    "P28-11"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
    "id": "P28-08",
    "phase": "P28",
    "title": "Tests, docs, CHANGELOG, release",
@@ -5415,7 +5546,11 @@ window.TRACKER = {
    "deps": [
     "P28-04",
     "P28-05",
-    "P28-07"
+    "P28-07",
+    "P28-11",
+    "P28-12",
+    "P28-13",
+    "P28-14"
    ],
    "status": "todo",
    "done": "",
@@ -5551,6 +5686,56 @@ window.TRACKER = {
    "q": []
   },
   {
+   "id": "P29-09",
+   "phase": "P29",
+   "title": "CLI contexts: gbi context add/use, gbi login per server; every changing command names its server; gbi mcp uses the context",
+   "reqs": [
+    "FR-226",
+    "FR-166"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P29-06"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P29-10",
+   "phase": "P29",
+   "title": "gbi sessions attach: watch and take over your agents' terminals from the CLI",
+   "reqs": [
+    "FR-227",
+    "FR-66"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P29-09"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P29-11",
+   "phase": "P29",
+   "title": "A shared-server install starts in multi-user mode; gbi serve on a workstation stays solo",
+   "reqs": [
+    "FR-163"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P29-08"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
    "id": "P29-08",
    "phase": "P29",
    "title": "Tests, docs, CHANGELOG, release",
@@ -5566,7 +5751,9 @@ window.TRACKER = {
     "P29-02",
     "P29-04",
     "P29-05",
-    "P29-07"
+    "P29-07",
+    "P29-09",
+    "P29-10"
    ],
    "status": "todo",
    "done": "",
@@ -5725,7 +5912,7 @@ window.TRACKER = {
   {
    "id": "P31-01",
    "phase": "P31",
-   "title": "Shared or Per user setting; Settings → Harnesses shows the credential for each harness and model",
+   "title": "Shared or Per user setting (Per user is the default in multi-user mode); Settings → Harnesses shows the credential for each harness and model",
    "reqs": [
     "FR-200",
     "FR-202"
@@ -5992,6 +6179,220 @@ window.TRACKER = {
    "size": "S",
    "deps": [
     "P33-02"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P34-01",
+   "phase": "P34",
+   "title": "Spike: gVisor runs a workspace image built from go-containerregistry, rootless or least privilege; herdr and harnesses work inside; measure start and task cost against runc and the host",
+   "reqs": [
+    "FR-208",
+    "FR-209",
+    "NFR-25"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P28-08"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": [
+    "Q18",
+    "Q20"
+   ]
+  },
+  {
+   "id": "P34-02",
+   "phase": "P34",
+   "title": "Decide ADR-017 from the spike (accept, or fall back to runc by default or containerd)",
+   "reqs": [
+    "FR-208"
+   ],
+   "views": [],
+   "size": "S",
+   "deps": [
+    "P34-01"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": [
+    "Q18",
+    "Q19",
+    "Q20"
+   ]
+  },
+  {
+   "id": "P34-03",
+   "phase": "P34",
+   "title": "Runtime interface (create, start, run, attach, stop, remove, use) with gVisor and runc implementations",
+   "reqs": [
+    "FR-208"
+   ],
+   "views": [],
+   "size": "L",
+   "deps": [
+    "P34-02"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P34-04",
+   "phase": "P34",
+   "title": "Images: pull by digest with go-containerregistry, unpack per user, persistent home; default workspace image (git, toolchains, herdr, harnesses); project images from a registry",
+   "reqs": [
+    "FR-209"
+   ],
+   "views": [],
+   "size": "L",
+   "deps": [
+    "P34-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": [
+    "Q19"
+   ]
+  },
+  {
+   "id": "P34-05",
+   "phase": "P34",
+   "title": "Limits (CPU, memory, disk, processes) per everyone, group or user; use shown in Settings, profile and the dev bar",
+   "reqs": [
+    "FR-210"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P34-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P34-06",
+   "phase": "P34",
+   "title": "Network allow-list per workspace; go-build-it's API reachable only through the user's token",
+   "reqs": [
+    "FR-211"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P34-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P34-07",
+   "phase": "P34",
+   "title": "herdr inside each workspace; terminal view, output and blocked detection across the boundary; watch by project access, control only your own",
+   "reqs": [
+    "FR-214",
+    "FR-66",
+    "FR-68"
+   ],
+   "views": [],
+   "size": "L",
+   "deps": [
+    "P34-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P34-08",
+   "phase": "P34",
+   "title": "Worktrees and clones inside workspaces; code leaves only as commits through Courier and review; agent work runs in its starter's workspace",
+   "reqs": [
+    "FR-207",
+    "FR-212",
+    "FR-213"
+   ],
+   "views": [],
+   "size": "L",
+   "deps": [
+    "P34-07"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P34-09",
+   "phase": "P34",
+   "title": "Lifecycle: create, start, stop when idle, keep, reset or remove by an admin, all recorded; image updates staged and reversible",
+   "reqs": [
+    "FR-215",
+    "FR-218"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P34-04",
+    "P34-08"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P34-10",
+   "phase": "P34",
+   "title": "Workspace shell from the UI (desktop and phone) and gbi workspace shell; image, limits, use and network on the profile",
+   "reqs": [
+    "FR-217"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P34-07"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P34-11",
+   "phase": "P34",
+   "title": "Doctor: user namespaces, subordinate IDs, cgroups v2 delegation, KVM; solo mode, macOS and Windows unchanged; NFR-20 in multi-user mode",
+   "reqs": [
+    "FR-216",
+    "NFR-20"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P34-03"
+   ],
+   "status": "todo",
+   "done": "",
+   "q": []
+  },
+  {
+   "id": "P34-12",
+   "phase": "P34",
+   "title": "Tests (isolation checks between two users, harness check inside a workspace), docs, CHANGELOG, release",
+   "reqs": [
+    "FR-133",
+    "NFR-23",
+    "NFR-25"
+   ],
+   "views": [],
+   "size": "M",
+   "deps": [
+    "P34-09",
+    "P34-10",
+    "P34-11"
    ],
    "status": "todo",
    "done": "",
@@ -6335,6 +6736,46 @@ window.TRACKER = {
    "text": "The Assistant SHALL use go-build-it through the CLI and MCP server with a token bound to its user and to itself (FR-167), so its access can be checked and ended like any token.",
    "section": "4.6 The personal Assistant (rev 13)"
   },
+  "FR-219": {
+   "text": "On first sign-in (and on first start in solo mode), go-build-it SHALL offer a setup wizard, \"Set up your Assistant\":",
+   "section": "4.7 Setting up in the browser (rev 15)"
+  },
+  "FR-220": {
+   "text": "To sign a harness in, the server SHALL start it for that person (in their own harness configuration folder, and in their workspace where workspaces exist, FR-207) in a herdr pane, ",
+   "section": "4.7 Setting up in the browser (rev 15)"
+  },
+  "FR-221": {
+   "text": "Where a harness's sign-in can't complete through a web terminal (for example one that returns to a local address on the machine running it), the wizard SHALL say so and offer that ",
+   "section": "4.7 Setting up in the browser (rev 15)"
+  },
+  "FR-222": {
+   "text": "The wizard SHALL be skippable:",
+   "section": "4.7 Setting up in the browser (rev 15)"
+  },
+  "FR-223": {
+   "text": "When a harness's sign-in expires or stops working, the person SHALL see it on the Assistant chip and in their inbox, with Fix, which reopens the wizard at the sign-in step.",
+   "section": "4.7 Setting up in the browser (rev 15)"
+  },
+  "FR-224": {
+   "text": "Only the person themself SHALL be able to open the terminal of their own harness during setup.",
+   "section": "4.7 Setting up in the browser (rev 15)"
+  },
+  "FR-225": {
+   "text": "In Shared mode, an admin SHALL set up the server's harnesses through the same wizard in Settings → Harnesses, and users skip the harness steps.",
+   "section": "4.7 Setting up in the browser (rev 15)"
+  },
+  "FR-226": {
+   "text": "The CLI MAY be pointed at a server:",
+   "section": "4.7 Setting up in the browser (rev 15)"
+  },
+  "FR-227": {
+   "text": "From the CLI, a person SHALL be able to watch and take over their agents' terminals on the server (gbi sessions attach), with the same rules as the web terminal (FR-66, FR-214).",
+   "section": "4.7 Setting up in the browser (rev 15)"
+  },
+  "FR-228": {
+   "text": "Setting up and fixing the Assistant SHALL be easy to find wherever someone looks:",
+   "section": "4.7 Setting up in the browser (rev 15)"
+  },
   "FR-30": {
    "text": "Everything that can be done in the web UI SHALL also be possible through the CLI, so AI agents can operate the application.",
    "section": "5. User interfaces"
@@ -6607,6 +7048,54 @@ window.TRACKER = {
    "text": "A short-lived harness used for one question (a reviewer's assessment, release notes) SHALL get the same care as a member:",
    "section": "8.5 Harness credentials and warm harnesses (rev 13)"
   },
+  "FR-207": {
+   "text": "In multi-user mode on Linux, each user SHALL have their own workspace:",
+   "section": "8.6 Per-user workspaces on a Linux server (rev 14)"
+  },
+  "FR-208": {
+   "text": "Workspaces SHALL run behind one runtime interface in go-build-it (create, start, run a command, attach a terminal, stop, remove, report use), so the runtime can be chosen per insta",
+   "section": "8.6 Per-user workspaces on a Linux server (rev 14)"
+  },
+  "FR-209": {
+   "text": "go-build-it SHALL NOT require the Docker Engine.",
+   "section": "8.6 Per-user workspaces on a Linux server (rev 14)"
+  },
+  "FR-210": {
+   "text": "Each workspace SHALL have limits (CPU, memory, disk, processes) set by the admin for everyone, per group or per user, and its use SHALL be shown in Settings, on the user's profile ",
+   "section": "8.6 Per-user workspaces on a Linux server (rev 14)"
+  },
+  "FR-211": {
+   "text": "A workspace's network SHALL by default reach only what the admin allows (the git forges, package registries and the harness providers' APIs).",
+   "section": "8.6 Per-user workspaces on a Linux server (rev 14)"
+  },
+  "FR-212": {
+   "text": "Code leaves a workspace only through review.",
+   "section": "8.6 Per-user workspaces on a Linux server (rev 14)"
+  },
+  "FR-213": {
+   "text": "Agent work SHALL run in the workspace of the user who started it, on that user's credentials (FR-203).",
+   "section": "8.6 Per-user workspaces on a Linux server (rev 14)"
+  },
+  "FR-214": {
+   "text": "Watching and taking over SHALL work across the boundary:",
+   "section": "8.6 Per-user workspaces on a Linux server (rev 14)"
+  },
+  "FR-215": {
+   "text": "A workspace SHALL be created when its user first signs in (or is switched to in dev mode), started when they sign in or have work to run, stopped when idle (with the warm-harness r",
+   "section": "8.6 Per-user workspaces on a Linux server (rev 14)"
+  },
+  "FR-216": {
+   "text": "In solo mode, and on macOS and Windows, go-build-it SHALL keep running everything on the host as today.",
+   "section": "8.6 Per-user workspaces on a Linux server (rev 14)"
+  },
+  "FR-217": {
+   "text": "A workspace SHALL be inspectable by its user:",
+   "section": "8.6 Per-user workspaces on a Linux server (rev 14)"
+  },
+  "FR-218": {
+   "text": "Updating the workspace image SHALL be done like a go-build-it update (FR-06c):",
+   "section": "8.6 Per-user workspaces on a Linux server (rev 14)"
+  },
   "FR-90": {
    "text": "The application SHALL work with both GitHub (gh) and GitLab (glab), and SHALL detect which one each project uses and whether its CLI is authenticated.",
    "section": "9. Git, GitHub and GitLab workflow"
@@ -6784,7 +7273,7 @@ window.TRACKER = {
    "section": "12.1 Learning go-build-it"
   },
   "NFR-20": {
-   "text": "Agents MAY run arbitrary code on the development machine.",
+   "text": "In solo mode, agents MAY run arbitrary code on the development machine, and container or VM sandboxing is not required.",
    "section": "13. Security posture"
   },
   "NFR-21": {
@@ -6797,6 +7286,10 @@ window.TRACKER = {
   },
   "NFR-24": {
    "text": "(rev 13) With warm harnesses (FR-204), a user's Assistant SHALL begin replying within 5 seconds, and a member SHALL begin a task within 10 seconds of it being started.",
+   "section": "13. Security posture"
+  },
+  "NFR-25": {
+   "text": "(rev 14) A stopped workspace SHOULD start in under 3 seconds as a container and under 5 seconds as a microVM, and a running workspace SHOULD add no more than 10% to a task's time c",
    "section": "13. Security posture"
   },
   "NFR-22": {
@@ -6821,6 +7314,9 @@ window.TRACKER = {
   "Q14": "Which OIDC provider will be used first (FR-162)?",
   "Q15": "Is the second sign-in step required for everyone, or only for admins and approvers (FR-161)? May project admins invite people who have no account yet?",
   "Q16": "May an AI member ever approve a gate (for example the AI reviewer on a low-risk gate), or never (FR-179)? *(Rev 13: the personal Assistant never decides on its own; it drafts for its user, FR-198.)*",
-  "Q17": "How much memory may warm harnesses use by default (FR-204)? To be set from measurements in dev mode."
+  "Q17": "How much memory may warm harnesses use by default (FR-204)? To be set from measurements in dev mode.",
+  "Q18": "Will agents build untrusted code from external repositories (which argues for strong isolation, FR-208, by default)?",
+  "Q19": "Do projects need to bring their own Dockerfiles, or is a registry image enough (FR-209)? Building images needs a builder (for example BuildKit) on the server.",
+  "Q20": "Will the server be bare-metal Linux, or a cloud VM (microVMs need KVM, which many cloud VMs don't offer)?"
  }
 };

@@ -105,6 +105,12 @@ table.t tr.sel td { background:var(--acc-s); }
 .devwhy { opacity:.95; } .devx { opacity:.8; font-size:11.5px; }
 .ast { display:inline-flex; align-items:center; gap:6px; font-size:12px; border:1px solid var(--line); border-radius:999px; padding:3px 10px; white-space:nowrap; }
 .ast .dot { width:8px; height:8px; border-radius:50%; background:#c9d0d5; } .ast .dot.grn { background:var(--grn); } .ast .dot.acc { background:var(--acc); box-shadow:0 0 0 3px var(--acc-s); } .ast .dot.amb { background:var(--amb); }
+.wsteps { display:flex; gap:6px; flex-wrap:wrap; }
+.wsteps span { display:inline-flex; align-items:center; gap:7px; font-size:12.5px; color:var(--m); background:#fff; border:1px solid var(--line); border-radius:999px; padding:4px 12px 4px 4px; }
+.wsteps span b { width:20px; height:20px; border-radius:50%; background:#eef1f3; display:inline-grid; place-items:center; font-size:11px; }
+.wsteps span.done { color:var(--grn); } .wsteps span.done b { background:var(--grn); color:#fff; }
+.wsteps span.now { color:var(--t); border:1.5px solid var(--acc); font-weight:600; } .wsteps span.now b { background:var(--acc); color:#fff; }
+.ast.setup { border-color:#f1d9a3; background:#fffaf0; }
 .take p { max-width:100ch; color:#4a4e55; }
 .pc { display:grid; grid-template-columns:1fr 1fr; gap:10px 24px; max-width:1240px; font-size:14px; }
 .pc ul { margin:4px 0 0; padding-left:18px; } .pc b { font-size:13px; text-transform:uppercase; letter-spacing:.05em; }
@@ -117,11 +123,11 @@ table.t tr.sel td { background:var(--acc-s); }
 
 <div class="rv-bar"><span class="rv-title">go-build-it · User management <small>Take 1 chosen · dev mode and the Assistant · static mockups · Nov 20, 2026</small></span>
   <a href="index.html">← All mockups</a><span class="rv-spacer"></span>
-  <a href="#shared">Shared: sign-in</a><a href="#take1">Take 1 · Admin console ✓</a><a href="#dev">D · Dev mode &amp; the Assistant</a><a href="#take2">Take 2 · Project-first</a><a href="#take3">Take 3 · Stakeholders &amp; sign-off</a><a href="#compare">Compare</a><a href="#questions">Questions</a>
+  <a href="#shared">Shared: sign-in</a><a href="#take1">Take 1 · Admin console ✓</a><a href="#dev">D · Dev mode &amp; the Assistant</a><a href="#wizard">W · Setup wizard</a><a href="#take2">Take 2 · Project-first</a><a href="#take3">Take 3 · Stakeholders &amp; sign-off</a><a href="#compare">Compare</a><a href="#questions">Questions</a>
 </div>
 
 <div class="rv-intro">
-  <p style="background:#e5f6ec;border:1px solid #a8dcc0;border-radius:8px;padding:10px 14px"><b>Decided Nov 20 (Q13, <a href="../decisions/ADR-016-users-dev-mode-assistant.md">ADR-016</a>):</b> <b>Take 1, the admin console</b>, is the design. <b>Section D</b> adds what comes first: <b>dev mode</b> with a user switcher, and a <b>personal Assistant</b> for every user. Takes 2 and 3 are kept as a record; Take 3's sign-off routes and access review return in a later phase on top of Take 1. Requirements <a href="../requirements.html">rev 13</a>, FR-190–FR-206.</p>
+  <p style="background:#e5f6ec;border:1px solid #a8dcc0;border-radius:8px;padding:10px 14px"><b>Decided Nov 20 (Q13, <a href="../decisions/ADR-016-users-dev-mode-assistant.md">ADR-016</a>):</b> <b>Take 1, the admin console</b>, is the design. <b>Section D</b> adds what comes first: <b>dev mode</b> with a user switcher, and a <b>personal Assistant</b> for every user. Takes 2 and 3 are kept as a record; Take 3's sign-off routes and access review return in a later phase on top of Take 1. Requirements <a href="../requirements.html">rev 13</a>, FR-190–FR-206. <b>Section W</b> (rev 15, FR-219–FR-228): the setup wizard that signs each person's harness in from the browser, and how an unfinished setup stays easy to find.</p>
   <p><b>What this is.</b> Requirements rev 12 add users, sign-in and per-project access control (<a href="../requirements.html">§4.4, FR-160–FR-189</a>). These are three takes on how it could look in Approach A. The two screens every take needs, signing in and the sign-in settings, are drawn once at the top. Each take then shows four screens. Pick one, or mix parts of them.</p>
   <p><b>Decisions already made (Nov 12):</b> one <b>shared go-build-it server</b> for everyone · <b>local accounts first</b>, OIDC required next (provider not chosen) · in multi-user mode <b>loopback is not trusted</b> unless a setting says so, and the setting names the user it signs in as · <b>custom roles</b> from the start, as flexible as custom artifact tabs.</p>
   <p><b>One idea runs through all three:</b> a <b>team role</b> is the job someone does on a project (PM, developer, QA…), filled by a person or an AI. An <b>access role</b> is what they're allowed to do (view, comment, approve, release…). Maria can be the project's <i>reviewer</i> and hold <i>Approver</i> access. AI members get access roles too, and can never hold more than the person who directs them.</p>
@@ -688,6 +694,117 @@ allow = [<span class="s">"view"</span>, <span class="s">"comment"</span>, <span 
             <tr><td>Lens · ledgerly</td><td>project</td><td>reviews open</td><td><span class="chip grn">ready</span></td><td>420 MB</td><td>30 min with no work</td></tr>
             <tr><td>Forge · lastcard</td><td>project</td><td>3 tasks queued</td><td><span class="chip">starting</span></td><td>—</td><td>30 min with no work</td></tr></table>
           <div class="row c small" style="margin-top:10px;gap:10px">Keep at most <span class="inp" style="width:50px">8</span> warm, using at most <span class="inp" style="width:60px">4 GB</span>; stop idle members after <span class="inp" style="width:60px">30 min</span>.</div></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ================= W: SETUP WIZARD ================= -->
+<div class="take t1" id="wizard"><span class="tag" style="background:#c2410c">W · rev 15</span><h2>Setup wizard: nothing to configure on your own machine</h2>
+<p>On first sign-in, the server sets up each person's Assistant with them, in the browser (FR-219–FR-225). The harness is signed in inside a terminal shown on the page; where that can't work, an API key is the fallback. The wizard can be skipped, and what's left stays visible and easy to find everywhere (FR-222, FR-228). A shared server starts in multi-user mode with <b>Per user</b> credentials; Shared is an admin option (FR-163, FR-200).</p></div>
+
+<section class="view" id="um-W1">
+  <header><span class="num">W1</span><h2>Choose a harness</h2><span class="req">FR-219</span><span class="req">FR-222</span></header>
+  <p class="look"><b>Look for:</b> one question, in plain words, with what each harness needs. <b>Skip for now</b> is always there: someone who only answers questions and signs off doesn't need an Assistant.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/setup</span></div>
+  <div class="app"><aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">2</span></a><a>Questions <span class="badge">2</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">1</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>People &amp; access</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot">v2026.12 · gbi.acme.internal</div></aside>
+    <div class="main">
+      <div class="topbar"><h1>Set up your Assistant</h1><span class="search">Search, run a command…  ⌘K</span><span class="ast setup"><span class="dot amb"></span>Assistant · <b>Set up</b></span><span class="me"><span class="av h2">MR</span>maria</span></div>
+      <div class="content"><div class="wsteps"><span class="now"><b>1</b>Choose a harness</span><span class=""><b>2</b>Sign in</span><span class=""><b>3</b>Check it</span><span class=""><b>4</b>Ready</span></div>
+        <div class="card"><h3>Which AI should your Assistant use?</h3>
+          <div class="small muted" style="margin:-4px 0 12px">Your Assistant works only with you: it drafts changes, asks the team, and keeps track of what needs you. It runs on this server; nothing is installed on your computer.</div>
+          <div class="row wrap">
+            <div class="opt on grow"><span class="radio on"></span><div><b>Claude Code</b><div class="small muted">Sign in with your Claude account (Pro, Max or Team), or use an Anthropic API key.</div><div class="small" style="margin-top:4px"><span class="chip grn">signs in from the browser</span></div></div></div>
+            <div class="opt grow"><span class="radio"></span><div><b>Antigravity</b><div class="small muted">Sign in with your Google account, or use an API key.</div><div class="small" style="margin-top:4px"><span class="chip amb">checking how sign-in works remotely</span></div></div></div>
+            <div class="opt grow"><span class="radio"></span><div><b>Pi</b><div class="small muted">Uses API keys for the models you choose.</div><div class="small" style="margin-top:4px"><span class="chip">API key</span></div></div></div>
+          </div>
+          <div class="row c" style="margin-top:14px"><span class="btn">Skip for now</span><span class="small muted">You can finish this any time from the <b>Set up</b> chip at the top.</span><span class="grow"></span><span class="btn p">Continue</span></div></div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="um-W2">
+  <header><span class="num">W2</span><h2>Sign in, in a terminal on the page</h2><span class="req">FR-220</span><span class="req">FR-224</span></header>
+  <p class="look"><b>Look for:</b> the real Claude Code, running on the server for maria, shown on the page. go-build-it doesn't script its sign-in; it only helps: the sign-in link is also a button, and the code goes into a paste box that types it for you. It notices success by checking the harness. Only maria can see this terminal.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/setup/sign-in</span></div>
+  <div class="app"><aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">2</span></a><a>Questions <span class="badge">2</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">1</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>People &amp; access</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot">v2026.12 · gbi.acme.internal</div></aside>
+    <div class="main">
+      <div class="topbar"><h1>Set up your Assistant</h1><span class="search">Search, run a command…  ⌘K</span><span class="ast setup"><span class="dot amb"></span>Assistant · <b>Set up</b></span><span class="me"><span class="av h2">MR</span>maria</span></div>
+      <div class="content"><div class="wsteps"><span class="done"><b>1</b>Choose a harness</span><span class="now"><b>2</b>Sign in</span><span class=""><b>3</b>Check it</span><span class=""><b>4</b>Ready</span></div>
+        <div class="row">
+          <div class="card grow" style="padding:0;overflow:hidden">
+            <div class="row c small" style="padding:8px 12px;background:#0f1720;color:#9fb0bf;gap:8px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:#1f9d55;display:inline-block"></span>Claude Code · running on the server for maria <span class="grow"></span><span class="chip" style="background:#22303c;color:#cdd8e1">only you can see this</span></div>
+            <div class="code" style="border-radius:0;min-height:300px">Claude Code
+<span class="c">Select login method:</span>
+  1. Claude account with subscription
+<span class="c">Browser didn't open? Use the url below to sign in:</span>
+
+<span class="k">https://claude.ai/oauth/authorize?code=true&amp;client_id=…</span>
+
+<span class="s">Paste code here if prompted &gt;</span> █</div>
+          </div>
+          <div class="card" style="width:320px;display:flex;flex-direction:column;gap:10px"><h3>Steps</h3>
+            <div class="small"><b>1.</b> Choose <b>Claude account with subscription</b> <span class="chip grn">done</span></div>
+            <div class="small"><b>2.</b> Open the sign-in page and approve:</div>
+            <span class="btn p" style="text-align:center">Open the Claude sign-in page ↗</span>
+            <div class="small"><b>3.</b> Claude shows a code. Paste it here:</div>
+            <div class="row c"><span class="inp grow muted">Paste the code</span><span class="btn">Send</span></div>
+            <div class="note blue small">Waiting for Claude Code to be signed in… this page moves on by itself.</div>
+            <div class="small muted">Can't sign in this way? <a>Use an API key instead</a></div></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="um-W3">
+  <header><span class="num">W3</span><h2>Check it: a test prompt, a model that works, or an API key</h2><span class="req">FR-219</span><span class="req">FR-221</span><span class="req">FR-205</span></header>
+  <p class="look"><b>Look for:</b> the check proves the Assistant actually answers. Here it caught the plan problem that stopped every Claude member last week: the default model needs usage credits, so the wizard offers one that works on maria's plan. On the right, the API-key path for a harness whose sign-in can't work from a server; the key is checked and then never shown again.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/setup/check</span></div>
+  <div class="app"><aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a>Projects <span class="badge n">2</span></a><a>Questions <span class="badge">2</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">1</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>People &amp; access</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot">v2026.12 · gbi.acme.internal</div></aside>
+    <div class="main">
+      <div class="topbar"><h1>Set up your Assistant</h1><span class="search">Search, run a command…  ⌘K</span><span class="ast setup"><span class="dot amb"></span>Assistant · <b>Set up</b></span><span class="me"><span class="av h2">MR</span>maria</span></div>
+      <div class="content"><div class="wsteps"><span class="done"><b>1</b>Choose a harness</span><span class="done"><b>2</b>Sign in</span><span class="now"><b>3</b>Check it</span><span class=""><b>4</b>Ready</span></div>
+        <div class="row">
+          <div class="card grow"><h3>Checking Claude Code</h3>
+            <div class="chk small" style="display:flex;flex-direction:column;gap:6px">
+              <span><span class="chip grn">ok</span> Claude Code is signed in (maria@acme.com, Pro)</span>
+              <span><span class="chip red">stopped</span> The default model asked for usage credits: <i>"Fable now runs on usage credits"</i></span>
+              <span><span class="chip grn">ok</span> With <b>opus</b>, a test prompt was answered in 2.8 s</span></div>
+            <div class="field" style="margin-top:12px"><label>Model for your Assistant</label><span class="inp sel" style="width:260px">opus · works on your plan</span></div>
+            <div class="row c" style="margin-top:14px"><span class="btn">Back</span><span class="grow"></span><span class="btn p">Start my Assistant</span></div></div>
+          <div class="card" style="width:340px"><h3>Or use an API key</h3>
+            <div class="small muted" style="margin-bottom:8px">For a harness whose sign-in can't work from a server, or if you'd rather pay per use.</div>
+            <div class="field"><label>Anthropic API key</label><span class="inp muted">sk-ant-…</span></div>
+            <div class="field" style="margin-top:8px"><label>Only for these models (optional)</label><span class="inp muted">all models</span></div>
+            <div class="small muted" style="margin-top:8px">Checked with a test prompt, stored encrypted, never shown again or written to a log.</div>
+            <div class="row c" style="margin-top:10px"><span class="grow"></span><span class="btn">Check and save</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="view" id="um-W4">
+  <header><span class="num">W4</span><h2>Skipped or unfinished: easy to find and pick up again</h2><span class="req">FR-222</span><span class="req">FR-223</span><span class="req">FR-228</span></header>
+  <p class="look"><b>Look for:</b> maria skipped the wizard. The top-bar chip says <b>Set up</b>, the Projects home has a <b>Finish setting up</b> card with what's left, and each opens the wizard at the first unfinished step. Dismissing the card hides it; the chip stays until setup is done. The same entry points are on the phone, in ⌘K ("Set up Assistant"), on the profile, and in the first Learn lesson. If a sign-in later expires, the chip turns to <b>Fix</b>.</p>
+  <div class="scroll"><div class="frame"><div class="chrome"><i></i><i></i><i></i><span class="url">gbi.acme.internal/</span></div>
+  <div class="app"><aside class="side"><div class="brand"><b>gb</b>go-build-it</div><a class="on">Projects <span class="badge n">2</span></a><a>Questions <span class="badge">2</span></a><a>Sessions</a><a>Queue</a><a>Reviews <span class="badge">1</span></a><div class="sep">Organization</div><a>Archetypes</a><a>Standards</a><a>People &amp; access</a><a>History</a><div class="sep">System</div><a>Settings</a><a>Learn</a><a>Docs</a><div class="foot">v2026.12 · gbi.acme.internal</div></aside>
+    <div class="main">
+      <div class="topbar"><h1>Projects</h1><span class="search">Search, run a command…  ⌘K</span><span class="ast setup"><span class="dot amb"></span>Assistant · <b>Set up</b></span><span class="me"><span class="av h2">MR</span>maria</span></div>
+      <div class="content">
+        <div class="card" style="border:1.5px solid #f1d9a3;background:#fffaf0"><div class="row c"><div class="grow"><b>Finish setting up</b> <span class="small muted">· 1 of 4 done</span>
+          <div class="row wrap small" style="gap:14px;margin-top:6px"><span>✓ Signed in</span><span><span class="cb"></span> Set up your Assistant <span class="muted">(choose a harness, sign it in, check it)</span></span><span><span class="cb"></span> Get go-build-it on your phone</span><span><span class="cb"></span> Optional: use the CLI with <span class="mono">gbi login</span></span></div></div>
+          <span class="btn p">Continue setup</span><span class="btn sm">Hide</span></div></div>
+        <div class="row">
+          <div class="card grow"><h3>ledgerly <span class="chip blue">Implementation</span></h3><div class="small muted">Personal finance ledger with bank CSV import.</div><div class="row c small" style="gap:6px;margin-top:8px"><span class="chip red">1 needs you</span><span class="chip">Contributor</span></div></div>
+          <div class="card grow"><h3>trailmap <span class="chip blue">Design</span></h3><div class="small muted">Offline hiking maps you can use one-handed.</div><div class="row c small" style="gap:6px;margin-top:8px"><span class="chip">Viewer</span></div></div>
+          <div class="card" style="width:250px"><h3>Elsewhere</h3>
+            <div class="small" style="display:flex;flex-direction:column;gap:7px">
+              <span>⌘K → <b>Set up Assistant</b></span><span>Profile → <b>My Assistant</b></span><span>Phone → home banner and <b>More</b></span><span>Learn → <b>0 · Set up</b></span>
+              <span class="note red small" style="margin-top:4px">Later, if a sign-in expires: <span class="ast" style="background:#fff"><span class="dot" style="background:#d1453b"></span>Assistant · <b>Fix</b></span> and an inbox item.</span></div></div>
+        </div>
       </div>
     </div>
   </div></div></div>
